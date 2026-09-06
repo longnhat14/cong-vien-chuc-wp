@@ -1,0 +1,32 @@
+services:
+  db:
+    image: mariadb:11.4
+    container_name: cvc-wp-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress_local
+      MYSQL_ROOT_PASSWORD: root_local
+    volumes:
+      - db_data:/var/lib/mysql
+
+  wordpress:
+    image: wordpress:php8.3-apache
+    container_name: cvc-wp
+    restart: unless-stopped
+    depends_on:
+      - db
+    ports:
+      - "8080:80"
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress_local
+    volumes:
+      - wp_data:/var/www/html
+      - ./theme/cong-vien-chuc:/var/www/html/wp-content/themes/cong-vien-chuc
+volumes:
+  db_data:
+  wp_data:

@@ -1,0 +1,11 @@
+<?php
+get_header();
+?>
+
+<main>
+    <h1>Công Viên Chức</h1>
+    <p>Frontend local đang hoạt động.</p>
+</main>
+
+<?php
+get_footer();
