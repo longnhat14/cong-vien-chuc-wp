@@ -14,6 +14,8 @@ final class CVC_Course_Service extends CVC_Api_Service {
 	 * @param int|string $lesson_id
 	 */
 	public function lesson( string $course_slug, $lesson_id ): array {
-		return $this->client->get( $this->endpoint() . '/' . $course_slug . '/lessons/' . $lesson_id );
+		return $this->client->get(
+			$this->endpoint() . '/' . rawurlencode( $course_slug ) . '/lessons/' . rawurlencode( (string) $lesson_id )
+		);
 	}
 }

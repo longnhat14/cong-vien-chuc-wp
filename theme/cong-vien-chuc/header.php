@@ -18,7 +18,7 @@
                     array(
                         'theme_location' => 'primary',
                         'container'      => false,
-                        'fallback_cb'    => false,
+                        'fallback_cb'    => 'cvc_default_nav_fallback',
                     )
                 );
                 ?>

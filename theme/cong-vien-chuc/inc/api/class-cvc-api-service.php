@@ -30,7 +30,7 @@ abstract class CVC_Api_Service {
 	}
 
 	public function find( string $slug ): array {
-		return $this->client->get( $this->endpoint() . '/' . $slug );
+		return $this->client->get( $this->endpoint() . '/' . rawurlencode( $slug ) );
 	}
 
 	/**

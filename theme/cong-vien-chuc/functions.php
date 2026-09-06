@@ -16,6 +16,8 @@ require_once __DIR__ . '/inc/services/class-cvc-recruitment-service.php';
 require_once __DIR__ . '/inc/services/class-cvc-exam-service.php';
 require_once __DIR__ . '/inc/services/class-cvc-legal-document-service.php';
 require_once __DIR__ . '/inc/template-tags.php';
+require_once __DIR__ . '/inc/seo.php';
+require_once __DIR__ . '/inc/routes.php';
 require_once __DIR__ . '/inc/dev-tools.php';
 
 add_action( 'wp_enqueue_scripts', 'cvc_enqueue_assets' );

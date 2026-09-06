@@ -133,10 +133,247 @@ h1, h2, h3, h4 {
     font-weight: 600;
 }
 
+/* --- Domain pages (Courses / Topics) --- */
+.cvc-page {
+    padding-bottom: 2rem;
+}
+
+.cvc-page-header {
+    margin-bottom: 1.5rem;
+}
+
+.cvc-page-header__lead {
+    color: #4b5563;
+    font-size: 1.05rem;
+}
+
+.cvc-page-header__meta {
+    color: #6b7280;
+    font-size: 0.9rem;
+}
+
+.cvc-prose {
+    line-height: 1.7;
+    color: #1f2328;
+    margin-bottom: 1.5rem;
+}
+
+/* --- Breadcrumbs --- */
+.cvc-breadcrumbs {
+    margin-bottom: 1rem;
+    font-size: 0.85rem;
+    color: #6b7280;
+}
+
+.cvc-breadcrumbs ol {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.cvc-breadcrumbs li:not(:last-child)::after {
+    content: '/';
+    margin-left: 0.35rem;
+    color: #9ca3af;
+}
+
+.cvc-breadcrumbs a {
+    color: #6b7280;
+}
+
+.cvc-breadcrumbs [aria-current='page'] {
+    color: #1f2328;
+    font-weight: 600;
+}
+
+/* --- Card grid --- */
+.cvc-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.25rem;
+    margin: 1.5rem 0;
+}
+
+.cvc-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+}
+
+.cvc-card__media img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+}
+
+.cvc-card__body {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+}
+
+.cvc-card__title {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.cvc-card__title a {
+    color: #1f2328;
+}
+
+.cvc-card__excerpt {
+    margin: 0;
+    color: #4b5563;
+    font-size: 0.92rem;
+}
+
+.cvc-card__meta {
+    margin: 0;
+    color: #6b7280;
+    font-size: 0.85rem;
+}
+
+/* --- Badges --- */
+.cvc-badge {
+    display: inline-block;
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    align-self: flex-start;
+}
+
+.cvc-badge--featured {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.cvc-badge--subject {
+    background: #e0e7ff;
+    color: #3730a3;
+}
+
+.cvc-badge--free {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.cvc-badge--paid {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+/* --- Pagination --- */
+.cvc-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin: 2rem 0;
+    font-size: 0.9rem;
+}
+
+.cvc-pagination__link--disabled {
+    color: #9ca3af;
+}
+
+.cvc-pagination__status {
+    color: #6b7280;
+}
+
+/* --- Lesson list / navigation --- */
+.cvc-lesson-list-section {
+    margin: 2rem 0;
+}
+
+.cvc-lesson-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.cvc-lesson-list__item {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.cvc-lesson-list__item:last-child {
+    border-bottom: none;
+}
+
+.cvc-lesson-list__title {
+    flex: 1;
+    min-width: 160px;
+    font-weight: 600;
+}
+
+.cvc-lesson-list__duration {
+    color: #6b7280;
+    font-size: 0.85rem;
+}
+
+.cvc-lesson-video {
+    margin: 1rem 0;
+}
+
+.cvc-lesson-nav {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 2rem 0;
+    padding-top: 1rem;
+    border-top: 1px solid #e5e7eb;
+}
+
+/* --- Related content (topics) --- */
+.cvc-related-section {
+    margin: 2rem 0;
+}
+
+.cvc-related-list {
+    margin: 0;
+    padding-left: 1.25rem;
+}
+
+/* --- State: not found / locked --- */
+.cvc-state--notfound {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.cvc-state--locked {
+    background: #fef9c3;
+    color: #713f12;
+}
+
 /* --- Responsive --- */
 @media (max-width: 640px) {
     .site-header__inner {
         flex-direction: column;
         align-items: flex-start;
+    }
+
+    .cvc-card-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .cvc-lesson-nav {
+        flex-direction: column;
     }
 }
