@@ -802,6 +802,39 @@ p {
     color: #ffffff;
 }
 
+/* --- Filter form (dùng cho listing có filter riêng, vd Tuyển dụng) --- */
+.cvc-filter-form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 1.25rem 0 1.5rem;
+}
+
+.cvc-filter-form__field input,
+.cvc-filter-form__field select {
+    min-height: 44px;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--cvc-color-border);
+    border-radius: var(--cvc-radius-sm);
+    font: inherit;
+    color: var(--cvc-color-text);
+    background: var(--cvc-color-bg);
+}
+
+.cvc-filter-form__field input:focus-visible,
+.cvc-filter-form__field select:focus-visible {
+    outline: 2px solid var(--cvc-color-primary);
+    outline-offset: 1px;
+}
+
+/* Nhấn nhẹ deadline trên card mà không lạm dụng màu (chỉ đậm chữ, không
+   nền đỏ/badge cảnh báo - backend chưa có business rule "sắp hết hạn"). */
+.cvc-card__meta--highlight {
+    color: var(--cvc-color-text);
+    font-weight: 700;
+}
+
 /* --- Responsive --- */
 /*
  * Nav chính có 7 item ("Văn bản pháp luật", "Thi trắc nghiệm" khá dài) -
@@ -846,6 +879,16 @@ p {
     .cvc-search-form {
         flex-direction: column;
         max-width: none;
+    }
+
+    .cvc-filter-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .cvc-filter-form__field input,
+    .cvc-filter-form__field select {
+        width: 100%;
     }
 
     .cvc-card-grid {

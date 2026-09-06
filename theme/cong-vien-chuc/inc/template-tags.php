@@ -195,15 +195,18 @@ function cvc_recruitment_type_label( ?string $type ): string {
  * @param array<string, mixed> $recruitment
  */
 function cvc_render_recruitment_card( array $recruitment, int $heading_level = 2 ): void {
-	$slug       = (string) ( $recruitment['slug'] ?? '' );
-	$title      = (string) ( $recruitment['title'] ?? '' );
-	$summary    = $recruitment['summary'] ?? '';
-	$type       = $recruitment['recruitment_type'] ?? null;
-	$location   = $recruitment['location'] ?? '';
-	$deadline   = $recruitment['dates']['application_deadline'] ?? null;
-	$agencyName = $recruitment['agency']['name'] ?? null;
-	$url        = cvc_recruitment_url( $slug );
-	$tag        = 'h' . max( 2, min( 4, $heading_level ) );
+	$slug            = (string) ( $recruitment['slug'] ?? '' );
+	$title           = (string) ( $recruitment['title'] ?? '' );
+	$code            = $recruitment['code'] ?? null;
+	$summary         = $recruitment['summary'] ?? '';
+	$type            = $recruitment['recruitment_type'] ?? null;
+	$location        = $recruitment['location'] ?? '';
+	$deadline        = $recruitment['dates']['application_deadline'] ?? null;
+	$announcedAt     = $recruitment['dates']['announcement_date'] ?? null;
+	$totalPositions  = $recruitment['total_positions'] ?? null;
+	$agencyName      = $recruitment['agency']['name'] ?? null;
+	$url             = cvc_recruitment_url( $slug );
+	$tag             = 'h' . max( 2, min( 4, $heading_level ) );
 	?>
 	<article class="cvc-card">
 		<div class="cvc-card__body">
@@ -213,6 +216,9 @@ function cvc_render_recruitment_card( array $recruitment, int $heading_level = 2
 			<<?php echo $tag; ?> class="cvc-card__title">
 				<a href="<?php echo esc_url( $url ); ?>"><?php echo esc_html( $title ); ?></a>
 			</<?php echo $tag; ?>>
+			<?php if ( $code ) : ?>
+				<p class="cvc-card__meta">Mã tin: <?php echo esc_html( $code ); ?></p>
+			<?php endif; ?>
 			<?php if ( $summary ) : ?>
 				<p class="cvc-card__excerpt"><?php echo esc_html( $summary ); ?></p>
 			<?php endif; ?>
@@ -222,8 +228,14 @@ function cvc_render_recruitment_card( array $recruitment, int $heading_level = 2
 			<?php if ( $location ) : ?>
 				<p class="cvc-card__meta"><?php echo esc_html( $location ); ?></p>
 			<?php endif; ?>
+			<?php if ( null !== $totalPositions ) : ?>
+				<p class="cvc-card__meta"><?php echo esc_html( sprintf( '%d chỉ tiêu', (int) $totalPositions ) ); ?></p>
+			<?php endif; ?>
 			<?php if ( $deadline ) : ?>
-				<p class="cvc-card__meta"><?php echo esc_html( sprintf( 'Hạn nộp: %s', cvc_format_date_vn( $deadline ) ) ); ?></p>
+				<p class="cvc-card__meta cvc-card__meta--highlight"><?php echo esc_html( sprintf( 'Hạn nộp: %s', cvc_format_date_vn( $deadline ) ) ); ?></p>
+			<?php endif; ?>
+			<?php if ( $announcedAt ) : ?>
+				<p class="cvc-card__meta"><?php echo esc_html( sprintf( 'Đăng ngày: %s', cvc_format_date_vn( $announcedAt ) ) ); ?></p>
 			<?php endif; ?>
 			<p class="cvc-card__footer">
 				<a class="cvc-btn cvc-btn--text" href="<?php echo esc_url( $url ); ?>">Xem chi tiết &rarr;</a>
