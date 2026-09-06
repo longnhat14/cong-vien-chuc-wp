@@ -509,3 +509,173 @@ function cvc_render_topic_card( array $topic, int $heading_level = 2 ): void {
 	</article>
 	<?php
 }
+
+/**
+ * ============================================================
+ * SEARCH - mapping tập trung + adapter sang shape từng card renderer
+ * đã có sẵn đang mong đợi (KHÔNG sửa các renderer ở trên).
+ * ============================================================
+ *
+ * Nguồn duy nhất cho:
+ * - danh sách type hợp lệ của query param "type" (khớp whitelist của
+ *   GET /api/search bên Laravel - all/courses/topics/recruitments/
+ *   knowledge/exams/legal-documents).
+ * - label tiếng Việt cho filter UI.
+ * - "result_type" - giá trị field "type" mà mỗi search result trả về
+ *   (course/topic/recruitment/knowledge/exam/legal_document).
+ * - adapter chuyển 1 search result {type,id,title,slug,excerpt,meta}
+ *   sang đúng shape mà card renderer domain đó cần (shape của list()
+ *   API gốc), và tên renderer tương ứng.
+ *
+ * @return array<string, array{label: string, result_type: string, adapt: callable, render: callable}>
+ */
+function cvc_search_domains(): array {
+	return array(
+		'courses'         => array(
+			'label'       => 'Khóa học',
+			'result_type' => 'course',
+			'adapt'       => function ( array $result ): array {
+				$meta = $result['meta'] ?? array();
+				return array(
+					'slug'              => $result['slug'] ?? '',
+					'title'             => $result['title'] ?? '',
+					'short_description' => $result['excerpt'] ?? '',
+					'thumbnail_url'     => $meta['thumbnail_url'] ?? null,
+					'is_featured'       => $meta['is_featured'] ?? false,
+				);
+			},
+			'render'      => 'cvc_render_course_card',
+		),
+		'topics'          => array(
+			'label'       => 'Chủ đề',
+			'result_type' => 'topic',
+			'adapt'       => function ( array $result ): array {
+				$meta = $result['meta'] ?? array();
+				return array(
+					'slug'         => $result['slug'] ?? '',
+					'name'         => $result['title'] ?? '',
+					'description'  => $result['excerpt'] ?? '',
+					'exam_subject' => ! empty( $meta['exam_subject'] ) ? array( 'name' => $meta['exam_subject'] ) : null,
+				);
+			},
+			'render'      => 'cvc_render_topic_card',
+		),
+		'recruitments'    => array(
+			'label'       => 'Tuyển dụng',
+			'result_type' => 'recruitment',
+			'adapt'       => function ( array $result ): array {
+				$meta = $result['meta'] ?? array();
+				return array(
+					'slug'             => $result['slug'] ?? '',
+					'title'            => $result['title'] ?? '',
+					'summary'          => $result['excerpt'] ?? '',
+					'recruitment_type' => $meta['recruitment_type'] ?? null,
+					'location'         => $meta['location'] ?? '',
+					'dates'            => array( 'application_deadline' => $meta['application_deadline'] ?? null ),
+					'agency'           => ! empty( $meta['agency'] ) ? array( 'name' => $meta['agency'] ) : null,
+				);
+			},
+			'render'      => 'cvc_render_recruitment_card',
+		),
+		'knowledge'       => array(
+			'label'       => 'Kiến thức',
+			'result_type' => 'knowledge',
+			'adapt'       => function ( array $result ): array {
+				$meta = $result['meta'] ?? array();
+				return array(
+					'slug'    => $result['slug'] ?? '',
+					'title'   => $result['title'] ?? '',
+					'summary' => $result['excerpt'] ?? '',
+					'topic'   => ! empty( $meta['topic'] ) ? array( 'name' => $meta['topic'] ) : null,
+				);
+			},
+			'render'      => 'cvc_render_knowledge_card',
+		),
+		'exams'           => array(
+			'label'       => 'Thi trắc nghiệm',
+			'result_type' => 'exam',
+			'adapt'       => function ( array $result ): array {
+				$meta = $result['meta'] ?? array();
+				return array(
+					'slug'             => $result['slug'] ?? '',
+					'title'            => $result['title'] ?? '',
+					'description'      => $result['excerpt'] ?? '',
+					'duration_minutes' => $meta['duration_minutes'] ?? null,
+					'total_questions'  => $meta['total_questions'] ?? null,
+				);
+			},
+			'render'      => 'cvc_render_exam_card',
+		),
+		'legal-documents' => array(
+			'label'       => 'Văn bản pháp luật',
+			'result_type' => 'legal_document',
+			'adapt'       => function ( array $result ): array {
+				$meta = $result['meta'] ?? array();
+				return array(
+					'slug'            => $result['slug'] ?? '',
+					'title'           => $result['title'] ?? '',
+					'summary'         => $result['excerpt'] ?? '',
+					'document_number' => $meta['document_number'] ?? null,
+					'issuing_agency'  => $meta['issuing_agency'] ?? null,
+					'effective_date'  => $meta['effective_date'] ?? null,
+				);
+			},
+			'render'      => 'cvc_render_legal_document_card',
+		),
+	);
+}
+
+/**
+ * Danh sách type hợp lệ cho query param "type" (dùng để validate URL
+ * + build filter UI) - luôn gồm 'all' + các key của cvc_search_domains().
+ *
+ * @return array<int, string>
+ */
+function cvc_search_valid_types(): array {
+	return array_merge( array( 'all' ), array_keys( cvc_search_domains() ) );
+}
+
+/**
+ * Render 1 search result bằng đúng card renderer của domain tương ứng,
+ * qua adapter để khớp shape. Type lạ (API version sau này thêm domain
+ * mới mà theme chưa biết) - bỏ qua an toàn, ghi log server-side, không
+ * hiển thị lỗi cho người dùng và không crash cả trang.
+ *
+ * @param array<string, mixed> $result Một phần tử trong data.data của
+ *                                     GET /api/search.
+ */
+function cvc_render_search_result( array $result, int $heading_level = 2 ): void {
+	$result_type = (string) ( $result['type'] ?? '' );
+
+	foreach ( cvc_search_domains() as $domain ) {
+		if ( $domain['result_type'] === $result_type ) {
+			$adapted = ( $domain['adapt'] )( $result );
+			( $domain['render'] )( $adapted, $heading_level );
+			return;
+		}
+	}
+
+	error_log( sprintf( '[cong-vien-chuc] Search result có type không xác định: %s', $result_type ) );
+}
+
+/**
+ * Form tìm kiếm dùng chung cho trang /tim-kiem/ và homepage - tránh
+ * lặp markup ở 2 nơi. GET thuần, không session, giữ lại $current_q.
+ */
+function cvc_render_search_form( string $current_q = '', string $input_id = 'cvc-search-q' ): void {
+	?>
+	<form class="cvc-search-form" method="get" action="<?php echo esc_url( home_url( '/tim-kiem/' ) ); ?>" role="search">
+		<label class="screen-reader-text" for="<?php echo esc_attr( $input_id ); ?>">Từ khóa tìm kiếm</label>
+		<input
+			type="search"
+			id="<?php echo esc_attr( $input_id ); ?>"
+			name="q"
+			class="cvc-search-form__input"
+			value="<?php echo esc_attr( $current_q ); ?>"
+			placeholder="Tìm khóa học, chủ đề, tuyển dụng, văn bản..."
+			autocomplete="off"
+		>
+		<button type="submit" class="cvc-btn cvc-btn--primary">Tìm kiếm</button>
+	</form>
+	<?php
+}

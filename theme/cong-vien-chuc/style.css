@@ -100,6 +100,19 @@ input:focus-visible {
     text-decoration: none;
 }
 
+/* --- Screen-reader-only text (label vẫn tồn tại cho a11y, ẩn thị giác) --- */
+.screen-reader-text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
 /* --- Layout --- */
 .container {
     width: 100%;
@@ -133,6 +146,25 @@ input:focus-visible {
     font-size: 0.8rem;
     font-weight: 400;
     color: var(--cvc-color-text-subtle);
+}
+
+/* Icon link tới trang tìm kiếm - luôn hiện (không nằm trong menu mobile
+   collapse), tránh làm nav chính (7 mục) dài thêm 1 text link. */
+.site-search-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--cvc-color-border);
+    border-radius: var(--cvc-radius-sm);
+    font-size: 1.1rem;
+    color: var(--cvc-color-text);
+}
+
+.site-search-link:hover {
+    border-color: var(--cvc-color-primary);
+    text-decoration: none;
 }
 
 /* Nút mở/đóng menu mobile - ẩn mặc định, chỉ hiện khi có JS (class .js
@@ -709,6 +741,67 @@ p {
     color: #713f12;
 }
 
+/* --- Search form --- */
+.cvc-search-form {
+    display: flex;
+    gap: 0.5rem;
+    max-width: 560px;
+    margin: 1.25rem 0;
+}
+
+.cvc-hero .cvc-search-form {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.cvc-search-form__input {
+    flex: 1;
+    min-width: 0;
+    padding: 0.65rem 0.9rem;
+    border: 1px solid var(--cvc-color-border);
+    border-radius: var(--cvc-radius-sm);
+    font: inherit;
+    font-size: 1rem;
+    color: var(--cvc-color-text);
+    background: var(--cvc-color-bg);
+}
+
+.cvc-search-form__input:focus-visible {
+    outline: 2px solid var(--cvc-color-primary);
+    outline-offset: 1px;
+}
+
+/* --- Search filters --- */
+.cvc-search-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 1rem 0 1.5rem;
+}
+
+.cvc-search-filters__item {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 0.9rem;
+    min-height: 40px;
+    border: 1px solid var(--cvc-color-border);
+    border-radius: var(--cvc-radius-pill);
+    color: var(--cvc-color-text-muted);
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.cvc-search-filters__item:hover {
+    border-color: var(--cvc-color-primary);
+    text-decoration: none;
+}
+
+.cvc-search-filters__item.is-active {
+    background: var(--cvc-color-primary);
+    border-color: var(--cvc-color-primary);
+    color: #ffffff;
+}
+
 /* --- Responsive --- */
 /*
  * Nav chính có 7 item ("Văn bản pháp luật", "Thi trắc nghiệm" khá dài) -
@@ -750,6 +843,11 @@ p {
 }
 
 @media (max-width: 640px) {
+    .cvc-search-form {
+        flex-direction: column;
+        max-width: none;
+    }
+
     .cvc-card-grid {
         grid-template-columns: 1fr;
     }

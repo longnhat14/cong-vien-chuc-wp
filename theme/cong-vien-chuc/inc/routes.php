@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Tăng số này khi thêm/sửa rewrite rule để buộc flush lại đúng 1 lần.
-const CVC_REWRITE_VERSION = '3';
+const CVC_REWRITE_VERSION = '4';
 
 add_action( 'init', 'cvc_register_rewrite_rules' );
 
@@ -116,6 +116,18 @@ function cvc_register_rewrite_rules(): void {
 		'index.php?cvc_page=legal-documents',
 		'top'
 	);
+
+	/*
+	 * Search không có path segment riêng (slug/số trang) - state (q/type/
+	 * page) đi qua query string thường (?q=...&type=...&page=...), luôn
+	 * có sẵn trong $_GET dù path đã bị rewrite, không cần capture group
+	 * hay đăng ký thêm query var.
+	 */
+	add_rewrite_rule(
+		'^tim-kiem/?$',
+		'index.php?cvc_page=search',
+		'top'
+	);
 }
 
 add_filter( 'query_vars', 'cvc_register_query_vars' );
@@ -209,6 +221,7 @@ function cvc_template_include( string $template ): string {
 		'exam-detail'           => 'template-exam-detail.php',
 		'legal-documents'       => 'template-legal-documents.php',
 		'legal-document-detail' => 'template-legal-document-detail.php',
+		'search'                => 'template-search.php',
 	);
 
 	if ( isset( $map[ $page ] ) ) {
@@ -312,4 +325,29 @@ function cvc_legal_documents_url( int $paged = 1 ): string {
 
 function cvc_legal_document_url( string $slug ): string {
 	return home_url( '/van-ban-phap-luat/' . rawurlencode( $slug ) . '/' );
+}
+
+/**
+ * URL trang tìm kiếm. $type bỏ qua nếu là 'all' (giữ URL sạch, không
+ * thêm tham số không cần thiết). $page bỏ qua nếu là 1 - click filter
+ * (không truyền $page) sẽ tự động reset về trang 1 đúng theo yêu cầu.
+ */
+function cvc_search_url( string $q = '', string $type = 'all', int $page = 1 ): string {
+	$args = array();
+
+	if ( '' !== $q ) {
+		$args['q'] = $q;
+	}
+
+	if ( 'all' !== $type ) {
+		$args['type'] = $type;
+	}
+
+	if ( $page > 1 ) {
+		$args['page'] = $page;
+	}
+
+	$url = home_url( '/tim-kiem/' );
+
+	return empty( $args ) ? $url : add_query_arg( $args, $url );
 }

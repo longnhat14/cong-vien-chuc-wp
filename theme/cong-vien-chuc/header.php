@@ -18,6 +18,9 @@
                     <span class="site-title__tagline"><?php echo esc_html( $tagline ); ?></span>
                 <?php endif; ?>
             </a>
+            <a class="site-search-link" href="<?php echo esc_url( cvc_search_url() ); ?>" aria-label="<?php esc_attr_e( 'Tìm kiếm', 'cong-vien-chuc' ); ?>">
+                <span aria-hidden="true">&#128269;</span>
+            </a>
             <button type="button" class="site-nav-toggle" aria-expanded="false" aria-controls="site-nav-menu">
                 <span class="site-nav-toggle__box" aria-hidden="true"></span>
                 <?php esc_html_e( 'Menu', 'cong-vien-chuc' ); ?>

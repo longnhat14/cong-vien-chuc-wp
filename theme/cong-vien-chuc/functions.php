@@ -15,6 +15,7 @@ require_once __DIR__ . '/inc/services/class-cvc-knowledge-service.php';
 require_once __DIR__ . '/inc/services/class-cvc-recruitment-service.php';
 require_once __DIR__ . '/inc/services/class-cvc-exam-service.php';
 require_once __DIR__ . '/inc/services/class-cvc-legal-document-service.php';
+require_once __DIR__ . '/inc/services/class-cvc-search-service.php';
 require_once __DIR__ . '/inc/template-tags.php';
 require_once __DIR__ . '/inc/seo.php';
 require_once __DIR__ . '/inc/routes.php';

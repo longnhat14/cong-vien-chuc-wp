@@ -51,6 +51,7 @@ get_header();
 				Khóa học theo lộ trình, kiến thức hệ thống theo từng chủ đề và tin tuyển dụng
 				mới nhất - giúp bạn ôn tập đúng trọng tâm.
 			</p>
+			<?php cvc_render_search_form( '', 'cvc-hero-search-q' ); ?>
 			<div class="cvc-hero__actions">
 				<a class="cvc-btn cvc-btn--primary" href="<?php echo esc_url( cvc_courses_url() ); ?>">Khám phá khóa học</a>
 				<a class="cvc-btn cvc-btn--secondary" href="<?php echo esc_url( cvc_recruitments_url() ); ?>">Xem tuyển dụng</a>
