@@ -29,6 +29,14 @@ function cvc_enqueue_assets(): void {
 		array(),
 		wp_get_theme()->get( 'Version' )
 	);
+
+	wp_enqueue_script(
+		'cvc-nav',
+		get_theme_file_uri( '/assets/js/nav.js' ),
+		array(),
+		wp_get_theme()->get( 'Version' ),
+		true
+	);
 }
 
 add_action( 'after_setup_theme', 'cvc_theme_setup' );

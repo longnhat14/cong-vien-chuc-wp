@@ -225,6 +225,9 @@ function cvc_render_recruitment_card( array $recruitment, int $heading_level = 2
 			<?php if ( $deadline ) : ?>
 				<p class="cvc-card__meta"><?php echo esc_html( sprintf( 'Hạn nộp: %s', cvc_format_date_vn( $deadline ) ) ); ?></p>
 			<?php endif; ?>
+			<p class="cvc-card__footer">
+				<a class="cvc-btn cvc-btn--text" href="<?php echo esc_url( $url ); ?>">Xem chi tiết &rarr;</a>
+			</p>
 		</div>
 	</article>
 	<?php
@@ -255,6 +258,9 @@ function cvc_render_knowledge_card( array $item, int $heading_level = 2 ): void 
 			<?php if ( $summary ) : ?>
 				<p class="cvc-card__excerpt"><?php echo esc_html( $summary ); ?></p>
 			<?php endif; ?>
+			<p class="cvc-card__footer">
+				<a class="cvc-btn cvc-btn--text" href="<?php echo esc_url( $url ); ?>">Đọc tiếp &rarr;</a>
+			</p>
 		</div>
 	</article>
 	<?php
@@ -289,6 +295,9 @@ function cvc_render_exam_card( array $exam, int $heading_level = 2 ): void {
 			<?php if ( $durationMinutes ) : ?>
 				<p class="cvc-card__meta"><?php echo esc_html( sprintf( '%d phút', (int) $durationMinutes ) ); ?></p>
 			<?php endif; ?>
+			<p class="cvc-card__footer">
+				<a class="cvc-btn cvc-btn--text" href="<?php echo esc_url( $url ); ?>">Xem đề thi &rarr;</a>
+			</p>
 		</div>
 	</article>
 	<?php
@@ -328,6 +337,9 @@ function cvc_render_legal_document_card( array $document, int $heading_level = 2
 			<?php if ( $effectiveDate ) : ?>
 				<p class="cvc-card__meta"><?php echo esc_html( sprintf( 'Hiệu lực: %s', cvc_format_date_vn( $effectiveDate ) ) ); ?></p>
 			<?php endif; ?>
+			<p class="cvc-card__footer">
+				<a class="cvc-btn cvc-btn--text" href="<?php echo esc_url( $url ); ?>">Xem văn bản &rarr;</a>
+			</p>
 		</div>
 	</article>
 	<?php
@@ -452,6 +464,9 @@ function cvc_render_course_card( array $course, int $heading_level = 2 ): void {
 			<?php if ( null !== $lessonCount ) : ?>
 				<p class="cvc-card__meta"><?php echo esc_html( sprintf( '%d bài học', (int) $lessonCount ) ); ?></p>
 			<?php endif; ?>
+			<p class="cvc-card__footer">
+				<a class="cvc-btn cvc-btn--text" href="<?php echo esc_url( $url ); ?>">Xem khóa học &rarr;</a>
+			</p>
 		</div>
 	</article>
 	<?php
@@ -487,6 +502,9 @@ function cvc_render_topic_card( array $topic, int $heading_level = 2 ): void {
 			<?php if ( null !== $itemCount ) : ?>
 				<p class="cvc-card__meta"><?php echo esc_html( sprintf( '%d kiến thức', (int) $itemCount ) ); ?></p>
 			<?php endif; ?>
+			<p class="cvc-card__footer">
+				<a class="cvc-btn cvc-btn--text" href="<?php echo esc_url( $url ); ?>">Xem chủ đề &rarr;</a>
+			</p>
 		</div>
 	</article>
 	<?php

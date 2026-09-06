@@ -6,6 +6,39 @@ Description: Frontend WordPress cho nền tảng Công Viên Chức.
 Version: 1.0.0
 */
 
+/* --- Design tokens --- */
+:root {
+    --cvc-color-primary: #0a58ca;
+    --cvc-color-primary-dark: #084298;
+    --cvc-color-primary-tint: #eef4ff;
+    --cvc-color-text: #1f2328;
+    --cvc-color-text-muted: #4b5563;
+    --cvc-color-text-subtle: #6b7280;
+    --cvc-color-border: #e5e7eb;
+    --cvc-color-bg: #ffffff;
+    --cvc-color-bg-alt: #f8fafc;
+
+    --cvc-font-sans: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+    --cvc-space-1: 0.25rem;
+    --cvc-space-2: 0.5rem;
+    --cvc-space-3: 0.75rem;
+    --cvc-space-4: 1rem;
+    --cvc-space-6: 1.5rem;
+    --cvc-space-8: 2rem;
+    --cvc-space-12: 3rem;
+
+    --cvc-radius-sm: 6px;
+    --cvc-radius: 8px;
+    --cvc-radius-pill: 999px;
+
+    --cvc-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+    --cvc-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+
+    --cvc-container-width: 1140px;
+    --cvc-prose-width: 72ch;
+}
+
 /* --- Reset nhẹ --- */
 *,
 *::before,
@@ -13,12 +46,17 @@ Version: 1.0.0
     box-sizing: border-box;
 }
 
+html {
+    -webkit-text-size-adjust: 100%;
+}
+
 body {
     margin: 0;
-    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    line-height: 1.5;
-    color: #1f2328;
-    background: #ffffff;
+    font-family: var(--cvc-font-sans);
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--cvc-color-text);
+    background: var(--cvc-color-bg);
 }
 
 img {
@@ -27,7 +65,7 @@ img {
 }
 
 a {
-    color: #0a58ca;
+    color: var(--cvc-color-primary);
     text-decoration: none;
 }
 
@@ -35,24 +73,52 @@ a:hover {
     text-decoration: underline;
 }
 
+/* --- Focus visibility (bàn phím) --- */
+a:focus-visible,
+button:focus-visible,
+.cvc-card a:focus-visible,
+input:focus-visible {
+    outline: 2px solid var(--cvc-color-primary);
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+/* --- Skip link (bỏ qua navigation, tới nội dung chính) --- */
+.cvc-skip-link {
+    position: absolute;
+    top: -100px;
+    left: 0;
+    z-index: 1000;
+    padding: 0.75rem 1.25rem;
+    background: var(--cvc-color-primary);
+    color: #fff;
+    border-radius: 0 0 var(--cvc-radius-sm) 0;
+}
+
+.cvc-skip-link:focus {
+    top: 0;
+    text-decoration: none;
+}
+
 /* --- Layout --- */
 .container {
     width: 100%;
-    max-width: 1140px;
+    max-width: var(--cvc-container-width);
     margin: 0 auto;
-    padding: 0 1rem;
+    padding: 0 var(--cvc-space-4);
 }
 
 .site-header {
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid var(--cvc-color-border);
+    background: var(--cvc-color-bg);
 }
 
 .site-header__inner {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 1rem;
-    padding: 1rem;
+    gap: var(--cvc-space-4);
+    padding: var(--cvc-space-4);
 }
 
 .site-title {
@@ -60,13 +126,55 @@ a:hover {
     flex-direction: column;
     font-size: 1.25rem;
     font-weight: 700;
-    color: #1f2328;
+    color: var(--cvc-color-text);
 }
 
 .site-title__tagline {
     font-size: 0.8rem;
     font-weight: 400;
-    color: #6b7280;
+    color: var(--cvc-color-text-subtle);
+}
+
+/* Nút mở/đóng menu mobile - ẩn mặc định, chỉ hiện khi có JS (class .js
+   trên <html>) VÀ ở màn hình hẹp. Không JS hoặc desktop -> nav luôn hiện
+   đầy đủ (progressive enhancement, không bao giờ ẩn hẳn navigation). */
+.site-nav-toggle {
+    display: none;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 0.75rem;
+    background: transparent;
+    border: 1px solid var(--cvc-color-border);
+    border-radius: var(--cvc-radius-sm);
+    color: var(--cvc-color-text);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.site-nav-toggle__box {
+    position: relative;
+    width: 18px;
+    height: 2px;
+    background: currentColor;
+}
+
+.site-nav-toggle__box::before,
+.site-nav-toggle__box::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    width: 18px;
+    height: 2px;
+    background: currentColor;
+}
+
+.site-nav-toggle__box::before {
+    top: -6px;
+}
+
+.site-nav-toggle__box::after {
+    top: 6px;
 }
 
 .site-nav ul {
@@ -81,29 +189,30 @@ a:hover {
 .site-nav a {
     display: inline-block;
     padding: 0.6rem 0.75rem;
-    color: #1f2328;
+    color: var(--cvc-color-text);
     font-weight: 500;
+    border-radius: var(--cvc-radius-sm);
 }
 
 .site-nav a:hover {
     text-decoration: none;
-    color: #0a58ca;
+    color: var(--cvc-color-primary);
 }
 
 .site-nav .cvc-nav-current a {
-    color: #0a58ca;
+    color: var(--cvc-color-primary);
     font-weight: 700;
 }
 
 .site-content {
     min-height: 60vh;
-    padding: 2rem 0;
+    padding: var(--cvc-space-8) 0;
 }
 
 .site-footer {
-    border-top: 1px solid #e5e7eb;
-    padding: 2rem 0;
-    color: #6b7280;
+    border-top: 1px solid var(--cvc-color-border);
+    padding: var(--cvc-space-8) 0;
+    color: var(--cvc-color-text-subtle);
     font-size: 0.9rem;
 }
 
@@ -112,12 +221,18 @@ a:hover {
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 1rem;
+    gap: var(--cvc-space-4);
 }
 
 .site-footer__brand {
     margin: 0;
-    color: #1f2328;
+    color: var(--cvc-color-text);
+}
+
+.site-footer__tagline {
+    margin: 0.25rem 0 0;
+    color: var(--cvc-color-text-subtle);
+    font-size: 0.85rem;
 }
 
 .site-footer__copyright {
@@ -128,19 +243,37 @@ a:hover {
 .site-footer__nav ul {
     display: flex;
     flex-wrap: wrap;
-    gap: 1rem;
+    gap: var(--cvc-space-4);
     margin: 0;
     padding: 0;
     list-style: none;
 }
 
 .site-footer__nav a {
-    color: #6b7280;
+    color: var(--cvc-color-text-subtle);
 }
 
 /* --- Typography --- */
 h1, h2, h3, h4 {
     line-height: 1.25;
+    margin: 0 0 1rem;
+    color: var(--cvc-color-text);
+    font-weight: 700;
+}
+
+h1 {
+    font-size: 1.75rem;
+}
+
+h2 {
+    font-size: 1.4rem;
+}
+
+h3 {
+    font-size: 1.15rem;
+}
+
+p {
     margin: 0 0 1rem;
 }
 
@@ -205,24 +338,36 @@ h1, h2, h3, h4 {
 }
 
 .cvc-btn--primary {
-    background: #0a58ca;
+    background: var(--cvc-color-primary);
     color: #ffffff;
 }
 
 .cvc-btn--primary:hover {
-    background: #084298;
+    background: var(--cvc-color-primary-dark);
     color: #ffffff;
 }
 
 .cvc-btn--secondary {
     background: transparent;
-    border-color: #0a58ca;
-    color: #0a58ca;
+    border-color: var(--cvc-color-primary);
+    color: var(--cvc-color-primary);
 }
 
 .cvc-btn--secondary:hover {
-    background: #eef4ff;
-    color: #0a58ca;
+    background: var(--cvc-color-primary-tint);
+    color: var(--cvc-color-primary);
+}
+
+/* Dùng cho CTA phụ, không cần khung viền (vd: "Xem chi tiết" trong card). */
+.cvc-btn--text {
+    padding: 0;
+    border: none;
+    color: var(--cvc-color-primary);
+    font-weight: 600;
+}
+
+.cvc-btn--text:hover {
+    text-decoration: underline;
 }
 
 /* --- Homepage hero --- */
@@ -276,37 +421,6 @@ h1, h2, h3, h4 {
     font-weight: 600;
 }
 
-/* --- Homepage "explore more" links (domains with no data yet) --- */
-.cvc-explore-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 1rem;
-}
-
-.cvc-explore-card {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-    padding: 1.25rem;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    color: #1f2328;
-}
-
-.cvc-explore-card:hover {
-    border-color: #0a58ca;
-    text-decoration: none;
-}
-
-.cvc-explore-card__title {
-    font-weight: 700;
-}
-
-.cvc-explore-card__desc {
-    color: #6b7280;
-    font-size: 0.9rem;
-}
-
 /* --- Domain pages (Courses / Topics) --- */
 .cvc-page {
     padding-bottom: 2rem;
@@ -327,8 +441,9 @@ h1, h2, h3, h4 {
 }
 
 .cvc-prose {
+    max-width: var(--cvc-prose-width);
     line-height: 1.7;
-    color: #1f2328;
+    color: var(--cvc-color-text);
     margin-bottom: 1.5rem;
 }
 
@@ -372,12 +487,18 @@ h1, h2, h3, h4 {
 }
 
 .cvc-card {
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
+    border: 1px solid var(--cvc-color-border);
+    border-radius: var(--cvc-radius);
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    background: #fff;
+    background: var(--cvc-color-bg);
+    transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.cvc-card:hover {
+    border-color: var(--cvc-color-primary);
+    box-shadow: var(--cvc-shadow-sm);
 }
 
 .cvc-card__media img {
@@ -416,6 +537,11 @@ h1, h2, h3, h4 {
     font-size: 0.85rem;
 }
 
+.cvc-card__footer {
+    margin-top: auto;
+    padding-top: 0.5rem;
+}
+
 /* --- Badges --- */
 .cvc-badge {
     display: inline-block;
@@ -449,6 +575,7 @@ h1, h2, h3, h4 {
 /* --- Pagination --- */
 .cvc-pagination {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: center;
     gap: 1rem;
@@ -456,8 +583,24 @@ h1, h2, h3, h4 {
     font-size: 0.9rem;
 }
 
+.cvc-pagination__link {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.6rem 1rem;
+    min-height: 44px;
+    border: 1px solid var(--cvc-color-border);
+    border-radius: var(--cvc-radius-sm);
+    font-weight: 600;
+}
+
+.cvc-pagination__link:hover {
+    border-color: var(--cvc-color-primary);
+    text-decoration: none;
+}
+
 .cvc-pagination__link--disabled {
     color: #9ca3af;
+    border-color: var(--cvc-color-border);
 }
 
 .cvc-pagination__status {
@@ -574,8 +717,35 @@ h1, h2, h3, h4 {
  */
 @media (max-width: 900px) {
     .site-header__inner {
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    /* Chỉ áp dụng hành vi collapse khi JS đã chạy (class .js được thêm
+       ngay trong <head>) - không JS thì nav vẫn hiện đầy đủ như cũ. */
+    html.js .site-nav-toggle {
+        display: inline-flex;
+    }
+
+    html.js .site-nav {
+        flex-basis: 100%;
+        max-height: 0;
+        overflow: hidden;
+    }
+
+    html.js .site-nav.is-open {
+        max-height: 600px;
+    }
+
+    html.js .site-nav ul {
         flex-direction: column;
-        align-items: flex-start;
+        gap: 0;
+        padding: 0.5rem 0;
+    }
+
+    html.js .site-nav a {
+        display: block;
+        padding: 0.75rem 0.25rem;
     }
 }
 

@@ -47,7 +47,7 @@ if ( $is_found ) {
 get_header();
 ?>
 
-<main class="container cvc-page">
+<main id="main" class="container cvc-page">
 	<?php
 	cvc_render_breadcrumbs(
 		array(

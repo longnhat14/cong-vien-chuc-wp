@@ -45,7 +45,7 @@ if ( $is_found ) {
 get_header();
 ?>
 
-<main class="container cvc-page">
+<main id="main" class="container cvc-page">
 	<?php
 	$topic = $is_found && is_array( $item['topic'] ?? null ) ? $item['topic'] : null;
 
