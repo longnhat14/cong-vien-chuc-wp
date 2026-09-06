@@ -276,6 +276,37 @@ h1, h2, h3, h4 {
     font-weight: 600;
 }
 
+/* --- Homepage "explore more" links (domains with no data yet) --- */
+.cvc-explore-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+}
+
+.cvc-explore-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 1.25rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    color: #1f2328;
+}
+
+.cvc-explore-card:hover {
+    border-color: #0a58ca;
+    text-decoration: none;
+}
+
+.cvc-explore-card__title {
+    font-weight: 700;
+}
+
+.cvc-explore-card__desc {
+    color: #6b7280;
+    font-size: 0.9rem;
+}
+
 /* --- Domain pages (Courses / Topics) --- */
 .cvc-page {
     padding-bottom: 2rem;
@@ -494,6 +525,36 @@ h1, h2, h3, h4 {
     padding-left: 1.25rem;
 }
 
+/* --- Recruitment position card --- */
+.cvc-position-card {
+    margin-bottom: 1rem;
+}
+
+/* --- Exam question preview --- */
+.cvc-question-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.cvc-question-list__item {
+    padding: 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.cvc-question-list__text {
+    font-weight: 600;
+    margin: 0 0 0.5rem;
+}
+
+.cvc-question-list__options {
+    margin: 0;
+    padding-left: 1.25rem;
+    color: #4b5563;
+}
+
 /* --- State: not found / locked --- */
 .cvc-state--notfound {
     background: #f3f4f6;
@@ -506,12 +567,19 @@ h1, h2, h3, h4 {
 }
 
 /* --- Responsive --- */
-@media (max-width: 640px) {
+/*
+ * Nav chính có 7 item ("Văn bản pháp luật", "Thi trắc nghiệm" khá dài) -
+ * cho header xuống dòng sớm từ tablet để nav có đủ chiều rộng tự wrap
+ * (site-nav ul đã có flex-wrap), tránh bị bóp sát vào logo.
+ */
+@media (max-width: 900px) {
     .site-header__inner {
         flex-direction: column;
         align-items: flex-start;
     }
+}
 
+@media (max-width: 640px) {
     .cvc-card-grid {
         grid-template-columns: 1fr;
     }

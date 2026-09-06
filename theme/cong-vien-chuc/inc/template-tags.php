@@ -50,9 +50,57 @@ function cvc_is_nav_section_active( string $section ): bool {
 			return in_array( $page, array( 'courses', 'course-detail', 'course-lesson' ), true );
 		case 'topics':
 			return in_array( $page, array( 'topics', 'topic-detail' ), true );
+		case 'recruitments':
+			return in_array( $page, array( 'recruitments', 'recruitment-detail' ), true );
+		case 'knowledge':
+			return in_array( $page, array( 'knowledge', 'knowledge-detail' ), true );
+		case 'exams':
+			return in_array( $page, array( 'exams', 'exam-detail' ), true );
+		case 'legal-documents':
+			return in_array( $page, array( 'legal-documents', 'legal-document-detail' ), true );
 	}
 
 	return false;
+}
+
+/**
+ * Danh sách item navigation chính - nguồn duy nhất dùng chung cho nav
+ * fallback (header) và footer, tránh khai báo trùng URL/label ở 2 nơi.
+ * Chỉ liệt kê domain đã có route thật.
+ *
+ * @return array<string, array{label: string, url: string}>
+ */
+function cvc_get_primary_nav_items(): array {
+	return array(
+		'home'            => array(
+			'label' => 'Trang chủ',
+			'url'   => home_url( '/' ),
+		),
+		'courses'         => array(
+			'label' => 'Khóa học',
+			'url'   => cvc_courses_url(),
+		),
+		'topics'          => array(
+			'label' => 'Chủ đề',
+			'url'   => cvc_topics_url(),
+		),
+		'recruitments'    => array(
+			'label' => 'Tuyển dụng',
+			'url'   => cvc_recruitments_url(),
+		),
+		'knowledge'       => array(
+			'label' => 'Kiến thức',
+			'url'   => cvc_knowledge_url(),
+		),
+		'exams'           => array(
+			'label' => 'Thi trắc nghiệm',
+			'url'   => cvc_exams_url(),
+		),
+		'legal-documents' => array(
+			'label' => 'Văn bản pháp luật',
+			'url'   => cvc_legal_documents_url(),
+		),
+	);
 }
 
 /**
@@ -61,23 +109,9 @@ function cvc_is_nav_section_active( string $section ): bool {
  * state để người dùng biết đang ở đâu.
  */
 function cvc_default_nav_fallback(): void {
-	$items = array(
-		'home'    => array(
-			'label' => 'Trang chủ',
-			'url'   => home_url( '/' ),
-		),
-		'courses' => array(
-			'label' => 'Khóa học',
-			'url'   => cvc_courses_url(),
-		),
-		'topics'  => array(
-			'label' => 'Chủ đề',
-			'url'   => cvc_topics_url(),
-		),
-	);
 	?>
 	<ul>
-		<?php foreach ( $items as $section => $item ) : ?>
+		<?php foreach ( cvc_get_primary_nav_items() as $section => $item ) : ?>
 			<?php $is_active = cvc_is_nav_section_active( $section ); ?>
 			<li class="<?php echo $is_active ? 'cvc-nav-current' : ''; ?>">
 				<a href="<?php echo esc_url( $item['url'] ); ?>"<?php echo $is_active ? ' aria-current="page"' : ''; ?>>
@@ -94,24 +128,10 @@ function cvc_default_nav_fallback(): void {
  * lại URL domain chính ở nhiều nơi.
  */
 function cvc_render_footer_nav(): void {
-	$items = array(
-		array(
-			'label' => 'Trang chủ',
-			'url'   => home_url( '/' ),
-		),
-		array(
-			'label' => 'Khóa học',
-			'url'   => cvc_courses_url(),
-		),
-		array(
-			'label' => 'Chủ đề',
-			'url'   => cvc_topics_url(),
-		),
-	);
 	?>
 	<nav class="site-footer__nav" aria-label="<?php esc_attr_e( 'Footer', 'cong-vien-chuc' ); ?>">
 		<ul>
-			<?php foreach ( $items as $item ) : ?>
+			<?php foreach ( cvc_get_primary_nav_items() as $item ) : ?>
 				<li><a href="<?php echo esc_url( $item['url'] ); ?>"><?php echo esc_html( $item['label'] ); ?></a></li>
 			<?php endforeach; ?>
 		</ul>
@@ -131,6 +151,185 @@ function cvc_render_section_header( string $title, string $more_label, string $m
 			<?php echo esc_html( $more_label ); ?> &rarr;
 		</a>
 	</div>
+	<?php
+}
+
+/**
+ * Format ngày kiểu Việt Nam (dd/mm/yyyy). Trả '' nếu rỗng/không hợp lệ -
+ * caller tự quyết định có hiển thị dòng đó hay không.
+ */
+function cvc_format_date_vn( ?string $date ): string {
+	if ( empty( $date ) ) {
+		return '';
+	}
+
+	$timestamp = strtotime( $date );
+
+	if ( false === $timestamp ) {
+		return '';
+	}
+
+	return date_i18n( 'd/m/Y', $timestamp );
+}
+
+/**
+ * Nhãn tiếng Việt cho recruitment_type - map từ đúng 3 giá trị enum được
+ * validate ở RecruitmentController (civil_servant/public_employee/other).
+ * Không áp dụng cách này cho các field dạng chuỗi tự do khác (exam_type,
+ * document_type,...) vì backend không giới hạn enum cho chúng.
+ */
+function cvc_recruitment_type_label( ?string $type ): string {
+	$labels = array(
+		'civil_servant'   => 'Công chức',
+		'public_employee' => 'Viên chức',
+		'other'           => 'Khác',
+	);
+
+	return $labels[ $type ] ?? (string) $type;
+}
+
+/**
+ * Card hiển thị 1 tin tuyển dụng. Chỉ hiển thị field thực sự có trong
+ * response của GET /api/recruitments.
+ *
+ * @param array<string, mixed> $recruitment
+ */
+function cvc_render_recruitment_card( array $recruitment, int $heading_level = 2 ): void {
+	$slug       = (string) ( $recruitment['slug'] ?? '' );
+	$title      = (string) ( $recruitment['title'] ?? '' );
+	$summary    = $recruitment['summary'] ?? '';
+	$type       = $recruitment['recruitment_type'] ?? null;
+	$location   = $recruitment['location'] ?? '';
+	$deadline   = $recruitment['dates']['application_deadline'] ?? null;
+	$agencyName = $recruitment['agency']['name'] ?? null;
+	$url        = cvc_recruitment_url( $slug );
+	$tag        = 'h' . max( 2, min( 4, $heading_level ) );
+	?>
+	<article class="cvc-card">
+		<div class="cvc-card__body">
+			<?php if ( $type ) : ?>
+				<span class="cvc-badge cvc-badge--subject"><?php echo esc_html( cvc_recruitment_type_label( $type ) ); ?></span>
+			<?php endif; ?>
+			<<?php echo $tag; ?> class="cvc-card__title">
+				<a href="<?php echo esc_url( $url ); ?>"><?php echo esc_html( $title ); ?></a>
+			</<?php echo $tag; ?>>
+			<?php if ( $summary ) : ?>
+				<p class="cvc-card__excerpt"><?php echo esc_html( $summary ); ?></p>
+			<?php endif; ?>
+			<?php if ( $agencyName ) : ?>
+				<p class="cvc-card__meta"><?php echo esc_html( $agencyName ); ?></p>
+			<?php endif; ?>
+			<?php if ( $location ) : ?>
+				<p class="cvc-card__meta"><?php echo esc_html( $location ); ?></p>
+			<?php endif; ?>
+			<?php if ( $deadline ) : ?>
+				<p class="cvc-card__meta"><?php echo esc_html( sprintf( 'Hạn nộp: %s', cvc_format_date_vn( $deadline ) ) ); ?></p>
+			<?php endif; ?>
+		</div>
+	</article>
+	<?php
+}
+
+/**
+ * Card hiển thị 1 knowledge item. Chỉ hiển thị field thực sự có trong
+ * response của GET /api/knowledge-items.
+ *
+ * @param array<string, mixed> $item
+ */
+function cvc_render_knowledge_card( array $item, int $heading_level = 2 ): void {
+	$slug       = (string) ( $item['slug'] ?? '' );
+	$title      = (string) ( $item['title'] ?? '' );
+	$summary    = $item['summary'] ?? '';
+	$topicName  = $item['topic']['name'] ?? null;
+	$url        = cvc_knowledge_item_url( $slug );
+	$tag        = 'h' . max( 2, min( 4, $heading_level ) );
+	?>
+	<article class="cvc-card">
+		<div class="cvc-card__body">
+			<?php if ( $topicName ) : ?>
+				<span class="cvc-badge cvc-badge--subject"><?php echo esc_html( $topicName ); ?></span>
+			<?php endif; ?>
+			<<?php echo $tag; ?> class="cvc-card__title">
+				<a href="<?php echo esc_url( $url ); ?>"><?php echo esc_html( $title ); ?></a>
+			</<?php echo $tag; ?>>
+			<?php if ( $summary ) : ?>
+				<p class="cvc-card__excerpt"><?php echo esc_html( $summary ); ?></p>
+			<?php endif; ?>
+		</div>
+	</article>
+	<?php
+}
+
+/**
+ * Card hiển thị 1 đề thi. Chỉ hiển thị field thực sự có trong response
+ * của GET /api/exams - không hiển thị câu hỏi/đáp án ở đây.
+ *
+ * @param array<string, mixed> $exam
+ */
+function cvc_render_exam_card( array $exam, int $heading_level = 2 ): void {
+	$slug            = (string) ( $exam['slug'] ?? '' );
+	$title           = (string) ( $exam['title'] ?? '' );
+	$description     = $exam['description'] ?? '';
+	$questionsCount  = $exam['questions_count'] ?? $exam['total_questions'] ?? null;
+	$durationMinutes = $exam['duration_minutes'] ?? null;
+	$url             = cvc_exam_url( $slug );
+	$tag             = 'h' . max( 2, min( 4, $heading_level ) );
+	?>
+	<article class="cvc-card">
+		<div class="cvc-card__body">
+			<<?php echo $tag; ?> class="cvc-card__title">
+				<a href="<?php echo esc_url( $url ); ?>"><?php echo esc_html( $title ); ?></a>
+			</<?php echo $tag; ?>>
+			<?php if ( $description ) : ?>
+				<p class="cvc-card__excerpt"><?php echo esc_html( $description ); ?></p>
+			<?php endif; ?>
+			<?php if ( null !== $questionsCount ) : ?>
+				<p class="cvc-card__meta"><?php echo esc_html( sprintf( '%d câu hỏi', (int) $questionsCount ) ); ?></p>
+			<?php endif; ?>
+			<?php if ( $durationMinutes ) : ?>
+				<p class="cvc-card__meta"><?php echo esc_html( sprintf( '%d phút', (int) $durationMinutes ) ); ?></p>
+			<?php endif; ?>
+		</div>
+	</article>
+	<?php
+}
+
+/**
+ * Card hiển thị 1 văn bản pháp luật. Chỉ hiển thị field thực sự có trong
+ * response của GET /api/legal-documents (file_path/file_hash đã bị
+ * backend ẩn - không cố lấy thêm field nào khác ngoài response).
+ *
+ * @param array<string, mixed> $document
+ */
+function cvc_render_legal_document_card( array $document, int $heading_level = 2 ): void {
+	$slug          = (string) ( $document['slug'] ?? '' );
+	$title         = (string) ( $document['title'] ?? '' );
+	$summary       = $document['summary'] ?? '';
+	$documentNumber = $document['document_number'] ?? null;
+	$issuingAgency  = $document['issuing_agency'] ?? null;
+	$effectiveDate  = $document['effective_date'] ?? null;
+	$url            = cvc_legal_document_url( $slug );
+	$tag            = 'h' . max( 2, min( 4, $heading_level ) );
+	?>
+	<article class="cvc-card">
+		<div class="cvc-card__body">
+			<?php if ( $documentNumber ) : ?>
+				<span class="cvc-badge cvc-badge--subject"><?php echo esc_html( $documentNumber ); ?></span>
+			<?php endif; ?>
+			<<?php echo $tag; ?> class="cvc-card__title">
+				<a href="<?php echo esc_url( $url ); ?>"><?php echo esc_html( $title ); ?></a>
+			</<?php echo $tag; ?>>
+			<?php if ( $summary ) : ?>
+				<p class="cvc-card__excerpt"><?php echo esc_html( $summary ); ?></p>
+			<?php endif; ?>
+			<?php if ( $issuingAgency ) : ?>
+				<p class="cvc-card__meta"><?php echo esc_html( $issuingAgency ); ?></p>
+			<?php endif; ?>
+			<?php if ( $effectiveDate ) : ?>
+				<p class="cvc-card__meta"><?php echo esc_html( sprintf( 'Hiệu lực: %s', cvc_format_date_vn( $effectiveDate ) ) ); ?></p>
+			<?php endif; ?>
+		</div>
+	</article>
 	<?php
 }
 

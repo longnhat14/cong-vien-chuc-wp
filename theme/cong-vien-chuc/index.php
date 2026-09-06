@@ -3,6 +3,11 @@
  * Homepage - giới thiệu nền tảng + khu vực Khóa học/Chủ đề dùng dữ liệu
  * thật từ Laravel API. Chỉ gọi đúng 2 API (courses, topics) - không lặp
  * request trong loop.
+ *
+ * Khu vực "Khám phá thêm" (Tuyển dụng/Kiến thức/Thi trắc nghiệm/Văn bản
+ * pháp luật) chỉ là link điều hướng tới trang danh sách tương ứng - cố
+ * tình KHÔNG gọi API 4 domain này ở đây vì DB dev hiện đang rỗng, tránh
+ * gọi API dư thừa chỉ để hiển thị card rỗng/số liệu giả.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -80,6 +85,32 @@ get_header();
 					<?php endforeach; ?>
 				</div>
 			<?php endif; ?>
+		</div>
+	</section>
+
+	<section class="cvc-section">
+		<div class="container">
+			<div class="cvc-section__header">
+				<h2>Khám phá thêm</h2>
+			</div>
+			<div class="cvc-explore-grid">
+				<a class="cvc-explore-card" href="<?php echo esc_url( cvc_recruitments_url() ); ?>">
+					<span class="cvc-explore-card__title">Tuyển dụng</span>
+					<span class="cvc-explore-card__desc">Thông tin tuyển dụng công chức, viên chức</span>
+				</a>
+				<a class="cvc-explore-card" href="<?php echo esc_url( cvc_knowledge_url() ); ?>">
+					<span class="cvc-explore-card__title">Kiến thức</span>
+					<span class="cvc-explore-card__desc">Nội dung kiến thức theo từng chủ đề</span>
+				</a>
+				<a class="cvc-explore-card" href="<?php echo esc_url( cvc_exams_url() ); ?>">
+					<span class="cvc-explore-card__title">Thi trắc nghiệm</span>
+					<span class="cvc-explore-card__desc">Đề thi trắc nghiệm ôn tập</span>
+				</a>
+				<a class="cvc-explore-card" href="<?php echo esc_url( cvc_legal_documents_url() ); ?>">
+					<span class="cvc-explore-card__title">Văn bản pháp luật</span>
+					<span class="cvc-explore-card__desc">Văn bản liên quan đến tuyển dụng, thi tuyển</span>
+				</a>
+			</div>
 		</div>
 	</section>
 </main>

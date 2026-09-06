@@ -1,8 +1,9 @@
 <?php
 /**
  * Rewrite rules + query vars + template dispatch cho các trang domain
- * (Courses, Topics). Mọi URL pretty của theme phải khai báo ở đây,
- * không tạo WP Page/Post giả cho các domain này.
+ * (Courses, Topics, Recruitment, Knowledge, Exams, Legal Documents).
+ * Mọi URL pretty của theme phải khai báo ở đây, không tạo WP Page/Post
+ * giả cho các domain này.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -10,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Tăng số này khi thêm/sửa rewrite rule để buộc flush lại đúng 1 lần.
-const CVC_REWRITE_VERSION = '2';
+const CVC_REWRITE_VERSION = '3';
 
 add_action( 'init', 'cvc_register_rewrite_rules' );
 
@@ -51,6 +52,70 @@ function cvc_register_rewrite_rules(): void {
 		'index.php?cvc_page=topics',
 		'top'
 	);
+
+	add_rewrite_rule(
+		'^tuyen-dung/page/([0-9]+)/?$',
+		'index.php?cvc_page=recruitments&cvc_paged=$matches[1]',
+		'top'
+	);
+	add_rewrite_rule(
+		'^tuyen-dung/([^/]+)/?$',
+		'index.php?cvc_page=recruitment-detail&cvc_recruitment_slug=$matches[1]',
+		'top'
+	);
+	add_rewrite_rule(
+		'^tuyen-dung/?$',
+		'index.php?cvc_page=recruitments',
+		'top'
+	);
+
+	add_rewrite_rule(
+		'^kien-thuc/page/([0-9]+)/?$',
+		'index.php?cvc_page=knowledge&cvc_paged=$matches[1]',
+		'top'
+	);
+	add_rewrite_rule(
+		'^kien-thuc/([^/]+)/?$',
+		'index.php?cvc_page=knowledge-detail&cvc_knowledge_slug=$matches[1]',
+		'top'
+	);
+	add_rewrite_rule(
+		'^kien-thuc/?$',
+		'index.php?cvc_page=knowledge',
+		'top'
+	);
+
+	add_rewrite_rule(
+		'^thi-trac-nghiem/page/([0-9]+)/?$',
+		'index.php?cvc_page=exams&cvc_paged=$matches[1]',
+		'top'
+	);
+	add_rewrite_rule(
+		'^thi-trac-nghiem/([^/]+)/?$',
+		'index.php?cvc_page=exam-detail&cvc_exam_slug=$matches[1]',
+		'top'
+	);
+	add_rewrite_rule(
+		'^thi-trac-nghiem/?$',
+		'index.php?cvc_page=exams',
+		'top'
+	);
+
+	add_rewrite_rule(
+		'^van-ban-phap-luat/page/([0-9]+)/?$',
+		'index.php?cvc_page=legal-documents&cvc_paged=$matches[1]',
+		'top'
+	);
+	add_rewrite_rule(
+		'^van-ban-phap-luat/([^/]+)/?$',
+		'index.php?cvc_page=legal-document-detail&cvc_legal_document_slug=$matches[1]',
+		'top'
+	);
+	add_rewrite_rule(
+		'^van-ban-phap-luat/?$',
+		'index.php?cvc_page=legal-documents',
+		'top'
+	);
 }
 
 add_filter( 'query_vars', 'cvc_register_query_vars' );
@@ -64,6 +129,10 @@ function cvc_register_query_vars( array $vars ): array {
 	$vars[] = 'cvc_course_slug';
 	$vars[] = 'cvc_lesson_id';
 	$vars[] = 'cvc_topic_slug';
+	$vars[] = 'cvc_recruitment_slug';
+	$vars[] = 'cvc_knowledge_slug';
+	$vars[] = 'cvc_exam_slug';
+	$vars[] = 'cvc_legal_document_slug';
 	$vars[] = 'cvc_paged';
 
 	return $vars;
@@ -127,11 +196,19 @@ function cvc_template_include( string $template ): string {
 	}
 
 	$map = array(
-		'courses'       => 'template-courses.php',
-		'course-detail' => 'template-course-detail.php',
-		'course-lesson' => 'template-course-lesson.php',
-		'topics'        => 'template-topics.php',
-		'topic-detail'  => 'template-topic-detail.php',
+		'courses'               => 'template-courses.php',
+		'course-detail'         => 'template-course-detail.php',
+		'course-lesson'         => 'template-course-lesson.php',
+		'topics'                => 'template-topics.php',
+		'topic-detail'          => 'template-topic-detail.php',
+		'recruitments'          => 'template-recruitments.php',
+		'recruitment-detail'    => 'template-recruitment-detail.php',
+		'knowledge'             => 'template-knowledge.php',
+		'knowledge-detail'      => 'template-knowledge-detail.php',
+		'exams'                 => 'template-exams.php',
+		'exam-detail'           => 'template-exam-detail.php',
+		'legal-documents'       => 'template-legal-documents.php',
+		'legal-document-detail' => 'template-legal-document-detail.php',
 	);
 
 	if ( isset( $map[ $page ] ) ) {
@@ -179,4 +256,60 @@ function cvc_topics_url( int $paged = 1 ): string {
 
 function cvc_topic_url( string $slug ): string {
 	return home_url( '/chu-de/' . rawurlencode( $slug ) . '/' );
+}
+
+function cvc_recruitments_url( int $paged = 1 ): string {
+	$path = 'tuyen-dung/';
+
+	if ( $paged > 1 ) {
+		$path .= 'page/' . $paged . '/';
+	}
+
+	return home_url( '/' . $path );
+}
+
+function cvc_recruitment_url( string $slug ): string {
+	return home_url( '/tuyen-dung/' . rawurlencode( $slug ) . '/' );
+}
+
+function cvc_knowledge_url( int $paged = 1 ): string {
+	$path = 'kien-thuc/';
+
+	if ( $paged > 1 ) {
+		$path .= 'page/' . $paged . '/';
+	}
+
+	return home_url( '/' . $path );
+}
+
+function cvc_knowledge_item_url( string $slug ): string {
+	return home_url( '/kien-thuc/' . rawurlencode( $slug ) . '/' );
+}
+
+function cvc_exams_url( int $paged = 1 ): string {
+	$path = 'thi-trac-nghiem/';
+
+	if ( $paged > 1 ) {
+		$path .= 'page/' . $paged . '/';
+	}
+
+	return home_url( '/' . $path );
+}
+
+function cvc_exam_url( string $slug ): string {
+	return home_url( '/thi-trac-nghiem/' . rawurlencode( $slug ) . '/' );
+}
+
+function cvc_legal_documents_url( int $paged = 1 ): string {
+	$path = 'van-ban-phap-luat/';
+
+	if ( $paged > 1 ) {
+		$path .= 'page/' . $paged . '/';
+	}
+
+	return home_url( '/' . $path );
+}
+
+function cvc_legal_document_url( string $slug ): string {
+	return home_url( '/van-ban-phap-luat/' . rawurlencode( $slug ) . '/' );
 }
