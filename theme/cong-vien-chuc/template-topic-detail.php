@@ -76,7 +76,7 @@ get_header();
 			cvc_render_error_state();
 		}
 		?>
-		<p><a href="<?php echo esc_url( cvc_topics_url() ); ?>">&larr; Xem tất cả chủ đề</a></p>
+		<p><a class="cvc-btn cvc-btn--secondary" href="<?php echo esc_url( cvc_topics_url() ); ?>">&larr; Xem tất cả chủ đề</a></p>
 	<?php else : ?>
 		<header class="cvc-page-header">
 			<h1><?php echo esc_html( $topic['name'] ); ?></h1>

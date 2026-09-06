@@ -11,6 +11,10 @@
         <div class="container site-header__inner">
             <a class="site-title" href="<?php echo esc_url( home_url( '/' ) ); ?>">
                 <?php bloginfo( 'name' ); ?>
+                <?php $tagline = get_bloginfo( 'description' ); ?>
+                <?php if ( $tagline ) : ?>
+                    <span class="site-title__tagline"><?php echo esc_html( $tagline ); ?></span>
+                <?php endif; ?>
             </a>
             <nav class="site-nav" aria-label="<?php esc_attr_e( 'Primary', 'cong-vien-chuc' ); ?>">
                 <?php

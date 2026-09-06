@@ -130,7 +130,7 @@ get_header();
 			cvc_render_error_state();
 		}
 		?>
-		<p><a href="<?php echo esc_url( cvc_courses_url() ); ?>">&larr; Xem tất cả khóa học</a></p>
+		<p><a class="cvc-btn cvc-btn--secondary" href="<?php echo esc_url( cvc_courses_url() ); ?>">&larr; Xem tất cả khóa học</a></p>
 	<?php else : ?>
 		<header class="cvc-page-header">
 			<h1><?php echo esc_html( $lesson['title'] ); ?></h1>
@@ -140,7 +140,7 @@ get_header();
 					&middot; <?php echo esc_html( sprintf( '%d phút', (int) $lesson['duration_minutes'] ) ); ?>
 				<?php endif; ?>
 			</p>
-			<p><a href="<?php echo esc_url( cvc_course_url( $course_slug ) ); ?>">&larr; Quay lại khóa học</a></p>
+			<p><a class="cvc-btn cvc-btn--secondary" href="<?php echo esc_url( cvc_course_url( $course_slug ) ); ?>">&larr; Quay lại khóa học</a></p>
 		</header>
 
 		<?php

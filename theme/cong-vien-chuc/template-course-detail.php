@@ -75,7 +75,7 @@ get_header();
 			cvc_render_error_state();
 		}
 		?>
-		<p><a href="<?php echo esc_url( cvc_courses_url() ); ?>">&larr; Xem tất cả khóa học</a></p>
+		<p><a class="cvc-btn cvc-btn--secondary" href="<?php echo esc_url( cvc_courses_url() ); ?>">&larr; Xem tất cả khóa học</a></p>
 	<?php else : ?>
 		<?php
 		$lessons = is_array( $course['lessons'] ?? null ) ? $course['lessons'] : array();
