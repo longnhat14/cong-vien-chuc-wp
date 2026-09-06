@@ -24,6 +24,12 @@ services:
       WORDPRESS_DB_NAME: wordpress
       WORDPRESS_DB_USER: wordpress
       WORDPRESS_DB_PASSWORD: wordpress_local
+      # Laravel API base URL cho local dev. host.docker.internal cho phép
+      # container gọi tới Laravel đang chạy trong WSL (127.0.0.1:8001) -
+      # đã xác nhận bằng test thực tế, không cần đổi backend binding.
+      WORDPRESS_CONFIG_EXTRA: |
+        define( 'CVC_API_BASE_URL', 'http://host.docker.internal:8001' );
+        define( 'CVC_DEV_TOOLS', true );
     volumes:
       - wp_data:/var/www/html
       - ./theme/cong-vien-chuc:/var/www/html/wp-content/themes/cong-vien-chuc
