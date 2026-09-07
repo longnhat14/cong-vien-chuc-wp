@@ -3,14 +3,14 @@
  * Danh sách tin tuyển dụng - /tuyen-dung/ và /tuyen-dung/page/{n}/
  *
  * Filter dùng đúng tên param thực tế của GET /api/recruitments
- * (RecruitmentController::index()) - "search" và "recruitment_type" -
- * không đặt tên khác rồi tự map, tránh thêm 1 lớp dịch không cần thiết.
- * Chỉ 2 filter này có UI vì đây là 2 field không cần danh mục tra cứu
- * (enum cố định / free text). province_id/admin_unit_id/agency_id cũng
- * được API hỗ trợ nhưng KHÔNG có UI ở đây - không có public endpoint
- * nào liệt kê provinces/agencies để build dropdown hợp lệ, và việc tạo
- * danh sách cứng trong theme sẽ là suy đoán/fake dữ liệu tra cứu. Xem
- * ghi chú "Remaining limitations" trong báo cáo Phase 3 task 3.1+3.3.
+ * (RecruitmentController::index()) - "search", "recruitment_type",
+ * "deadline_from", "deadline_to" - không đặt tên khác rồi tự map, tránh
+ * thêm 1 lớp dịch không cần thiết.
+ *
+ * province_id/admin_unit_id/agency_id cũng được API hỗ trợ nhưng KHÔNG có
+ * UI ở đây (Phase 3.5, Phần 3 - DEFERRED): không có public endpoint nào
+ * liệt kê provinces/agencies để build dropdown hợp lệ, và việc tạo danh
+ * sách cứng trong theme sẽ là suy đoán/fake dữ liệu tra cứu.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -29,7 +29,21 @@ if ( ! in_array( $recruitment_type, $valid_recruitment_types, true ) ) {
 	$recruitment_type = '';
 }
 
-$has_filter = ( '' !== $search ) || ( '' !== $recruitment_type );
+/**
+ * Chỉ kiểm tra ĐÚNG hình dạng ngày (YYYY-MM-DD) ở đây - không tự validate
+ * business rule (VD from > to). Việc đó do API quyết định (422) và
+ * template tự hiển thị thông báo tương ứng, tránh 2 nguồn sự thật cho
+ * cùng 1 rule.
+ */
+$sanitize_date_param = static function ( string $key ): string {
+	$raw = isset( $_GET[ $key ] ) ? sanitize_text_field( wp_unslash( $_GET[ $key ] ) ) : '';
+	return preg_match( '/^\d{4}-\d{2}-\d{2}$/', $raw ) ? $raw : '';
+};
+
+$deadline_from = $sanitize_date_param( 'deadline_from' );
+$deadline_to   = $sanitize_date_param( 'deadline_to' );
+
+$has_filter = ( '' !== $search ) || ( '' !== $recruitment_type ) || ( '' !== $deadline_from ) || ( '' !== $deadline_to );
 
 $query_args = array(
 	'per_page' => 12,
@@ -41,17 +55,25 @@ if ( '' !== $search ) {
 if ( '' !== $recruitment_type ) {
 	$query_args['recruitment_type'] = $recruitment_type;
 }
+if ( '' !== $deadline_from ) {
+	$query_args['deadline_from'] = $deadline_from;
+}
+if ( '' !== $deadline_to ) {
+	$query_args['deadline_to'] = $deadline_to;
+}
 
 /**
  * Build URL /tuyen-dung/ (hoặc /tuyen-dung/page/{n}/) kèm filter hiện tại
  * - dùng lại cho canonical/pagination link để giữ đúng state khi chuyển
  * trang, không đổi tên field so với API.
  */
-$build_url = static function ( int $target_page ) use ( $search, $recruitment_type ): string {
+$build_url = static function ( int $target_page ) use ( $search, $recruitment_type, $deadline_from, $deadline_to ): string {
 	$extra = array_filter(
 		array(
 			'search'           => $search,
 			'recruitment_type' => $recruitment_type,
+			'deadline_from'    => $deadline_from,
+			'deadline_to'      => $deadline_to,
 		)
 	);
 
@@ -64,13 +86,14 @@ $service = new CVC_Recruitment_Service();
 $result  = $service->list( $query_args );
 
 $ok         = (bool) $result['ok'];
+$status     = (int) $result['status'];
 $pagination = $ok ? ( $result['data']['data'] ?? array() ) : array();
 $items      = is_array( $pagination ) ? ( $pagination['data'] ?? array() ) : array();
 $currentPg  = (int) ( $pagination['current_page'] ?? $paged );
 $lastPg     = (int) ( $pagination['last_page'] ?? 1 );
 
 if ( ! $ok ) {
-	status_header( 503 );
+	status_header( 422 === $status ? 422 : ( 429 === $status ? 429 : 503 ) );
 }
 
 cvc_seo_set_title( 'Tuyển dụng' );
@@ -131,6 +154,24 @@ get_header();
 				<?php endforeach; ?>
 			</select>
 		</div>
+		<div class="cvc-filter-form__field">
+			<label for="cvc-recruitment-deadline-from">Hạn nộp từ</label>
+			<input
+				type="date"
+				id="cvc-recruitment-deadline-from"
+				name="deadline_from"
+				value="<?php echo esc_attr( $deadline_from ); ?>"
+			>
+		</div>
+		<div class="cvc-filter-form__field">
+			<label for="cvc-recruitment-deadline-to">đến</label>
+			<input
+				type="date"
+				id="cvc-recruitment-deadline-to"
+				name="deadline_to"
+				value="<?php echo esc_attr( $deadline_to ); ?>"
+			>
+		</div>
 		<button type="submit" class="cvc-btn cvc-btn--primary">Lọc</button>
 		<?php if ( $has_filter ) : ?>
 			<a class="cvc-btn cvc-btn--text" href="<?php echo esc_url( cvc_recruitments_url() ); ?>">Xóa lọc</a>
@@ -138,9 +179,26 @@ get_header();
 	</form>
 
 	<?php if ( ! $ok ) : ?>
-		<?php cvc_render_error_state(); ?>
+
+		<?php
+		if ( 422 === $status ) {
+			cvc_render_error_state( 'Bộ lọc chưa hợp lệ (kiểm tra lại khoảng ngày hạn nộp). Vui lòng thử lại.' );
+		} elseif ( 429 === $status ) {
+			cvc_render_error_state( 'Bạn đang gửi quá nhiều yêu cầu. Vui lòng thử lại sau.' );
+		} else {
+			cvc_render_error_state();
+		}
+
+		if ( $has_filter ) :
+			?>
+			<p><a class="cvc-btn cvc-btn--secondary" href="<?php echo esc_url( cvc_recruitments_url() ); ?>">Xóa lọc và thử lại</a></p>
+		<?php endif; ?>
+
 	<?php elseif ( empty( $items ) ) : ?>
 		<?php cvc_render_empty_state( $has_filter ? 'Không có tin tuyển dụng phù hợp với bộ lọc hiện tại.' : 'Chưa có tin tuyển dụng nào.' ); ?>
+		<?php if ( $has_filter ) : ?>
+			<p><a class="cvc-btn cvc-btn--secondary" href="<?php echo esc_url( cvc_recruitments_url() ); ?>">Xóa lọc</a></p>
+		<?php endif; ?>
 	<?php else : ?>
 		<div class="cvc-card-grid">
 			<?php foreach ( $items as $item ) : ?>

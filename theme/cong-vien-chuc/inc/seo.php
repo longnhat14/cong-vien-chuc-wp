@@ -17,6 +17,8 @@ $GLOBALS['cvc_seo'] = array(
 	'noindex'     => false,
 	'prev_url'    => null,
 	'next_url'    => null,
+	'og'          => array(),
+	'json_ld'     => array(),
 );
 
 function cvc_seo_set_title( string $title ): void {
@@ -38,6 +40,31 @@ function cvc_seo_set_noindex( bool $noindex = true ): void {
 function cvc_seo_set_pagination_links( ?string $prev_url, ?string $next_url ): void {
 	$GLOBALS['cvc_seo']['prev_url'] = $prev_url;
 	$GLOBALS['cvc_seo']['next_url'] = $next_url;
+}
+
+/**
+ * Override Open Graph riêng cho trang hiện tại. Không truyền key nào thì
+ * dùng fallback từ title/description/canonical đã set (xem
+ * cvc_seo_output_meta()) - phần lớn trang domain không cần gọi hàm này,
+ * chỉ trang cần og:type khác 'website' hoặc og:image mới cần.
+ *
+ * @param array{title?: string, description?: string, url?: string, type?: string, image?: string} $og
+ */
+function cvc_seo_set_og( array $og ): void {
+	$GLOBALS['cvc_seo']['og'] = array_merge( $GLOBALS['cvc_seo']['og'], $og );
+}
+
+/**
+ * Thêm 1 khối JSON-LD vào trang hiện tại (có thể gọi nhiều lần - mỗi lần
+ * xuất ra 1 <script> riêng). Không có cơ chế de-dup theo thiết kế - caller
+ * tự đảm bảo không gọi trùng cùng 1 schema (xem cvc_seo_add_breadcrumb_jsonld
+ * và cvc_build_recruitment_job_posting_jsonld() làm ví dụ, mỗi cái chỉ nên
+ * được gọi đúng 1 lần cho 1 lần render trang).
+ *
+ * @param array<string, mixed> $schema
+ */
+function cvc_seo_add_json_ld( array $schema ): void {
+	$GLOBALS['cvc_seo']['json_ld'][] = $schema;
 }
 
 /**
@@ -96,5 +123,60 @@ function cvc_seo_output_meta(): void {
 
 	if ( ! empty( $seo['noindex'] ) ) {
 		echo '<meta name="robots" content="noindex, follow">' . "\n";
+	}
+
+	/*
+	 * Open Graph - fallback về title/description/canonical đã set cho
+	 * trang, không cần domain nào gọi lại các field trùng lặp. Áp dụng
+	 * cho MỌI trang domain hiện có (không riêng Recruitment) vì đều đi
+	 * qua cùng cvc_seo_set_title()/cvc_seo_set_description() - đúng tinh
+	 * thần "tái sử dụng mechanism hiện tại", không phá OG domain nào vì
+	 * trước đó chưa domain nào có OG.
+	 */
+	$og_title       = $seo['og']['title'] ?? $seo['title'];
+	$og_description = $seo['og']['description'] ?? $seo['description'];
+	$og_url         = $seo['og']['url'] ?? $seo['canonical'];
+	$og_type        = $seo['og']['type'] ?? 'website';
+	$og_image       = $seo['og']['image'] ?? null;
+
+	if ( ! empty( $og_title ) ) {
+		printf( '<meta property="og:title" content="%s">' . "\n", esc_attr( $og_title ) );
+	}
+
+	if ( ! empty( $og_description ) ) {
+		printf( '<meta property="og:description" content="%s">' . "\n", esc_attr( $og_description ) );
+	}
+
+	if ( ! empty( $og_url ) ) {
+		printf( '<meta property="og:url" content="%s">' . "\n", esc_url( $og_url ) );
+	}
+
+	printf( '<meta property="og:type" content="%s">' . "\n", esc_attr( $og_type ) );
+
+	if ( ! empty( $og_image ) ) {
+		printf( '<meta property="og:image" content="%s">' . "\n", esc_url( $og_image ) );
+	}
+
+	/*
+	 * JSON-LD - mỗi phần tử là 1 schema độc lập, xuất thành 1 <script>
+	 * riêng. wp_json_encode() escape đúng UTF-8/tiếng Việt; tự thay thế
+	 * "</script" phòng trường hợp dữ liệu người dùng (title/summary...)
+	 * chứa chuỗi này, tránh phá vỡ trang.
+	 */
+	foreach ( $seo['json_ld'] as $schema ) {
+		if ( empty( $schema ) ) {
+			continue;
+		}
+
+		$json = wp_json_encode( $schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES );
+
+		if ( false === $json ) {
+			continue;
+		}
+
+		printf(
+			'<script type="application/ld+json">%s</script>' . "\n",
+			str_replace( '</script', '<\/script', $json )
+		);
 	}
 }

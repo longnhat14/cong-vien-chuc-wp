@@ -700,6 +700,16 @@ p {
     padding-left: 1.25rem;
 }
 
+.cvc-related-list--inline {
+    padding-left: 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.75rem;
+    font-size: 0.9rem;
+    color: #4b5563;
+}
+
 /* --- Recruitment position card --- */
 .cvc-position-card {
     margin-bottom: 1rem;
@@ -737,6 +747,11 @@ p {
 }
 
 .cvc-state--locked {
+    background: #fef9c3;
+    color: #713f12;
+}
+
+.cvc-state--expired {
     background: #fef9c3;
     color: #713f12;
 }

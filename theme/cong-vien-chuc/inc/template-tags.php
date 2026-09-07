@@ -316,6 +316,33 @@ function cvc_render_exam_card( array $exam, int $heading_level = 2 ): void {
 }
 
 /**
+ * Danh sách môn thi (exam_subjects) lồng trong 1 Position hoặc 1 Exam của
+ * Recruitment detail - dùng chung cho cả 2 chỗ vì shape giống nhau
+ * (id/code/name/slug/subject_type + pivot weight/sort_order). Chỉ render
+ * khi API thực sự trả mảng này (Phase 3.6, Phần 10).
+ *
+ * @param array<int, array<string, mixed>> $exam_subjects
+ */
+function cvc_render_exam_subject_list( array $exam_subjects ): void {
+	if ( empty( $exam_subjects ) ) {
+		return;
+	}
+	?>
+	<ul class="cvc-related-list cvc-related-list--inline">
+		<?php foreach ( $exam_subjects as $subject ) : ?>
+			<?php if ( empty( $subject['name'] ) ) : continue; endif; ?>
+			<li>
+				<?php echo esc_html( $subject['name'] ); ?>
+				<?php if ( ! empty( $subject['is_required'] ) ) : ?>
+					<span class="cvc-card__meta">(bắt buộc)</span>
+				<?php endif; ?>
+			</li>
+		<?php endforeach; ?>
+	</ul>
+	<?php
+}
+
+/**
  * Card hiển thị 1 văn bản pháp luật. Chỉ hiển thị field thực sự có trong
  * response của GET /api/legal-documents (file_path/file_hash đã bị
  * backend ẩn - không cố lấy thêm field nào khác ngoài response).
@@ -365,6 +392,18 @@ function cvc_render_notfound_state( string $message ): void {
 }
 
 /**
+ * Thông báo "đã hết hạn" - dùng khi API trả status=expired. KHÔNG bao giờ
+ * tự tính expired từ application_deadline ở phía WordPress - status luôn
+ * lấy nguyên từ response (xem Recruitment Detail, Phase 3.6).
+ */
+function cvc_render_expired_state( string $message ): void {
+	printf(
+		'<div class="cvc-state cvc-state--expired">%s</div>',
+		esc_html( $message )
+	);
+}
+
+/**
  * Breadcrumb đơn giản, semantic HTML. Item cuối luôn là trang hiện tại
  * (không link) dù có truyền url hay không.
  *
@@ -394,6 +433,129 @@ function cvc_render_breadcrumbs( array $items ): void {
 		</ol>
 	</nav>
 	<?php
+}
+
+/**
+ * BreadcrumbList JSON-LD từ ĐÚNG cùng mảng $items đã dùng cho
+ * cvc_render_breadcrumbs() - tránh duy trì 2 nguồn dữ liệu breadcrumb
+ * khác nhau (Phase 3.7, Phần 16). Item cuối (trang hiện tại) không có
+ * "item" URL - đúng theo cách cvc_render_breadcrumbs() xử lý và được
+ * Google's BreadcrumbList spec cho phép.
+ *
+ * @param array<int, array{label: string, url?: string}> $items
+ */
+function cvc_seo_add_breadcrumb_jsonld( array $items ): void {
+	if ( empty( $items ) ) {
+		return;
+	}
+
+	$list_items = array();
+
+	foreach ( array_values( $items ) as $index => $item ) {
+		$entry = array(
+			'@type'    => 'ListItem',
+			'position' => $index + 1,
+			'name'     => (string) ( $item['label'] ?? '' ),
+		);
+
+		if ( ! empty( $item['url'] ) ) {
+			$entry['item'] = $item['url'];
+		}
+
+		$list_items[] = $entry;
+	}
+
+	cvc_seo_add_json_ld(
+		array(
+			'@context'        => 'https://schema.org',
+			'@type'           => 'BreadcrumbList',
+			'itemListElement' => $list_items,
+		)
+	);
+}
+
+/**
+ * JobPosting JSON-LD cho 1 recruitment - CHỈ dùng field thực sự có trong
+ * response của GET /api/recruitments/{slug} (Phase 3.7, Phần 15).
+ *
+ * Cố ý KHÔNG map employmentType: Position.employment_type là free text ở
+ * backend (không phải enum chuẩn schema.org FULL_TIME/PART_TIME/...),
+ * map sai sẽ là suy đoán - deferred, xem FINAL REPORT.
+ *
+ * validThrough dùng application_deadline kể cả khi recruitment đã hết
+ * hạn (status=expired) - đây là semantics ĐÚNG của schema.org (báo hiệu
+ * tin đã hết hạn cho search engine), không phải lỗi cần che giấu.
+ *
+ * @param array<string, mixed> $recruitment Response data của show().
+ * @return array<string, mixed>|null Null nếu thiếu dữ liệu tối thiểu bắt buộc.
+ */
+function cvc_build_recruitment_job_posting_jsonld( array $recruitment ): ?array {
+	$agency = is_array( $recruitment['agency'] ?? null ) ? $recruitment['agency'] : null;
+
+	if ( empty( $recruitment['title'] ) || ! $agency || empty( $agency['name'] ) ) {
+		return null;
+	}
+
+	$dates     = is_array( $recruitment['dates'] ?? null ) ? $recruitment['dates'] : array();
+	$province  = is_array( $recruitment['province'] ?? null ) ? $recruitment['province'] : null;
+	$adminUnit = is_array( $recruitment['admin_unit'] ?? null ) ? $recruitment['admin_unit'] : null;
+
+	$schema = array(
+		'@context'           => 'https://schema.org',
+		'@type'              => 'JobPosting',
+		'title'              => (string) $recruitment['title'],
+		// Fallback description = title khi summary rỗng: không fake nội
+		// dung, chỉ tái dùng chính title đã có (Phần 14/15).
+		'description'        => ! empty( $recruitment['summary'] )
+			? (string) $recruitment['summary']
+			: (string) $recruitment['title'],
+		'hiringOrganization' => array(
+			'@type' => 'Organization',
+			'name'  => (string) $agency['name'],
+		),
+	);
+
+	if ( ! empty( $agency['website'] ) ) {
+		$schema['hiringOrganization']['sameAs'] = (string) $agency['website'];
+	}
+
+	if ( ! empty( $recruitment['code'] ) ) {
+		$schema['identifier'] = array(
+			'@type' => 'PropertyValue',
+			'name'  => (string) $agency['name'],
+			'value' => (string) $recruitment['code'],
+		);
+	}
+
+	if ( ! empty( $dates['announcement_date'] ) ) {
+		$schema['datePosted'] = (string) $dates['announcement_date'];
+	}
+
+	if ( ! empty( $dates['application_deadline'] ) ) {
+		$schema['validThrough'] = (string) $dates['application_deadline'];
+	}
+
+	if ( ( $province && ! empty( $province['name'] ) ) || ( $adminUnit && ! empty( $adminUnit['name'] ) ) ) {
+		$address = array(
+			'@type'          => 'PostalAddress',
+			'addressCountry' => 'VN',
+		);
+
+		if ( $adminUnit && ! empty( $adminUnit['name'] ) ) {
+			$address['addressLocality'] = (string) $adminUnit['name'];
+		}
+
+		if ( $province && ! empty( $province['name'] ) ) {
+			$address['addressRegion'] = (string) $province['name'];
+		}
+
+		$schema['jobLocation'] = array(
+			'@type'   => 'Place',
+			'address' => $address,
+		);
+	}
+
+	return $schema;
 }
 
 /**
