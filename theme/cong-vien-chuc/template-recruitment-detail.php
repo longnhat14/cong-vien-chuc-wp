@@ -247,6 +247,11 @@ get_header();
 							<?php if ( ! empty( $position['exam_subjects'] ) && is_array( $position['exam_subjects'] ) ) : ?>
 								<p class="cvc-card__meta">Môn thi:</p>
 								<?php cvc_render_exam_subject_list( $position['exam_subjects'] ); ?>
+								<?php foreach ( $position['exam_subjects'] as $subject ) : ?>
+									<?php if ( ! empty( $subject['topics'] ) && is_array( $subject['topics'] ) ) : ?>
+										<?php cvc_render_related_link_list( $subject['topics'], 'cvc_topic_url', 'name' ); ?>
+									<?php endif; ?>
+								<?php endforeach; ?>
 							<?php endif; ?>
 							<?php if ( ! empty( $position['courses'] ) && is_array( $position['courses'] ) ) : ?>
 								<p class="cvc-card__meta">
@@ -276,6 +281,11 @@ get_header();
 							<?php if ( ! empty( $exam['exam_subjects'] ) && is_array( $exam['exam_subjects'] ) ) : ?>
 								<p class="cvc-card__meta">Môn thi:</p>
 								<?php cvc_render_exam_subject_list( $exam['exam_subjects'] ); ?>
+								<?php foreach ( $exam['exam_subjects'] as $subject ) : ?>
+									<?php if ( ! empty( $subject['topics'] ) && is_array( $subject['topics'] ) ) : ?>
+										<?php cvc_render_related_link_list( $subject['topics'], 'cvc_topic_url', 'name' ); ?>
+									<?php endif; ?>
+								<?php endforeach; ?>
 							<?php endif; ?>
 						</div>
 					</article>

@@ -119,10 +119,39 @@ get_header();
 								<?php if ( isset( $subject['question_count'] ) ) : ?>
 									<p class="cvc-card__meta"><?php echo esc_html( sprintf( '%d câu hỏi', (int) $subject['question_count'] ) ); ?></p>
 								<?php endif; ?>
+								<?php if ( ! empty( $subject['topics'] ) && is_array( $subject['topics'] ) ) : ?>
+									<p class="cvc-card__meta">Chủ đề:</p>
+									<?php cvc_render_related_link_list( $subject['topics'], 'cvc_topic_url', 'name' ); ?>
+								<?php endif; ?>
 							</div>
 						</article>
 					<?php endforeach; ?>
 				</div>
+			</section>
+		<?php endif; ?>
+
+		<?php
+		/*
+		 * Cross-domain linking (Phase 4B) - GET /api/exams/{slug} nay đã
+		 * eager-load recruitments/courses (xem ExamController::show()).
+		 * Chỉ render title/slug - không in nguyên object dù API có thể
+		 * trả thêm field khác (VD source_url trong recruitments).
+		 */
+		$related_exam_recruitments = is_array( $exam['recruitments'] ?? null ) ? $exam['recruitments'] : array();
+		$related_exam_courses      = is_array( $exam['courses'] ?? null ) ? $exam['courses'] : array();
+		?>
+
+		<?php if ( ! empty( $related_exam_recruitments ) ) : ?>
+			<section class="cvc-related-section">
+				<h2>Tuyển dụng liên quan</h2>
+				<?php cvc_render_related_link_list( $related_exam_recruitments, 'cvc_recruitment_url', 'title' ); ?>
+			</section>
+		<?php endif; ?>
+
+		<?php if ( ! empty( $related_exam_courses ) ) : ?>
+			<section class="cvc-related-section">
+				<h2>Khóa học liên quan</h2>
+				<?php cvc_render_related_link_list( $related_exam_courses, 'cvc_course_url', 'title' ); ?>
 			</section>
 		<?php endif; ?>
 
