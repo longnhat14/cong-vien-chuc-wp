@@ -35,6 +35,7 @@
                     )
                 );
                 ?>
+                <?php cvc_render_header_auth_area(); ?>
             </nav>
         </div>
     </header>

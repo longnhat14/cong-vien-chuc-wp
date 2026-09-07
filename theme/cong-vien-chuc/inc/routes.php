@@ -11,7 +11,28 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Tăng số này khi thêm/sửa rewrite rule để buộc flush lại đúng 1 lần.
-const CVC_REWRITE_VERSION = '4';
+const CVC_REWRITE_VERSION = '5';
+
+/**
+ * Section hợp lệ của /tai-khoan/{section}/ (Phase 10) - map slug tiếng
+ * Việt trên URL sang query var nội bộ, dùng chung cho rewrite rule +
+ * cvc_account_url() + template-account.php.
+ *
+ * @return array<string, string>
+ */
+function cvc_account_sections(): array {
+	return array(
+		'tong-quan'         => 'overview',
+		'ho-so'             => 'profile',
+		'muc-tieu'          => 'goals',
+		'lo-trinh'          => 'learning-path',
+		'dau-trang'         => 'bookmarks',
+		'lich-su-thi'       => 'exam-history',
+		'goi-y'             => 'recommendations',
+		'viec-lam-phu-hop'  => 'recruitment-matches',
+		'thong-bao'         => 'notifications',
+	);
+}
 
 add_action( 'init', 'cvc_register_rewrite_rules' );
 
@@ -128,6 +149,45 @@ function cvc_register_rewrite_rules(): void {
 		'index.php?cvc_page=search',
 		'top'
 	);
+
+	/*
+	 * Auth + Dashboard (Phase 10) - user-scoped, không có phần nào công
+	 * khai. Section slug được whitelist qua cvc_account_sections() - slug
+	 * lạ sẽ 404 ở chính template-account.php (không thêm rule riêng cho
+	 * từng section, tránh phình rewrite).
+	 */
+	add_rewrite_rule(
+		'^dang-nhap/?$',
+		'index.php?cvc_page=login',
+		'top'
+	);
+	add_rewrite_rule(
+		'^dang-ky/?$',
+		'index.php?cvc_page=register',
+		'top'
+	);
+	add_rewrite_rule(
+		'^tai-khoan/([^/]+)/?$',
+		'index.php?cvc_page=account&cvc_account_section=$matches[1]',
+		'top'
+	);
+	add_rewrite_rule(
+		'^tai-khoan/?$',
+		'index.php?cvc_page=account&cvc_account_section=tong-quan',
+		'top'
+	);
+
+	/*
+	 * Làm bài thi (Phase 10) - attempt_id luôn thuộc CHÍNH user đang đăng
+	 * nhập, kiểm tra ownership thật lại trong template qua chính API
+	 * (403 từ backend nếu không phải của mình - Phần XV Recruitment/Exam
+	 * security).
+	 */
+	add_rewrite_rule(
+		'^lam-bai/([0-9]+)/?$',
+		'index.php?cvc_page=exam-attempt&cvc_attempt_id=$matches[1]',
+		'top'
+	);
 }
 
 add_filter( 'query_vars', 'cvc_register_query_vars' );
@@ -146,6 +206,8 @@ function cvc_register_query_vars( array $vars ): array {
 	$vars[] = 'cvc_exam_slug';
 	$vars[] = 'cvc_legal_document_slug';
 	$vars[] = 'cvc_paged';
+	$vars[] = 'cvc_account_section';
+	$vars[] = 'cvc_attempt_id';
 
 	return $vars;
 }
@@ -222,6 +284,10 @@ function cvc_template_include( string $template ): string {
 		'legal-documents'       => 'template-legal-documents.php',
 		'legal-document-detail' => 'template-legal-document-detail.php',
 		'search'                => 'template-search.php',
+		'login'                 => 'template-login.php',
+		'register'              => 'template-register.php',
+		'account'               => 'template-account.php',
+		'exam-attempt'          => 'template-exam-attempt.php',
 	);
 
 	if ( isset( $map[ $page ] ) ) {
@@ -350,4 +416,20 @@ function cvc_search_url( string $q = '', string $type = 'all', int $page = 1 ): 
 	$url = home_url( '/tim-kiem/' );
 
 	return empty( $args ) ? $url : add_query_arg( $args, $url );
+}
+
+/**
+ * URL 1 section trong dashboard /tai-khoan/{slug}/ - $section là key nội bộ
+ * (vd 'goals'), tự map ngược ra slug tiếng Việt qua cvc_account_sections().
+ * Fallback về 'tong-quan' nếu key không tồn tại (không bao giờ tạo link
+ * hỏng dù truyền nhầm key).
+ */
+function cvc_account_url( string $section = 'overview' ): string {
+	$slug = array_search( $section, cvc_account_sections(), true );
+
+	return home_url( '/tai-khoan/' . ( false !== $slug ? $slug : 'tong-quan' ) . '/' );
+}
+
+function cvc_exam_attempt_url( int $attemptId ): string {
+	return home_url( '/lam-bai/' . $attemptId . '/' );
 }

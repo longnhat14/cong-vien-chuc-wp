@@ -90,7 +90,7 @@ get_header();
 		<p><a class="cvc-btn cvc-btn--secondary" href="<?php echo esc_url( cvc_knowledge_url() ); ?>">&larr; Xem tất cả kiến thức</a></p>
 	<?php else : ?>
 		<?php $legalDocument = is_array( $item['legal_document'] ?? null ) ? $item['legal_document'] : null; ?>
-		<header class="cvc-page-header">
+		<header class="cvc-page-header" data-cvc-track="knowledge_viewed" data-cvc-target-type="knowledge" data-cvc-target-id="<?php echo esc_attr( (string) ( $item['id'] ?? 0 ) ); ?>">
 			<?php if ( $topic && ! empty( $topic['name'] ) ) : ?>
 				<span class="cvc-badge cvc-badge--subject"><?php echo esc_html( $topic['name'] ); ?></span>
 			<?php endif; ?>
@@ -99,6 +99,10 @@ get_header();
 				<p class="cvc-page-header__lead"><?php echo esc_html( $item['summary'] ); ?></p>
 			<?php endif; ?>
 		</header>
+
+		<div class="cvc-detail-actions">
+			<?php cvc_render_bookmark_button( 'knowledge_item', (int) ( $item['id'] ?? 0 ) ); ?>
+		</div>
 
 		<?php if ( ! empty( $item['content'] ) ) : ?>
 			<div class="cvc-prose"><?php echo nl2br( esc_html( $item['content'] ) ); ?></div>

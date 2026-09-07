@@ -31,9 +31,64 @@ function cvc_render_error_state( string $message = 'Không thể tải dữ li�
 }
 
 /**
+ * Flash notice (Phase 10) - đọc cookie cvc_notice đã set bởi
+ * cvc_redirect_with_notice() (Post/Redirect/Get). In ra 1 lần rồi thôi -
+ * cookie đã bị xoá ngay trong cvc_consume_notice().
+ */
+function cvc_render_notice(): void {
+	$notice = cvc_consume_notice();
+
+	if ( null === $notice ) {
+		return;
+	}
+
+	printf(
+		'<div class="cvc-notice cvc-notice--%s" role="status">%s</div>',
+		esc_attr( 'success' === $notice['type'] ? 'success' : 'error' ),
+		esc_html( $notice['message'] )
+	);
+}
+
+/**
  * State cho resource không tồn tại (course/topic/lesson slug hoặc id sai).
  * Khác với empty state (danh sách rỗng) và error state (lỗi tạm thời).
  */
+
+/**
+ * Vùng đăng nhập/tài khoản trên header (Phase 10, Phần VIII/XIII) - đã
+ * đăng nhập thì hiện link Tài khoản + số thông báo chưa đọc (1 API call
+ * GET /api/notifications/unread-count MỖI page load khi đã đăng nhập -
+ * chấp nhận được vì đây chính là yêu cầu "header phải phản ánh trạng thái
+ * đăng nhập + notification indicator", không phải call thừa); chưa đăng
+ * nhập thì hiện Đăng nhập/Đăng ký.
+ */
+function cvc_render_header_auth_area(): void {
+	if ( ! cvc_is_logged_in() ) {
+		printf(
+			'<div class="site-header__auth"><a href="%s">%s</a><a href="%s" class="cvc-btn cvc-btn--small cvc-btn--primary">%s</a></div>',
+			esc_url( cvc_login_url() ),
+			esc_html__( 'Đăng nhập', 'cong-vien-chuc' ),
+			esc_url( cvc_register_url() ),
+			esc_html__( 'Đăng ký', 'cong-vien-chuc' )
+		);
+		return;
+	}
+
+	$token         = cvc_auth_token();
+	$unread_result = null !== $token ? ( new CVC_Notification_Service() )->unreadCount( $token ) : array( 'ok' => false );
+	$unread        = ( $unread_result['ok'] ?? false ) ? (int) ( $unread_result['data']['data']['unread_count'] ?? 0 ) : 0;
+	?>
+	<div class="site-header__auth">
+		<a href="<?php echo esc_url( cvc_account_url() ); ?>" class="site-header__account-link">
+			<?php esc_html_e( 'Tài khoản', 'cong-vien-chuc' ); ?>
+			<?php if ( $unread > 0 ) : ?>
+				<span class="cvc-notification-badge"><?php echo esc_html( (string) $unread ); ?></span>
+			<?php endif; ?>
+		</a>
+		<a href="<?php echo esc_url( cvc_logout_url() ); ?>"><?php esc_html_e( 'Đăng xuất', 'cong-vien-chuc' ); ?></a>
+	</div>
+	<?php
+}
 
 /**
  * Section chính đang active dựa trên route hiện tại - dùng cho nav
@@ -853,6 +908,95 @@ function cvc_render_topic_card( array $topic, int $heading_level = 2 ): void {
 			</p>
 		</div>
 	</article>
+	<?php
+}
+
+/**
+ * Nút "Lưu vào đánh dấu" (Phase 10, Phần VII/XII) - chỉ hiện khi đã đăng
+ * nhập (khách bấm sẽ luôn 401 nếu cố tình gọi thẳng action, nên ẩn hẳn CTA
+ * thay vì hiện rồi báo lỗi). POST /api/bookmarks là firstOrCreate() ở
+ * backend (idempotent) - bấm nhiều lần không tạo trùng, nên không cần biết
+ * trước trạng thái đã bookmark hay chưa (API list/detail hiện KHÔNG trả
+ * is_bookmarked - không tự suy đoán state không có thật). Bỏ/gỡ bookmark
+ * luôn thực hiện trong /tai-khoan/dau-trang/.
+ *
+ * @param string $type Một trong CVC_Bookmark_Service::VALID_TYPES.
+ */
+function cvc_render_bookmark_button( string $type, int $id ): void {
+	if ( ! cvc_is_logged_in() || 0 === $id ) {
+		return;
+	}
+
+	$redirect_to = (string) add_query_arg( null, null );
+	?>
+	<form class="cvc-inline-action" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+		<?php wp_nonce_field( 'cvc_bookmark_add' ); ?>
+		<input type="hidden" name="action" value="cvc_bookmark_add">
+		<input type="hidden" name="type" value="<?php echo esc_attr( $type ); ?>">
+		<input type="hidden" name="id" value="<?php echo esc_attr( (string) $id ); ?>">
+		<input type="hidden" name="redirect_to" value="<?php echo esc_attr( $redirect_to ); ?>">
+		<button type="submit" class="cvc-btn cvc-btn--secondary cvc-btn--icon">
+			<span aria-hidden="true">&#9733;</span> Lưu vào đánh dấu
+		</button>
+	</form>
+	<?php
+}
+
+/**
+ * Nút "Đặt làm mục tiêu" (Phase 10, Phần IX/X) - tạo nhanh 1 Goal gắn với
+ * ĐÚNG entity đang xem (id lấy từ dữ liệu thật của trang, không bắt gõ
+ * tay). Chỉ hiện khi đã đăng nhập. `$entity_fields` chỉ được chứa key nằm
+ * trong whitelist của cvc_handle_goal_save() (province_id/agency_id/
+ * position_id/exam_id/recruitment_id).
+ *
+ * @param array<string, int> $entity_fields
+ */
+function cvc_render_goal_quick_action( string $title, array $entity_fields ): void {
+	if ( ! cvc_is_logged_in() ) {
+		return;
+	}
+	?>
+	<form class="cvc-inline-action" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+		<?php wp_nonce_field( 'cvc_goal_save' ); ?>
+		<input type="hidden" name="action" value="cvc_goal_save">
+		<input type="hidden" name="title" value="<?php echo esc_attr( $title ); ?>">
+		<?php foreach ( $entity_fields as $field => $value ) : ?>
+			<input type="hidden" name="<?php echo esc_attr( $field ); ?>" value="<?php echo esc_attr( (string) $value ); ?>">
+		<?php endforeach; ?>
+		<button type="submit" class="cvc-btn cvc-btn--secondary cvc-btn--icon">
+			<span aria-hidden="true">&#127919;</span> Đặt làm mục tiêu
+		</button>
+	</form>
+	<?php
+}
+
+/**
+ * CTA bắt đầu làm bài thi (Phase 10, Phần XIII) - authenticated thì POST
+ * thẳng tới cvc_exam_start (mode mặc định "mock" - đủ cho luồng chính,
+ * không thêm bộ chọn hình thức thi vì backend/API không yêu cầu UI phải
+ * chọn), chưa đăng nhập thì đưa sang đăng nhập kèm intended destination
+ * (Phần VIII - quay lại đúng trang thi sau khi đăng nhập).
+ */
+function cvc_render_exam_start_cta( int $examId ): void {
+	if ( 0 === $examId ) {
+		return;
+	}
+
+	if ( ! cvc_is_logged_in() ) {
+		$current = home_url( add_query_arg( null, null ) );
+		?>
+		<a class="cvc-btn cvc-btn--primary" href="<?php echo esc_url( cvc_login_url( $current ) ); ?>">Đăng nhập để làm bài</a>
+		<?php
+		return;
+	}
+	?>
+	<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+		<?php wp_nonce_field( 'cvc_exam_start' ); ?>
+		<input type="hidden" name="action" value="cvc_exam_start">
+		<input type="hidden" name="exam_id" value="<?php echo esc_attr( (string) $examId ); ?>">
+		<input type="hidden" name="mode" value="mock">
+		<button type="submit" class="cvc-btn cvc-btn--primary">Bắt đầu làm bài</button>
+	</form>
 	<?php
 }
 

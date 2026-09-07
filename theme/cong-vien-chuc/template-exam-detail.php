@@ -104,6 +104,12 @@ get_header();
 			</p>
 		</header>
 
+		<div class="cvc-detail-actions">
+			<?php cvc_render_exam_start_cta( (int) ( $exam['id'] ?? 0 ) ); ?>
+			<?php cvc_render_bookmark_button( 'exam', (int) ( $exam['id'] ?? 0 ) ); ?>
+			<?php cvc_render_goal_quick_action( (string) $exam['title'], array( 'exam_id' => (int) ( $exam['id'] ?? 0 ) ) ); ?>
+		</div>
+
 		<?php if ( ! empty( $exam['description'] ) ) : ?>
 			<div class="cvc-prose"><?php echo nl2br( esc_html( $exam['description'] ) ); ?></div>
 		<?php endif; ?>

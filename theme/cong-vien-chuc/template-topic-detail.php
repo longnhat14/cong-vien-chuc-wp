@@ -77,12 +77,16 @@ get_header();
 		?>
 		<p><a class="cvc-btn cvc-btn--secondary" href="<?php echo esc_url( cvc_topics_url() ); ?>">&larr; Xem tất cả chủ đề</a></p>
 	<?php else : ?>
-		<header class="cvc-page-header">
+		<header class="cvc-page-header" data-cvc-track="topic_viewed" data-cvc-target-type="topic" data-cvc-target-id="<?php echo esc_attr( (string) ( $topic['id'] ?? 0 ) ); ?>">
 			<h1><?php echo esc_html( $topic['name'] ); ?></h1>
 			<?php if ( ! empty( $topic['exam_subject']['name'] ) ) : ?>
 				<p class="cvc-page-header__meta"><?php echo esc_html( $topic['exam_subject']['name'] ); ?></p>
 			<?php endif; ?>
 		</header>
+
+		<div class="cvc-detail-actions">
+			<?php cvc_render_bookmark_button( 'topic', (int) ( $topic['id'] ?? 0 ) ); ?>
+		</div>
 
 		<?php if ( ! empty( $topic['description'] ) ) : ?>
 			<div class="cvc-prose"><?php echo nl2br( esc_html( $topic['description'] ) ); ?></div>

@@ -1,8 +1,8 @@
 <?php
 /**
  * Base class cho mọi domain service (Course, Topic, Knowledge, ...).
- * Domain service KHÔNG gọi wp_remote_get() trực tiếp - luôn qua
- * CVC_Api_Client.
+ * Domain service KHÔNG gọi wp_remote_get()/wp_remote_post() trực tiếp -
+ * luôn qua CVC_Api_Client.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -25,12 +25,12 @@ abstract class CVC_Api_Service {
 	/**
 	 * @param array<string, mixed> $query
 	 */
-	public function list( array $query = array() ): array {
-		return $this->client->get( $this->endpoint(), $query );
+	public function list( array $query = array(), ?string $token = null ): array {
+		return $this->client->get( $this->endpoint(), $query, $token );
 	}
 
-	public function find( string $slug ): array {
-		return $this->client->get( $this->endpoint() . '/' . rawurlencode( $slug ) );
+	public function find( string $slug, ?string $token = null ): array {
+		return $this->client->get( $this->endpoint() . '/' . rawurlencode( $slug ), array(), $token );
 	}
 
 	/**

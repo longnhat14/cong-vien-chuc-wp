@@ -16,8 +16,20 @@ require_once __DIR__ . '/inc/services/class-cvc-recruitment-service.php';
 require_once __DIR__ . '/inc/services/class-cvc-exam-service.php';
 require_once __DIR__ . '/inc/services/class-cvc-legal-document-service.php';
 require_once __DIR__ . '/inc/services/class-cvc-search-service.php';
+require_once __DIR__ . '/inc/services/class-cvc-goal-service.php';
+require_once __DIR__ . '/inc/services/class-cvc-bookmark-service.php';
+require_once __DIR__ . '/inc/services/class-cvc-profile-service.php';
+require_once __DIR__ . '/inc/services/class-cvc-learning-path-service.php';
+require_once __DIR__ . '/inc/services/class-cvc-recommendation-service.php';
+require_once __DIR__ . '/inc/services/class-cvc-recruitment-match-service.php';
+require_once __DIR__ . '/inc/services/class-cvc-notification-service.php';
+require_once __DIR__ . '/inc/services/class-cvc-exam-attempt-service.php';
 require_once __DIR__ . '/inc/template-tags.php';
 require_once __DIR__ . '/inc/seo.php';
+require_once __DIR__ . '/inc/auth.php';
+require_once __DIR__ . '/inc/actions.php';
+require_once __DIR__ . '/inc/exam.php';
+require_once __DIR__ . '/inc/engagement.php';
 require_once __DIR__ . '/inc/routes.php';
 require_once __DIR__ . '/inc/dev-tools.php';
 
@@ -37,6 +49,24 @@ function cvc_enqueue_assets(): void {
 		array(),
 		wp_get_theme()->get( 'Version' ),
 		true
+	);
+
+	wp_enqueue_script(
+		'cvc-engagement',
+		get_theme_file_uri( '/assets/js/engagement.js' ),
+		array(),
+		wp_get_theme()->get( 'Version' ),
+		true
+	);
+
+	wp_localize_script(
+		'cvc-engagement',
+		'cvcEngagement',
+		array(
+			'ajaxUrl'    => admin_url( 'admin-ajax.php' ),
+			'nonce'      => wp_create_nonce( 'cvc_track_event' ),
+			'loggedIn'   => cvc_is_logged_in(),
+		)
 	);
 }
 

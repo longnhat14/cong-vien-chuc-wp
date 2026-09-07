@@ -121,7 +121,7 @@ get_header();
 		$exams     = is_array( $recruitment['exams'] ?? null ) ? $recruitment['exams'] : array();
 		$rCourses  = is_array( $recruitment['courses'] ?? null ) ? $recruitment['courses'] : array();
 		?>
-		<header class="cvc-page-header">
+		<header class="cvc-page-header" data-cvc-track="recruitment_viewed" data-cvc-target-type="recruitment" data-cvc-target-id="<?php echo esc_attr( (string) ( $recruitment['id'] ?? 0 ) ); ?>">
 			<?php if ( ! empty( $recruitment['recruitment_type'] ) ) : ?>
 				<span class="cvc-badge cvc-badge--subject"><?php echo esc_html( cvc_recruitment_type_label( $recruitment['recruitment_type'] ) ); ?></span>
 			<?php endif; ?>
@@ -145,6 +145,11 @@ get_header();
 				?>
 			</p>
 		</header>
+
+		<div class="cvc-detail-actions">
+			<?php cvc_render_bookmark_button( 'recruitment', (int) ( $recruitment['id'] ?? 0 ) ); ?>
+			<?php cvc_render_goal_quick_action( (string) $recruitment['title'], array( 'recruitment_id' => (int) ( $recruitment['id'] ?? 0 ) ) ); ?>
+		</div>
 
 		<?php
 		/*

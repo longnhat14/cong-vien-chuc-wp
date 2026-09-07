@@ -97,6 +97,10 @@ get_header();
 			</p>
 		</header>
 
+		<div class="cvc-detail-actions">
+			<?php cvc_render_bookmark_button( 'course', (int) ( $course['id'] ?? 0 ) ); ?>
+		</div>
+
 		<?php if ( ! empty( $course['description'] ) ) : ?>
 			<div class="cvc-prose"><?php echo nl2br( esc_html( $course['description'] ) ); ?></div>
 		<?php endif; ?>
