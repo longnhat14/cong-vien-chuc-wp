@@ -32,40 +32,39 @@ if ( ! $is_found ) {
 
 cvc_seo_set_title( $is_found ? (string) $topic['name'] : 'Không tìm thấy chủ đề' );
 
+$breadcrumb_items = array(
+	array(
+		'label' => 'Trang chủ',
+		'url'   => home_url( '/' ),
+	),
+	array(
+		'label' => 'Chủ đề',
+		'url'   => cvc_topics_url(),
+	),
+);
+
+if ( $is_found && is_array( $topic['parent'] ?? null ) && ! empty( $topic['parent']['slug'] ) ) {
+	$breadcrumb_items[] = array(
+		'label' => (string) $topic['parent']['name'],
+		'url'   => cvc_topic_url( (string) $topic['parent']['slug'] ),
+	);
+}
+
+$breadcrumb_items[] = array( 'label' => $is_found ? (string) $topic['name'] : 'Không tìm thấy' );
+
 if ( $is_found ) {
 	if ( ! empty( $topic['description'] ) ) {
 		cvc_seo_set_description( (string) $topic['description'] );
 	}
 	cvc_seo_set_canonical( cvc_topic_url( $slug ) );
+	cvc_seo_add_breadcrumb_jsonld( $breadcrumb_items );
 }
 
 get_header();
 ?>
 
 <main id="main" class="container cvc-page">
-	<?php
-	$breadcrumb_items = array(
-		array(
-			'label' => 'Trang chủ',
-			'url'   => home_url( '/' ),
-		),
-		array(
-			'label' => 'Chủ đề',
-			'url'   => cvc_topics_url(),
-		),
-	);
-
-	if ( $is_found && is_array( $topic['parent'] ?? null ) && ! empty( $topic['parent']['slug'] ) ) {
-		$breadcrumb_items[] = array(
-			'label' => (string) $topic['parent']['name'],
-			'url'   => cvc_topic_url( (string) $topic['parent']['slug'] ),
-		);
-	}
-
-	$breadcrumb_items[] = array( 'label' => $is_found ? (string) $topic['name'] : 'Không tìm thấy' );
-
-	cvc_render_breadcrumbs( $breadcrumb_items );
-	?>
+	<?php cvc_render_breadcrumbs( $breadcrumb_items ); ?>
 
 	<?php if ( ! $is_found ) : ?>
 		<h1><?php echo esc_html( 404 === (int) $result['status'] ? 'Không tìm thấy chủ đề' : 'Đã có lỗi xảy ra' ); ?></h1>
@@ -106,11 +105,14 @@ get_header();
 		<?php if ( ! empty( $topic['knowledge_items'] ) && is_array( $topic['knowledge_items'] ) ) : ?>
 			<section class="cvc-related-section">
 				<h2>Kiến thức liên quan</h2>
-				<ul class="cvc-related-list">
-					<?php foreach ( $topic['knowledge_items'] as $item ) : ?>
-						<li><?php echo esc_html( $item['title'] ?? '' ); ?></li>
-					<?php endforeach; ?>
-				</ul>
+				<?php
+				/*
+				 * Trước Phase 4A chỉ hiển thị title dạng text, không có
+				 * link dù API đã trả slug - sửa thành link thật
+				 * (cross-domain linking, Phần 9).
+				 */
+				cvc_render_related_link_list( $topic['knowledge_items'], 'cvc_knowledge_item_url', 'title' );
+				?>
 			</section>
 		<?php endif; ?>
 	<?php endif; ?>

@@ -37,32 +37,37 @@ if ( ! $is_found ) {
 
 cvc_seo_set_title( $is_found ? (string) $document['title'] : 'Không tìm thấy văn bản pháp luật' );
 
+$breadcrumb_items = array(
+	array(
+		'label' => 'Trang chủ',
+		'url'   => home_url( '/' ),
+	),
+	array(
+		'label' => 'Văn bản pháp luật',
+		'url'   => cvc_legal_documents_url(),
+	),
+	array( 'label' => $is_found ? (string) $document['title'] : 'Không tìm thấy' ),
+);
+
 if ( $is_found ) {
 	if ( ! empty( $document['summary'] ) ) {
 		cvc_seo_set_description( (string) $document['summary'] );
 	}
 	cvc_seo_set_canonical( cvc_legal_document_url( $slug ) );
+	cvc_seo_set_og( array( 'type' => 'article' ) );
+	cvc_seo_add_breadcrumb_jsonld( $breadcrumb_items );
+
+	$legislation_schema = cvc_build_legal_document_jsonld( $document );
+	if ( null !== $legislation_schema ) {
+		cvc_seo_add_json_ld( $legislation_schema );
+	}
 }
 
 get_header();
 ?>
 
 <main id="main" class="container cvc-page">
-	<?php
-	cvc_render_breadcrumbs(
-		array(
-			array(
-				'label' => 'Trang chủ',
-				'url'   => home_url( '/' ),
-			),
-			array(
-				'label' => 'Văn bản pháp luật',
-				'url'   => cvc_legal_documents_url(),
-			),
-			array( 'label' => $is_found ? (string) $document['title'] : 'Không tìm thấy' ),
-		)
-	);
-	?>
+	<?php cvc_render_breadcrumbs( $breadcrumb_items ); ?>
 
 	<?php if ( ! $is_found ) : ?>
 		<h1><?php echo esc_html( 404 === (int) $result['status'] ? 'Không tìm thấy văn bản pháp luật' : 'Đã có lỗi xảy ra' ); ?></h1>

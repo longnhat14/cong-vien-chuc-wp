@@ -255,6 +255,7 @@ function cvc_render_knowledge_card( array $item, int $heading_level = 2 ): void 
 	$slug       = (string) ( $item['slug'] ?? '' );
 	$title      = (string) ( $item['title'] ?? '' );
 	$summary    = $item['summary'] ?? '';
+	$code       = $item['code'] ?? null;
 	$topicName  = $item['topic']['name'] ?? null;
 	$url        = cvc_knowledge_item_url( $slug );
 	$tag        = 'h' . max( 2, min( 4, $heading_level ) );
@@ -267,6 +268,9 @@ function cvc_render_knowledge_card( array $item, int $heading_level = 2 ): void 
 			<<?php echo $tag; ?> class="cvc-card__title">
 				<a href="<?php echo esc_url( $url ); ?>"><?php echo esc_html( $title ); ?></a>
 			</<?php echo $tag; ?>>
+			<?php if ( $code ) : ?>
+				<p class="cvc-card__meta">Mã: <?php echo esc_html( $code ); ?></p>
+			<?php endif; ?>
 			<?php if ( $summary ) : ?>
 				<p class="cvc-card__excerpt"><?php echo esc_html( $summary ); ?></p>
 			<?php endif; ?>
@@ -290,11 +294,17 @@ function cvc_render_exam_card( array $exam, int $heading_level = 2 ): void {
 	$description     = $exam['description'] ?? '';
 	$questionsCount  = $exam['questions_count'] ?? $exam['total_questions'] ?? null;
 	$durationMinutes = $exam['duration_minutes'] ?? null;
+	$subjectNames    = is_array( $exam['exam_subjects'] ?? null )
+		? array_filter( array_map( fn( $s ) => (string) ( $s['name'] ?? '' ), $exam['exam_subjects'] ) )
+		: array();
 	$url             = cvc_exam_url( $slug );
 	$tag             = 'h' . max( 2, min( 4, $heading_level ) );
 	?>
 	<article class="cvc-card">
 		<div class="cvc-card__body">
+			<?php if ( ! empty( $subjectNames ) ) : ?>
+				<span class="cvc-badge cvc-badge--subject"><?php echo esc_html( implode( ', ', $subjectNames ) ); ?></span>
+			<?php endif; ?>
 			<<?php echo $tag; ?> class="cvc-card__title">
 				<a href="<?php echo esc_url( $url ); ?>"><?php echo esc_html( $title ); ?></a>
 			</<?php echo $tag; ?>>
@@ -556,6 +566,168 @@ function cvc_build_recruitment_job_posting_jsonld( array $recruitment ): ?array 
 	}
 
 	return $schema;
+}
+
+/**
+ * Article JSON-LD cho 1 knowledge item - CHỈ dùng field thực sự có trong
+ * response của GET /api/knowledge-items/{slug} (Phase 4A, Phần 13).
+ * created_at/updated_at có sẵn trong response (KnowledgeItem không
+ * $hidden 2 field này ở model) - dùng làm datePublished/dateModified,
+ * không phải suy đoán.
+ *
+ * @param array<string, mixed> $item
+ * @return array<string, mixed>|null
+ */
+function cvc_build_knowledge_article_jsonld( array $item ): ?array {
+	if ( empty( $item['title'] ) ) {
+		return null;
+	}
+
+	$topic = is_array( $item['topic'] ?? null ) ? $item['topic'] : null;
+
+	$schema = array(
+		'@context'    => 'https://schema.org',
+		'@type'       => 'Article',
+		'headline'    => (string) $item['title'],
+		'description' => ! empty( $item['summary'] )
+			? (string) $item['summary']
+			: (string) $item['title'],
+		'publisher'   => array(
+			'@type' => 'Organization',
+			'name'  => get_bloginfo( 'name' ),
+			'url'   => home_url( '/' ),
+		),
+	);
+
+	if ( $topic && ! empty( $topic['name'] ) ) {
+		$schema['articleSection'] = (string) $topic['name'];
+	}
+
+	if ( ! empty( $item['created_at'] ) ) {
+		$schema['datePublished'] = (string) $item['created_at'];
+	}
+
+	if ( ! empty( $item['updated_at'] ) ) {
+		$schema['dateModified'] = (string) $item['updated_at'];
+	}
+
+	return $schema;
+}
+
+/**
+ * Legislation JSON-LD cho 1 văn bản pháp luật - CHỈ dùng field thực sự có
+ * trong response của GET /api/legal-documents/{slug} (Phase 4A, Phần 13).
+ *
+ * Dùng schema.org "Legislation" thay vì "Article" chung chung vì đây là
+ * mapping semantics chính xác hơn cho văn bản pháp luật (có
+ * legislationIdentifier/legislationType/legislationDate khớp đúng
+ * document_number/document_type/issued_date đã có).
+ *
+ * @param array<string, mixed> $document
+ * @return array<string, mixed>|null
+ */
+function cvc_build_legal_document_jsonld( array $document ): ?array {
+	if ( empty( $document['title'] ) ) {
+		return null;
+	}
+
+	$schema = array(
+		'@context'    => 'https://schema.org',
+		'@type'       => 'Legislation',
+		'name'        => (string) $document['title'],
+		'description' => ! empty( $document['summary'] )
+			? (string) $document['summary']
+			: (string) $document['title'],
+		// Nền tảng chỉ phục vụ văn bản pháp luật Việt Nam - đây là sự thật
+		// về phạm vi platform, không phải suy đoán theo từng bản ghi.
+		'jurisdiction' => 'Việt Nam',
+	);
+
+	if ( ! empty( $document['document_number'] ) ) {
+		$schema['legislationIdentifier'] = (string) $document['document_number'];
+	}
+
+	if ( ! empty( $document['document_type'] ) ) {
+		$schema['legislationType'] = (string) $document['document_type'];
+	}
+
+	if ( ! empty( $document['issued_date'] ) ) {
+		$schema['legislationDate'] = (string) $document['issued_date'];
+		$schema['datePublished']   = (string) $document['issued_date'];
+	}
+
+	if ( ! empty( $document['issuing_agency'] ) ) {
+		$schema['creator'] = array(
+			'@type' => 'Organization',
+			'name'  => (string) $document['issuing_agency'],
+		);
+	}
+
+	return $schema;
+}
+
+/**
+ * Course JSON-LD cho 1 khóa học - CHỈ dùng field thực sự có trong response
+ * của GET /api/courses/{slug} (Phase 4A, Phần 13).
+ *
+ * Cố ý KHÔNG map "offers"/price: chưa có luồng mua/đăng ký công khai
+ * (enrollment/payment ngoài phạm vi phase này) - khai báo offers lúc này
+ * sẽ là tuyên bố sai về khả năng mua thực tế. provider = chính nền tảng
+ * (Công Viên Chức), đúng sự thật vì đây là platform xuất bản khóa học,
+ * không phải suy đoán.
+ *
+ * @param array<string, mixed> $course
+ * @return array<string, mixed>|null
+ */
+function cvc_build_course_jsonld( array $course ): ?array {
+	if ( empty( $course['title'] ) ) {
+		return null;
+	}
+
+	$description = $course['description'] ?? $course['short_description'] ?? '';
+
+	$schema = array(
+		'@context'    => 'https://schema.org',
+		'@type'       => 'Course',
+		'name'        => (string) $course['title'],
+		'description' => ! empty( $description ) ? (string) $description : (string) $course['title'],
+		'provider'    => array(
+			'@type' => 'Organization',
+			'name'  => get_bloginfo( 'name' ),
+			'url'   => home_url( '/' ),
+		),
+	);
+
+	return $schema;
+}
+
+/**
+ * Danh sách link liên quan đơn giản (chỉ tiêu đề + URL) - dùng khi chỉ
+ * cần liệt kê liên kết sang domain khác, không cần đầy đủ 1 card (Phase
+ * 4A, Phần 9/10). Bỏ qua item thiếu slug - không bao giờ tạo link gãy.
+ *
+ * @param array<int, array<string, mixed>> $items
+ * @param callable(string): string         $url_builder Nhận slug, trả URL.
+ * @param string                           $title_key   Field chứa tiêu đề hiển thị (VD: 'title', 'name').
+ */
+function cvc_render_related_link_list( array $items, callable $url_builder, string $title_key = 'title' ): void {
+	$valid = array_values(
+		array_filter(
+			$items,
+			static fn( $item ) => is_array( $item ) && ! empty( $item['slug'] )
+		)
+	);
+
+	if ( empty( $valid ) ) {
+		return;
+	}
+	?>
+	<ul class="cvc-related-list">
+		<?php foreach ( $valid as $item ) : ?>
+			<li><a href="<?php echo esc_url( $url_builder( (string) $item['slug'] ) ); ?>"><?php echo esc_html( (string) ( $item[ $title_key ] ?? '' ) ); ?></a></li>
+		<?php endforeach; ?>
+	</ul>
+	<?php
 }
 
 /**

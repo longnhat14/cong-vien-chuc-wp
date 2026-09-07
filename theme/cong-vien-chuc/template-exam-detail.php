@@ -42,32 +42,31 @@ if ( ! $is_found ) {
 
 cvc_seo_set_title( $is_found ? (string) $exam['title'] : 'Không tìm thấy đề thi' );
 
+$breadcrumb_items = array(
+	array(
+		'label' => 'Trang chủ',
+		'url'   => home_url( '/' ),
+	),
+	array(
+		'label' => 'Thi trắc nghiệm',
+		'url'   => cvc_exams_url(),
+	),
+	array( 'label' => $is_found ? (string) $exam['title'] : 'Không tìm thấy' ),
+);
+
 if ( $is_found ) {
 	if ( ! empty( $exam['description'] ) ) {
 		cvc_seo_set_description( (string) $exam['description'] );
 	}
 	cvc_seo_set_canonical( cvc_exam_url( $slug ) );
+	cvc_seo_add_breadcrumb_jsonld( $breadcrumb_items );
 }
 
 get_header();
 ?>
 
 <main id="main" class="container cvc-page">
-	<?php
-	cvc_render_breadcrumbs(
-		array(
-			array(
-				'label' => 'Trang chủ',
-				'url'   => home_url( '/' ),
-			),
-			array(
-				'label' => 'Thi trắc nghiệm',
-				'url'   => cvc_exams_url(),
-			),
-			array( 'label' => $is_found ? (string) $exam['title'] : 'Không tìm thấy' ),
-		)
-	);
-	?>
+	<?php cvc_render_breadcrumbs( $breadcrumb_items ); ?>
 
 	<?php if ( ! $is_found ) : ?>
 		<h1><?php echo esc_html( 404 === (int) $result['status'] ? 'Không tìm thấy đề thi' : 'Đã có lỗi xảy ra' ); ?></h1>

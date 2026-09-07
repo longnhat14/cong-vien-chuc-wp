@@ -31,7 +31,7 @@ if ( ! $ok ) {
 
 cvc_seo_set_title( 'Văn bản pháp luật' );
 cvc_seo_set_description( 'Văn bản pháp luật liên quan đến tuyển dụng, thi tuyển công chức, viên chức.' );
-cvc_seo_set_canonical( cvc_legal_documents_url( $currentPg ) );
+cvc_seo_set_listing_pagination_state( $currentPg, 'cvc_legal_documents_url' );
 cvc_seo_set_pagination_links(
 	$currentPg > 1 ? cvc_legal_documents_url( $currentPg - 1 ) : null,
 	$currentPg < $lastPg ? cvc_legal_documents_url( $currentPg + 1 ) : null

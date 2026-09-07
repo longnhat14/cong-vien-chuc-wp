@@ -35,42 +35,48 @@ if ( ! $is_found ) {
 
 cvc_seo_set_title( $is_found ? (string) $item['title'] : 'Không tìm thấy nội dung kiến thức' );
 
+$topic = $is_found && is_array( $item['topic'] ?? null ) ? $item['topic'] : null;
+
+$breadcrumb_items = array(
+	array(
+		'label' => 'Trang chủ',
+		'url'   => home_url( '/' ),
+	),
+	array(
+		'label' => 'Kiến thức',
+		'url'   => cvc_knowledge_url(),
+	),
+);
+
+if ( $topic && ! empty( $topic['slug'] ) ) {
+	$breadcrumb_items[] = array(
+		'label' => (string) ( $topic['name'] ?? '' ),
+		'url'   => cvc_topic_url( $topic['slug'] ),
+	);
+}
+
+$breadcrumb_items[] = array( 'label' => $is_found ? (string) $item['title'] : 'Không tìm thấy' );
+
 if ( $is_found ) {
 	if ( ! empty( $item['summary'] ) ) {
 		cvc_seo_set_description( (string) $item['summary'] );
 	}
 	cvc_seo_set_canonical( cvc_knowledge_item_url( $slug ) );
+	cvc_seo_set_og( array( 'type' => 'article' ) );
+
+	cvc_seo_add_breadcrumb_jsonld( $breadcrumb_items );
+
+	$article_schema = cvc_build_knowledge_article_jsonld( $item );
+	if ( null !== $article_schema ) {
+		cvc_seo_add_json_ld( $article_schema );
+	}
 }
 
 get_header();
 ?>
 
 <main id="main" class="container cvc-page">
-	<?php
-	$topic = $is_found && is_array( $item['topic'] ?? null ) ? $item['topic'] : null;
-
-	$breadcrumb_items = array(
-		array(
-			'label' => 'Trang chủ',
-			'url'   => home_url( '/' ),
-		),
-		array(
-			'label' => 'Kiến thức',
-			'url'   => cvc_knowledge_url(),
-		),
-	);
-
-	if ( $topic && ! empty( $topic['slug'] ) ) {
-		$breadcrumb_items[] = array(
-			'label' => (string) ( $topic['name'] ?? '' ),
-			'url'   => cvc_topic_url( $topic['slug'] ),
-		);
-	}
-
-	$breadcrumb_items[] = array( 'label' => $is_found ? (string) $item['title'] : 'Không tìm thấy' );
-
-	cvc_render_breadcrumbs( $breadcrumb_items );
-	?>
+	<?php cvc_render_breadcrumbs( $breadcrumb_items ); ?>
 
 	<?php if ( ! $is_found ) : ?>
 		<h1><?php echo esc_html( 404 === (int) $result['status'] ? 'Không tìm thấy nội dung kiến thức' : 'Đã có lỗi xảy ra' ); ?></h1>

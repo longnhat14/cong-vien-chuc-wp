@@ -30,7 +30,7 @@ if ( ! $ok ) {
 
 cvc_seo_set_title( 'Thi trắc nghiệm' );
 cvc_seo_set_description( 'Đề thi trắc nghiệm ôn tập theo từng môn thi, chủ đề.' );
-cvc_seo_set_canonical( cvc_exams_url( $currentPg ) );
+cvc_seo_set_listing_pagination_state( $currentPg, 'cvc_exams_url' );
 cvc_seo_set_pagination_links(
 	$currentPg > 1 ? cvc_exams_url( $currentPg - 1 ) : null,
 	$currentPg < $lastPg ? cvc_exams_url( $currentPg + 1 ) : null

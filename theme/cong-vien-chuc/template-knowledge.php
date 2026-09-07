@@ -30,7 +30,7 @@ if ( ! $ok ) {
 
 cvc_seo_set_title( 'Kiến thức' );
 cvc_seo_set_description( 'Nội dung kiến thức hệ thống theo từng chủ đề, giúp ôn tập đúng trọng tâm.' );
-cvc_seo_set_canonical( cvc_knowledge_url( $currentPg ) );
+cvc_seo_set_listing_pagination_state( $currentPg, 'cvc_knowledge_url' );
 cvc_seo_set_pagination_links(
 	$currentPg > 1 ? cvc_knowledge_url( $currentPg - 1 ) : null,
 	$currentPg < $lastPg ? cvc_knowledge_url( $currentPg + 1 ) : null

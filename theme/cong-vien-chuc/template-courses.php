@@ -30,7 +30,7 @@ if ( ! $ok ) {
 
 cvc_seo_set_title( 'Khóa học' );
 cvc_seo_set_description( 'Danh sách khóa học luyện thi công chức, viên chức tại Công Viên Chức.' );
-cvc_seo_set_canonical( cvc_courses_url( $currentPg ) );
+cvc_seo_set_listing_pagination_state( $currentPg, 'cvc_courses_url' );
 cvc_seo_set_pagination_links(
 	$currentPg > 1 ? cvc_courses_url( $currentPg - 1 ) : null,
 	$currentPg < $lastPg ? cvc_courses_url( $currentPg + 1 ) : null

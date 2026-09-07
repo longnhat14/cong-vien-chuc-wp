@@ -68,6 +68,27 @@ function cvc_seo_add_json_ld( array $schema ): void {
 }
 
 /**
+ * Chuẩn hóa SEO cho trang listing CHỈ có phân trang, không có filter/search
+ * (Knowledge/Exam/Course/Legal Document/Topic) - trang 1 indexable +
+ * canonical, trang >1 noindex để tránh hàng nghìn URL phân trang bị index
+ * trùng lặp nội dung khi dữ liệu tăng (Phase 4A, Phần 12).
+ *
+ * Recruitment KHÔNG dùng hàm này - đã có logic riêng ở
+ * template-recruitments.php vì còn phải xét thêm filter/search
+ * (Phase 3.5), không chỉ mỗi số trang.
+ *
+ * @param callable(int): string $url_builder Nhận số trang, trả URL trang đó.
+ */
+function cvc_seo_set_listing_pagination_state( int $current_page, callable $url_builder ): void {
+	if ( $current_page > 1 ) {
+		cvc_seo_set_noindex();
+		return;
+	}
+
+	cvc_seo_set_canonical( $url_builder( 1 ) );
+}
+
+/**
  * Rút gọn text thuần (không HTML) cho meta description, không bịa nội dung -
  * chỉ cắt bớt dữ liệu thật lấy từ API.
  */

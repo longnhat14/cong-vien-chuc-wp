@@ -89,36 +89,35 @@ if ( $is_found ) {
 
 cvc_seo_set_title( $is_found ? (string) $lesson['title'] : 'Không tìm thấy bài học' );
 
+$breadcrumb_items = array(
+	array(
+		'label' => 'Trang chủ',
+		'url'   => home_url( '/' ),
+	),
+	array(
+		'label' => 'Khóa học',
+		'url'   => cvc_courses_url(),
+	),
+	array(
+		'label' => $course ? (string) $course['title'] : 'Khóa học',
+		'url'   => $course ? cvc_course_url( $course_slug ) : '',
+	),
+	array( 'label' => $is_found ? (string) $lesson['title'] : 'Không tìm thấy' ),
+);
+
 if ( $is_found ) {
 	if ( ! empty( $lesson['short_description'] ) ) {
 		cvc_seo_set_description( (string) $lesson['short_description'] );
 	}
 	cvc_seo_set_canonical( cvc_course_lesson_url( $course_slug, $lesson_id ) );
+	cvc_seo_add_breadcrumb_jsonld( $breadcrumb_items );
 }
 
 get_header();
 ?>
 
 <main id="main" class="container cvc-page">
-	<?php
-	cvc_render_breadcrumbs(
-		array(
-			array(
-				'label' => 'Trang chủ',
-				'url'   => home_url( '/' ),
-			),
-			array(
-				'label' => 'Khóa học',
-				'url'   => cvc_courses_url(),
-			),
-			array(
-				'label' => $course ? (string) $course['title'] : 'Khóa học',
-				'url'   => $course ? cvc_course_url( $course_slug ) : '',
-			),
-			array( 'label' => $is_found ? (string) $lesson['title'] : 'Không tìm thấy' ),
-		)
-	);
-	?>
+	<?php cvc_render_breadcrumbs( $breadcrumb_items ); ?>
 
 	<?php if ( ! $is_found ) : ?>
 		<?php $not_found_heading = null === $course ? 'Không tìm thấy khóa học' : 'Không tìm thấy bài học'; ?>

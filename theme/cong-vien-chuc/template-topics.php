@@ -30,7 +30,7 @@ if ( ! $ok ) {
 
 cvc_seo_set_title( 'Chủ đề' );
 cvc_seo_set_description( 'Danh sách chủ đề kiến thức ôn thi công chức, viên chức tại Công Viên Chức.' );
-cvc_seo_set_canonical( cvc_topics_url( $currentPg ) );
+cvc_seo_set_listing_pagination_state( $currentPg, 'cvc_topics_url' );
 cvc_seo_set_pagination_links(
 	$currentPg > 1 ? cvc_topics_url( $currentPg - 1 ) : null,
 	$currentPg < $lastPg ? cvc_topics_url( $currentPg + 1 ) : null

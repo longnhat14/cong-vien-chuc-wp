@@ -38,33 +38,37 @@ if ( ! $is_found ) {
 
 cvc_seo_set_title( $is_found ? (string) $course['title'] : 'Không tìm thấy khóa học' );
 
+$breadcrumb_items = array(
+	array(
+		'label' => 'Trang chủ',
+		'url'   => home_url( '/' ),
+	),
+	array(
+		'label' => 'Khóa học',
+		'url'   => cvc_courses_url(),
+	),
+	array( 'label' => $is_found ? (string) $course['title'] : 'Không tìm thấy' ),
+);
+
 if ( $is_found ) {
 	$description = $course['short_description'] ?? $course['description'] ?? '';
 	if ( $description ) {
 		cvc_seo_set_description( (string) $description );
 	}
 	cvc_seo_set_canonical( cvc_course_url( $slug ) );
+	cvc_seo_add_breadcrumb_jsonld( $breadcrumb_items );
+
+	$course_schema = cvc_build_course_jsonld( $course );
+	if ( null !== $course_schema ) {
+		cvc_seo_add_json_ld( $course_schema );
+	}
 }
 
 get_header();
 ?>
 
 <main id="main" class="container cvc-page">
-	<?php
-	cvc_render_breadcrumbs(
-		array(
-			array(
-				'label' => 'Trang chủ',
-				'url'   => home_url( '/' ),
-			),
-			array(
-				'label' => 'Khóa học',
-				'url'   => cvc_courses_url(),
-			),
-			array( 'label' => $is_found ? (string) $course['title'] : 'Không tìm thấy' ),
-		)
-	);
-	?>
+	<?php cvc_render_breadcrumbs( $breadcrumb_items ); ?>
 
 	<?php if ( ! $is_found ) : ?>
 		<h1><?php echo esc_html( 404 === (int) $result['status'] ? 'Không tìm thấy khóa học' : 'Đã có lỗi xảy ra' ); ?></h1>
@@ -124,6 +128,66 @@ get_header();
 				</ol>
 			<?php endif; ?>
 		</section>
+
+		<?php
+		/*
+		 * Cross-domain linking (Phase 4A, Phần 9) - GET /api/courses/{slug}
+		 * đã eager-load recruitments/positions/exams/exam_subjects/topics
+		 * (xem CourseController::show()) nhưng trước đây WP chưa render.
+		 * Chỉ hiển thị field cần thiết (title/name + slug) - không in
+		 * nguyên object dù API có thể trả thêm field khác (VD source_url
+		 * trong recruitments) để tránh rò rỉ field chưa được chốt công khai.
+		 */
+		$related_recruitments = is_array( $course['recruitments'] ?? null ) ? $course['recruitments'] : array();
+		$related_positions    = is_array( $course['positions'] ?? null ) ? $course['positions'] : array();
+		$related_exams        = is_array( $course['exams'] ?? null ) ? $course['exams'] : array();
+		$related_subjects     = is_array( $course['exam_subjects'] ?? null ) ? $course['exam_subjects'] : array();
+		$related_topics       = is_array( $course['topics'] ?? null ) ? $course['topics'] : array();
+		?>
+
+		<?php if ( ! empty( $related_recruitments ) ) : ?>
+			<section class="cvc-related-section">
+				<h2>Tuyển dụng liên quan</h2>
+				<?php cvc_render_related_link_list( $related_recruitments, 'cvc_recruitment_url', 'title' ); ?>
+			</section>
+		<?php endif; ?>
+
+		<?php if ( ! empty( $related_exams ) ) : ?>
+			<section class="cvc-related-section">
+				<h2>Kỳ thi liên quan</h2>
+				<?php cvc_render_related_link_list( $related_exams, 'cvc_exam_url', 'title' ); ?>
+			</section>
+		<?php endif; ?>
+
+		<?php if ( ! empty( $related_topics ) ) : ?>
+			<section class="cvc-related-section">
+				<h2>Chủ đề liên quan</h2>
+				<?php cvc_render_related_link_list( $related_topics, 'cvc_topic_url', 'name' ); ?>
+			</section>
+		<?php endif; ?>
+
+		<?php if ( ! empty( $related_positions ) || ! empty( $related_subjects ) ) : ?>
+			<section class="cvc-related-section">
+				<h2>Chuẩn bị cho vị trí / môn thi</h2>
+				<?php
+				/*
+				 * Position/ExamSubject chưa có route chi tiết riêng trong
+				 * theme (chỉ xem lồng trong Recruitment/Exam detail) - hiển
+				 * thị tên để cung cấp thông tin, không tạo link vì chưa có
+				 * trang đích hợp lệ (tránh link gãy).
+				 */
+				$names = array_filter(
+					array_merge(
+						array_map( fn( $p ) => (string) ( $p['name'] ?? '' ), $related_positions ),
+						array_map( fn( $s ) => (string) ( $s['name'] ?? '' ), $related_subjects )
+					)
+				);
+				?>
+				<?php if ( ! empty( $names ) ) : ?>
+					<p class="cvc-prose"><?php echo esc_html( implode( ', ', $names ) ); ?></p>
+				<?php endif; ?>
+			</section>
+		<?php endif; ?>
 	<?php endif; ?>
 </main>
 
