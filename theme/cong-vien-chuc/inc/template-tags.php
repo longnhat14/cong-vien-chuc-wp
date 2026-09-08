@@ -265,7 +265,29 @@ function cvc_render_icon( string $key, int $size = 20, string $class = '' ): voi
  * nguồn thông tin duy nhất).
  */
 function cvc_render_v2_asset_icon( string $relative_path, int $w, int $h, string $class = '', string $alt = '' ): bool {
-	$path = "assets/images/homepage-v2/{$relative_path}";
+	return cvc_render_raster_icon_from( 'assets/images/homepage-v2', $relative_path, $w, $h, $class, $alt );
+}
+
+/**
+ * Phase 10A.18: "CVC Icon Library V2" (85 tile PNG, 144x128, cắt sẵn từ
+ * poster - khác bộ SVG core V1 đã tích hợp ở 10A.17). README của bộ này
+ * nói rõ: dùng cho card/feature-block/empty-state/resource-block, KHÔNG
+ * thay thế SVG core khi cần icon inline nhỏ/màu theo CSS - nên hàm riêng
+ * này tách khỏi cvc_render_cvc_icon() (SVG), không dùng chung 1 hàm dù
+ * cùng mục đích "render icon theo key".
+ */
+function cvc_render_icon_library_v2( string $key, int $w, int $h, string $class = '', string $alt = '' ): bool {
+	return cvc_render_raster_icon_from( 'assets/images/cvc-icon-library-v2', $key, $w, $h, $class, $alt );
+}
+
+/**
+ * Renderer dùng chung cho mọi bộ icon dạng ảnh raster (PNG + webp sibling,
+ * <picture> + fallback) - cvc_render_v2_asset_icon() và
+ * cvc_render_icon_library_v2() đều gọi qua đây (Phần 4/6 - "mở rộng
+ * helper hiện có thay vì tạo hệ thống trùng lặp").
+ */
+function cvc_render_raster_icon_from( string $base_dir, string $relative_path, int $w, int $h, string $class = '', string $alt = '' ): bool {
+	$path = "{$base_dir}/{$relative_path}";
 	if ( ! file_exists( get_theme_file_path( "/{$path}.png" ) ) ) {
 		return false;
 	}
