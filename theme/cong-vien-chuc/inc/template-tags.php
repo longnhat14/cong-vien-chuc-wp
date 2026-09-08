@@ -406,9 +406,15 @@ function cvc_render_recruitment_list_item( array $recruitment ): void {
 	 */
 	$url     = $isDemo ? cvc_recruitments_url() : cvc_recruitment_url( $slug );
 	$initial = $agencyName ? mb_substr( $agencyName, 0, 1 ) : 'C';
+	/*
+	 * Màu avatar xoay vòng theo tên cơ quan (Phần 21 - "visual agency
+	 * placeholder", KHÔNG giả làm logo chính thức) - chỉ để tạo nhịp thị
+	 * giác giữa các dòng, không mang ý nghĩa phân loại nào.
+	 */
+	$avatarColor = array( 'blue', 'teal', 'amber', 'purple' )[ $agencyName ? crc32( $agencyName ) % 4 : 0 ];
 	?>
 	<article class="cvc-recruitment-row<?php echo $isDemo ? ' cvc-recruitment-row--demo' : ''; ?>">
-		<span class="cvc-recruitment-row__avatar" aria-hidden="true"><?php echo esc_html( mb_strtoupper( $initial ) ); ?></span>
+		<span class="cvc-recruitment-row__avatar cvc-recruitment-row__avatar--<?php echo esc_attr( $avatarColor ); ?>" aria-hidden="true"><?php echo esc_html( mb_strtoupper( $initial ) ); ?></span>
 		<div class="cvc-recruitment-row__body">
 			<div class="cvc-recruitment-row__top">
 				<h3 class="cvc-recruitment-row__title">
@@ -1023,19 +1029,50 @@ function cvc_course_type_color( ?string $type ): string {
 }
 
 /**
- * Placeholder minh họa cho course card khi chưa có thumbnail_url thật
- * (Phần 10 - KHÔNG dùng ảnh stock generic, chỉ 1 illustration SVG
- * thương hiệu dùng chung, tránh vỡ ảnh/request ảnh ngoài). Nền đổi màu
- * theo course_type để tạo visual variety giống ảnh benchmark thay vì
- * đồng loạt 1 màu xanh.
+ * Artwork minh họa cho course card khi chưa có thumbnail_url thật (Phase
+ * 10A.7, Phần 16 COURSE ARTWORK - "được phép tạo artwork riêng cho từng
+ * category... KHÔNG dùng ảnh stock generic"). Mỗi course_type 1 "scene"
+ * SVG riêng (không chỉ 1 icon lặp lại như bản 10A.6) - hình khối lớn phía
+ * sau + icon glyph + chi tiết phụ, gợi đúng ngữ cảnh môn học mà không cần
+ * ảnh chụp (không có asset ảnh có bản quyền rõ ràng để dùng - Phần 6).
  */
-function cvc_render_course_thumbnail_placeholder( string $color = 'blue' ): void {
+function cvc_render_course_thumbnail_placeholder( ?string $course_type = null, string $color = 'blue' ): void {
+	$scenes = array(
+		// Ôn thi - bia kiểm tra + dấu tick.
+		'exam_prep'    => '<circle cx="43" cy="20" r="16" fill="#ffffff" fill-opacity="0.14"/>
+			<circle cx="28" cy="52" r="9" fill="#ffffff" fill-opacity="0.1"/>
+			<rect x="17" y="14" width="30" height="38" rx="4" fill="#ffffff" fill-opacity="0.16"/>
+			<path d="M23 24h18M23 31h18M23 38h11" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+			<circle cx="45" cy="42" r="10" fill="#ffffff"/>
+			<path d="m41 42 3 3 6-6.5" stroke-width="2.2" stroke="#0f172a" stroke-linecap="round" stroke-linejoin="round" fill="none"/>',
+		// Kỹ năng - 2 người trao đổi (bong bóng chat).
+		'skill'        => '<circle cx="20" cy="46" r="14" fill="#ffffff" fill-opacity="0.12"/>
+			<circle cx="46" cy="20" r="12" fill="#ffffff" fill-opacity="0.14"/>
+			<path d="M14 24a8 8 0 1 1 16 0 8 8 0 0 1-16 0Z" fill="#ffffff"/>
+			<path d="M8 46c0-7 5.5-12 14-12s14 5 14 12" fill="#ffffff" fill-opacity="0.85"/>
+			<path d="M34 20h16a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3h-3l-4 4v-4h-9a3 3 0 0 1-3-3v-9a3 3 0 0 1 3-3Z" fill="#ffffff" fill-opacity="0.95"/>',
+		// Chuyên môn nghiệp vụ - laptop/màn hình dữ liệu.
+		'professional' => '<circle cx="45" cy="16" r="14" fill="#ffffff" fill-opacity="0.14"/>
+			<rect x="13" y="15" width="34" height="23" rx="2.5" fill="#ffffff" fill-opacity="0.9"/>
+			<rect x="16.5" y="18.5" width="27" height="14" rx="1" fill-opacity="0.35" fill="currentColor"/>
+			<path d="M20 29.5 25 24l4 3.5 6.5-7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+			<path d="M9 41.5h46l-4 6.5H13Z" fill="#ffffff"/>',
+		// Định hướng nghề nghiệp - la bàn.
+		'orientation'  => '<circle cx="30" cy="32" r="21" fill="#ffffff" fill-opacity="0.14"/>
+			<circle cx="30" cy="32" r="15" fill="#ffffff"/>
+			<circle cx="30" cy="32" r="15" fill="none" stroke-opacity="0.25" stroke="currentColor" stroke-width="1.5"/>
+			<path d="m36 25-9 5-3 9 9-5Z" fill="currentColor"/>',
+		// Mặc định - sách + mũ tốt nghiệp (giữ để tương thích course_type lạ).
+		'default'      => '<circle cx="42" cy="18" r="14" fill="#ffffff" fill-opacity="0.14"/>
+			<path d="M12 24 30 15l18 9-18 9-18-9Z" fill="#ffffff"/>
+			<path d="M17 27v9c0 2.2 5.8 4 13 4s13-1.8 13-4v-9" stroke="#ffffff" stroke-width="2" fill="none"/>',
+	);
+
+	$scene = $scenes[ $course_type ?? '' ] ?? $scenes['default'];
 	?>
 	<div class="cvc-card__media cvc-card__media--placeholder cvc-card__media--<?php echo esc_attr( $color ); ?>" aria-hidden="true">
-		<svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-			<path d="M3 6.5 12 3l9 3.5-9 3.5-9-3.5Z"/>
-			<path d="M7 9v5c0 1.1 2.24 2 5 2s5-.9 5-2V9"/>
-			<path d="M21 6.5v6"/>
+		<svg width="100%" height="100%" viewBox="0 0 60 60" preserveAspectRatio="xMidYMid meet" fill="none" style="color:rgba(0,0,0,0.35)">
+			<?php echo $scene; // phpcs:ignore -- SVG tĩnh, hardcode trong theme, không phải input người dùng. ?>
 		</svg>
 	</div>
 	<?php
@@ -1085,7 +1122,7 @@ function cvc_render_course_card( array $course, int $heading_level = 2 ): void {
 					<img src="<?php echo esc_url( $thumbnail ); ?>" alt="" loading="lazy">
 				</div>
 			<?php else : ?>
-				<?php cvc_render_course_thumbnail_placeholder( $typeColor ); ?>
+				<?php cvc_render_course_thumbnail_placeholder( $course['course_type'] ?? null, $typeColor ); ?>
 			<?php endif; ?>
 			<span class="cvc-card__media-flags">
 				<?php if ( $isDemo ) : ?>
@@ -1157,7 +1194,7 @@ function cvc_render_course_card_featured( array $course ): void {
 					<img src="<?php echo esc_url( $thumbnail ); ?>" alt="" loading="lazy">
 				</div>
 			<?php else : ?>
-				<?php cvc_render_course_thumbnail_placeholder( $typeColor ); ?>
+				<?php cvc_render_course_thumbnail_placeholder( $course['course_type'] ?? null, $typeColor ); ?>
 			<?php endif; ?>
 			<?php if ( $typeLabel ) : ?>
 				<span class="cvc-badge cvc-badge--category cvc-badge--category-<?php echo esc_attr( $typeColor ); ?> cvc-card__media-badge"><?php echo esc_html( $typeLabel ); ?></span>
@@ -1504,33 +1541,75 @@ function cvc_render_search_form( string $current_q = '', string $input_id = 'cvc
  * nghiệp + tài liệu), vẽ bằng SVG thuần theo đúng brand blue, không phụ
  * thuộc ảnh ngoài nên không bao giờ vỡ ảnh/chậm tải.
  */
+/**
+ * Minh họa hero (Phase 10A.7, Phần 7 "HERO VISUAL - phải có chiều sâu,
+ * KHÔNG chấp nhận 1 icon nhỏ") - composition nhiều lớp: nền glow + vòng
+ * tròn trang trí (chiều sâu) -> trụ sở cơ quan (nhiều chi tiết kiến trúc
+ * hơn bản cũ - mái tam giác, hàng cột, bậc thềm) -> cờ Tổ quốc -> silhouette
+ * 1 người chuyên nghiệp (bán thân, cách điệu - KHÔNG dùng ảnh chụp vì
+ * không có asset ảnh rõ bản quyền, xem Phần 6) cầm tablet, đại diện
+ * "người học/công chức" -> icon nổi (mũ tốt nghiệp, tài liệu) làm điểm
+ * nhấn. Toàn bộ vẫn SVG thuần, không phụ thuộc ảnh ngoài.
+ */
 function cvc_render_hero_illustration(): void {
 	?>
-	<svg class="cvc-hero__illustration" viewBox="0 0 480 420" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Minh họa cơ quan nhà nước và học tập">
-		<circle cx="240" cy="210" r="200" fill="url(#cvcHeroGlow)"/>
-		<rect x="90" y="190" width="300" height="150" rx="10" fill="#ffffff" stroke="#dbe9ff" stroke-width="2"/>
-		<path d="M90 190 240 100 390 190Z" fill="#0a58ca"/>
-		<rect x="112" y="215" width="26" height="105" fill="#eef4ff"/>
-		<rect x="156" y="215" width="26" height="105" fill="#eef4ff"/>
-		<rect x="228" y="215" width="26" height="105" fill="#eef4ff"/>
-		<rect x="300" y="215" width="26" height="105" fill="#eef4ff"/>
-		<rect x="344" y="215" width="26" height="105" fill="#eef4ff"/>
-		<rect x="200" y="270" width="80" height="50" fill="#0a58ca"/>
-		<rect x="70" y="335" width="340" height="14" rx="7" fill="#dbe9ff"/>
-		<g transform="translate(300 60)">
-			<circle cx="40" cy="40" r="40" fill="#16a34a"/>
-			<path d="M20 40h40M40 20v40" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+	<svg class="cvc-hero__illustration" viewBox="0 0 480 420" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Minh họa cơ quan nhà nước và người công chức, viên chức đang học tập">
+		<circle cx="240" cy="215" r="205" fill="url(#cvcHeroGlow)"/>
+
+		<!-- Vòng trang trí tạo chiều sâu -->
+		<circle cx="70" cy="330" r="46" fill="#fde68a" fill-opacity="0.3"/>
+		<circle cx="430" cy="110" r="34" fill="#bbf7d0" fill-opacity="0.4"/>
+		<circle cx="415" cy="330" r="20" fill="#c7d2fe" fill-opacity="0.5"/>
+
+		<!-- Bóng đổ mặt đất -->
+		<ellipse cx="250" cy="372" rx="190" ry="14" fill="#0a58ca" fill-opacity="0.06"/>
+
+		<!-- Trụ sở cơ quan (dịch sang phải, nhường chỗ bên trái cho người -
+		     bố cục cố ý tránh vùng bị floating card che ở góc dưới-phải,
+		     xem cvc-hero-feature-card position absolute right/bottom). -->
+		<g>
+			<rect x="170" y="205" width="260" height="150" rx="6" fill="#ffffff" stroke="#dbe9ff" stroke-width="2"/>
+			<path d="M162 205 300 118 438 205Z" fill="#0a58ca"/>
+			<rect x="285" y="128" width="30" height="18" fill="#0a58ca"/>
+			<circle cx="300" cy="112" r="7" fill="#f59e0b"/>
+			<rect x="192" y="228" width="22" height="98" fill="#eef4ff"/>
+			<rect x="230" y="228" width="22" height="98" fill="#eef4ff"/>
+			<rect x="268" y="228" width="22" height="98" fill="#eef4ff"/>
+			<rect x="338" y="228" width="22" height="98" fill="#eef4ff"/>
+			<rect x="376" y="228" width="22" height="98" fill="#eef4ff"/>
+			<rect x="284" y="280" width="52" height="46" fill="#0a58ca"/>
+			<rect x="150" y="355" width="260" height="16" rx="8" fill="#dbe9ff"/>
+			<rect x="130" y="371" width="300" height="10" rx="5" fill="#c7d2fe" fill-opacity="0.6"/>
 		</g>
-		<g transform="translate(28 250)">
-			<rect width="86" height="64" rx="8" fill="#062a5c"/>
-			<path d="M10 20h66M10 34h66M10 48h40" stroke="#eef4ff" stroke-width="4" stroke-linecap="round"/>
+
+		<!-- Cờ Tổ quốc -->
+		<g transform="translate(392 50)">
+			<rect x="-1.5" y="0" width="3" height="80" fill="#94a3b8"/>
+			<path d="M0 4h46v28H0Z" fill="#da251d"/>
+			<path d="m23 9 2.6 8h8.4l-6.8 5 2.6 8-6.8-5-6.8 5 2.6-8-6.8-5h8.4Z" fill="#ffcd00"/>
 		</g>
-		<g transform="translate(150 20)">
+
+		<!-- Mũ tốt nghiệp nổi, giữa người và tòa nhà -->
+		<g transform="translate(195 12)">
 			<path d="M40 0 78 16 40 32 2 16Z" fill="#d97706"/>
 			<path d="M14 22v14c0 6 12 10 26 10s26-4 26-10V22" stroke="#d97706" stroke-width="4" fill="none" stroke-linecap="round"/>
 		</g>
+
+		<!-- Người công chức/viên chức (bán thân, cách điệu) - đặt hoàn
+		     toàn bên trái (x tối đa ~155) để KHÔNG bao giờ bị floating
+		     card (bên phải) che, dù ở bất kỳ chiều cao viewport nào. -->
+		<g transform="translate(24 108)">
+			<ellipse cx="60" cy="255" rx="72" ry="16" fill="#0a58ca" fill-opacity="0.08"/>
+			<path d="M10 252V162c0-35 22-61 50-61s50 26 50 61v90Z" fill="#16305c"/>
+			<path d="M33 158c6 11 20 17 27 17s21-6 27-17l7 13c-9 15-24 24-34 24s-25-9-34-24Z" fill="#ffffff"/>
+			<circle cx="60" cy="82" r="32" fill="#f4c9a4"/>
+			<path d="M30 78c0-19 14-34 30-34s30 15 30 34c-9-4-15-13-17-13-7 9-28 11-43 9Z" fill="#3a2a20"/>
+			<rect x="88" y="182" width="48" height="36" rx="4" fill="#eef4ff" stroke="#0a58ca" stroke-width="2"/>
+			<path d="M96 190h32M96 200h32M96 208h20" stroke="#0a58ca" stroke-width="2" stroke-linecap="round"/>
+		</g>
+
 		<defs>
-			<radialGradient id="cvcHeroGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(240 210) rotate(90) scale(200)">
+			<radialGradient id="cvcHeroGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(240 215) rotate(90) scale(205)">
 				<stop stop-color="#dbe9ff"/>
 				<stop offset="1" stop-color="#dbe9ff" stop-opacity="0"/>
 			</radialGradient>

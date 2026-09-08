@@ -1120,6 +1120,21 @@ p {
     font-size: 0.95rem;
 }
 
+.cvc-recruitment-row__avatar--teal {
+    background: #ccfbf1;
+    color: #0f766e;
+}
+
+.cvc-recruitment-row__avatar--amber {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.cvc-recruitment-row__avatar--purple {
+    background: #ede9fe;
+    color: #6d28d9;
+}
+
 .cvc-recruitment-row__body {
     min-width: 0;
     flex: 1;
