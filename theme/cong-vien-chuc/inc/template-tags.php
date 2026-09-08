@@ -1566,18 +1566,26 @@ function cvc_render_hero_illustration(): void {
 
 		<!-- Trụ sở cơ quan (dịch sang phải, nhường chỗ bên trái cho người -
 		     bố cục cố ý tránh vùng bị floating card che ở góc dưới-phải,
-		     xem cvc-hero-feature-card position absolute right/bottom). -->
-		<g>
+		     xem cvc-hero-feature-card position absolute right/bottom).
+		     Dùng gradient (không fill phẳng) + shadow filter cho mái/thân
+		     nhà để tạo chiều sâu (Phase 10A.8, Phần 7 "phải có depth,
+		     perspective, lighting" - không giả ảnh chụp nhưng có shading). -->
+		<g filter="url(#cvcSoftShadow)">
 			<rect x="170" y="205" width="260" height="150" rx="6" fill="#ffffff" stroke="#dbe9ff" stroke-width="2"/>
-			<path d="M162 205 300 118 438 205Z" fill="#0a58ca"/>
-			<rect x="285" y="128" width="30" height="18" fill="#0a58ca"/>
+			<path d="M162 205 300 118 438 205Z" fill="url(#cvcRoofGradient)"/>
+			<path d="M300 118 438 205H414L300 132Z" fill="#000000" fill-opacity="0.08"/>
+			<rect x="285" y="128" width="30" height="18" fill="url(#cvcRoofGradient)"/>
 			<circle cx="300" cy="112" r="7" fill="#f59e0b"/>
 			<rect x="192" y="228" width="22" height="98" fill="#eef4ff"/>
 			<rect x="230" y="228" width="22" height="98" fill="#eef4ff"/>
 			<rect x="268" y="228" width="22" height="98" fill="#eef4ff"/>
 			<rect x="338" y="228" width="22" height="98" fill="#eef4ff"/>
 			<rect x="376" y="228" width="22" height="98" fill="#eef4ff"/>
-			<rect x="284" y="280" width="52" height="46" fill="#0a58ca"/>
+			<rect x="192" y="228" width="8" height="98" fill="#ffffff" fill-opacity="0.6"/>
+			<rect x="230" y="228" width="8" height="98" fill="#ffffff" fill-opacity="0.6"/>
+			<rect x="268" y="228" width="8" height="98" fill="#ffffff" fill-opacity="0.6"/>
+			<rect x="284" y="280" width="52" height="46" fill="url(#cvcDoorGradient)"/>
+			<rect x="170" y="345" width="260" height="10" fill="#000000" fill-opacity="0.05"/>
 			<rect x="150" y="355" width="260" height="16" rx="8" fill="#dbe9ff"/>
 			<rect x="130" y="371" width="300" height="10" rx="5" fill="#c7d2fe" fill-opacity="0.6"/>
 		</g>
@@ -1590,20 +1598,23 @@ function cvc_render_hero_illustration(): void {
 		</g>
 
 		<!-- Mũ tốt nghiệp nổi, giữa người và tòa nhà -->
-		<g transform="translate(195 12)">
-			<path d="M40 0 78 16 40 32 2 16Z" fill="#d97706"/>
+		<g transform="translate(195 12)" filter="url(#cvcSoftShadow)">
+			<path d="M40 0 78 16 40 32 2 16Z" fill="url(#cvcCapGradient)"/>
 			<path d="M14 22v14c0 6 12 10 26 10s26-4 26-10V22" stroke="#d97706" stroke-width="4" fill="none" stroke-linecap="round"/>
 		</g>
 
 		<!-- Người công chức/viên chức (bán thân, cách điệu) - đặt hoàn
 		     toàn bên trái (x tối đa ~155) để KHÔNG bao giờ bị floating
-		     card (bên phải) che, dù ở bất kỳ chiều cao viewport nào. -->
-		<g transform="translate(24 108)">
+		     card (bên phải) che, dù ở bất kỳ chiều cao viewport nào.
+		     Gradient trên áo/tóc thay vì fill phẳng để có khối, không
+		     phải icon dẹt. -->
+		<g transform="translate(24 108)" filter="url(#cvcSoftShadow)">
 			<ellipse cx="60" cy="255" rx="72" ry="16" fill="#0a58ca" fill-opacity="0.08"/>
-			<path d="M10 252V162c0-35 22-61 50-61s50 26 50 61v90Z" fill="#16305c"/>
+			<path d="M10 252V162c0-35 22-61 50-61s50 26 50 61v90Z" fill="url(#cvcSuitGradient)"/>
 			<path d="M33 158c6 11 20 17 27 17s21-6 27-17l7 13c-9 15-24 24-34 24s-25-9-34-24Z" fill="#ffffff"/>
-			<circle cx="60" cy="82" r="32" fill="#f4c9a4"/>
-			<path d="M30 78c0-19 14-34 30-34s30 15 30 34c-9-4-15-13-17-13-7 9-28 11-43 9Z" fill="#3a2a20"/>
+			<path d="M53 168 60 179 67 168 60 172Z" fill="#0a58ca"/>
+			<circle cx="60" cy="82" r="32" fill="url(#cvcSkinGradient)"/>
+			<path d="M30 78c0-19 14-34 30-34s30 15 30 34c-9-4-15-13-17-13-7 9-28 11-43 9Z" fill="url(#cvcHairGradient)"/>
 			<rect x="88" y="182" width="48" height="36" rx="4" fill="#eef4ff" stroke="#0a58ca" stroke-width="2"/>
 			<path d="M96 190h32M96 200h32M96 208h20" stroke="#0a58ca" stroke-width="2" stroke-linecap="round"/>
 		</g>
@@ -1613,6 +1624,33 @@ function cvc_render_hero_illustration(): void {
 				<stop stop-color="#dbe9ff"/>
 				<stop offset="1" stop-color="#dbe9ff" stop-opacity="0"/>
 			</radialGradient>
+			<linearGradient id="cvcRoofGradient" x1="162" y1="118" x2="438" y2="205" gradientUnits="userSpaceOnUse">
+				<stop stop-color="#1669e0"/>
+				<stop offset="1" stop-color="#073f96"/>
+			</linearGradient>
+			<linearGradient id="cvcDoorGradient" x1="284" y1="280" x2="336" y2="326" gradientUnits="userSpaceOnUse">
+				<stop stop-color="#1669e0"/>
+				<stop offset="1" stop-color="#073f96"/>
+			</linearGradient>
+			<linearGradient id="cvcSuitGradient" x1="10" y1="101" x2="110" y2="252" gradientUnits="userSpaceOnUse">
+				<stop stop-color="#1d3d6e"/>
+				<stop offset="1" stop-color="#0d1f3d"/>
+			</linearGradient>
+			<linearGradient id="cvcSkinGradient" x1="28" y1="50" x2="92" y2="114" gradientUnits="userSpaceOnUse">
+				<stop stop-color="#f8d3ae"/>
+				<stop offset="1" stop-color="#eab98a"/>
+			</linearGradient>
+			<linearGradient id="cvcHairGradient" x1="30" y1="44" x2="90" y2="87" gradientUnits="userSpaceOnUse">
+				<stop stop-color="#4a3527"/>
+				<stop offset="1" stop-color="#2a1c12"/>
+			</linearGradient>
+			<linearGradient id="cvcCapGradient" x1="2" y1="0" x2="78" y2="32" gradientUnits="userSpaceOnUse">
+				<stop stop-color="#f0a825"/>
+				<stop offset="1" stop-color="#c8790a"/>
+			</linearGradient>
+			<filter id="cvcSoftShadow" x="-20%" y="-20%" width="140%" height="140%">
+				<feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#0a58ca" flood-opacity="0.14"/>
+			</filter>
 		</defs>
 	</svg>
 	<?php

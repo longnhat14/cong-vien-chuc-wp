@@ -13,7 +13,7 @@
         <div class="container site-header__inner">
             <a class="site-title" href="<?php echo esc_url( home_url( '/' ) ); ?>">
                 <span class="site-title__mark" aria-hidden="true">
-                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 3 3 8v1h18V8L12 3Z"/>
                         <path d="M5 10.5V18M9 10.5V18M15 10.5V18M19 10.5V18"/>
                         <path d="M3.5 19.5h17"/>
