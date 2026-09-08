@@ -1038,34 +1038,79 @@ function cvc_course_type_color( ?string $type ): string {
  */
 function cvc_render_course_thumbnail_placeholder( ?string $course_type = null, string $color = 'blue' ): void {
 	$scenes = array(
-		// Ôn thi - bia kiểm tra + dấu tick.
-		'exam_prep'    => '<circle cx="43" cy="20" r="16" fill="#ffffff" fill-opacity="0.14"/>
-			<circle cx="28" cy="52" r="9" fill="#ffffff" fill-opacity="0.1"/>
-			<rect x="17" y="14" width="30" height="38" rx="4" fill="#ffffff" fill-opacity="0.16"/>
-			<path d="M23 24h18M23 31h18M23 38h11" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
-			<circle cx="45" cy="42" r="10" fill="#ffffff"/>
-			<path d="m41 42 3 3 6-6.5" stroke-width="2.2" stroke="#0f172a" stroke-linecap="round" stroke-linejoin="round" fill="none"/>',
-		// Kỹ năng - 2 người trao đổi (bong bóng chat).
-		'skill'        => '<circle cx="20" cy="46" r="14" fill="#ffffff" fill-opacity="0.12"/>
-			<circle cx="46" cy="20" r="12" fill="#ffffff" fill-opacity="0.14"/>
-			<path d="M14 24a8 8 0 1 1 16 0 8 8 0 0 1-16 0Z" fill="#ffffff"/>
-			<path d="M8 46c0-7 5.5-12 14-12s14 5 14 12" fill="#ffffff" fill-opacity="0.85"/>
-			<path d="M34 20h16a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3h-3l-4 4v-4h-9a3 3 0 0 1-3-3v-9a3 3 0 0 1 3-3Z" fill="#ffffff" fill-opacity="0.95"/>',
-		// Chuyên môn nghiệp vụ - laptop/màn hình dữ liệu.
-		'professional' => '<circle cx="45" cy="16" r="14" fill="#ffffff" fill-opacity="0.14"/>
-			<rect x="13" y="15" width="34" height="23" rx="2.5" fill="#ffffff" fill-opacity="0.9"/>
-			<rect x="16.5" y="18.5" width="27" height="14" rx="1" fill-opacity="0.35" fill="currentColor"/>
-			<path d="M20 29.5 25 24l4 3.5 6.5-7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-			<path d="M9 41.5h46l-4 6.5H13Z" fill="#ffffff"/>',
-		// Định hướng nghề nghiệp - la bàn.
-		'orientation'  => '<circle cx="30" cy="32" r="21" fill="#ffffff" fill-opacity="0.14"/>
-			<circle cx="30" cy="32" r="15" fill="#ffffff"/>
-			<circle cx="30" cy="32" r="15" fill="none" stroke-opacity="0.25" stroke="currentColor" stroke-width="1.5"/>
-			<path d="m36 25-9 5-3 9 9-5Z" fill="currentColor"/>',
-		// Mặc định - sách + mũ tốt nghiệp (giữ để tương thích course_type lạ).
-		'default'      => '<circle cx="42" cy="18" r="14" fill="#ffffff" fill-opacity="0.14"/>
-			<path d="M12 24 30 15l18 9-18 9-18-9Z" fill="#ffffff"/>
-			<path d="M17 27v9c0 2.2 5.8 4 13 4s13-1.8 13-4v-9" stroke="#ffffff" stroke-width="2" fill="none"/>',
+		// Ôn thi - bài thi + đồng hồ bấm giờ + bia điểm, kể câu chuyện
+		// "luyện đề có giới hạn thời gian, chấm điểm rõ ràng" thay vì chỉ
+		// 1 tờ giấy + dấu tick đơn giản (Phase 10A.9, Phần 18).
+		'exam_prep'    => '<circle cx="45" cy="16" r="15" fill="#ffffff" fill-opacity="0.14"/>
+			<circle cx="12" cy="48" r="10" fill="#ffffff" fill-opacity="0.1"/>
+			<rect x="12" y="12" width="28" height="40" rx="4" fill="#ffffff" fill-opacity="0.92"/>
+			<rect x="12" y="12" width="28" height="9" rx="4" fill="currentColor" fill-opacity="0.3"/>
+			<path d="M17 27h18M17 33.5h18M17 40h11" stroke="currentColor" stroke-opacity="0.55" stroke-width="2" stroke-linecap="round"/>
+			<circle cx="46" cy="14" r="3" fill="#ffffff" fill-opacity="0.9"/>
+			<path d="M44 6h4l1 4h-6Z" fill="#ffffff" fill-opacity="0.9"/>
+			<circle cx="44" cy="42" r="13" fill="#ffffff"/>
+			<circle cx="44" cy="42" r="13" fill="none" stroke="currentColor" stroke-opacity="0.2" stroke-width="1.5"/>
+			<path d="M44 35v7l5 3" stroke="#0f172a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+			<circle cx="44" cy="42" r="1.6" fill="#0f172a"/>',
+		// Kỹ năng - 2 người đối thoại, mũi tên trao đổi + biểu đồ tăng
+		// trưởng nhỏ, kể câu chuyện "trao đổi kỹ năng giúp tiến bộ" thay vì
+		// chỉ 1 bong bóng chat đơn giản.
+		'skill'        => '<circle cx="16" cy="18" r="12" fill="#ffffff" fill-opacity="0.14"/>
+			<circle cx="47" cy="46" r="11" fill="#ffffff" fill-opacity="0.1"/>
+			<circle cx="15" cy="16" r="7" fill="#ffffff"/>
+			<path d="M4 38c0-7.5 5-13 11-13s11 5.5 11 13" fill="#ffffff" fill-opacity="0.85"/>
+			<circle cx="45" cy="22" r="7" fill="#ffffff" fill-opacity="0.95"/>
+			<path d="M34 44c0-7.5 5-13 11-13s11 5.5 11 13" fill="#ffffff" fill-opacity="0.7"/>
+			<path d="M25 24c3 2 7 2 10 0" stroke="currentColor" stroke-opacity="0.5" stroke-width="2" fill="none" stroke-linecap="round"/>
+			<path d="m31 20 4 4-4 4" stroke="currentColor" stroke-opacity="0.5" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+			<path d="M6 52h10l4-6 4 3 5-8" stroke="#ffffff" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+		// Chuyên môn/Tin học - laptop với biểu đồ cột + con trỏ + bảng tính
+		// nổi phía sau, kể câu chuyện "làm việc với số liệu, nghiệp vụ số"
+		// rõ hơn hẳn 1 icon màn hình chung chung.
+		'professional' => '<circle cx="15" cy="14" r="12" fill="#ffffff" fill-opacity="0.14"/>
+			<circle cx="49" cy="44" r="9" fill="#ffffff" fill-opacity="0.1"/>
+			<rect x="30" y="8" width="20" height="16" rx="2" fill="#ffffff" fill-opacity="0.85"/>
+			<path d="M33 12h5M33 15.5h9M33 19h6" stroke="currentColor" stroke-opacity="0.4" stroke-width="1.4" stroke-linecap="round"/>
+			<rect x="9" y="17" width="34" height="23" rx="2.5" fill="#ffffff"/>
+			<rect x="12.5" y="20.5" width="27" height="13" rx="1" fill="currentColor" fill-opacity="0.14"/>
+			<path d="M16 30.5 22 24l4.5 4 8-8" stroke="currentColor" stroke-opacity="0.65" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+			<circle cx="34.5" cy="20" r="1.8" fill="currentColor" fill-opacity="0.65"/>
+			<path d="M5 43.5h46l-4 6.5H9Z" fill="#ffffff" fill-opacity="0.95"/>
+			<rect x="19" y="27" width="4" height="6" fill="currentColor" fill-opacity="0.35"/>
+			<rect x="25" y="24" width="4" height="9" fill="currentColor" fill-opacity="0.35"/>
+			<rect x="31" y="21" width="4" height="12" fill="currentColor" fill-opacity="0.35"/>',
+		// Định hướng nghề nghiệp - la bàn + con đường sự nghiệp có cột mốc
+		// và lá cờ đích, kể câu chuyện "có lộ trình rõ ràng để đi tới" thay
+		// vì chỉ 1 la bàn tĩnh.
+		'orientation'  => '<circle cx="18" cy="46" r="12" fill="#ffffff" fill-opacity="0.12"/>
+			<circle cx="46" cy="16" r="10" fill="#ffffff" fill-opacity="0.14"/>
+			<path d="M6 52c4-14 14-24 28-28" stroke="#ffffff" stroke-width="3" fill="none" stroke-linecap="round" stroke-dasharray="1 7"/>
+			<circle cx="12" cy="47" r="2.6" fill="#ffffff"/>
+			<circle cx="21" cy="35" r="2.6" fill="#ffffff" fill-opacity="0.85"/>
+			<g transform="translate(30 6)">
+				<rect x="-1.4" y="0" width="2.8" height="20" fill="#ffffff"/>
+				<path d="M1.4 2h13l-3.4 5 3.4 5h-13Z" fill="currentColor" fill-opacity="0.55"/>
+			</g>
+			<circle cx="24" cy="34" r="16" fill="#ffffff"/>
+			<circle cx="24" cy="34" r="16" fill="none" stroke="currentColor" stroke-opacity="0.2" stroke-width="1.5"/>
+			<circle cx="24" cy="34" r="11.5" fill="none" stroke="currentColor" stroke-opacity="0.15" stroke-width="1"/>
+			<path d="m30 25-10 6-3 10 10-6Z" fill="currentColor" fill-opacity="0.8"/>
+			<circle cx="24" cy="34" r="1.8" fill="#0f172a"/>',
+		// Mặc định (kiến thức chung/pháp lý) - sách mở + búa gavel + dải
+		// ruy băng, kể câu chuyện "kiến thức nền tảng, quy định, văn bản"
+		// thay vì chỉ 1 mũ tốt nghiệp đơn lẻ.
+		'default'      => '<circle cx="45" cy="15" r="13" fill="#ffffff" fill-opacity="0.14"/>
+			<circle cx="12" cy="47" r="10" fill="#ffffff" fill-opacity="0.1"/>
+			<path d="M8 20c5-3 12-3 16 0v26c-4-3-11-3-16 0Z" fill="#ffffff" fill-opacity="0.92"/>
+			<path d="M40 20c-5-3-12-3-16 0v26c4-3 11-3 16 0Z" fill="#ffffff" fill-opacity="0.92"/>
+			<path d="M24 20v26" stroke="currentColor" stroke-opacity="0.25" stroke-width="1.4"/>
+			<path d="M11 25h9M11 30h9M28 25h9M28 30h9" stroke="currentColor" stroke-opacity="0.4" stroke-width="1.4" stroke-linecap="round"/>
+			<g transform="translate(37 34) rotate(-40)">
+				<rect x="-2.4" y="-14" width="4.8" height="16" rx="2" fill="currentColor" fill-opacity="0.65"/>
+				<rect x="-8" y="0" width="16" height="5" rx="2" fill="currentColor" fill-opacity="0.85"/>
+				<rect x="-9" y="16" width="18" height="4.5" rx="2" fill="currentColor" fill-opacity="0.85"/>
+			</g>
+			<path d="M45 45c1.4 4 1.4 7 0 10-1.4-3-1.4-6 0-10Z" fill="#ffffff" fill-opacity="0.9"/>',
 	);
 
 	$scene = $scenes[ $course_type ?? '' ] ?? $scenes['default'];
@@ -1553,94 +1598,167 @@ function cvc_render_search_form( string $current_q = '', string $input_id = 'cvc
  */
 function cvc_render_hero_illustration(): void {
 	?>
-	<svg class="cvc-hero__illustration" viewBox="0 0 480 420" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Minh họa cơ quan nhà nước và người công chức, viên chức đang học tập">
+	<svg class="cvc-hero__illustration" viewBox="0 0 480 420" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Minh họa trụ sở cơ quan nhà nước và người công chức, viên chức đang học tập, phát triển sự nghiệp">
+		<rect x="0" y="0" width="480" height="420" rx="24" fill="url(#cvcSkyGradient)"/>
 		<circle cx="240" cy="215" r="205" fill="url(#cvcHeroGlow)"/>
 
+		<!-- Mặt trời/glow góc trên phải + mây -->
+		<circle cx="418" cy="70" r="46" fill="url(#cvcSunGlow)"/>
+		<ellipse cx="120" cy="60" rx="38" ry="14" fill="#ffffff" fill-opacity="0.7"/>
+		<ellipse cx="150" cy="52" rx="26" ry="11" fill="#ffffff" fill-opacity="0.7"/>
+
 		<!-- Vòng trang trí tạo chiều sâu -->
-		<circle cx="70" cy="330" r="46" fill="#fde68a" fill-opacity="0.3"/>
-		<circle cx="430" cy="110" r="34" fill="#bbf7d0" fill-opacity="0.4"/>
+		<circle cx="60" cy="335" r="46" fill="#fde68a" fill-opacity="0.28"/>
 		<circle cx="415" cy="330" r="20" fill="#c7d2fe" fill-opacity="0.5"/>
 
-		<!-- Bóng đổ mặt đất -->
-		<ellipse cx="250" cy="372" rx="190" ry="14" fill="#0a58ca" fill-opacity="0.06"/>
+		<!-- Nền quảng trường phối cảnh + gạch lát -->
+		<path d="M20 378 460 378 420 400 60 400Z" fill="url(#cvcPlazaGradient)"/>
+		<path d="M84 384 396 384M108 391 372 391" stroke="#ffffff" stroke-opacity="0.4" stroke-width="2"/>
 
-		<!-- Trụ sở cơ quan (dịch sang phải, nhường chỗ bên trái cho người -
-		     bố cục cố ý tránh vùng bị floating card che ở góc dưới-phải,
-		     xem cvc-hero-feature-card position absolute right/bottom).
-		     Dùng gradient (không fill phẳng) + shadow filter cho mái/thân
-		     nhà để tạo chiều sâu (Phase 10A.8, Phần 7 "phải có depth,
-		     perspective, lighting" - không giả ảnh chụp nhưng có shading). -->
+		<!-- Cây xanh 2 bên tạo bối cảnh môi trường thật (đối chiếu ảnh
+		     benchmark có cây quanh trụ sở) -->
+		<g transform="translate(410 250)">
+			<rect x="7" y="40" width="6" height="46" rx="3" fill="#8a5a34"/>
+			<circle cx="10" cy="34" r="22" fill="#4c9a5a"/>
+			<circle cx="-6" cy="44" r="16" fill="#3f8a4d"/>
+			<circle cx="24" cy="44" r="16" fill="#5aab68"/>
+		</g>
+		<g transform="translate(18 262)">
+			<rect x="7" y="34" width="5" height="40" rx="2.5" fill="#8a5a34"/>
+			<circle cx="9" cy="28" r="18" fill="#4c9a5a"/>
+			<circle cx="-4" cy="36" r="13" fill="#3f8a4d"/>
+			<circle cx="20" cy="36" r="13" fill="#5aab68"/>
+		</g>
+
+		<!-- Bóng đổ mặt đất -->
+		<ellipse cx="255" cy="378" rx="175" ry="12" fill="#062a5c" fill-opacity="0.1"/>
+
+		<!-- Trụ sở cơ quan - khối 3 mặt (mặt tiền + mặt hông + mái 2 diện)
+		     để tạo chiều sâu/perspective thật (Phase 10A.9, Phần 9 "không
+		     phải 1 house icon, phải có perspective/depth/light/shadow").
+		     Dịch sang phải, nhường bên trái cho người - tránh vùng bị
+		     floating card che (position absolute right/bottom). -->
 		<g filter="url(#cvcSoftShadow)">
-			<rect x="170" y="205" width="260" height="150" rx="6" fill="#ffffff" stroke="#dbe9ff" stroke-width="2"/>
-			<path d="M162 205 300 118 438 205Z" fill="url(#cvcRoofGradient)"/>
-			<path d="M300 118 438 205H414L300 132Z" fill="#000000" fill-opacity="0.08"/>
-			<rect x="285" y="128" width="30" height="18" fill="url(#cvcRoofGradient)"/>
-			<circle cx="300" cy="112" r="7" fill="#f59e0b"/>
-			<rect x="192" y="228" width="22" height="98" fill="#eef4ff"/>
-			<rect x="230" y="228" width="22" height="98" fill="#eef4ff"/>
-			<rect x="268" y="228" width="22" height="98" fill="#eef4ff"/>
-			<rect x="338" y="228" width="22" height="98" fill="#eef4ff"/>
-			<rect x="376" y="228" width="22" height="98" fill="#eef4ff"/>
-			<rect x="192" y="228" width="8" height="98" fill="#ffffff" fill-opacity="0.6"/>
-			<rect x="230" y="228" width="8" height="98" fill="#ffffff" fill-opacity="0.6"/>
-			<rect x="268" y="228" width="8" height="98" fill="#ffffff" fill-opacity="0.6"/>
-			<rect x="284" y="280" width="52" height="46" fill="url(#cvcDoorGradient)"/>
-			<rect x="170" y="345" width="260" height="10" fill="#000000" fill-opacity="0.05"/>
-			<rect x="150" y="355" width="260" height="16" rx="8" fill="#dbe9ff"/>
-			<rect x="130" y="371" width="300" height="10" rx="5" fill="#c7d2fe" fill-opacity="0.6"/>
+			<!-- mặt hông (khuất sáng hơn, tạo khối 3D) -->
+			<path d="M388 200 430 178 430 338 388 358Z" fill="url(#cvcSideGradient)"/>
+			<path d="M300 116 342 96 430 178 388 200Z" fill="url(#cvcRoofSideGradient)"/>
+			<!-- mặt tiền -->
+			<rect x="168" y="200" width="220" height="158" fill="url(#cvcFacadeGradient)" stroke="#dbe9ff" stroke-width="1.5"/>
+			<path d="M160 200 300 116 388 200Z" fill="url(#cvcRoofGradient)"/>
+			<rect x="283" y="126" width="30" height="18" fill="url(#cvcRoofGradient)"/>
+			<circle cx="298" cy="110" r="6.5" fill="#f7c948"/>
+			<!-- hàng cột -->
+			<g fill="url(#cvcColumnGradient)">
+				<rect x="184" y="224" width="14" height="104"/>
+				<rect x="214" y="224" width="14" height="104"/>
+				<rect x="244" y="224" width="14" height="104"/>
+				<rect x="326" y="224" width="14" height="104"/>
+				<rect x="356" y="224" width="14" height="104"/>
+			</g>
+			<g fill="#ffffff" fill-opacity="0.55">
+				<rect x="184" y="224" width="4" height="104"/>
+				<rect x="214" y="224" width="4" height="104"/>
+				<rect x="244" y="224" width="4" height="104"/>
+				<rect x="326" y="224" width="4" height="104"/>
+				<rect x="356" y="224" width="4" height="104"/>
+			</g>
+			<rect x="168" y="214" width="220" height="10" fill="#0a58ca" fill-opacity="0.5"/>
+			<!-- cửa chính + bậc thềm -->
+			<path d="M274 358 274 268 302 268 302 358Z" fill="url(#cvcDoorGradient)"/>
+			<rect x="168" y="352" width="220" height="8" fill="#000000" fill-opacity="0.06"/>
+			<rect x="152" y="360" width="252" height="10" rx="5" fill="#dbe9ff"/>
+			<rect x="136" y="373" width="284" height="8" rx="4" fill="#c7d2fe" fill-opacity="0.6"/>
 		</g>
 
 		<!-- Cờ Tổ quốc -->
-		<g transform="translate(392 50)">
-			<rect x="-1.5" y="0" width="3" height="80" fill="#94a3b8"/>
+		<g transform="translate(392 44)">
+			<rect x="-1.5" y="0" width="3" height="82" fill="#94a3b8"/>
 			<path d="M0 4h46v28H0Z" fill="#da251d"/>
 			<path d="m23 9 2.6 8h8.4l-6.8 5 2.6 8-6.8-5-6.8 5 2.6-8-6.8-5h8.4Z" fill="#ffcd00"/>
 		</g>
 
 		<!-- Mũ tốt nghiệp nổi, giữa người và tòa nhà -->
-		<g transform="translate(195 12)" filter="url(#cvcSoftShadow)">
+		<g transform="translate(192 6)" filter="url(#cvcSoftShadow)">
 			<path d="M40 0 78 16 40 32 2 16Z" fill="url(#cvcCapGradient)"/>
 			<path d="M14 22v14c0 6 12 10 26 10s26-4 26-10V22" stroke="#d97706" stroke-width="4" fill="none" stroke-linecap="round"/>
+			<circle cx="76" cy="17" r="3" fill="#92400e"/>
+			<path d="M76 17v20" stroke="#92400e" stroke-width="1.5"/>
 		</g>
 
 		<!-- Người công chức/viên chức (bán thân, cách điệu) - đặt hoàn
-		     toàn bên trái (x tối đa ~155) để KHÔNG bao giờ bị floating
+		     toàn bên trái (x tối đa ~160) để KHÔNG bao giờ bị floating
 		     card (bên phải) che, dù ở bất kỳ chiều cao viewport nào.
-		     Gradient trên áo/tóc thay vì fill phẳng để có khối, không
-		     phải icon dẹt. -->
-		<g transform="translate(24 108)" filter="url(#cvcSoftShadow)">
-			<ellipse cx="60" cy="255" rx="72" ry="16" fill="#0a58ca" fill-opacity="0.08"/>
-			<path d="M10 252V162c0-35 22-61 50-61s50 26 50 61v90Z" fill="url(#cvcSuitGradient)"/>
-			<path d="M33 158c6 11 20 17 27 17s21-6 27-17l7 13c-9 15-24 24-34 24s-25-9-34-24Z" fill="#ffffff"/>
-			<path d="M53 168 60 179 67 168 60 172Z" fill="#0a58ca"/>
-			<circle cx="60" cy="82" r="32" fill="url(#cvcSkinGradient)"/>
-			<path d="M30 78c0-19 14-34 30-34s30 15 30 34c-9-4-15-13-17-13-7 9-28 11-43 9Z" fill="url(#cvcHairGradient)"/>
-			<rect x="88" y="182" width="48" height="36" rx="4" fill="#eef4ff" stroke="#0a58ca" stroke-width="2"/>
-			<path d="M96 190h32M96 200h32M96 208h20" stroke="#0a58ca" stroke-width="2" stroke-linecap="round"/>
+		     Áo vest 2 tông (thân + ve áo) + thẻ công chức đeo ngực để rõ
+		     bối cảnh nghề nghiệp, tóc/da dùng gradient tạo khối thật. -->
+		<g transform="translate(18 96)" filter="url(#cvcSoftShadow)">
+			<ellipse cx="64" cy="270" rx="78" ry="16" fill="#0a58ca" fill-opacity="0.08"/>
+			<path d="M8 266V172c0-38 24-66 56-66s56 28 56 66v94Z" fill="url(#cvcSuitGradient)"/>
+			<path d="M64 106c-14 0-26 10-32 24l18 74h28l18-74c-6-14-18-24-32-24Z" fill="url(#cvcSuitLapelGradient)"/>
+			<path d="M36 168c7 12 21 19 28 19s21-7 28-19l7 14c-9 16-25 26-35 26s-26-10-35-26Z" fill="#ffffff"/>
+			<path d="M56 178 64 190 72 178 64 182Z" fill="#0a58ca"/>
+			<rect x="52" y="196" width="18" height="24" rx="2" fill="#f7c948" stroke="#b45309" stroke-width="1"/>
+			<circle cx="61" cy="204" r="4" fill="#ffffff" fill-opacity="0.85"/>
+			<circle cx="64" cy="88" r="34" fill="url(#cvcSkinGradient)"/>
+			<path d="M28 84c0-21 15-37 32-37s32 16 32 37c-2 8-6 13-10 16 1-8-2-15-6-15-8 10-30 12-46 9-3-3-2-9-2-10Z" fill="url(#cvcHairGradient)"/>
+			<path d="M45 92c2 3 5 5 8 5M83 92c-2 3-5 5-8 5" stroke="#8a5a34" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+			<rect x="94" y="196" width="50" height="38" rx="4" fill="#eef4ff" stroke="#0a58ca" stroke-width="2"/>
+			<path d="M102 205h34M102 215h34M102 224h22" stroke="#0a58ca" stroke-width="2" stroke-linecap="round"/>
 		</g>
 
 		<defs>
-			<radialGradient id="cvcHeroGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(240 215) rotate(90) scale(205)">
+			<linearGradient id="cvcSkyGradient" x1="240" y1="0" x2="240" y2="420" gradientUnits="userSpaceOnUse">
+				<stop stop-color="#eaf2ff"/>
+				<stop offset="1" stop-color="#ffffff"/>
+			</linearGradient>
+			<radialGradient id="cvcSunGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(418 70) rotate(90) scale(46)">
+				<stop stop-color="#fef3c7" stop-opacity="0.9"/>
+				<stop offset="1" stop-color="#fef3c7" stop-opacity="0"/>
+			</radialGradient>
+			<linearGradient id="cvcPlazaGradient" x1="240" y1="378" x2="240" y2="400" gradientUnits="userSpaceOnUse">
 				<stop stop-color="#dbe9ff"/>
+				<stop offset="1" stop-color="#c7d9f7"/>
+			</linearGradient>
+			<radialGradient id="cvcHeroGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(240 215) rotate(90) scale(205)">
+				<stop stop-color="#dbe9ff" stop-opacity="0.7"/>
 				<stop offset="1" stop-color="#dbe9ff" stop-opacity="0"/>
 			</radialGradient>
-			<linearGradient id="cvcRoofGradient" x1="162" y1="118" x2="438" y2="205" gradientUnits="userSpaceOnUse">
+			<linearGradient id="cvcRoofGradient" x1="160" y1="116" x2="388" y2="200" gradientUnits="userSpaceOnUse">
+				<stop stop-color="#2a7bf0"/>
+				<stop offset="1" stop-color="#0a58ca"/>
+			</linearGradient>
+			<linearGradient id="cvcRoofSideGradient" x1="300" y1="96" x2="430" y2="200" gradientUnits="userSpaceOnUse">
+				<stop stop-color="#073f96"/>
+				<stop offset="1" stop-color="#042a68"/>
+			</linearGradient>
+			<linearGradient id="cvcFacadeGradient" x1="168" y1="200" x2="388" y2="358" gradientUnits="userSpaceOnUse">
+				<stop stop-color="#ffffff"/>
+				<stop offset="1" stop-color="#eef4ff"/>
+			</linearGradient>
+			<linearGradient id="cvcSideGradient" x1="388" y1="178" x2="430" y2="358" gradientUnits="userSpaceOnUse">
+				<stop stop-color="#c9dcf8"/>
+				<stop offset="1" stop-color="#a9c3ec"/>
+			</linearGradient>
+			<linearGradient id="cvcColumnGradient" x1="184" y1="224" x2="198" y2="328" gradientUnits="userSpaceOnUse">
+				<stop stop-color="#f5f9ff"/>
+				<stop offset="1" stop-color="#cfe0fa"/>
+			</linearGradient>
+			<linearGradient id="cvcDoorGradient" x1="274" y1="268" x2="302" y2="358" gradientUnits="userSpaceOnUse">
 				<stop stop-color="#1669e0"/>
 				<stop offset="1" stop-color="#073f96"/>
 			</linearGradient>
-			<linearGradient id="cvcDoorGradient" x1="284" y1="280" x2="336" y2="326" gradientUnits="userSpaceOnUse">
-				<stop stop-color="#1669e0"/>
-				<stop offset="1" stop-color="#073f96"/>
-			</linearGradient>
-			<linearGradient id="cvcSuitGradient" x1="10" y1="101" x2="110" y2="252" gradientUnits="userSpaceOnUse">
-				<stop stop-color="#1d3d6e"/>
+			<linearGradient id="cvcSuitGradient" x1="8" y1="106" x2="120" y2="266" gradientUnits="userSpaceOnUse">
+				<stop stop-color="#20416f"/>
 				<stop offset="1" stop-color="#0d1f3d"/>
 			</linearGradient>
-			<linearGradient id="cvcSkinGradient" x1="28" y1="50" x2="92" y2="114" gradientUnits="userSpaceOnUse">
+			<linearGradient id="cvcSuitLapelGradient" x1="32" y1="106" x2="96" y2="204" gradientUnits="userSpaceOnUse">
+				<stop stop-color="#2c507f"/>
+				<stop offset="1" stop-color="#16305c"/>
+			</linearGradient>
+			<linearGradient id="cvcSkinGradient" x1="30" y1="54" x2="98" y2="122" gradientUnits="userSpaceOnUse">
 				<stop stop-color="#f8d3ae"/>
 				<stop offset="1" stop-color="#eab98a"/>
 			</linearGradient>
-			<linearGradient id="cvcHairGradient" x1="30" y1="44" x2="90" y2="87" gradientUnits="userSpaceOnUse">
+			<linearGradient id="cvcHairGradient" x1="28" y1="47" x2="92" y2="100" gradientUnits="userSpaceOnUse">
 				<stop stop-color="#4a3527"/>
 				<stop offset="1" stop-color="#2a1c12"/>
 			</linearGradient>
@@ -1649,7 +1767,7 @@ function cvc_render_hero_illustration(): void {
 				<stop offset="1" stop-color="#c8790a"/>
 			</linearGradient>
 			<filter id="cvcSoftShadow" x="-20%" y="-20%" width="140%" height="140%">
-				<feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#0a58ca" flood-opacity="0.14"/>
+				<feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#0a58ca" flood-opacity="0.16"/>
 			</filter>
 		</defs>
 	</svg>
