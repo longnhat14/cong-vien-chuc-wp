@@ -28,7 +28,14 @@ require_once __DIR__ . '/inc/homepage-fixtures.php';
 
 $course_result      = ( new CVC_Course_Service() )->list( array( 'per_page' => 3 ) );
 $topic_result       = ( new CVC_Topic_Service() )->list( array( 'per_page' => 1 ) );
-$recruitment_result = ( new CVC_Recruitment_Service() )->list( array( 'per_page' => 5 ) );
+/*
+ * per_page=4 (Phase 10A.12, Phần 6/16 - density/balance) - khớp gần đúng
+ * chiều cao cột "Khóa học nổi bật + Tài nguyên ôn tập" bên trái, tránh 1
+ * khoảng trắng lớn ở đáy cột trái khi sidebar tuyển dụng cao hơn hẳn.
+ * "Xem tất cả" vẫn dẫn tới trang tuyển dụng đầy đủ - không mất dữ liệu
+ * thật, chỉ giới hạn số lượng preview trên trang chủ.
+ */
+$recruitment_result = ( new CVC_Recruitment_Service() )->list( array( 'per_page' => 4 ) );
 $knowledge_result   = ( new CVC_Knowledge_Service() )->list( array( 'per_page' => 1 ) );
 $exam_result        = ( new CVC_Exam_Service() )->list( array( 'per_page' => 1 ) );
 $legal_result       = ( new CVC_Legal_Document_Service() )->list( array( 'per_page' => 1 ) );
@@ -78,6 +85,15 @@ if ( $course_result['ok'] && count( $courses ) < 3 && cvc_homepage_demo_enabled(
 if ( $recruitment_result['ok'] && empty( $recruitments ) && cvc_homepage_demo_enabled() ) {
 	$recruitments = cvc_homepage_demo_recruitments();
 }
+
+/*
+ * Giới hạn hiển thị 3 tin (Phần 6/16 - density/balance) - đo thực tế bằng
+ * screenshot cho thấy 4-5 tin làm sidebar cao hơn hẳn cột trái (course +
+ * resource), để lại 1 khoảng trắng lớn ở đáy cột trái. "Xem tất cả" vẫn
+ * dẫn tới trang tuyển dụng đầy đủ - không có tin thật nào bị ẩn hoàn
+ * toàn, chỉ giới hạn số lượng preview trên trang chủ để cân bằng 2 cột.
+ */
+$recruitments = array_slice( $recruitments, 0, 3 );
 
 cvc_seo_set_title( 'Ôn thi công chức, viên chức online' );
 cvc_seo_set_description( 'Nền tảng hỗ trợ công chức, viên chức: khóa học theo lộ trình, tin tuyển dụng uy tín, đề thi trắc nghiệm và tài liệu hữu ích giúp bạn vững vàng trên con đường sự nghiệp.' );

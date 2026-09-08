@@ -1068,7 +1068,7 @@ p {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.4rem;
-    padding: var(--cvc-space-6);
+    padding: var(--cvc-space-8) var(--cvc-space-6);
     background: var(--cvc-color-bg);
     border: 1px solid var(--cvc-color-border);
     border-radius: var(--cvc-radius-lg);
@@ -1108,7 +1108,7 @@ p {
 }
 
 .cvc-resource-grid--footer {
-    margin-top: var(--cvc-space-8);
+    margin-top: var(--cvc-space-12);
     grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
