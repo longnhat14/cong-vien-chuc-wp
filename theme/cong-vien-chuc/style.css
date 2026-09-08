@@ -1396,33 +1396,16 @@ p {
     line-height: 1.4;
 }
 
-@media (max-width: 900px) {
-    .cvc-journey {
-        grid-template-columns: 1fr;
-        gap: 0;
-    }
-
-    .cvc-journey__step:not(:last-child)::after {
-        top: auto;
-        bottom: -0.5rem;
-        left: 1.75rem;
-        right: auto;
-        width: 2px;
-        height: 1rem;
-    }
-
-    .cvc-journey__link {
-        flex-direction: row;
-        text-align: left;
-        padding: var(--cvc-space-3);
-    }
-
-    .cvc-journey__number {
-        top: 0.1rem;
-        right: auto;
-        left: 2.15rem;
-    }
-}
+/* Rule @max-width:900px cho .cvc-journey (layout dọc, trước Homepage V2)
+ * đã bị xoá (Phase 10A.13 cleanup) - .cvc-journey chỉ dùng ở homepage,
+ * và Homepage V2 (.cvc-home-v2, cuối file) đã có bộ breakpoint riêng đầy
+ * đủ cho component này (grid 5 cột ở ≥768px, carousel cuộn ngang ở
+ * ≤767px). Rule cũ để lại gây conflict thật: ở đúng 768px, nó set
+ * grid-template-columns:1fr (đè "repeat(5,...)" - specificity bằng nhau,
+ * source order sau nên thắng) khiến cả 5 step chồng lên nhau trong 1 ô
+ * grid duy nhất, tràn ngang 736px→1045px - phát hiện qua QA screenshot/
+ * overflow check thật, không phải suy đoán.
+ */
 
 /* --- Goal direction section "Bạn đang hướng đến điều gì?" (Phần 18) --- */
 .cvc-goal-section__subtitle {
@@ -3294,4 +3277,397 @@ button.cvc-btn:disabled {
     .cvc-value-strip__item {
         flex: 1 1 40%;
     }
+}
+
+/* ================================================================
+ * HOMEPAGE V2 — FINAL VISUAL INTEGRATION
+ * Production assets are pre-cut; no runtime cropping/screenshot slicing.
+ * Scoped to homepage so existing inner templates remain unchanged.
+ * ================================================================ */
+.cvc-home-v2 .cvc-hero {
+    min-height: 560px;
+    padding: 0;
+    display: flex;
+    align-items: stretch;
+    background: linear-gradient(110deg, #f7fbff 0%, #eef6ff 54%, #e4f1ff 100%);
+    border-bottom: 0;
+}
+
+.cvc-home-v2 .cvc-hero > .container {
+    width: min(1240px, calc(100% - 40px));
+    margin-inline: auto;
+    display: flex;
+    align-items: center;
+    min-height: 560px;
+}
+
+.cvc-home-v2 .cvc-hero__content {
+    max-width: 650px;
+    padding: 72px 0 58px;
+}
+
+.cvc-home-v2 .cvc-hero__eyebrow {
+    margin-bottom: 16px;
+    letter-spacing: .03em;
+}
+
+.cvc-home-v2 .cvc-hero h1 {
+    max-width: 700px;
+    margin: 0;
+    font-size: clamp(2.55rem, 4vw, 4.25rem);
+    line-height: .98;
+    letter-spacing: -.045em;
+}
+
+.cvc-home-v2 .cvc-hero__accent {
+    display: inline-block;
+    margin-top: 10px;
+    background: linear-gradient(90deg, #0a58ca, #1e82ef);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.cvc-home-v2 .cvc-hero__lead {
+    max-width: 620px;
+    margin-top: 22px;
+    font-size: 1.08rem;
+    line-height: 1.7;
+}
+
+.cvc-home-v2 .cvc-hero .cvc-search-form {
+    max-width: 610px;
+    margin-top: 28px;
+}
+
+.cvc-home-v2 .cvc-hero__actions {
+    margin-top: 20px;
+}
+
+.cvc-home-v2 .cvc-hero__visual {
+    z-index: 0;
+    width: min(57vw, 900px);
+}
+
+.cvc-home-v2 .cvc-hero__visual-inner {
+    overflow: hidden;
+}
+
+.cvc-home-v2 .cvc-hero__illustration {
+    object-position: 62% center;
+}
+
+.cvc-home-v2 .cvc-hero__visual::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(247,251,255,.98) 0%, rgba(247,251,255,.58) 9%, rgba(247,251,255,0) 32%), linear-gradient(0deg, rgba(247,251,255,.12), rgba(247,251,255,0));
+    pointer-events: none;
+}
+
+/* position:absolute lặp lại tường minh ở đây (Phase 10A.13 QA fix) - bản
+   base .cvc-hero-feature-card đã có position:absolute, nhưng 1 rule
+   tablet cũ (10A.10, @media 641-1024px) từng đổi nó thành position:static
+   để xếp dưới ảnh khi ảnh minh họa chỉ cao vài trăm px tự động theo nội
+   dung. Ở Homepage V2, .cvc-hero__visual tại các breakpoint ≤1024px giờ
+   có height CỐ ĐỊNH (330px/270px/235px) - card ở chế độ static sẽ tràn
+   ra ngoài khối cố định đó và đè lên H1/eyebrow bên dưới (bug thật, phát
+   hiện qua screenshot QA tại 1024px). Khai báo lại absolute ở đây (đặc
+   hiệu hơn rule tablet cũ) để card luôn nổi đúng vị trí trong ảnh, mọi
+   breakpoint ≥481px. */
+.cvc-home-v2 .cvc-hero-feature-card {
+    position: absolute;
+    z-index: 3;
+    right: 44px;
+    bottom: 42px;
+    width: 250px;
+    backdrop-filter: blur(14px);
+    background: rgba(255,255,255,.9);
+}
+
+.cvc-home-v2 .cvc-section--tight {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.cvc-home-v2 .cvc-value-panel {
+    position: relative;
+    z-index: 5;
+    margin-top: -1px;
+    border-radius: 0 0 20px 20px;
+    box-shadow: 0 12px 35px rgba(13,68,130,.08);
+}
+
+.cvc-home-v2 .cvc-value-strip {
+    padding: 20px 24px;
+    background: rgba(255,255,255,.94);
+}
+
+.cvc-home-v2 .cvc-value-strip__item {
+    min-height: 58px;
+}
+
+.cvc-home-v2 .cvc-journey-section {
+    padding-top: 58px;
+    padding-bottom: 54px;
+    background: linear-gradient(180deg, #eff7ff 0%, #f8fbff 100%);
+}
+
+.cvc-home-v2 .cvc-journey-section .cvc-section__header {
+    margin-bottom: 30px;
+}
+
+.cvc-home-v2 .cvc-journey {
+    gap: 0;
+}
+
+.cvc-home-v2 .cvc-journey__step {
+    position: relative;
+    flex: 1;
+}
+
+.cvc-home-v2 .cvc-journey__step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 28px;
+    left: 58%;
+    width: 84%;
+    border-top: 1px dashed #9ec6f6;
+    pointer-events: none;
+}
+
+.cvc-home-v2 .cvc-journey__link {
+    position: relative;
+    z-index: 1;
+    min-height: 130px;
+    padding: 0 14px;
+    background: transparent;
+}
+
+.cvc-home-v2 .cvc-journey__icon {
+    width: 56px;
+    height: 56px;
+    background: #fff;
+    border: 1px solid #cfe2fa;
+    box-shadow: 0 8px 20px rgba(22,91,167,.08);
+}
+
+.cvc-home-v2 #khoa-hoc {
+    padding-top: 60px;
+    padding-bottom: 64px;
+}
+
+.cvc-home-v2 .cvc-home-split {
+    grid-template-columns: minmax(0, 1fr) 370px;
+    gap: 32px;
+}
+
+.cvc-home-v2 .cvc-home-main .cvc-card-grid--3 {
+    grid-template-columns: repeat(3, minmax(0,1fr));
+    gap: 18px;
+}
+
+.cvc-home-v2 .cvc-card--course {
+    overflow: hidden;
+    border: 1px solid #dbe8f7;
+    box-shadow: 0 8px 24px rgba(22,70,120,.06);
+    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+
+.cvc-home-v2 .cvc-card--course:hover {
+    transform: translateY(-4px);
+    border-color: #b9d5f5;
+    box-shadow: 0 16px 32px rgba(22,70,120,.12);
+}
+
+.cvc-home-v2 .cvc-card--course .cvc-card__media {
+    aspect-ratio: 4 / 3;
+}
+
+.cvc-home-v2 .cvc-card--course .cvc-card__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cvc-home-v2 .cvc-recruitment-panel {
+    border-radius: 20px;
+    padding: 18px;
+    box-shadow: 0 10px 30px rgba(22,70,120,.07);
+}
+
+.cvc-home-v2 .cvc-recruitment-panel__banner {
+    margin: -18px -18px 18px;
+}
+
+.cvc-home-v2 .cvc-recruitment-panel__banner img {
+    aspect-ratio: 16 / 7;
+}
+
+.cvc-home-v2 .cvc-recruitment-row {
+    border: 1px solid #e3edf8;
+    border-radius: 14px;
+    margin: 0 0 10px;
+    padding: 12px;
+    background: #fff;
+}
+
+.cvc-home-v2 .cvc-goal-section {
+    background: #f1f7ff;
+}
+
+.cvc-home-v2 .cvc-goal-section__grid {
+    grid-template-columns: minmax(0,1fr) 330px;
+    gap: 24px;
+}
+
+.cvc-home-v2 .cvc-goal-direction-grid {
+    gap: 14px;
+}
+
+.cvc-home-v2 .cvc-goal-direction-card,
+.cvc-home-v2 .cvc-goal-cta-card {
+    border: 1px solid #dce9f7;
+    box-shadow: 0 8px 22px rgba(22,70,120,.05);
+}
+
+.cvc-home-v2 .cvc-goal-cta-card {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, rgba(255,255,255,.96), rgba(234,244,255,.96));
+}
+
+.cvc-home-v2 .cvc-goal-cta-card::after {
+    content: '';
+    position: absolute;
+    right: -50px;
+    bottom: -70px;
+    width: 230px;
+    height: 190px;
+    background: url('assets/images/homepage-v2/SECTIONS/goal-journey.jpg') center / cover no-repeat;
+    opacity: .2;
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.cvc-home-v2 .cvc-cta-banner {
+    position: relative;
+    overflow: hidden;
+    min-height: 300px;
+    background: #0756b8;
+}
+
+.cvc-home-v2 .cvc-cta-banner__photo {
+    position: absolute;
+    inset: 0;
+    opacity: .32;
+    pointer-events: none;
+}
+
+.cvc-home-v2 .cvc-cta-banner__photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+.cvc-home-v2 .cvc-cta-banner::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(2,54,125,.94), rgba(4,96,196,.72) 60%, rgba(4,72,150,.62));
+    pointer-events: none;
+}
+
+.cvc-home-v2 .cvc-cta-banner__inner {
+    position: relative;
+    z-index: 2;
+}
+
+@media (max-width: 1200px) {
+    .cvc-home-v2 .cvc-hero__content { max-width: 590px; }
+    .cvc-home-v2 .cvc-hero__visual { width: 54vw; }
+    .cvc-home-v2 .cvc-home-split { grid-template-columns: minmax(0,1fr) 330px; }
+}
+
+@media (max-width: 1024px) {
+    .cvc-home-v2 .cvc-hero {
+        display: block;
+    }
+    .cvc-home-v2 .cvc-hero > .container {
+        min-height: 0;
+        width: min(760px, calc(100% - 32px));
+    }
+    .cvc-home-v2 .cvc-hero__visual {
+        display: block;
+        position: relative;
+        inset: auto;
+        width: 100%;
+        max-width: none;
+        height: 330px;
+        margin: 0;
+        order: -1;
+    }
+    .cvc-home-v2 .cvc-hero__visual-inner { height: 100%; }
+    .cvc-home-v2 .cvc-hero__illustration {
+        height: 100%;
+        object-position: center 28%;
+    }
+    .cvc-home-v2 .cvc-hero__visual::before,
+    .cvc-home-v2 .cvc-hero__visual::after { display: none; }
+    .cvc-home-v2 .cvc-hero__content {
+        max-width: none;
+        padding: 44px 0 48px;
+    }
+    .cvc-home-v2 .cvc-home-split { grid-template-columns: 1fr; }
+    .cvc-home-v2 .cvc-home-main .cvc-card-grid--3 { grid-template-columns: repeat(3,minmax(0,1fr)); }
+}
+
+@media (max-width: 767px) {
+    .cvc-home-v2 .cvc-hero__visual { height: 270px; }
+    .cvc-home-v2 .cvc-hero__content { padding: 34px 0 40px; }
+    .cvc-home-v2 .cvc-hero h1 { font-size: clamp(2.15rem, 9vw, 3rem); }
+    .cvc-home-v2 .cvc-hero__lead { font-size: 1rem; }
+    .cvc-home-v2 .cvc-hero-feature-card {
+        right: 14px;
+        bottom: 14px;
+        width: min(235px, calc(100% - 28px));
+    }
+    .cvc-home-v2 .cvc-home-main .cvc-card-grid--3 {
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        gap: 14px;
+        padding: 4px 2px 12px;
+        scrollbar-width: thin;
+    }
+    .cvc-home-v2 .cvc-home-main .cvc-card-grid--3 > * {
+        flex: 0 0 min(82vw, 330px);
+        scroll-snap-align: start;
+    }
+    .cvc-home-v2 .cvc-journey {
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        padding-bottom: 10px;
+    }
+    .cvc-home-v2 .cvc-journey__step { flex: 0 0 190px; scroll-snap-align: start; }
+    .cvc-home-v2 .cvc-journey__step:not(:last-child)::after { display: none; }
+    .cvc-home-v2 .cvc-goal-section__grid { grid-template-columns: 1fr; }
+    .cvc-home-v2 .cvc-goal-direction-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+    .cvc-home-v2 .cvc-cta-banner__inner { text-align: center; }
+    .cvc-home-v2 .cvc-cta-banner__actions { justify-content: center; }
+}
+
+@media (max-width: 480px) {
+    .cvc-home-v2 .cvc-hero__visual { height: 235px; }
+    .cvc-home-v2 .cvc-hero__illustration { object-position: 62% center; }
+    .cvc-home-v2 .cvc-hero-feature-card { display: none; }
+    .cvc-home-v2 .cvc-goal-direction-grid { grid-template-columns: 1fr 1fr; }
+    .cvc-home-v2 .cvc-value-strip { padding: 14px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cvc-home-v2 .cvc-card--course { transition: none; }
+    .cvc-home-v2 .cvc-card--course:hover { transform: none; }
 }

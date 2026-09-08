@@ -70,6 +70,25 @@ function cvc_enqueue_assets(): void {
 	);
 }
 
+add_action( 'wp_head', 'cvc_homepage_hero_preload', 2 );
+
+/**
+ * Preload ảnh hero (Phase 10A.13) - ảnh luôn nằm trên màn hình đầu tiên
+ * (above the fold), fetchpriority="high" trên thẻ <img> không đủ nếu
+ * trình duyệt còn phải parse hết CSS/HTML mới thấy tag - preload link
+ * trong <head> giúp trình duyệt bắt đầu tải ngay. Chỉ preload bản webp
+ * (khớp đúng resource mà <picture><source type="image/webp"> sẽ chọn ở
+ * trình duyệt hỗ trợ) - preload nhầm sang .jpg sẽ lãng phí băng thông vì
+ * trình duyệt hỗ trợ webp không dùng tới file đó.
+ */
+function cvc_homepage_hero_preload(): void {
+	if ( ! is_front_page() ) {
+		return;
+	}
+	$hero = get_theme_file_uri( '/assets/images/homepage-v2/HERO/hero-main.webp' );
+	printf( '<link rel="preload" as="image" href="%s" type="image/webp" fetchpriority="high">' . "\n", esc_url( $hero ) );
+}
+
 add_action( 'after_setup_theme', 'cvc_theme_setup' );
 
 function cvc_theme_setup(): void {

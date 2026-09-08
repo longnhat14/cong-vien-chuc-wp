@@ -28,3 +28,9 @@ npm-debug.log*
 # Kept on disk for QA/re-derivation reference, never committed - see
 # docs/PHASE_10A.10_ASSET_INTEGRATION.md.
 /homepage-assets-incoming/
+
+# Phase 10A.13 - Homepage V2 source packages (implementation + asset zips,
+# and their extracted copies) used to derive the theme/cong-vien-chuc/
+# changes actually committed. Kept on disk for reference, never committed -
+# see docs/PHASE_10A.13_HOMEPAGE_V2_INTEGRATION.md.
+/_homepage-v2/

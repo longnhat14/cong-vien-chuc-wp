@@ -1030,26 +1030,29 @@ function cvc_course_type_color( ?string $type ): string {
 
 /**
  * Artwork minh họa cho course card khi chưa có thumbnail_url thật.
- * Phase 10A.10: ưu tiên ảnh thật (cắt từ bộ asset ChatGPT Image
- * Generation, đã bỏ hết badge category baked-in trùng với
- * `.cvc-card__media-badge` thật - xem docs/PHASE_10A.10_ASSET_INTEGRATION.md
- * mục 5). course_type không map được ảnh (giá trị lạ, ngoài enum) rơi về
- * SVG scene (Phase 10A.9) làm fallback cuối - không bao giờ vỡ ảnh.
+ * Phase 10A.13: ảnh production Homepage V2 (đã cắt sẵn, không qua xử lý
+ * runtime nào - khác bản 10A.10 vốn tự crop/blur từ 1 board collage nhỏ).
+ * Map theo course_type THẬT (không theo vị trí trong danh sách API trả
+ * về) để đúng nội dung ảnh với category hiển thị - ví dụ course_type=
+ * professional luôn ra ảnh laptop/Excel, không phụ thuộc course đó đứng
+ * thứ mấy trong response. course_type không map được ảnh (giá trị lạ,
+ * ngoài enum) rơi về SVG scene (Phase 10A.9) làm fallback cuối.
  */
 function cvc_render_course_thumbnail_placeholder( ?string $course_type = null, string $color = 'blue' ): void {
 	$photo_map = array(
-		'exam_prep'    => 'course-exam-prep',
-		'skill'        => 'course-skill',
-		'professional' => 'course-professional',
-		'orientation'  => 'course-orientation',
+		'exam_prep'    => array( 'course-exam', 288, 201 ),
+		'skill'        => array( 'course-skill', 290, 201 ),
+		'professional' => array( 'course-office', 283, 201 ),
+		'orientation'  => array( 'course-admin', 289, 201 ),
 	);
-	$photo_file = $photo_map[ $course_type ?? '' ] ?? 'course-default';
-	if ( file_exists( get_theme_file_path( "/assets/images/homepage/{$photo_file}.webp" ) ) ) {
+	list( $photo_file, $photo_w, $photo_h ) = $photo_map[ $course_type ?? '' ] ?? array( 'course-law', 290, 201 );
+	$photo_path = "assets/images/homepage-v2/COURSES/{$photo_file}";
+	if ( file_exists( get_theme_file_path( "/{$photo_path}.jpg" ) ) ) {
 		?>
 		<div class="cvc-card__media cvc-card__media--photo" aria-hidden="true">
 			<picture>
-				<source srcset="<?php echo esc_url( get_theme_file_uri( "/assets/images/homepage/{$photo_file}.webp" ) ); ?>" type="image/webp">
-				<img src="<?php echo esc_url( get_theme_file_uri( "/assets/images/homepage/{$photo_file}.png" ) ); ?>" alt="" loading="lazy" width="220" height="226">
+				<source srcset="<?php echo esc_url( get_theme_file_uri( "/{$photo_path}.webp" ) ); ?>" type="image/webp">
+				<img src="<?php echo esc_url( get_theme_file_uri( "/{$photo_path}.jpg" ) ); ?>" alt="" loading="lazy" width="<?php echo esc_attr( $photo_w ); ?>" height="<?php echo esc_attr( $photo_h ); ?>">
 			</picture>
 		</div>
 		<?php
@@ -1623,15 +1626,15 @@ function cvc_render_search_form( string $current_q = '', string $input_id = 'cvc
  * nhấn. Toàn bộ vẫn SVG thuần, không phụ thuộc ảnh ngoài.
  */
 /**
- * Phase 10A.10 - thay minh họa SVG bằng ảnh thật (người công chức + trụ sở
- * cơ quan + cờ Tổ quốc, cắt từ bộ asset ChatGPT Image Generation, đã bỏ
- * hết phần chữ/UI baked-in trùng với HTML thật - xem docs/PHASE_10A.10_
- * ASSET_INTEGRATION.md mục 3). SVG cũ giữ lại làm fallback nếu file ảnh
- * bị thiếu (ví dụ site khác dùng theme này nhưng chưa có asset).
+ * Phase 10A.13 - ảnh hero production thật (1672x941, cắt sẵn từ bộ asset
+ * Homepage V2, không qua xử lý crop/blur runtime nào - khác bản 10A.10
+ * vốn phải tự crop+blur 1 ảnh collage nhỏ). WebP tự tạo (re-encode cùng
+ * kích thước, không crop) để giảm dung lượng tải; SVG cũ giữ lại làm
+ * fallback nếu thiếu file ảnh.
  */
 function cvc_render_hero_illustration(): void {
-	$file = 'assets/images/homepage/hero-photo';
-	if ( ! file_exists( get_theme_file_path( "/{$file}.webp" ) ) ) {
+	$file = 'assets/images/homepage-v2/HERO/hero-main';
+	if ( ! file_exists( get_theme_file_path( "/{$file}.jpg" ) ) ) {
 		cvc_render_hero_illustration_svg_fallback();
 		return;
 	}
@@ -1640,9 +1643,9 @@ function cvc_render_hero_illustration(): void {
 		<source srcset="<?php echo esc_url( get_theme_file_uri( "/{$file}.webp" ) ); ?>" type="image/webp">
 		<img
 			class="cvc-hero__illustration cvc-hero__illustration--photo"
-			src="<?php echo esc_url( get_theme_file_uri( "/{$file}.png" ) ); ?>"
+			src="<?php echo esc_url( get_theme_file_uri( "/{$file}.jpg" ) ); ?>"
 			alt="Người công chức, viên chức trước trụ sở cơ quan nhà nước"
-			width="433" height="415"
+			width="1672" height="941"
 			fetchpriority="high"
 			decoding="async"
 		>
@@ -2199,15 +2202,15 @@ function cvc_render_resource_hub_card( string $icon, string $title, string $desc
  * fixture có nhãn Demo như cũ, ảnh này không thêm bất kỳ claim nào.
  */
 function cvc_render_recruitment_panel_banner(): void {
-	$photo = 'assets/images/homepage/recruitment-photo';
-	if ( ! file_exists( get_theme_file_path( "/{$photo}.webp" ) ) ) {
+	$photo = 'assets/images/homepage-v2/SECTIONS/recruitment';
+	if ( ! file_exists( get_theme_file_path( "/{$photo}.jpg" ) ) ) {
 		return;
 	}
 	?>
 	<div class="cvc-recruitment-panel__banner" aria-hidden="true">
 		<picture>
 			<source srcset="<?php echo esc_url( get_theme_file_uri( "/{$photo}.webp" ) ); ?>" type="image/webp">
-			<img src="<?php echo esc_url( get_theme_file_uri( "/{$photo}.png" ) ); ?>" alt="" loading="lazy" width="220" height="208">
+			<img src="<?php echo esc_url( get_theme_file_uri( "/{$photo}.jpg" ) ); ?>" alt="" loading="lazy" width="412" height="210">
 		</picture>
 	</div>
 	<?php
@@ -2218,13 +2221,13 @@ function cvc_render_recruitment_panel_banner(): void {
  * skyline minh họa bằng SVG (không phải ảnh ngoài).
  */
 function cvc_render_homepage_cta_banner(): void {
-	$photo = 'assets/images/homepage/cta-skyline';
+	$photo = 'assets/images/homepage-v2/SECTIONS/cta-background';
 	?>
 	<section class="cvc-cta-banner">
-		<?php if ( file_exists( get_theme_file_path( "/{$photo}.webp" ) ) ) : ?>
+		<?php if ( file_exists( get_theme_file_path( "/{$photo}.jpg" ) ) ) : ?>
 			<picture class="cvc-cta-banner__photo" aria-hidden="true">
 				<source srcset="<?php echo esc_url( get_theme_file_uri( "/{$photo}.webp" ) ); ?>" type="image/webp">
-				<img src="<?php echo esc_url( get_theme_file_uri( "/{$photo}.png" ) ); ?>" alt="" loading="lazy" width="214" height="226">
+				<img src="<?php echo esc_url( get_theme_file_uri( "/{$photo}.jpg" ) ); ?>" alt="" loading="lazy" width="377" height="210">
 			</picture>
 		<?php endif; ?>
 		<svg class="cvc-cta-banner__skyline" viewBox="0 0 1200 120" preserveAspectRatio="none" aria-hidden="true">

@@ -102,7 +102,7 @@ cvc_seo_set_canonical( home_url( '/' ) );
 get_header();
 ?>
 
-<main id="main">
+<main id="main" class="cvc-home-v2">
 
 	<!-- ============ HERO ============ -->
 	<section class="cvc-hero">
