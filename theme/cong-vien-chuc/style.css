@@ -823,6 +823,77 @@ p {
     box-shadow: var(--cvc-shadow-sm);
 }
 
+/* Statistics strip (Phase 10A.6, Phần 13) - CHỈ render khi demo mode bật
+   (xem cvc_render_homepage_statistics_strip()). Tách biệt trực quan khỏi
+   Value strip thật ở trên bằng border-top + nhãn "Demo" riêng. */
+.cvc-stats-strip {
+    margin-top: var(--cvc-space-6);
+    padding-top: var(--cvc-space-6);
+    border-top: 1px dashed var(--cvc-color-border);
+}
+
+.cvc-stats-strip__label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: var(--cvc-space-3);
+    font-size: 0.75rem;
+    color: var(--cvc-color-text-subtle);
+}
+
+.cvc-stats-strip__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--cvc-space-6);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.cvc-stats-strip__item {
+    flex: 1 1 0;
+    min-width: 8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.cvc-stats-strip__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--cvc-radius-sm);
+    background: var(--cvc-color-primary-tint);
+    color: var(--cvc-color-primary);
+    flex-shrink: 0;
+}
+
+.cvc-stats-strip__value {
+    display: block;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--cvc-color-primary-dark);
+    line-height: 1.2;
+}
+
+.cvc-stats-strip__desc {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--cvc-color-text-subtle);
+}
+
+@media (max-width: 900px) {
+    .cvc-stats-strip__list {
+        gap: var(--cvc-space-4);
+    }
+
+    .cvc-stats-strip__item {
+        flex: 1 1 40%;
+    }
+}
+
 /* --- Value strip (Phần 8 VALUE STRIP) --- */
 .cvc-value-strip {
     display: flex;
@@ -1652,6 +1723,19 @@ p {
 .cvc-badge--flag-new {
     background: #16a34a;
     color: #ffffff;
+}
+
+/* Badge "Demo" (Phase 10A.6, Phần 17) - PHẢI gắn lên mọi design fixture
+   hiển thị ra trang, không đánh lừa người xem là dữ liệu thật. */
+.cvc-badge--demo {
+    background: #f3f4f6;
+    color: #6b7280;
+    border: 1px dashed #d1d5db;
+}
+
+.cvc-card--demo,
+.cvc-recruitment-row--demo {
+    opacity: 0.92;
 }
 
 .cvc-btn--block {

@@ -30,6 +30,11 @@ services:
       WORDPRESS_CONFIG_EXTRA: |
         define( 'CVC_API_BASE_URL', 'http://host.docker.internal:8001' );
         define( 'CVC_DEV_TOOLS', true );
+        // Phase 10A.6 - cho phép homepage dùng design fixture (demo) để
+        // lấp chỗ trống khi DEV data ít, CHỈ ảnh hưởng hiển thị homepage,
+        // không đụng DB/API/business logic. PHẢI false ở production - xem
+        // theme/cong-vien-chuc/inc/homepage-fixtures.php.
+        define( 'CVC_HOMEPAGE_DEMO_CONTENT', true );
     volumes:
       - wp_data:/var/www/html
       - ./theme/cong-vien-chuc:/var/www/html/wp-content/themes/cong-vien-chuc

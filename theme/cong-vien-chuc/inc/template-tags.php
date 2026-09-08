@@ -394,15 +394,20 @@ function cvc_render_recruitment_card( array $recruitment, int $heading_level = 2
  * phải suy đoán/tạo logo giả).
  */
 function cvc_render_recruitment_list_item( array $recruitment ): void {
+	$isDemo      = ! empty( $recruitment['_is_demo'] );
 	$slug        = (string) ( $recruitment['slug'] ?? '' );
 	$title       = (string) ( $recruitment['title'] ?? '' );
 	$location    = $recruitment['location'] ?? '';
 	$deadline    = $recruitment['dates']['application_deadline'] ?? null;
 	$agencyName  = $recruitment['agency']['name'] ?? null;
-	$url         = cvc_recruitment_url( $slug );
-	$initial     = $agencyName ? mb_substr( $agencyName, 0, 1 ) : 'C';
+	/*
+	 * Recruitment fixture (Phần 3/17) không có slug thật - trỏ về đúng
+	 * trang danh sách tuyển dụng thật thay vì 1 URL chi tiết không tồn tại.
+	 */
+	$url     = $isDemo ? cvc_recruitments_url() : cvc_recruitment_url( $slug );
+	$initial = $agencyName ? mb_substr( $agencyName, 0, 1 ) : 'C';
 	?>
-	<article class="cvc-recruitment-row">
+	<article class="cvc-recruitment-row<?php echo $isDemo ? ' cvc-recruitment-row--demo' : ''; ?>">
 		<span class="cvc-recruitment-row__avatar" aria-hidden="true"><?php echo esc_html( mb_strtoupper( $initial ) ); ?></span>
 		<div class="cvc-recruitment-row__body">
 			<div class="cvc-recruitment-row__top">
@@ -410,6 +415,9 @@ function cvc_render_recruitment_list_item( array $recruitment ): void {
 					<a href="<?php echo esc_url( $url ); ?>"><?php echo esc_html( $title ); ?></a>
 				</h3>
 				<span class="cvc-badge cvc-badge--status cvc-badge--status-active cvc-recruitment-row__status">Đang tuyển</span>
+				<?php if ( $isDemo ) : ?>
+					<?php cvc_render_demo_badge(); ?>
+				<?php endif; ?>
 			</div>
 			<?php if ( $agencyName ) : ?>
 				<p class="cvc-recruitment-row__agency"><?php echo esc_html( $agencyName ); ?></p>
@@ -1050,6 +1058,7 @@ function cvc_course_is_new( ?string $publishedAt ): bool {
 }
 
 function cvc_render_course_card( array $course, int $heading_level = 2 ): void {
+	$isDemo      = ! empty( $course['_is_demo'] );
 	$slug        = (string) ( $course['slug'] ?? '' );
 	$title       = (string) ( $course['title'] ?? '' );
 	$summary     = $course['short_description'] ?? '';
@@ -1061,10 +1070,15 @@ function cvc_render_course_card( array $course, int $heading_level = 2 ): void {
 	$price       = $course['price'] ?? null;
 	$isFeatured  = ! empty( $course['is_featured'] );
 	$isNew       = cvc_course_is_new( $course['published_at'] ?? null );
-	$url         = cvc_course_url( $slug );
-	$tag         = 'h' . max( 2, min( 4, $heading_level ) );
+	/*
+	 * Course fixture (Phần 3/17) không có slug thật - KHÔNG được trỏ tới
+	 * 1 URL chi tiết không tồn tại (dead link giả). Đưa về đúng trang
+	 * danh sách khóa học thật thay vì suy đoán 1 URL.
+	 */
+	$url = $isDemo ? cvc_courses_url() : cvc_course_url( $slug );
+	$tag = 'h' . max( 2, min( 4, $heading_level ) );
 	?>
-	<article class="cvc-card cvc-card--course">
+	<article class="cvc-card cvc-card--course<?php echo $isDemo ? ' cvc-card--demo' : ''; ?>">
 		<a class="cvc-card__media-link" href="<?php echo esc_url( $url ); ?>" tabindex="-1" aria-hidden="true">
 			<?php if ( $thumbnail ) : ?>
 				<div class="cvc-card__media">
@@ -1074,7 +1088,9 @@ function cvc_render_course_card( array $course, int $heading_level = 2 ): void {
 				<?php cvc_render_course_thumbnail_placeholder( $typeColor ); ?>
 			<?php endif; ?>
 			<span class="cvc-card__media-flags">
-				<?php if ( $isNew ) : ?>
+				<?php if ( $isDemo ) : ?>
+					<?php cvc_render_demo_badge(); ?>
+				<?php elseif ( $isNew ) : ?>
 					<span class="cvc-badge cvc-badge--flag-new">Mới</span>
 				<?php elseif ( null !== $price && 0.0 === (float) $price ) : ?>
 					<?php cvc_render_free_badge( true ); ?>
@@ -1674,6 +1690,38 @@ function cvc_render_value_strip(): void {
 			</li>
 		<?php endforeach; ?>
 	</ul>
+	<?php
+}
+
+/**
+ * Statistics strip (Phase 10A.6, Phần 13) - CHỈ render khi
+ * cvc_homepage_demo_enabled() (kiểm tra lại ngay trong hàm - phòng thủ
+ * kép, không dựa hoàn toàn vào nơi gọi). Không có aggregate API thật nào
+ * cung cấp các số liệu quy mô này - toàn bộ là design fixture, luôn đi
+ * kèm badge "Demo" trên chính hàng số liệu, không lẫn với Value strip
+ * thật ở trên (đặc điểm sản phẩm, không phải số liệu).
+ */
+function cvc_render_homepage_statistics_strip(): void {
+	if ( ! cvc_homepage_demo_enabled() ) {
+		return;
+	}
+
+	$stats = cvc_homepage_demo_statistics();
+	?>
+	<div class="cvc-stats-strip">
+		<span class="cvc-stats-strip__label"><?php cvc_render_demo_badge(); ?> Số liệu minh họa</span>
+		<ul class="cvc-stats-strip__list">
+			<?php foreach ( $stats as $stat ) : ?>
+				<li class="cvc-stats-strip__item">
+					<span class="cvc-stats-strip__icon"><?php cvc_render_icon( $stat['icon'], 20 ); ?></span>
+					<span>
+						<strong class="cvc-stats-strip__value"><?php echo esc_html( $stat['value'] ); ?></strong>
+						<span class="cvc-stats-strip__desc"><?php echo esc_html( $stat['label'] ); ?></span>
+					</span>
+				</li>
+			<?php endforeach; ?>
+		</ul>
+	</div>
 	<?php
 }
 

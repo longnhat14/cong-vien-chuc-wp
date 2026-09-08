@@ -1,21 +1,30 @@
 <?php
 /**
- * Homepage (Phase 10A.4 - rebuild theo ảnh master mới
- * docs/ui-benchmark/homepage-reference.png, phân tích trực tiếp bằng
- * Read). Kiến trúc: Hero (search + quick-search tags + floating feature
- * card) -> Value strip (panel viền) -> [2 cột: Khóa học nổi bật + Tài
- * nguyên ôn tập | Tuyển dụng mới nhất] -> Goal direction section -> CTA
- * banner. KHÔNG có Statistics strip (ảnh có nhưng số liệu trong ảnh chỉ
- * là ví dụ minh họa - dữ liệu DEV thật hiện quá nhỏ để hiển thị như "số
- * liệu quy mô" mà không gây hiểu lầm, xem docs/PHASE_10A.4_VISUAL_REBUILD.md).
- * KHÔNG có Community section (ảnh có "Cộng đồng học tập" nhưng backend
- * chưa có tính năng hỏi đáp/thảo luận thật - Phần 20 "không fake discussion").
- * Vẫn đúng 6 lệnh gọi API domain, không tạo dữ liệu giả (Phần 31/32).
+ * Homepage (Phase 10A.6 - 99% visual fidelity so với
+ * docs/ui-benchmark/homepage-reference.png). Kiến trúc: Hero -> Value
+ * strip -> Statistics strip (chỉ DEV, xem dưới) -> Learning Journey ->
+ * [2 cột: Khóa học nổi bật + Tài nguyên ôn tập | Tuyển dụng mới nhất] ->
+ * Goal direction section -> CTA banner.
+ *
+ * REAL DATA luôn ưu tiên (Phần 31). Khi DEV data quá ít để tái tạo đúng
+ * mật độ ảnh benchmark, CHO PHÉP lấp bằng DESIGN FIXTURE
+ * (inc/homepage-fixtures.php) - CHỈ khi CVC_HOMEPAGE_DEMO_CONTENT=true
+ * (mặc định false, production luôn an toàn - xem cvc_homepage_demo_enabled()).
+ * Fixture không bao giờ THAY THẾ real data đã có, chỉ ĐIỀN THÊM cho đủ,
+ * và luôn gắn badge "Demo" khi hiển thị (xem cvc_render_demo_badge()).
+ *
+ * KHÔNG có Community section (ảnh có "Cộng đồng học tập" nhưng đây là
+ * ranh giới KHÔNG được vượt qua dù đã nới lỏng fixture - Phần 22/43 cấm
+ * rõ "fake testimonials/community trình bày như thật", khác với design
+ * fixture cho course/recruitment/statistics vốn không giả lập người dùng
+ * thật). Vẫn đúng 6 lệnh gọi API domain.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+require_once __DIR__ . '/inc/homepage-fixtures.php';
 
 $course_result      = ( new CVC_Course_Service() )->list( array( 'per_page' => 3 ) );
 $topic_result       = ( new CVC_Topic_Service() )->list( array( 'per_page' => 1 ) );
@@ -53,6 +62,23 @@ $topics_total    = cvc_homepage_total( $topic_result );
 $knowledge_total = cvc_homepage_total( $knowledge_result );
 $legal_total     = cvc_homepage_total( $legal_result );
 
+/*
+ * Fallback strategy (Phần 5/31): REAL API -> DESIGN FIXTURE (chỉ khi bật
+ * demo mode) -> premium empty state. Fixture CHỈ ĐIỀN THÊM cho đủ mật độ
+ * 3 card, KHÔNG BAO GIỜ thay thế course/tin thật đã có - course/tin thật
+ * luôn hiện TRƯỚC.
+ */
+$courses_is_padded = false;
+if ( $course_result['ok'] && count( $courses ) < 3 && cvc_homepage_demo_enabled() ) {
+	$needed             = 3 - count( $courses );
+	$courses            = array_merge( $courses, array_slice( cvc_homepage_demo_courses(), 0, $needed ) );
+	$courses_is_padded  = true;
+}
+
+if ( $recruitment_result['ok'] && empty( $recruitments ) && cvc_homepage_demo_enabled() ) {
+	$recruitments = cvc_homepage_demo_recruitments();
+}
+
 cvc_seo_set_title( 'Ôn thi công chức, viên chức online' );
 cvc_seo_set_description( 'Nền tảng hỗ trợ công chức, viên chức: khóa học theo lộ trình, tin tuyển dụng uy tín, đề thi trắc nghiệm và tài liệu hữu ích giúp bạn vững vàng trên con đường sự nghiệp.' );
 cvc_seo_set_canonical( home_url( '/' ) );
@@ -89,11 +115,12 @@ get_header();
 		</div>
 	</section>
 
-	<!-- ============ VALUE STRIP ============ -->
+	<!-- ============ VALUE STRIP + STATISTICS (chỉ DEV) ============ -->
 	<section class="cvc-section cvc-section--tight">
 		<div class="container">
 			<div class="cvc-value-panel">
 				<?php cvc_render_value_strip(); ?>
+				<?php cvc_render_homepage_statistics_strip(); ?>
 			</div>
 		</div>
 	</section>
@@ -112,7 +139,7 @@ get_header();
 					<?php cvc_render_error_state(); ?>
 				<?php elseif ( empty( $courses ) ) : ?>
 					<?php cvc_render_premium_empty_state( 'courses', 'Chưa có khóa học nào', 'Khóa học mới sẽ sớm được cập nhật tại đây.', 'Xem tất cả khóa học', cvc_courses_url() ); ?>
-				<?php elseif ( 1 === count( $courses ) ) : ?>
+				<?php elseif ( 1 === count( $courses ) && ! $courses_is_padded ) : ?>
 					<?php cvc_render_course_card_featured( $courses[0] ); ?>
 				<?php else : ?>
 					<div class="cvc-card-grid cvc-card-grid--3">
