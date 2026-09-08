@@ -3,7 +3,7 @@ Theme Name: Công Viên Chức
 Theme URI: https://congvienchuc.com
 Author: PCTech
 Description: Frontend WordPress cho nền tảng Công Viên Chức.
-Version: 1.0.0
+Version: 1.0.1
 */
 
 /* --- Design tokens --- */
@@ -186,13 +186,13 @@ input:focus-visible {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--cvc-space-6);
+    gap: var(--cvc-space-4);
     padding: 0.65rem var(--cvc-space-4);
     min-height: 72px;
     /* Header là 1 dải riêng biệt, không cần bó hẹp theo max-width nội
        dung chính (Phase 10A.8, Phần 11/12 - "header hiện tại còn hơi
        nhỏ", tránh nav 7 mục bị wrap xuống dòng 2 ở 1440px). */
-    max-width: 1400px;
+    max-width: 1420px;
 }
 
 .site-title {
@@ -305,12 +305,13 @@ input:focus-visible {
 .site-nav a {
     display: inline-flex;
     align-items: center;
-    gap: 0.4rem;
-    padding: 0.55rem 0.85rem;
+    gap: 0.3rem;
+    padding: 0.5rem 0.5rem;
     color: var(--cvc-color-text-muted);
     font-weight: 600;
-    font-size: 0.93rem;
+    font-size: 0.8rem;
     border-radius: var(--cvc-radius-pill);
+    white-space: nowrap;
 }
 
 .site-nav a:hover {
@@ -338,7 +339,7 @@ input:focus-visible {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: var(--cvc-space-4);
+    gap: 0.65rem;
 }
 
 .site-content {
@@ -2489,8 +2490,18 @@ button.cvc-btn:disabled {
 .site-header__auth {
     display: flex;
     align-items: center;
-    gap: var(--cvc-space-3);
-    margin-left: var(--cvc-space-4);
+    gap: 0.5rem;
+    margin-left: 0.75rem;
+    flex-shrink: 0;
+}
+
+/* Thu hẹp padding ngang riêng cho nút Đăng ký/Đăng nhập trong header
+   (Phase 10A.14 - sửa nav bị wrap ở 1440px) - không đổi
+   .cvc-btn--small gốc vì class đó còn dùng ở nhiều nơi khác (dashboard,
+   account sections) không liên quan tới header. */
+.site-header__auth .cvc-btn--small {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.8rem;
 }
 
 .site-header__account-link {
