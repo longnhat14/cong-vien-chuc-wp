@@ -10,15 +10,31 @@ Version: 1.0.0
 :root {
     --cvc-color-primary: #0a58ca;
     --cvc-color-primary-dark: #084298;
+    --cvc-color-primary-deep: #062a5c;
     --cvc-color-primary-tint: #eef4ff;
-    --cvc-color-text: #1f2328;
-    --cvc-color-text-muted: #4b5563;
-    --cvc-color-text-subtle: #6b7280;
+    --cvc-color-primary-tint-strong: #dbe9ff;
+    --cvc-color-accent-green: #16a34a;
+    --cvc-color-accent-amber: #d97706;
+    --cvc-color-accent-red: #dc2626;
+    --cvc-color-accent-purple: #7c3aed;
+    --cvc-color-text: #101828;
+    --cvc-color-text-muted: #475467;
+    --cvc-color-text-subtle: #667085;
     --cvc-color-border: #e5e7eb;
+    --cvc-color-border-strong: #d0d5dd;
     --cvc-color-bg: #ffffff;
     --cvc-color-bg-alt: #f8fafc;
+    --cvc-color-bg-tint: #f0f6ff;
 
     --cvc-font-sans: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+    /* Type scale - clamp() để tự responsive, không cần media query riêng
+       cho từng heading (Phase 10A.2 - typography trước đây quá nhỏ). */
+    --cvc-text-h1: clamp(1.9rem, 1.5rem + 2vw, 3.25rem);
+    --cvc-text-h2: clamp(1.5rem, 1.3rem + 1vw, 2.1rem);
+    --cvc-text-h3: clamp(1.15rem, 1.05rem + 0.5vw, 1.4rem);
+    --cvc-text-lead: clamp(1.05rem, 1rem + 0.3vw, 1.2rem);
+    --cvc-text-body: 1rem;
 
     --cvc-space-1: 0.25rem;
     --cvc-space-2: 0.5rem;
@@ -27,15 +43,25 @@ Version: 1.0.0
     --cvc-space-6: 1.5rem;
     --cvc-space-8: 2rem;
     --cvc-space-12: 3rem;
+    --cvc-space-16: 4rem;
+    --cvc-space-20: 5rem;
 
-    --cvc-radius-sm: 6px;
-    --cvc-radius: 8px;
+    /* Nhịp section (Phần 12 - "homepage phải có rhythm") - dùng chung cho
+       mọi <section> homepage/domain page, thay vì mỗi nơi tự đặt padding. */
+    --cvc-section-py: clamp(2.5rem, 2rem + 2vw, 5rem);
+    --cvc-section-py-lg: clamp(3rem, 2.5rem + 2.5vw, 6rem);
+
+    --cvc-radius-sm: 8px;
+    --cvc-radius: 14px;
+    --cvc-radius-lg: 20px;
     --cvc-radius-pill: 999px;
 
-    --cvc-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
-    --cvc-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+    --cvc-shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.06);
+    --cvc-shadow: 0 4px 12px rgba(16, 24, 40, 0.08);
+    --cvc-shadow-md: 0 8px 24px rgba(16, 24, 40, 0.1);
+    --cvc-shadow-lg: 0 20px 48px rgba(6, 42, 92, 0.16);
 
-    --cvc-container-width: 1140px;
+    --cvc-container-width: 1240px;
     --cvc-prose-width: 72ch;
 }
 
@@ -54,9 +80,10 @@ body {
     margin: 0;
     font-family: var(--cvc-font-sans);
     font-size: 16px;
-    line-height: 1.6;
+    line-height: 1.65;
     color: var(--cvc-color-text);
     background: var(--cvc-color-bg);
+    -webkit-font-smoothing: antialiased;
 }
 
 img {
@@ -81,6 +108,16 @@ input:focus-visible {
     outline: 2px solid var(--cvc-color-primary);
     outline-offset: 2px;
     border-radius: 2px;
+}
+
+/* Nền tối (footer, section --deep, CTA banner) - outline xanh đậm gần như
+   biến mất trên nền cũng xanh đậm, đổi sang outline trắng cho đủ tương
+   phản (Phần 29 Accessibility - "focus visible"). */
+.site-footer a:focus-visible,
+.cvc-section--deep a:focus-visible,
+.cvc-section--deep button:focus-visible,
+.cvc-cta-banner a:focus-visible {
+    outline-color: #ffffff;
 }
 
 /* --- Skip link (bỏ qua navigation, tới nội dung chính) --- */
@@ -123,28 +160,56 @@ input:focus-visible {
 
 .site-header {
     border-bottom: 1px solid var(--cvc-color-border);
-    background: var(--cvc-color-bg);
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: saturate(1.2) blur(6px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
 .site-header__inner {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--cvc-space-4);
-    padding: var(--cvc-space-4);
+    gap: var(--cvc-space-6);
+    padding: 0.65rem var(--cvc-space-4);
+    min-height: 68px;
 }
 
 .site-title {
     display: flex;
-    flex-direction: column;
-    font-size: 1.25rem;
-    font-weight: 700;
+    align-items: center;
+    gap: 0.65rem;
+    font-size: 1.2rem;
+    font-weight: 800;
     color: var(--cvc-color-text);
+    letter-spacing: -0.01em;
+}
+
+.site-title__mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+    border-radius: var(--cvc-radius);
+    background: linear-gradient(155deg, var(--cvc-color-primary), var(--cvc-color-primary-deep));
+    color: #fff;
+    box-shadow: var(--cvc-shadow-sm);
+}
+
+.site-title__text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
 }
 
 .site-title__tagline {
-    font-size: 0.8rem;
-    font-weight: 400;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
     color: var(--cvc-color-text-subtle);
 }
 
@@ -219,21 +284,35 @@ input:focus-visible {
 }
 
 .site-nav a {
-    display: inline-block;
-    padding: 0.6rem 0.75rem;
-    color: var(--cvc-color-text);
-    font-weight: 500;
-    border-radius: var(--cvc-radius-sm);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.55rem 0.85rem;
+    color: var(--cvc-color-text-muted);
+    font-weight: 600;
+    font-size: 0.93rem;
+    border-radius: var(--cvc-radius-pill);
 }
 
 .site-nav a:hover {
     text-decoration: none;
     color: var(--cvc-color-primary);
+    background: var(--cvc-color-primary-tint);
+}
+
+.cvc-nav-icon {
+    flex-shrink: 0;
+    opacity: 0.85;
 }
 
 .site-nav .cvc-nav-current a {
-    color: var(--cvc-color-primary);
+    color: var(--cvc-color-primary-dark);
+    background: var(--cvc-color-primary-tint);
     font-weight: 700;
+}
+
+.site-nav .cvc-nav-current .cvc-nav-icon {
+    opacity: 1;
 }
 
 .site-nav {
@@ -249,9 +328,10 @@ input:focus-visible {
 }
 
 .site-footer {
-    border-top: 1px solid var(--cvc-color-border);
+    border-top: 1px solid #1c3a63;
+    background: var(--cvc-color-primary-deep);
     padding: var(--cvc-space-8) 0;
-    color: var(--cvc-color-text-subtle);
+    color: #a9c2e8;
     font-size: 0.9rem;
 }
 
@@ -261,22 +341,27 @@ input:focus-visible {
     align-items: center;
     justify-content: space-between;
     gap: var(--cvc-space-4);
+    padding-bottom: var(--cvc-space-4);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .site-footer__brand {
     margin: 0;
-    color: var(--cvc-color-text);
+    font-size: 1.05rem;
+    color: #ffffff;
 }
 
 .site-footer__tagline {
     margin: 0.25rem 0 0;
-    color: var(--cvc-color-text-subtle);
+    color: #a9c2e8;
     font-size: 0.85rem;
 }
 
 .site-footer__copyright {
-    margin: 0;
+    margin: var(--cvc-space-4) 0 0;
     width: 100%;
+    font-size: 0.82rem;
+    color: #7fa0d1;
 }
 
 .site-footer__nav ul {
@@ -289,53 +374,78 @@ input:focus-visible {
 }
 
 .site-footer__nav a {
-    color: var(--cvc-color-text-subtle);
+    color: #cfe1ff;
+    font-weight: 500;
+}
+
+.site-footer__nav a:hover {
+    color: #ffffff;
 }
 
 /* --- Typography --- */
 h1, h2, h3, h4 {
-    line-height: 1.25;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
     margin: 0 0 1rem;
     color: var(--cvc-color-text);
-    font-weight: 700;
+    font-weight: 800;
 }
 
 h1 {
-    font-size: 1.75rem;
+    font-size: var(--cvc-text-h1);
+    line-height: 1.1;
 }
 
 h2 {
-    font-size: 1.4rem;
+    font-size: var(--cvc-text-h2);
 }
 
 h3 {
-    font-size: 1.15rem;
+    font-size: var(--cvc-text-h3);
+    font-weight: 700;
 }
 
 p {
     margin: 0 0 1rem;
+    line-height: 1.65;
 }
 
-/* --- State: loading / empty / error --- */
+/* --- State: loading / empty / error ---
+ * Empty KHÔNG PHẢI warning (Phase 10A.2, Phần 25) - trước đây dùng cùng
+ * nền vàng cảnh báo với validation error, khiến "chưa có dữ liệu" (bình
+ * thường, nhất là trên DEV) trông như lỗi. Giờ trung tính + có icon, chỉ
+ * .cvc-state--error mới dùng màu cảnh báo thật.
+ */
 .cvc-state {
-    padding: 1rem;
-    border-radius: 6px;
+    padding: var(--cvc-space-6) var(--cvc-space-4);
+    border-radius: var(--cvc-radius);
     margin: 1rem 0;
+    text-align: center;
+    font-size: 0.95rem;
 }
 
 .cvc-state--loading {
-    background: #f3f4f6;
-    color: #4b5563;
+    background: var(--cvc-color-bg-alt);
+    color: var(--cvc-color-text-subtle);
 }
 
 .cvc-state--empty {
-    background: #fef9c3;
-    color: #713f12;
+    background: var(--cvc-color-bg-alt);
+    border: 1px dashed var(--cvc-color-border-strong);
+    color: var(--cvc-color-text-muted);
+}
+
+.cvc-state--empty::before {
+    content: '\1F4C2';
+    display: block;
+    font-size: 1.75rem;
+    margin-bottom: 0.5rem;
 }
 
 .cvc-state--error {
-    background: #fee2e2;
-    color: #7f1d1d;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
 }
 
 /* --- Dev tools (Phase 7 status page) --- */
@@ -364,32 +474,50 @@ p {
 
 /* --- Buttons --- */
 .cvc-btn {
-    display: inline-block;
-    padding: 0.65rem 1.25rem;
-    border-radius: 6px;
-    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    min-height: 44px;
+    padding: 0.65rem 1.4rem;
+    border-radius: var(--cvc-radius-sm);
+    font-weight: 700;
+    font-size: 0.95rem;
     text-decoration: none;
     border: 1px solid transparent;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease, border-color 0.12s ease;
 }
 
 .cvc-btn:hover {
     text-decoration: none;
 }
 
+.cvc-btn:active {
+    transform: translateY(1px);
+}
+
 .cvc-btn--primary {
     background: var(--cvc-color-primary);
     color: #ffffff;
+    box-shadow: 0 1px 2px rgba(6, 42, 92, 0.08);
 }
 
 .cvc-btn--primary:hover {
     background: var(--cvc-color-primary-dark);
     color: #ffffff;
+    box-shadow: var(--cvc-shadow-sm);
 }
 
 .cvc-btn--secondary {
-    background: transparent;
+    background: var(--cvc-color-bg);
+    border-color: var(--cvc-color-border-strong);
+    color: var(--cvc-color-text);
+}
+
+.cvc-btn--secondary:hover {
     border-color: var(--cvc-color-primary);
-    color: var(--cvc-color-primary);
+    background: var(--cvc-color-primary-tint);
+    color: var(--cvc-color-primary-dark);
 }
 
 .cvc-btn--secondary:hover {
@@ -409,38 +537,94 @@ p {
     text-decoration: underline;
 }
 
-/* --- Homepage hero --- */
+/* --- Homepage hero (Phase 10A.2 - Visual Benchmark) ---
+ * 2 cột: nội dung + search bên trái, minh họa SVG bên phải. Nền gradient
+ * xanh rất nhạt (KHÔNG dùng ảnh chụp generic - Phần 10) tạo chiều sâu mà
+ * không cần ảnh ngoài, không rủi ro vỡ ảnh/chậm tải.
+ */
 .cvc-hero {
-    background: #f8fafc;
-    border-bottom: 1px solid #e5e7eb;
-    padding: 3rem 0;
-    text-align: center;
+    background: linear-gradient(180deg, #f5f9ff 0%, #ffffff 75%);
+    border-bottom: 1px solid var(--cvc-color-border);
+    padding: var(--cvc-space-16) 0 var(--cvc-space-12);
+    overflow: hidden;
 }
 
-.cvc-hero__inner {
-    max-width: 640px;
+.cvc-hero__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    align-items: center;
+    gap: var(--cvc-space-12);
+}
+
+.cvc-hero__eyebrow {
+    display: inline-block;
+    margin: 0 0 var(--cvc-space-3);
+    padding: 0.3rem 0.85rem;
+    border-radius: var(--cvc-radius-pill);
+    background: var(--cvc-color-primary-tint);
+    color: var(--cvc-color-primary-dark);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
 }
 
 .cvc-hero__lead {
-    color: #4b5563;
-    font-size: 1.1rem;
+    color: var(--cvc-color-text-muted);
+    font-size: var(--cvc-text-lead);
+    max-width: 46ch;
+}
+
+.cvc-hero .cvc-search-form {
+    margin: var(--cvc-space-6) 0 0;
 }
 
 .cvc-hero__actions {
     display: flex;
-    justify-content: center;
     flex-wrap: wrap;
     gap: 0.75rem;
-    margin-top: 1.5rem;
+    margin-top: var(--cvc-space-4);
 }
 
-/* --- Homepage sections --- */
+.cvc-hero__visual {
+    display: flex;
+    justify-content: center;
+}
+
+.cvc-hero__illustration {
+    width: 100%;
+    max-width: 420px;
+    height: auto;
+}
+
+/* --- Homepage / domain page sections - nhịp nền (Phần 12 SECTION RHYTHM):
+ * trắng (mặc định) -> tint (xanh rất nhạt, Tuyển dụng) -> deep (xanh đậm,
+ * Thi trắc nghiệm) -> trắng (Resource hub) -> CTA banner xanh đậm đặc.
+ * Thay cho .cvc-section--alt cũ (xám be, không có nhịp rõ ràng). */
 .cvc-section {
-    padding: 3rem 0;
+    padding: var(--cvc-section-py) 0;
 }
 
-.cvc-section--alt {
-    background: #f8fafc;
+.cvc-section--tight {
+    padding: var(--cvc-space-8) 0;
+}
+
+.cvc-section--tint {
+    background: var(--cvc-color-bg-tint);
+}
+
+.cvc-section--deep {
+    background: var(--cvc-color-primary-deep);
+    color: #fff;
+}
+
+.cvc-section--deep h2,
+.cvc-section--deep .cvc-section__more {
+    color: #fff;
+}
+
+.cvc-section--deep .cvc-section__more:hover {
+    color: #cfe1ff;
 }
 
 .cvc-section__header {
@@ -448,7 +632,7 @@ p {
     align-items: baseline;
     justify-content: space-between;
     gap: 1rem;
-    margin-bottom: 1rem;
+    margin-bottom: var(--cvc-space-6);
 }
 
 .cvc-section__header h2 {
@@ -457,7 +641,207 @@ p {
 
 .cvc-section__more {
     white-space: nowrap;
-    font-weight: 600;
+    font-weight: 700;
+    color: var(--cvc-color-primary);
+}
+
+/* --- Value strip (Phần 8 VALUE STRIP) --- */
+.cvc-value-strip {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: var(--cvc-space-6);
+}
+
+.cvc-value-strip__item {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+    padding: 0 var(--cvc-space-4);
+    border-left: 1px solid var(--cvc-color-border);
+}
+
+.cvc-value-strip__item:first-child {
+    border-left: none;
+    padding-left: 0;
+}
+
+.cvc-value-strip__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--cvc-color-primary-tint);
+    font-size: 1.35rem;
+    margin-bottom: 0.25rem;
+}
+
+.cvc-value-strip__title {
+    font-weight: 700;
+    font-size: 0.98rem;
+}
+
+.cvc-value-strip__desc {
+    font-size: 0.85rem;
+    color: var(--cvc-color-text-subtle);
+    line-height: 1.5;
+}
+
+/* --- Resource hub (Chủ đề/Kiến thức/Văn bản gộp 1 hàng) --- */
+.cvc-resource-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: var(--cvc-space-6);
+}
+
+.cvc-resource-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+    padding: var(--cvc-space-6);
+    background: var(--cvc-color-bg);
+    border: 1px solid var(--cvc-color-border);
+    border-radius: var(--cvc-radius-lg);
+    color: var(--cvc-color-text);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.cvc-resource-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--cvc-shadow-md);
+    border-color: var(--cvc-color-primary);
+    text-decoration: none;
+}
+
+.cvc-resource-card__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border-radius: var(--cvc-radius);
+    background: var(--cvc-color-primary-tint);
+    font-size: 1.6rem;
+    margin-bottom: 0.35rem;
+}
+
+.cvc-resource-card__title {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--cvc-color-text);
+}
+
+.cvc-resource-card__desc {
+    font-size: 0.9rem;
+    color: var(--cvc-color-text-subtle);
+    line-height: 1.55;
+}
+
+.cvc-resource-card__count {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--cvc-color-primary-dark);
+}
+
+.cvc-resource-card__link {
+    margin-top: auto;
+    padding-top: 0.5rem;
+    font-weight: 700;
+    color: var(--cvc-color-primary);
+}
+
+/* --- Empty state cao cấp cho section chủ lực homepage (Phần 25) --- */
+.cvc-empty-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.5rem;
+    padding: var(--cvc-space-12) var(--cvc-space-6);
+    background: var(--cvc-color-bg);
+    border: 1px dashed var(--cvc-color-border-strong);
+    border-radius: var(--cvc-radius-lg);
+}
+
+.cvc-section--deep .cvc-empty-panel {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+.cvc-empty-panel__icon {
+    font-size: 2.25rem;
+}
+
+.cvc-empty-panel__heading {
+    margin: 0;
+    font-size: 1.15rem;
+}
+
+.cvc-section--deep .cvc-empty-panel__heading {
+    color: #fff;
+}
+
+.cvc-empty-panel__desc {
+    margin: 0 0 0.5rem;
+    max-width: 46ch;
+    color: var(--cvc-color-text-subtle);
+}
+
+.cvc-section--deep .cvc-empty-panel__desc {
+    color: #dbe9ff;
+}
+
+/* --- CTA banner cuối trang chủ (Phần 8 FINAL CTA) --- */
+.cvc-cta-banner {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, var(--cvc-color-primary-deep), var(--cvc-color-primary-dark));
+    padding: var(--cvc-space-16) 0;
+    color: #fff;
+}
+
+.cvc-cta-banner__skyline {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 120px;
+}
+
+.cvc-cta-banner__inner {
+    position: relative;
+    text-align: center;
+    max-width: 640px;
+}
+
+.cvc-cta-banner h2 {
+    color: #fff;
+    margin-bottom: var(--cvc-space-3);
+}
+
+.cvc-cta-banner p {
+    color: #dbe9ff;
+    font-size: var(--cvc-text-lead);
+    margin-bottom: var(--cvc-space-6);
+}
+
+.cvc-btn--cta {
+    background: #fff;
+    color: var(--cvc-color-primary-deep);
+    padding: 0.85rem 1.9rem;
+    font-size: 1.02rem;
+}
+
+.cvc-btn--cta:hover {
+    background: #eef4ff;
+    color: var(--cvc-color-primary-deep);
 }
 
 /* --- Domain pages (Courses / Topics) --- */
@@ -521,8 +905,29 @@ p {
 .cvc-card-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 1.25rem;
-    margin: 1.5rem 0;
+    gap: var(--cvc-space-6);
+    margin: 0;
+}
+
+.cvc-card-grid--4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.cvc-card-grid--3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 1024px) {
+    .cvc-card-grid--4 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    .cvc-card-grid--4,
+    .cvc-card-grid--3 {
+        grid-template-columns: 1fr;
+    }
 }
 
 .cvc-card {
@@ -532,12 +937,18 @@ p {
     display: flex;
     flex-direction: column;
     background: var(--cvc-color-bg);
-    transition: box-shadow 0.15s ease, border-color 0.15s ease;
+    box-shadow: var(--cvc-shadow-sm);
+    transition: box-shadow 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
 }
 
 .cvc-card:hover {
     border-color: var(--cvc-color-primary);
-    box-shadow: var(--cvc-shadow-sm);
+    box-shadow: var(--cvc-shadow-md);
+    transform: translateY(-3px);
+}
+
+.cvc-card__media {
+    position: relative;
 }
 
 .cvc-card__media img {
@@ -547,38 +958,100 @@ p {
     object-fit: cover;
 }
 
+/* Placeholder minh họa khi course chưa có thumbnail thật (Phần 10). */
+.cvc-card__media--placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 16 / 9;
+    background: linear-gradient(135deg, var(--cvc-color-primary), var(--cvc-color-primary-deep));
+}
+
 .cvc-card__body {
-    padding: 1rem;
+    padding: 1.25rem;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.55rem;
     flex: 1;
+}
+
+.cvc-card__badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
 }
 
 .cvc-card__title {
     margin: 0;
     font-size: 1.1rem;
+    line-height: 1.35;
 }
 
 .cvc-card__title a {
-    color: #1f2328;
+    color: var(--cvc-color-text);
 }
 
 .cvc-card__excerpt {
     margin: 0;
-    color: #4b5563;
+    color: var(--cvc-color-text-muted);
     font-size: 0.92rem;
 }
 
 .cvc-card__meta {
     margin: 0;
-    color: #6b7280;
+    color: var(--cvc-color-text-subtle);
+    font-size: 0.85rem;
+}
+
+.cvc-card__meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.75rem;
+    margin: 0;
+    color: var(--cvc-color-text-subtle);
     font-size: 0.85rem;
 }
 
 .cvc-card__footer {
     margin-top: auto;
     padding-top: 0.5rem;
+}
+
+.cvc-card__footer--split {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.cvc-card__deadline {
+    font-size: 0.85rem;
+    color: var(--cvc-color-text-subtle);
+}
+
+.cvc-card__deadline strong {
+    color: var(--cvc-color-accent-amber);
+}
+
+/* --- Exam card: accent bar + icon riêng (Phần 8 EXAMS "accent mạnh") --- */
+.cvc-card--exam {
+    position: relative;
+    border-top: 3px solid var(--cvc-color-primary-dark);
+}
+
+.cvc-card--exam .cvc-card__accent {
+    position: absolute;
+    top: var(--cvc-space-4);
+    right: var(--cvc-space-4);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--cvc-color-primary-tint);
+    color: var(--cvc-color-primary-dark);
 }
 
 /* --- Badges --- */
@@ -749,18 +1222,28 @@ p {
 
 /* --- State: not found / locked --- */
 .cvc-state--notfound {
-    background: #f3f4f6;
-    color: #374151;
+    background: var(--cvc-color-bg-alt);
+    border: 1px dashed var(--cvc-color-border-strong);
+    color: var(--cvc-color-text-muted);
+}
+
+.cvc-state--notfound::before {
+    content: '\1F50D';
+    display: block;
+    font-size: 1.75rem;
+    margin-bottom: 0.5rem;
 }
 
 .cvc-state--locked {
-    background: #fef9c3;
-    color: #713f12;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    color: #92400e;
 }
 
 .cvc-state--expired {
-    background: #fef9c3;
-    color: #713f12;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    color: #92400e;
 }
 
 /* --- Search form --- */
@@ -769,11 +1252,6 @@ p {
     gap: 0.5rem;
     max-width: 560px;
     margin: 1.25rem 0;
-}
-
-.cvc-hero .cvc-search-form {
-    margin-left: auto;
-    margin-right: auto;
 }
 
 .cvc-search-form__input {
@@ -791,6 +1269,31 @@ p {
 .cvc-search-form__input:focus-visible {
     outline: 2px solid var(--cvc-color-primary);
     outline-offset: 1px;
+}
+
+/* Search trong hero là focal point lớn nhất (Phần 8 HERO) - to hơn, bo
+   tròn hơn, có shadow riêng để nổi bật trên nền gradient. */
+.cvc-hero .cvc-search-form {
+    max-width: 34rem;
+    gap: 0.6rem;
+    padding: 0.4rem;
+    background: var(--cvc-color-bg);
+    border-radius: var(--cvc-radius-lg);
+    box-shadow: var(--cvc-shadow-lg);
+}
+
+.cvc-hero .cvc-search-form__input {
+    border: none;
+    padding: 0.7rem 1rem;
+    font-size: 1.02rem;
+}
+
+.cvc-hero .cvc-search-form__input:focus-visible {
+    outline: none;
+}
+
+.cvc-hero .cvc-btn {
+    border-radius: var(--cvc-radius);
 }
 
 /* --- Search filters --- */
@@ -876,7 +1379,8 @@ button.cvc-btn:disabled {
 }
 
 .cvc-btn--small {
-    padding: 0.35rem 0.85rem;
+    min-height: 36px;
+    padding: 0.4rem 0.9rem;
     font-size: 0.85rem;
 }
 
@@ -1623,7 +2127,7 @@ button.cvc-btn:disabled {
     }
 
     .cvc-hero {
-        padding: 2rem 0;
+        padding: 2.5rem 0;
     }
 
     .cvc-section {
@@ -1634,5 +2138,58 @@ button.cvc-btn:disabled {
         flex-direction: column;
         align-items: flex-start;
         gap: 0.5rem;
+    }
+
+    .cvc-hero__visual {
+        display: none;
+    }
+
+    .cvc-value-strip {
+        flex-direction: column;
+        gap: var(--cvc-space-4);
+    }
+
+    .cvc-value-strip__item {
+        flex-direction: row;
+        align-items: center;
+        border-left: none;
+        border-top: 1px solid var(--cvc-color-border);
+        padding: var(--cvc-space-4) 0 0;
+    }
+
+    .cvc-value-strip__item:first-child {
+        border-top: none;
+        padding-top: 0;
+    }
+
+    .cvc-value-strip__icon {
+        margin-bottom: 0;
+        flex-shrink: 0;
+    }
+
+    .cvc-cta-banner {
+        padding: var(--cvc-space-12) 0;
+    }
+}
+
+/* Tablet (768-1024px, benchmark Phần 5 BASELINE SCREENSHOT AUDIT) - hero
+   vẫn 2 cột nhưng minh họa co lại vừa đủ, tránh bóp chật search box. */
+@media (max-width: 1024px) and (min-width: 641px) {
+    .cvc-hero__grid {
+        grid-template-columns: 1fr;
+    }
+
+    .cvc-hero__visual {
+        order: -1;
+        max-width: 280px;
+        margin: 0 auto var(--cvc-space-4);
+    }
+
+    .cvc-value-strip {
+        flex-wrap: wrap;
+    }
+
+    .cvc-value-strip__item {
+        flex: 1 1 40%;
     }
 }
