@@ -657,6 +657,30 @@ p {
     margin-top: var(--cvc-space-6);
 }
 
+/* Trust micro-signal (Phần 10) - checklist năng lực thật, không phải
+   số liệu xã hội. */
+.cvc-hero__trust {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+    margin: var(--cvc-space-6) 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.cvc-hero__trust li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.83rem;
+    color: var(--cvc-color-text-muted);
+}
+
+.cvc-hero__trust svg {
+    flex-shrink: 0;
+    color: #16a34a;
+}
+
 .cvc-hero__visual {
     position: relative;
     display: flex;
@@ -715,19 +739,22 @@ p {
     height: 34px;
     border-radius: var(--cvc-radius-sm);
     background: var(--cvc-color-primary-tint);
-    font-size: 1rem;
+    color: var(--cvc-color-primary);
 }
 
 .cvc-hero-feature-card__icon--green {
     background: #dcfce7;
+    color: #16a34a;
 }
 
 .cvc-hero-feature-card__icon--amber {
     background: #fef3c7;
+    color: #d97706;
 }
 
 .cvc-hero-feature-card__icon--purple {
     background: #ede9fe;
+    color: #7c3aed;
 }
 
 /* --- Homepage / domain page sections - nhịp nền (Phần 12 SECTION RHYTHM):
@@ -777,7 +804,7 @@ p {
 
 .cvc-section__header-icon {
     display: inline-flex;
-    font-size: 1.3rem;
+    color: var(--cvc-color-primary);
 }
 
 .cvc-section__more {
@@ -828,7 +855,7 @@ p {
     height: 44px;
     border-radius: 50%;
     background: var(--cvc-color-primary-tint);
-    font-size: 1.35rem;
+    color: var(--cvc-color-primary);
     margin-bottom: 0.25rem;
 }
 
@@ -836,18 +863,22 @@ p {
    KHÔNG đồng loạt xanh). Chỉ trang trí, không gắn ý nghĩa dữ liệu. */
 .cvc-value-strip__icon--green {
     background: #dcfce7;
+    color: #16a34a;
 }
 
 .cvc-value-strip__icon--amber {
     background: #fef3c7;
+    color: #d97706;
 }
 
 .cvc-value-strip__icon--purple {
     background: #ede9fe;
+    color: #7c3aed;
 }
 
 .cvc-value-strip__icon--pink {
     background: #fce7f3;
+    color: #db2777;
 }
 
 .cvc-value-strip__title {
@@ -896,7 +927,7 @@ p {
     height: 52px;
     border-radius: var(--cvc-radius);
     background: var(--cvc-color-primary-tint);
-    font-size: 1.6rem;
+    color: var(--cvc-color-primary);
     margin-bottom: 0.35rem;
 }
 
@@ -904,10 +935,12 @@ p {
    Cẩm nang/Thi nâng ngạch/Tin tức mỗi cái 1 màu khác nhau). */
 .cvc-resource-card__icon--purple {
     background: #ede9fe;
+    color: #7c3aed;
 }
 
 .cvc-resource-card__icon--green {
     background: #dcfce7;
+    color: #16a34a;
 }
 
 .cvc-resource-grid--footer {
@@ -1057,8 +1090,132 @@ p {
 }
 
 .cvc-recruitment-row__meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
     font-size: 0.8rem;
     color: var(--cvc-color-text-subtle);
+}
+
+.cvc-recruitment-row__meta-item svg {
+    flex-shrink: 0;
+    opacity: 0.75;
+}
+
+/* --- Learning Journey "Con đường của bạn" (Phần 12) - timeline ngang
+   desktop, có đường nối; dọc ở mobile (xem @media bên dưới). --- */
+.cvc-journey {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: var(--cvc-space-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: none;
+}
+
+.cvc-journey__step {
+    position: relative;
+}
+
+.cvc-journey__step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 1.55rem;
+    left: calc(50% + 1.8rem);
+    right: calc(-50% + 1.8rem);
+    height: 2px;
+    background: var(--cvc-color-border);
+}
+
+.cvc-journey__link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.4rem;
+    color: var(--cvc-color-text);
+    padding: var(--cvc-space-2);
+    border-radius: var(--cvc-radius);
+}
+
+.cvc-journey__link:hover {
+    text-decoration: none;
+    background: var(--cvc-color-bg-alt);
+}
+
+.cvc-journey__link:hover .cvc-journey__icon {
+    background: var(--cvc-color-primary);
+    color: #fff;
+}
+
+.cvc-journey__number {
+    position: absolute;
+    top: -0.35rem;
+    right: calc(50% - 1.75rem);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--cvc-color-primary-deep);
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 700;
+    z-index: 1;
+}
+
+.cvc-journey__icon {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--cvc-color-primary-tint);
+    color: var(--cvc-color-primary);
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.cvc-journey__title {
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+.cvc-journey__desc {
+    font-size: 0.78rem;
+    color: var(--cvc-color-text-subtle);
+    line-height: 1.4;
+}
+
+@media (max-width: 900px) {
+    .cvc-journey {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .cvc-journey__step:not(:last-child)::after {
+        top: auto;
+        bottom: -0.5rem;
+        left: 1.75rem;
+        right: auto;
+        width: 2px;
+        height: 1rem;
+    }
+
+    .cvc-journey__link {
+        flex-direction: row;
+        text-align: left;
+        padding: var(--cvc-space-3);
+    }
+
+    .cvc-journey__number {
+        top: 0.1rem;
+        right: auto;
+        left: 2.15rem;
+    }
 }
 
 /* --- Goal direction section "Bạn đang hướng đến điều gì?" (Phần 18) --- */
@@ -1110,12 +1267,17 @@ p {
     height: 48px;
     border-radius: var(--cvc-radius);
     background: var(--cvc-color-primary-tint);
-    font-size: 1.4rem;
+    color: var(--cvc-color-primary);
 }
 
 .cvc-goal-direction-card__label {
     font-weight: 700;
     font-size: 0.9rem;
+}
+
+.cvc-goal-direction-card__desc {
+    font-size: 0.78rem;
+    color: var(--cvc-color-text-subtle);
 }
 
 .cvc-goal-cta-card {
@@ -1163,7 +1325,19 @@ p {
 }
 
 .cvc-empty-panel__icon {
-    font-size: 2.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--cvc-color-primary-tint);
+    color: var(--cvc-color-primary);
+}
+
+.cvc-section--deep .cvc-empty-panel__icon {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
 }
 
 .cvc-empty-panel__heading {
@@ -2069,6 +2243,28 @@ button.cvc-btn:disabled {
     gap: 0.35rem;
     font-weight: 600;
     color: var(--cvc-color-text);
+}
+
+.site-header__bell {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    color: var(--cvc-color-text-muted);
+}
+
+.site-header__bell:hover {
+    background: var(--cvc-color-bg-alt);
+    color: var(--cvc-color-primary);
+}
+
+.site-header__bell .cvc-notification-badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
 }
 
 .cvc-notification-badge {

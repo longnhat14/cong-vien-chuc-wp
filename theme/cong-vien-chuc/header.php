@@ -27,7 +27,7 @@
                 </span>
             </a>
             <a class="site-search-link" href="<?php echo esc_url( cvc_search_url() ); ?>" aria-label="<?php esc_attr_e( 'Tìm kiếm', 'cong-vien-chuc' ); ?>">
-                <span aria-hidden="true">&#128269;</span>
+                <?php cvc_render_icon( 'search', 18 ); ?>
             </a>
             <button type="button" class="site-nav-toggle" aria-expanded="false" aria-controls="site-nav-menu">
                 <span class="site-nav-toggle__box" aria-hidden="true"></span>
