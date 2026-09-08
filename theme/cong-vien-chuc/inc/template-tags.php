@@ -2097,7 +2097,7 @@ function cvc_render_learning_journey_section(): void {
 		),
 	);
 	?>
-	<section class="cvc-section cvc-journey-section">
+	<section class="cvc-section cvc-section--tint cvc-journey-section">
 		<div class="container">
 			<?php cvc_render_section_header( 'Con đường của bạn', 'Đặt mục tiêu ngay', $logged_in ? cvc_account_url( 'goals' ) : cvc_login_url( cvc_account_url( 'goals' ) ), 'route' ); ?>
 			<ol class="cvc-journey">

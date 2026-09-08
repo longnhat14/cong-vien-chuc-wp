@@ -90,7 +90,19 @@ get_header();
 
 	<!-- ============ HERO ============ -->
 	<section class="cvc-hero">
-		<div class="container cvc-hero__grid">
+		<!-- Phase 10A.11: minh họa hero là con trực tiếp của <section>, KHÔNG
+		     nằm trong .container - để ảnh bleed hết mép phải viewport và hết
+		     chiều cao hero band (đúng benchmark-homepage.png mới: ảnh full-
+		     bleed, không phải 1 card nhỏ nổi giữa khoảng trống). Đứng TRƯỚC
+		     .container trong DOM để ở tablet/mobile (khi chuyển position:static)
+		     nó tự nhiên render phía trên nội dung chữ mà không cần CSS order. -->
+		<div class="cvc-hero__visual">
+			<div class="cvc-hero__visual-inner" aria-hidden="true">
+				<?php cvc_render_hero_illustration(); ?>
+			</div>
+			<?php cvc_render_hero_feature_card(); ?>
+		</div>
+		<div class="container">
 			<div class="cvc-hero__content">
 				<p class="cvc-hero__eyebrow">Nền tảng học tập và phát triển sự nghiệp công</p>
 				<h1>Công chức, viên chức<br><span class="cvc-hero__accent">Học đúng &ndash; Thi tốt &ndash; Vươn xa</span></h1>
@@ -105,12 +117,6 @@ get_header();
 					<a class="cvc-btn cvc-btn--secondary" href="<?php echo esc_url( cvc_recruitments_url() ); ?>">Khám phá tuyển dụng</a>
 				</div>
 				<?php cvc_render_hero_trust_signals(); ?>
-			</div>
-			<div class="cvc-hero__visual">
-				<div class="cvc-hero__visual-inner" aria-hidden="true">
-					<?php cvc_render_hero_illustration(); ?>
-				</div>
-				<?php cvc_render_hero_feature_card(); ?>
 			</div>
 		</div>
 	</section>

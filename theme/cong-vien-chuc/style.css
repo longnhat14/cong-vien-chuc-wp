@@ -76,6 +76,21 @@ html {
     -webkit-text-size-adjust: 100%;
 }
 
+/* Phase 10A.11, Phần 20 - tôn trọng prefers-reduced-motion: tắt mọi
+   transition/animation/scroll mượt cho người dùng đã bật cài đặt hệ
+   thống này (chóng mặt/rối loạn tiền đình), áp dụng toàn site 1 lần thay
+   vì phải lặp lại ở từng component (hover card, journey icon, v.v.). */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
 body {
     margin: 0;
     font-family: var(--cvc-font-sans);
@@ -589,6 +604,7 @@ p {
    KHÔNG phải toàn site. Đặt phía trên bên phải, không lặp lại, mờ nhẹ nên
    không cạnh tranh với text/search bên trái. */
 .cvc-hero {
+    position: relative;
     background:
         url('assets/images/homepage/bg-pattern.webp') top right / min(60%, 640px) auto no-repeat,
         linear-gradient(180deg, #f5f9ff 0%, #ffffff 75%);
@@ -597,11 +613,14 @@ p {
     overflow: hidden;
 }
 
-.cvc-hero__grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
-    align-items: center;
-    gap: var(--cvc-space-12);
+/* Cột chữ giới hạn chiều rộng riêng (Phase 10A.11) - trước đây dựa vào
+   grid-template-columns để chừa chỗ cho .cvc-hero__visual, giờ visual đã
+   tách ra khỏi .container (bleed full-bleed cạnh phải) nên content tự set
+   max-width để không bị ảnh full-bleed che mất ở màn rộng. */
+.cvc-hero__content {
+    position: relative;
+    z-index: 1;
+    max-width: 38rem;
 }
 
 .cvc-hero__eyebrow {
@@ -697,36 +716,85 @@ p {
     color: #16a34a;
 }
 
+/* Base (mobile/tablet): minh họa trong luồng bình thường, căn giữa, bo
+   góc + shadow như 1 khối ảnh. Desktop override (min-width:1025px, dưới
+   đây) chuyển sang position:absolute để bleed hết mép phải + chiều cao
+   hero band, đúng benchmark-homepage.png mới (Phase 10A.11) - trước đó
+   ảnh chỉ là 1 khối nhỏ nổi giữa nhiều khoảng trống, đây là phần người
+   dùng phản hồi trực tiếp là "chẳng ra sao". */
 .cvc-hero__visual {
     position: relative;
     display: flex;
     justify-content: center;
+    width: 100%;
+    max-width: 420px;
+    margin: 0 auto var(--cvc-space-8);
 }
 
 .cvc-hero__visual-inner {
     width: 100%;
+    height: 100%;
 }
 
 .cvc-hero__illustration {
-    width: 100%;
-    max-width: 420px;
-    height: auto;
-}
-
-/* Ảnh hero thật (Phase 10A.10) - bo góc + shadow để đọc như 1 khối ảnh
-   premium, không phải ảnh dán thẳng lên nền trắng. */
-.cvc-hero__illustration--photo {
     display: block;
+    width: 100%;
+    height: auto;
     border-radius: var(--cvc-radius-lg);
     box-shadow: var(--cvc-shadow-lg);
     object-fit: cover;
 }
 
+@media (min-width: 1025px) {
+    .cvc-hero__visual {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: auto;
+        width: min(48vw, 760px);
+        max-width: none;
+        margin: 0;
+        justify-content: stretch;
+    }
+
+    .cvc-hero__visual-inner {
+        width: 100%;
+        height: 100%;
+    }
+
+    /* Full-bleed: không bo góc/shadow nữa (ảnh chạm mép section, đọc như
+       1 phần nền chứ không phải card nổi), phủ kín cả chiều rộng lẫn
+       chiều cao khối visual. */
+    .cvc-hero__illustration {
+        width: 100%;
+        height: 100%;
+        max-width: none;
+        border-radius: 0;
+        box-shadow: none;
+        object-position: center 22%;
+    }
+
+    /* Dải gradient mờ bên trái ảnh - hoà mép ảnh vào nền hero sáng thay
+       vì có 1 đường cắt cứng giữa ảnh và nền trắng/xanh nhạt. */
+    .cvc-hero__visual::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: 18%;
+        background: linear-gradient(90deg, #f5f9ff 0%, rgba(245, 249, 255, 0) 100%);
+        z-index: 2;
+        pointer-events: none;
+    }
+}
+
 /* Card nổi trong hero (Phần B/10) - đè lên góc dưới-phải minh họa. */
 .cvc-hero-feature-card {
     position: absolute;
-    right: 0;
-    bottom: -1.5rem;
+    right: var(--cvc-space-8);
+    bottom: var(--cvc-space-8);
     width: 15rem;
     display: flex;
     flex-direction: column;
@@ -1138,8 +1206,16 @@ p {
 .cvc-recruitment-row {
     display: flex;
     gap: var(--cvc-space-3);
+    padding: var(--cvc-space-2);
+    margin: 0 calc(-1 * var(--cvc-space-2)) var(--cvc-space-2);
     padding-bottom: var(--cvc-space-4);
     border-bottom: 1px solid var(--cvc-color-border);
+    border-radius: var(--cvc-radius);
+    transition: background-color 0.15s ease;
+}
+
+.cvc-recruitment-row:hover {
+    background: var(--cvc-color-bg-alt);
 }
 
 .cvc-recruitment-row:last-child {
@@ -1248,11 +1324,12 @@ p {
 .cvc-journey__step:not(:last-child)::after {
     content: '';
     position: absolute;
-    top: 1.55rem;
-    left: calc(50% + 1.8rem);
-    right: calc(-50% + 1.8rem);
+    top: 1.85rem;
+    left: calc(50% + 2.05rem);
+    right: calc(-50% + 2.05rem);
     height: 2px;
-    background: var(--cvc-color-border);
+    background: repeating-linear-gradient(90deg, var(--cvc-color-primary) 0 6px, transparent 6px 12px);
+    opacity: 0.35;
 }
 
 .cvc-journey__link {
@@ -1274,12 +1351,13 @@ p {
 .cvc-journey__link:hover .cvc-journey__icon {
     background: var(--cvc-color-primary);
     color: #fff;
+    transform: translateY(-2px);
 }
 
 .cvc-journey__number {
     position: absolute;
     top: -0.35rem;
-    right: calc(50% - 1.75rem);
+    right: calc(50% - 2rem);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1298,12 +1376,13 @@ p {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 56px;
-    height: 56px;
+    width: 64px;
+    height: 64px;
     border-radius: 50%;
-    background: var(--cvc-color-primary-tint);
+    background: var(--cvc-color-bg);
     color: var(--cvc-color-primary);
-    transition: background-color 0.15s ease, color 0.15s ease;
+    box-shadow: var(--cvc-shadow-sm);
+    transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
 }
 
 .cvc-journey__title {
@@ -1733,6 +1812,7 @@ p {
 
 .cvc-card__media {
     position: relative;
+    overflow: hidden;
 }
 
 .cvc-card__media img {
@@ -1740,6 +1820,13 @@ p {
     width: 100%;
     aspect-ratio: 4 / 3;
     object-fit: cover;
+    transition: transform 0.25s ease;
+}
+
+/* Artwork zoom rất nhẹ khi hover card (Phần 9/20 - "subtle scale", không
+   parallax/animation liên tục). */
+.cvc-card:hover .cvc-card__media img {
+    transform: scale(1.04);
 }
 
 /* Placeholder minh họa khi course chưa có thumbnail thật (Phần 10) - màu
@@ -3176,15 +3263,13 @@ button.cvc-btn:disabled {
 }
 
 /* Tablet (768-1024px, benchmark Phần 5 BASELINE SCREENSHOT AUDIT) - hero
-   vẫn 2 cột nhưng minh họa co lại vừa đủ, tránh bóp chật search box. */
+   xếp dọc (visual không còn absolute ở dưới 1025px - xem base rule của
+   .cvc-hero__visual), minh họa co lại vừa đủ, tránh bóp chật search box.
+   Đứng trước .container trong DOM nên tự render phía trên chữ, không cần
+   order (Phase 10A.11). */
 @media (max-width: 1024px) and (min-width: 641px) {
-    .cvc-hero__grid {
-        grid-template-columns: 1fr;
-    }
-
     .cvc-hero__visual {
-        order: -1;
-        max-width: 280px;
+        max-width: 320px;
         margin: 0 auto var(--cvc-space-8);
     }
 
