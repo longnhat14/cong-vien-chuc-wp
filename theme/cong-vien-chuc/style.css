@@ -637,6 +637,14 @@ p {
 
 .cvc-section__header h2 {
     margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.cvc-section__header-icon {
+    display: inline-flex;
+    font-size: 1.3rem;
 }
 
 .cvc-section__more {
@@ -679,6 +687,24 @@ p {
     background: var(--cvc-color-primary-tint);
     font-size: 1.35rem;
     margin-bottom: 0.25rem;
+}
+
+/* 5 màu icon riêng biệt (đối chiếu ảnh benchmark thật - value strip
+   KHÔNG đồng loạt xanh). Chỉ trang trí, không gắn ý nghĩa dữ liệu. */
+.cvc-value-strip__icon--green {
+    background: #dcfce7;
+}
+
+.cvc-value-strip__icon--amber {
+    background: #fef3c7;
+}
+
+.cvc-value-strip__icon--purple {
+    background: #ede9fe;
+}
+
+.cvc-value-strip__icon--pink {
+    background: #fce7f3;
 }
 
 .cvc-value-strip__title {
@@ -731,6 +757,21 @@ p {
     margin-bottom: 0.35rem;
 }
 
+/* Mỗi resource card 1 màu icon riêng (đối chiếu ảnh benchmark thật -
+   Cẩm nang/Thi nâng ngạch/Tin tức mỗi cái 1 màu khác nhau). */
+.cvc-resource-card__icon--purple {
+    background: #ede9fe;
+}
+
+.cvc-resource-card__icon--green {
+    background: #dcfce7;
+}
+
+.cvc-resource-grid--footer {
+    margin-top: var(--cvc-space-8);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .cvc-resource-card__title {
     font-weight: 700;
     font-size: 1.1rem;
@@ -754,6 +795,127 @@ p {
     padding-top: 0.5rem;
     font-weight: 700;
     color: var(--cvc-color-primary);
+}
+
+/* --- Homepage 2-cột: Khóa học/Tài nguyên (chính) | Tuyển dụng (sidebar)
+ * (Phase 10A.3, đối chiếu ảnh benchmark thật - đây là khác biệt cấu trúc
+ * lớn nhất so với bản trước: recruitment KHÔNG phải 1 section riêng nữa,
+ * mà là 1 sidebar dọc chạy song song với course + resource ở cột chính).
+ */
+.cvc-home-split {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
+    gap: var(--cvc-space-8);
+    align-items: start;
+}
+
+.cvc-home-main {
+    min-width: 0;
+}
+
+.cvc-recruitment-panel {
+    background: var(--cvc-color-bg);
+    border: 1px solid var(--cvc-color-border);
+    border-radius: var(--cvc-radius-lg);
+    padding: 1.25rem;
+    box-shadow: var(--cvc-shadow-sm);
+}
+
+.cvc-recruitment-panel__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--cvc-space-2);
+    margin-bottom: var(--cvc-space-4);
+}
+
+.cvc-recruitment-panel__header h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.cvc-recruitment-panel__icon {
+    display: inline-flex;
+}
+
+.cvc-recruitment-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cvc-space-4);
+}
+
+.cvc-recruitment-row {
+    display: flex;
+    gap: var(--cvc-space-3);
+    padding-bottom: var(--cvc-space-4);
+    border-bottom: 1px solid var(--cvc-color-border);
+}
+
+.cvc-recruitment-row:last-child {
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.cvc-recruitment-row__avatar {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--cvc-radius-sm);
+    background: var(--cvc-color-primary-tint);
+    color: var(--cvc-color-primary-dark);
+    font-weight: 800;
+    font-size: 0.95rem;
+}
+
+.cvc-recruitment-row__body {
+    min-width: 0;
+    flex: 1;
+}
+
+.cvc-recruitment-row__top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.cvc-recruitment-row__title {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+.cvc-recruitment-row__title a {
+    color: var(--cvc-color-text);
+}
+
+.cvc-recruitment-row__status {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.cvc-recruitment-row__agency {
+    margin: 0.2rem 0 0;
+    font-size: 0.85rem;
+    color: var(--cvc-color-text-muted);
+}
+
+.cvc-recruitment-row__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    margin: 0.35rem 0 0;
+}
+
+.cvc-recruitment-row__meta-item {
+    font-size: 0.8rem;
+    color: var(--cvc-color-text-subtle);
 }
 
 /* --- Empty state cao cấp cho section chủ lực homepage (Phần 25) --- */
@@ -798,11 +960,13 @@ p {
 }
 
 /* --- CTA banner cuối trang chủ (Phần 8 FINAL CTA) --- */
+/* CTA banner - 3 vùng ngang (icon+heading | quote | CTA), đối chiếu ảnh
+ * benchmark thật: KHÔNG phải 1 cột căn giữa như bản trước. */
 .cvc-cta-banner {
     position: relative;
     overflow: hidden;
     background: linear-gradient(135deg, var(--cvc-color-primary-deep), var(--cvc-color-primary-dark));
-    padding: var(--cvc-space-16) 0;
+    padding: var(--cvc-space-8) 0;
     color: #fff;
 }
 
@@ -817,26 +981,56 @@ p {
 
 .cvc-cta-banner__inner {
     position: relative;
-    text-align: center;
-    max-width: 640px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--cvc-space-6);
+    text-align: left;
+}
+
+.cvc-cta-banner__lead {
+    display: flex;
+    align-items: center;
+    gap: var(--cvc-space-3);
+    flex: 0 0 auto;
+}
+
+.cvc-cta-banner__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    flex-shrink: 0;
 }
 
 .cvc-cta-banner h2 {
     color: #fff;
-    margin-bottom: var(--cvc-space-3);
+    margin: 0;
+    font-size: 1.4rem;
+    line-height: 1.3;
 }
 
-.cvc-cta-banner p {
+.cvc-cta-banner__quote {
+    flex: 1 1 auto;
+    margin: 0;
+    padding: 0 var(--cvc-space-6);
     color: #dbe9ff;
-    font-size: var(--cvc-text-lead);
-    margin-bottom: var(--cvc-space-6);
+    font-size: 1rem;
+    font-style: italic;
+    text-align: center;
+    border-left: 1px solid rgba(255, 255, 255, 0.2);
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .cvc-btn--cta {
+    flex-shrink: 0;
     background: #fff;
     color: var(--cvc-color-primary-deep);
-    padding: 0.85rem 1.9rem;
-    font-size: 1.02rem;
+    padding: 0.75rem 1.6rem;
+    font-size: 0.98rem;
 }
 
 .cvc-btn--cta:hover {
@@ -958,13 +1152,62 @@ p {
     object-fit: cover;
 }
 
-/* Placeholder minh họa khi course chưa có thumbnail thật (Phần 10). */
+/* Placeholder minh họa khi course chưa có thumbnail thật (Phần 10) - màu
+   nền đổi theo course_type (cvc_course_type_color()) để tạo variety thị
+   giác giống ảnh benchmark thật thay vì đồng loạt 1 màu xanh. */
 .cvc-card__media--placeholder {
     display: flex;
     align-items: center;
     justify-content: center;
     aspect-ratio: 16 / 9;
     background: linear-gradient(135deg, var(--cvc-color-primary), var(--cvc-color-primary-deep));
+}
+
+.cvc-card__media--teal {
+    background: linear-gradient(135deg, #0d9488, #115e59);
+}
+
+.cvc-card__media--amber {
+    background: linear-gradient(135deg, #d97706, #92400e);
+}
+
+.cvc-card__media--pink {
+    background: linear-gradient(135deg, #db2777, #831843);
+}
+
+.cvc-card__media-link {
+    position: relative;
+    display: block;
+}
+
+.cvc-card__media-badge {
+    position: absolute;
+    left: var(--cvc-space-3);
+    bottom: var(--cvc-space-3);
+}
+
+/* Badge category trên ảnh course card - nền đặc (không phải pill nhạt
+   như .cvc-badge--subject) để đủ tương phản khi đặt trên ảnh/gradient. */
+.cvc-badge--category {
+    color: #ffffff;
+    background: var(--cvc-color-primary);
+}
+
+.cvc-badge--category-teal {
+    background: #0d9488;
+}
+
+.cvc-badge--category-amber {
+    background: #d97706;
+}
+
+.cvc-badge--category-pink {
+    background: #db2777;
+}
+
+.cvc-btn--block {
+    display: flex;
+    width: 100%;
 }
 
 .cvc-card__body {
@@ -2168,7 +2411,37 @@ button.cvc-btn:disabled {
     }
 
     .cvc-cta-banner {
-        padding: var(--cvc-space-12) 0;
+        padding: var(--cvc-space-8) 0;
+    }
+
+    .cvc-cta-banner__inner {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .cvc-cta-banner__lead {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .cvc-cta-banner__quote {
+        border-left: none;
+        border-right: none;
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        padding: var(--cvc-space-4) 0;
+    }
+
+    .cvc-resource-grid--footer {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Sidebar tuyển dụng xuống dưới course/resource trên tablet trở xuống -
+   2 cột cạnh nhau chỉ hợp lý ở desktop rộng (Phần 16/17). */
+@media (max-width: 1024px) {
+    .cvc-home-split {
+        grid-template-columns: 1fr;
     }
 }
 

@@ -1,9 +1,18 @@
-# Phase 10A.2 — Premium Product UI / Visual Benchmark
+# Phase 10A.2/10A.3 — Premium Product UI / Visual Benchmark
 
 Nâng cấp thị giác toàn bộ frontend từ "sơ sài, giống bản demo API" lên
-"sản phẩm chuyên nghiệp" theo benchmark mô tả bằng chữ (không có ảnh đính
-kèm - xem §9 Known limitations). Không đổi kiến trúc, không đổi API
-contract, không thêm dữ liệu giả.
+"sản phẩm chuyên nghiệp". Không đổi kiến trúc, không đổi API contract,
+không thêm dữ liệu giả.
+
+**10A.2** (đợt 1) làm theo benchmark mô tả bằng chữ (chưa có file ảnh).
+**10A.3** (đợt 2, §11) nhận được file ảnh thật tại
+`docs/ui-benchmark/homepage-reference.png` và đối chiếu lại trực tiếp -
+phát hiện vài khác biệt cấu trúc so với suy đoán ở 10A.2 (quan trọng nhất:
+Tuyển dụng là 1 sidebar dọc chạy song song với Khóa học, KHÔNG phải section
+riêng; không có section "Thi trắc nghiệm" riêng biệt) và đã sửa lại đúng
+theo ảnh. Phần §1-10 dưới đây là tài liệu gốc của 10A.2 (vẫn đúng phần lớn
+- design tokens, component nâng cấp toàn site, accessibility fix... không
+đổi); §11 ghi lại riêng những gì 10A.3 sửa lại sau khi có ảnh thật.
 
 ## 1. Benchmark & design direction
 
@@ -66,34 +75,31 @@ riêng lẻ):
 - **Footer**: nền xanh đậm (khớp CTA banner), thay vì nền trắng nhạt cũ -
   tạo điểm kết thúc trang rõ ràng thay vì "trôi dần" hết nội dung.
 
-## 4. Homepage - kiến trúc mới
-
-Thay 6 section gần giống hệt nhau (Phase 4A) bằng 1 câu chuyện sản phẩm
-có nhịp (Phần 12 SECTION RHYTHM):
+## 4. Homepage - kiến trúc (bản hiện tại, sau 10A.3 - xem §11 cho lịch sử)
 
 1. **Hero** (gradient xanh rất nhạt, 2 cột) - eyebrow, H1, subtitle,
    search box lớn (focal point, shadow riêng), 2 CTA, minh họa SVG bên
    phải (tòa nhà công sở + mũ tốt nghiệp + tài liệu, brand blue - KHÔNG
-   dùng ảnh chụp generic vì chưa có ảnh thật phù hợp, xem Phần 10).
-2. **Value strip** (trắng) - 5 tính năng ngang, chỉ mô tả SẢN PHẨM THẬT
-   đang có (khóa học/văn bản/tuyển dụng/thi/lộ trình) - không phải số
-   liệu nên không vi phạm "không fake data".
-3. **Khóa học nổi bật** (trắng) - `cvc-card-grid--4`.
-4. **Tuyển dụng mới nhất** (nền tint xanh nhạt) - `cvc-card-grid--4`,
-   badge "Đang tuyển" (đúng sự thật: `GET /api/recruitments` chỉ trả
-   `status=published`, xem `RecruitmentController::index()`).
-5. **Luyện thi trắc nghiệm** (nền xanh đậm `--cvc-section--deep`) -
-   `cvc-card-grid--3`, card trắng nổi trên nền đậm.
-6. **Tài nguyên ôn tập** (trắng) - gộp Chủ đề + Kiến thức + Văn bản pháp
-   luật thành 3 "hub card" thay vì 3 section lặp lại gần giống nhau -
-   chỉ hiện số lượng thật khi > 0 (topics/knowledge/legal hiện là
-   3/0/0 trên DEV).
-7. **CTA banner** (xanh đậm, skyline SVG mờ) - CTA trỏ `/dang-ky/` (khách)
-   hoặc `/tai-khoan/muc-tieu/` (đã đăng nhập).
+   dùng ảnh chụp generic, xem Phần 10 + §9).
+2. **Value strip** (trắng) - 5 tính năng ngang, mỗi icon 1 màu riêng, chỉ
+   mô tả SẢN PHẨM THẬT đang có - không phải số liệu nên không vi phạm
+   "không fake data".
+3. **2 cột `.cvc-home-split`**:
+   - Cột trái `.cvc-home-main`: "Khóa học nổi bật" (`cvc-card-grid--4`) +
+     "Tài nguyên ôn tập" (3 resource card: Cẩm nang, Thi nâng ngạch, Văn
+     bản & chính sách).
+   - Cột phải `.cvc-recruitment-panel`: sidebar "Tuyển dụng mới nhất" -
+     panel bo tròn, list compact tối đa 5 dòng
+     (`cvc_render_recruitment_list_item()`), badge "Đang tuyển" (đúng sự
+     thật: `GET /api/recruitments` chỉ trả `status=published`, xem
+     `RecruitmentController::index()`).
+4. **CTA banner** (xanh đậm, 3 vùng ngang: icon+heading | quote | nút,
+   skyline SVG mờ) - CTA trỏ `/dang-ky/` (khách) hoặc `/tai-khoan/muc-tieu/`
+   (đã đăng nhập).
 
-Vẫn đúng 6 lệnh gọi API (mỗi domain 1 lần `list()`), không tăng số request
-so với trước - `topics`/`knowledge`/`legal` chỉ cần `per_page=1` vì hub
-card chỉ cần `total` từ paginator, không cần render item.
+Vẫn đúng 6 lệnh gọi API (mỗi domain 1 lần `list()`, `per_page=1` cho
+topics/knowledge/exam/legal vì chỉ cần `total` từ paginator để hiện số
+lượng thật trên resource card, không cần render item).
 
 ## 5. Card render helper - nâng cấp field thật, không thêm field giả
 
@@ -159,10 +165,15 @@ toàn bộ là mô tả tính năng sản phẩm có thật (đối chiếu vớ
 
 ## 9. Known limitations
 
-- **Không có ảnh benchmark thật**: toàn bộ layout/màu sắc/minh họa dựa
-  trên mô tả bằng chữ trong prompt, không đối chiếu pixel được với ảnh
-  gốc. Nếu người dùng cung cấp lại ảnh, nên review lại phần hero/course
-  card cụ thể so với ảnh.
+- **Hero vẫn dùng minh họa SVG, không phải ảnh thật**: ảnh benchmark thật
+  (§11) có 1 ảnh chụp thật (nhân vật + tòa nhà công sở + cờ Việt Nam) ở
+  hero. Theme không có quyền/tài sản ảnh thật phù hợp - dùng ảnh stock
+  ngẫu nhiên từ internet sẽ vi phạm chính yêu cầu "KHÔNG dùng ảnh generic"
+  của spec (Phần 10 gốc) vì không kiểm chứng được nguồn/bản quyền. Giữ
+  nguyên minh họa SVG thương hiệu (đã tinh chỉnh tông màu/bố cục sát ảnh
+  hơn ở 10A.3) - đây là khoảng cách còn lại lớn nhất so với ảnh benchmark.
+  Khi có ảnh thật hợp lệ (đã mua bản quyền/tự chụp), thay trực tiếp bằng
+  `<img>` trong `cvc_render_hero_illustration()` hoặc gọi hàm mới.
 - **Không có visual QA bằng browser thật**: đã thử cài Playwright +
   Chromium để chụp ảnh thật ở 1440/1280/1024/768/390/360 (Phần 35) nhưng
   môi trường sandbox không có quyền cài system dependencies
@@ -171,7 +182,7 @@ toàn bộ là mô tả tính năng sản phẩm có thật (đối chiếu vớ
   logic responsive/contrast thủ công trong code, nhưng đây KHÔNG thay thế
   hoàn toàn việc mở trình duyệt thật kiểm tra. Khuyến nghị: người dùng tự
   mở `http://localhost:8080` ở các breakpoint trên trước khi coi Phase
-  10A.2 hoàn tất 100%.
+  10A hoàn tất 100%.
 - **Course/recruitment chưa có ảnh thật**: `thumbnail_url` hiện null cho
   course DEV duy nhất - đang dùng placeholder SVG thương hiệu. Khi CMS/
   Laravel có ảnh thật, card sẽ tự động dùng ảnh đó (đã có nhánh
@@ -198,3 +209,95 @@ toàn bộ là mô tả tính năng sản phẩm có thật (đối chiếu vớ
   xuất hiện khi có recruitment thật, empty state tuyển dụng render đúng
   panel cao cấp (không phải box vàng cũ), exam card không còn hiện
   "0 câu hỏi", resource hub chỉ hiện count khi > 0.
+
+## 11. Phase 10A.3 — Đối chiếu trực tiếp ảnh benchmark thật
+
+File ảnh nhận được sau 10A.2: `docs/ui-benchmark/homepage-reference.png`
+(mở và phân tích trực tiếp bằng Read - không suy diễn qua mô tả chữ thêm
+nữa). So với bản 10A.2 (dựa hoàn toàn trên mô tả chữ), ảnh thật lộ ra 2
+khác biệt cấu trúc quan trọng mà mô tả chữ trước đó không nói rõ:
+
+1. **Tuyển dụng KHÔNG phải 1 section riêng nằm dưới Khóa học** - trong
+   ảnh, "Tuyển dụng mới nhất" là 1 sidebar dọc compact (list 5 dòng, có
+   avatar chữ cái + trạng thái + địa điểm + hạn nộp), nằm **bên phải**,
+   chạy song song về chiều cao với toàn bộ cột trái (Khóa học nổi bật +
+   3 resource card), không phải xếp chồng theo chiều dọc.
+2. **Không có section "Thi trắc nghiệm" riêng với nền xanh đậm** - ảnh
+   benchmark thật không có section này. Đề thi được thể hiện qua: (a)
+   badge category "Ôn thi" màu hồng trên 1 course card, và (b) 1 trong 3
+   resource card ("Thi nâng ngạch, thăng hạng"). Đã bỏ hẳn section
+   `--cvc-section--deep` khỏi homepage (class CSS vẫn giữ trong design
+   system làm tiện ích dùng chung, không phải dead code - chỉ không dùng
+   ở homepage nữa).
+
+### Thay đổi cụ thể đã áp dụng
+
+- **`index.php`**: viết lại thành `.cvc-home-split` (CSS grid 2 cột:
+  `minmax(0,1fr) minmax(300px,360px)`) - cột trái `.cvc-home-main` (course
+  grid + resource grid), cột phải `.cvc-recruitment-panel` (card viền
+  bo tròn, có header riêng + `cvc_render_recruitment_list_item()` cho
+  từng dòng). Bỏ hẳn 6→còn 1 lệnh gọi `list()` cho exam (chỉ cần `total`
+  cho resource card, không render card thi riêng nữa) - vẫn đúng 6 lệnh
+  API tổng cộng.
+- **Resource hub đổi từ 3 domain riêng biệt (Chủ đề/Kiến thức/Văn bản)
+  sang 3 "cụm" khớp đúng ảnh**: "Cẩm nang công chức, viên chức" (gộp
+  Kiến thức + Chủ đề, đếm gộp `$knowledge_total + $topics_total`), "Thi
+  nâng ngạch, thăng hạng" (Thi trắc nghiệm - **thay cho section đã bỏ**),
+  "Văn bản & chính sách" (Văn bản pháp luật). Mỗi card 1 màu icon riêng
+  (blue/purple/green, khớp ảnh).
+- **`cvc_render_recruitment_list_item()`** (mới, `template-tags.php`) -
+  dòng compact cho sidebar: avatar là **chữ cái đầu tên cơ quan** (Agency
+  model không có field logo thật - dùng initials là trình bày trung thực,
+  không phải logo giả), tiêu đề, badge "Đang tuyển", agency, địa điểm
+  (icon 📍), hạn nộp (icon 📅). `cvc_render_recruitment_card()` (card đầy
+  đủ, dùng ở trang `/tuyen-dung/`) giữ nguyên, không đổi.
+- **Course card**: đối chiếu ảnh thấy category badge nằm **đè lên ảnh**
+  (không phải trong phần thân card) và mỗi category 1 màu riêng (Pháp
+  luật/Kỹ năng xanh, Tin học xanh lá, Ôn thi hồng) - thêm
+  `cvc_course_type_color()` (map `course_type` → 1 trong 4 màu cố định,
+  ổn định theo hash cho type lạ vì field này free text ở backend) áp dụng
+  cho cả nền placeholder lẫn màu badge. CTA cuối card đổi từ text-link
+  sang **nút đặc full-width** (`.cvc-btn--primary.cvc-btn--block`) khớp
+  "Đăng ký học →" trong ảnh (label giữ "Xem khóa học" vì flow thật là xem
+  chi tiết trước, không phải đăng ký 1 chạm từ homepage - chỉ đổi hình
+  thức nút, không đổi hành vi).
+- **Value strip**: ảnh có 5 icon tròn **5 màu khác nhau** (xanh dương/xanh
+  lá/cam/tím/hồng), bản 10A.2 trước đó lỡ để tất cả cùng 1 màu xanh -
+  thêm biến thể màu `cvc-value-strip__icon--{color}`.
+- **CTA banner**: ảnh là layout **ngang 3 vùng** (icon tròn viền trắng +
+  heading bên trái | quote in nghiêng ở giữa, có border trái/phải mảnh |
+  nút trắng bên phải), không phải 1 cột căn giữa như bản 10A.2. Viết lại
+  `cvc_render_homepage_cta_banner()` + CSS flex row (stack dọc ở mobile).
+  Thêm câu quote tĩnh (brand copy, không phải số liệu nên không vi phạm
+  Phần 31) khớp đúng nội dung trong ảnh.
+- **Section header có icon**: ảnh có icon nhỏ ngay trước tiêu đề "Khóa học
+  nổi bật"/"Tuyển dụng mới nhất" - thêm tham số `$icon` (optional, không
+  phá call site cũ) cho `cvc_render_section_header()`.
+
+### Xác minh sau khi sửa (không dùng screenshot - xem giới hạn ở §9)
+
+Vì môi trường vẫn không cài được Chromium headless (đã thử lại, vẫn lỗi
+thiếu thư viện hệ thống + không có `sudo`), verify bằng:
+
+- Gọi trực tiếp `cvc_render_recruitment_list_item()` với dữ liệu mẫu qua
+  `docker exec cvc-wp php -r ...` (không qua HTTP, không đụng DB thật) để
+  kiểm tra markup đúng cấu trúc trước khi tin tưởng đưa vào trang thật.
+- `curl` thật `http://localhost:8080/` sau mỗi thay đổi, kiểm tra bằng
+  cách tìm đúng class/nội dung mong đợi trong HTML trả về (course card có
+  `cvc-badge--category-pink`, resource card có đúng 3 màu, value-strip có
+  đủ 5 màu, CTA banner có `cvc-cta-banner__quote`...).
+- Regression toàn bộ trang public (`/`, `/tuyen-dung/`, `/thi-trac-nghiem/`
+  +slug, `/khoa-hoc/` +slug, `/kien-thuc/`, `/chu-de/`, `/van-ban-phap-luat/`,
+  `/tim-kiem/`, `/dang-nhap/`, `/dang-ky/`) và dashboard đã đăng nhập
+  (`/tai-khoan/`, `/tai-khoan/muc-tieu/`, `/tai-khoan/dau-trang/`,
+  `/tai-khoan/ho-so/`) - toàn bộ 200, 0 PHP warning/fatal.
+- PHP lint + `git diff --check` sạch, CSS brace-balanced sau mỗi lần sửa.
+
+### Vẫn còn khác biệt so với ảnh (chấp nhận được / có lý do)
+
+- Hero dùng SVG thay vì ảnh chụp thật (xem §9).
+- Rating/số học viên trong ảnh KHÔNG được sao chép - đây là yêu cầu tường
+  minh của người dùng ("Không fake rating, số học viên..."), không phải
+  thiếu sót.
+- Card "Xem khóa học" thay vì "Đăng ký học" (giải thích ở trên - flow
+  thật khác, chỉ đổi hình thức nút).

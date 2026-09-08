@@ -1,10 +1,12 @@
 <?php
 /**
- * Homepage (Phase 10A.2 - Premium Product UI). Kiến trúc mới thay thế 6
- * section lặp lại gần giống nhau (Phase 4A): Hero -> Value strip -> Khóa
- * học -> Tuyển dụng -> Thi trắc nghiệm -> Resource hub (Chủ đề/Kiến thức/
- * Văn bản gộp 1 hàng) -> CTA. Vẫn đúng 6 lệnh gọi API (1 lần list() mỗi
- * domain, không lặp trong loop) - domain đang rỗng có empty state riêng,
+ * Homepage (Phase 10A.3 - đối chiếu trực tiếp ảnh benchmark thật tại
+ * docs/ui-benchmark/homepage-reference.png). Kiến trúc: Hero -> Value
+ * strip -> [2 cột: (Khóa học nổi bật + Tài nguyên ôn tập) | (Tuyển dụng
+ * mới nhất, sidebar dọc)] -> CTA banner. KHÔNG còn section "Thi trắc
+ * nghiệm" riêng (ảnh benchmark thật không có - đề thi được gộp vào card
+ * "Thi trắc nghiệm" trong Tài nguyên ôn tập + badge category "Ôn thi"
+ * trên course card). Vẫn đúng 6 lệnh gọi API (1 lần list() mỗi domain),
  * không tạo dữ liệu giả để lấp chỗ trống (Phần 31/32).
  */
 
@@ -14,9 +16,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 $course_result      = ( new CVC_Course_Service() )->list( array( 'per_page' => 4 ) );
 $topic_result       = ( new CVC_Topic_Service() )->list( array( 'per_page' => 1 ) );
-$recruitment_result = ( new CVC_Recruitment_Service() )->list( array( 'per_page' => 4 ) );
+$recruitment_result = ( new CVC_Recruitment_Service() )->list( array( 'per_page' => 5 ) );
 $knowledge_result   = ( new CVC_Knowledge_Service() )->list( array( 'per_page' => 1 ) );
-$exam_result        = ( new CVC_Exam_Service() )->list( array( 'per_page' => 3 ) );
+$exam_result        = ( new CVC_Exam_Service() )->list( array( 'per_page' => 1 ) );
 $legal_result       = ( new CVC_Legal_Document_Service() )->list( array( 'per_page' => 1 ) );
 
 /**
@@ -42,12 +44,12 @@ function cvc_homepage_total( array $result ): int {
 	return (int) ( $result['data']['data']['total'] ?? 0 );
 }
 
-$courses          = cvc_homepage_items( $course_result );
-$recruitments     = cvc_homepage_items( $recruitment_result );
-$exams            = cvc_homepage_items( $exam_result );
-$topics_total     = cvc_homepage_total( $topic_result );
-$knowledge_total  = cvc_homepage_total( $knowledge_result );
-$legal_total      = cvc_homepage_total( $legal_result );
+$courses         = cvc_homepage_items( $course_result );
+$recruitments    = cvc_homepage_items( $recruitment_result );
+$topics_total    = cvc_homepage_total( $topic_result );
+$knowledge_total = cvc_homepage_total( $knowledge_result );
+$exams_total     = cvc_homepage_total( $exam_result );
+$legal_total     = cvc_homepage_total( $legal_result );
 
 cvc_seo_set_title( 'Ôn thi công chức, viên chức online' );
 cvc_seo_set_description( 'Nền tảng hỗ trợ công chức, viên chức: khóa học theo lộ trình, tin tuyển dụng uy tín, đề thi trắc nghiệm và tài liệu hữu ích giúp bạn vững vàng trên con đường sự nghiệp.' );
@@ -87,96 +89,77 @@ get_header();
 		</div>
 	</section>
 
-	<!-- ============ COURSES ============ -->
+	<!-- ============ COURSES + RESOURCES (trái) | TUYỂN DỤNG (phải) ============ -->
 	<section class="cvc-section" id="khoa-hoc">
-		<div class="container">
-			<?php cvc_render_section_header( 'Khóa học nổi bật', 'Xem tất cả khóa học', cvc_courses_url() ); ?>
+		<div class="container cvc-home-split">
 
-			<?php if ( ! $course_result['ok'] ) : ?>
-				<?php cvc_render_error_state(); ?>
-			<?php elseif ( empty( $courses ) ) : ?>
-				<?php cvc_render_premium_empty_state( '&#127891;', 'Chưa có khóa học nào', 'Khóa học mới sẽ sớm được cập nhật tại đây.', 'Xem tất cả khóa học', cvc_courses_url() ); ?>
-			<?php else : ?>
-				<div class="cvc-card-grid cvc-card-grid--4">
-					<?php foreach ( $courses as $course ) : ?>
-						<?php cvc_render_course_card( $course, 3 ); ?>
-					<?php endforeach; ?>
+			<div class="cvc-home-main">
+				<?php cvc_render_section_header( 'Khóa học nổi bật', 'Xem tất cả khóa học', cvc_courses_url(), '&#127891;' ); ?>
+
+				<?php if ( ! $course_result['ok'] ) : ?>
+					<?php cvc_render_error_state(); ?>
+				<?php elseif ( empty( $courses ) ) : ?>
+					<?php cvc_render_premium_empty_state( '&#127891;', 'Chưa có khóa học nào', 'Khóa học mới sẽ sớm được cập nhật tại đây.', 'Xem tất cả khóa học', cvc_courses_url() ); ?>
+				<?php else : ?>
+					<div class="cvc-card-grid cvc-card-grid--4">
+						<?php foreach ( $courses as $course ) : ?>
+							<?php cvc_render_course_card( $course, 3 ); ?>
+						<?php endforeach; ?>
+					</div>
+				<?php endif; ?>
+
+				<div class="cvc-resource-grid cvc-resource-grid--footer" id="tai-nguyen">
+					<?php
+					cvc_render_resource_hub_card(
+						'&#128218;',
+						'Cẩm nang công chức, viên chức',
+						'Chủ đề ôn tập và kiến thức chuyên môn hệ thống theo môn thi.',
+						cvc_knowledge_url(),
+						$knowledge_total + $topics_total,
+						'nội dung',
+						'blue'
+					);
+					cvc_render_resource_hub_card(
+						'&#127942;',
+						'Thi nâng ngạch, thăng hạng',
+						'Đề thi trắc nghiệm theo môn thi, bám sát cấu trúc thi thật.',
+						cvc_exams_url(),
+						$exams_total,
+						'đề thi',
+						'purple'
+					);
+					cvc_render_resource_hub_card(
+						'&#128220;',
+						'Văn bản & chính sách',
+						'Văn bản pháp luật, quy định liên quan trực tiếp tới công vụ.',
+						cvc_legal_documents_url(),
+						$legal_total,
+						'văn bản',
+						'green'
+					);
+					?>
 				</div>
-			<?php endif; ?>
-		</div>
-	</section>
-
-	<!-- ============ RECRUITMENT (tint) ============ -->
-	<section class="cvc-section cvc-section--tint" id="tuyen-dung">
-		<div class="container">
-			<?php cvc_render_section_header( 'Tuyển dụng mới nhất', 'Xem tất cả tin tuyển dụng', cvc_recruitments_url() ); ?>
-
-			<?php if ( ! $recruitment_result['ok'] ) : ?>
-				<?php cvc_render_error_state(); ?>
-			<?php elseif ( empty( $recruitments ) ) : ?>
-				<?php cvc_render_premium_empty_state( '&#128188;', 'Hiện chưa có tin tuyển dụng phù hợp', 'Tin tuyển dụng công chức, viên chức mới sẽ được cập nhật liên tục - hãy quay lại sau hoặc đặt mục tiêu để nhận gợi ý phù hợp.', 'Xem tất cả tin tuyển dụng', cvc_recruitments_url() ); ?>
-			<?php else : ?>
-				<div class="cvc-card-grid cvc-card-grid--4">
-					<?php foreach ( $recruitments as $recruitment ) : ?>
-						<?php cvc_render_recruitment_card( $recruitment, 3 ); ?>
-					<?php endforeach; ?>
-				</div>
-			<?php endif; ?>
-		</div>
-	</section>
-
-	<!-- ============ EXAMS (deep accent) ============ -->
-	<section class="cvc-section cvc-section--deep" id="on-thi">
-		<div class="container">
-			<?php cvc_render_section_header( 'Luyện thi trắc nghiệm', 'Xem tất cả đề thi', cvc_exams_url() ); ?>
-
-			<?php if ( ! $exam_result['ok'] ) : ?>
-				<?php cvc_render_error_state(); ?>
-			<?php elseif ( empty( $exams ) ) : ?>
-				<?php cvc_render_premium_empty_state( '&#9989;', 'Chưa có đề thi nào', 'Đề thi trắc nghiệm theo môn thi, chủ đề sẽ sớm được cập nhật.', 'Xem tất cả đề thi', cvc_exams_url() ); ?>
-			<?php else : ?>
-				<div class="cvc-card-grid cvc-card-grid--3">
-					<?php foreach ( $exams as $exam ) : ?>
-						<?php cvc_render_exam_card( $exam, 3 ); ?>
-					<?php endforeach; ?>
-				</div>
-			<?php endif; ?>
-		</div>
-	</section>
-
-	<!-- ============ RESOURCE HUB (Chủ đề/Kiến thức/Văn bản) ============ -->
-	<section class="cvc-section">
-		<div class="container">
-			<?php cvc_render_section_header( 'Tài nguyên ôn tập', 'Xem trang tìm kiếm', cvc_search_url() ); ?>
-
-			<div class="cvc-resource-grid">
-				<?php
-				cvc_render_resource_hub_card(
-					'&#128218;',
-					'Chủ đề ôn tập',
-					'Kiến thức hệ thống theo từng chủ đề, gắn với môn thi cụ thể.',
-					cvc_topics_url(),
-					$topics_total,
-					'chủ đề'
-				);
-				cvc_render_resource_hub_card(
-					'&#128161;',
-					'Cẩm nang kiến thức',
-					'Bài viết, kiến thức chuyên môn phục vụ công việc và ôn thi.',
-					cvc_knowledge_url(),
-					$knowledge_total,
-					'bài viết'
-				);
-				cvc_render_resource_hub_card(
-					'&#128220;',
-					'Văn bản pháp luật',
-					'Văn bản, quy định liên quan trực tiếp tới công vụ.',
-					cvc_legal_documents_url(),
-					$legal_total,
-					'văn bản'
-				);
-				?>
 			</div>
+
+			<aside class="cvc-recruitment-panel" id="tuyen-dung" aria-label="Tuyển dụng mới nhất">
+				<div class="cvc-recruitment-panel__header">
+					<h2><span class="cvc-recruitment-panel__icon" aria-hidden="true">&#128188;</span> Tuyển dụng mới nhất</h2>
+					<a class="cvc-section__more" href="<?php echo esc_url( cvc_recruitments_url() ); ?>">Xem tất cả &rarr;</a>
+				</div>
+
+				<?php if ( ! $recruitment_result['ok'] ) : ?>
+					<?php cvc_render_error_state(); ?>
+				<?php elseif ( empty( $recruitments ) ) : ?>
+					<?php cvc_render_premium_empty_state( '&#128188;', 'Chưa có tin phù hợp', 'Tin tuyển dụng mới sẽ được cập nhật liên tục.', 'Xem tất cả tin tuyển dụng', cvc_recruitments_url() ); ?>
+				<?php else : ?>
+					<div class="cvc-recruitment-list">
+						<?php foreach ( $recruitments as $recruitment ) : ?>
+							<?php cvc_render_recruitment_list_item( $recruitment ); ?>
+						<?php endforeach; ?>
+					</div>
+				<?php endif; ?>
+			</aside>
+
 		</div>
 	</section>
 
