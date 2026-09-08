@@ -331,9 +331,16 @@ input:focus-visible {
     padding: var(--cvc-space-8) 0;
 }
 
+/* Skyline mờ làm nền footer (Phase 10A.10, Phần 12) - ảnh đã tối màu sẵn
+   (cùng tông xanh đậm với --cvc-color-primary-deep) nên hoà vào nền, chỉ
+   đặt ở dải trên cùng, không lặp lại - không ảnh hưởng độ tương phản chữ
+   footer (vẫn text sáng trên nền tối như cũ). */
 .site-footer {
     border-top: 1px solid #1c3a63;
-    background: var(--cvc-color-primary-deep);
+    background:
+        linear-gradient(180deg, rgba(9, 46, 108, 0.75) 0%, var(--cvc-color-primary-deep) 55%),
+        url('assets/images/homepage/footer-bg.webp') top center / cover no-repeat,
+        var(--cvc-color-primary-deep);
     padding: var(--cvc-space-12) 0 0;
     color: #a9c2e8;
     font-size: 0.9rem;
@@ -578,8 +585,13 @@ p {
  * xanh rất nhạt (KHÔNG dùng ảnh chụp generic - Phần 10) tạo chiều sâu mà
  * không cần ảnh ngoài, không rủi ro vỡ ảnh/chậm tải.
  */
+/* Hoạ tiết nền mờ (Phase 10A.10, Phần 11) - chỉ áp cho riêng section hero,
+   KHÔNG phải toàn site. Đặt phía trên bên phải, không lặp lại, mờ nhẹ nên
+   không cạnh tranh với text/search bên trái. */
 .cvc-hero {
-    background: linear-gradient(180deg, #f5f9ff 0%, #ffffff 75%);
+    background:
+        url('assets/images/homepage/bg-pattern.webp') top right / min(60%, 640px) auto no-repeat,
+        linear-gradient(180deg, #f5f9ff 0%, #ffffff 75%);
     border-bottom: 1px solid var(--cvc-color-border);
     padding: var(--cvc-space-16) 0 var(--cvc-space-12);
     overflow: hidden;
@@ -699,6 +711,15 @@ p {
     width: 100%;
     max-width: 420px;
     height: auto;
+}
+
+/* Ảnh hero thật (Phase 10A.10) - bo góc + shadow để đọc như 1 khối ảnh
+   premium, không phải ảnh dán thẳng lên nền trắng. */
+.cvc-hero__illustration--photo {
+    display: block;
+    border-radius: var(--cvc-radius-lg);
+    box-shadow: var(--cvc-shadow-lg);
+    object-fit: cover;
 }
 
 /* Card nổi trong hero (Phần B/10) - đè lên góc dưới-phải minh họa. */
@@ -1070,6 +1091,22 @@ p {
     border-radius: var(--cvc-radius-lg);
     padding: 1.25rem;
     box-shadow: var(--cvc-shadow-sm);
+}
+
+/* Ảnh banner trang trí đầu sidebar tuyển dụng (Phase 10A.10) - margin âm
+   để ảnh tràn hết viền panel (bleeds to edge), bo góc trên khớp panel. */
+.cvc-recruitment-panel__banner {
+    margin: -1.25rem -1.25rem var(--cvc-space-4);
+    border-radius: var(--cvc-radius-lg) var(--cvc-radius-lg) 0 0;
+    overflow: hidden;
+}
+
+.cvc-recruitment-panel__banner img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 220 / 130;
+    object-fit: cover;
+    object-position: center 25%;
 }
 
 .cvc-recruitment-panel__header {
@@ -1469,8 +1506,40 @@ p {
     height: 120px;
 }
 
+/* Ảnh trụ sở/skyline thật bên phải banner CTA (Phase 10A.10) - chỉ dùng
+   phần ảnh, KHÔNG dùng headline/nút baked-in trong ảnh gốc (đã cắt bỏ ở
+   khâu xử lý asset - xem docs/PHASE_10A.10_ASSET_INTEGRATION.md mục 6).
+   Gradient phủ từ màu nền banner -> trong suốt để ảnh hoà vào nền xanh
+   đậm thay vì dán cứng 1 khối chữ nhật, đồng thời giữ đủ tương phản cho
+   phần quote text đè lên bên phải. */
+.cvc-cta-banner__photo {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(46%, 32rem);
+    z-index: 0;
+}
+
+.cvc-cta-banner__photo::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, var(--cvc-color-primary-deep) 0%, rgba(9, 46, 108, 0.55) 35%, rgba(9, 46, 108, 0.35) 100%);
+}
+
+.cvc-cta-banner__photo img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: right center;
+    opacity: 0.85;
+}
+
 .cvc-cta-banner__inner {
     position: relative;
+    z-index: 1;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -1669,19 +1738,33 @@ p {
 .cvc-card__media img {
     display: block;
     width: 100%;
-    aspect-ratio: 16 / 9;
+    aspect-ratio: 4 / 3;
     object-fit: cover;
 }
 
 /* Placeholder minh họa khi course chưa có thumbnail thật (Phần 10) - màu
    nền đổi theo course_type (cvc_course_type_color()) để tạo variety thị
-   giác giống ảnh benchmark thật thay vì đồng loạt 1 màu xanh. */
+   giác giống ảnh benchmark thật thay vì đồng loạt 1 màu xanh. Tỷ lệ 4:3
+   (thay vì 16:9 cũ, Phase 10A.10) - khớp hơn với khung hình ảnh course
+   thật (gần vuông) nên object-fit:cover không phải cắt mất chủ thể chính. */
 .cvc-card__media--placeholder {
     display: flex;
     align-items: center;
     justify-content: center;
-    aspect-ratio: 16 / 9;
+    aspect-ratio: 4 / 3;
     background: linear-gradient(135deg, var(--cvc-color-primary), var(--cvc-color-primary-deep));
+}
+
+/* Course artwork ảnh thật (Phase 10A.10) - cùng tỷ lệ 4:3, object-position
+   hơi lệch lên trên vì hầu hết ảnh nguồn có chủ thể chính (người/vật) ở
+   nửa trên, phần dưới thường là bàn/nền ít quan trọng hơn. */
+.cvc-card__media--photo img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    object-position: center 30%;
 }
 
 .cvc-card__media--teal {
@@ -3030,6 +3113,13 @@ button.cvc-btn:disabled {
         padding: var(--cvc-space-8) 0;
     }
 
+    /* Ảnh skyline bên phải (Phase 10A.10) ẩn khi banner chuyển sang layout
+       1 cột dưới 640px - tránh đè lên quote text lúc này đã full-width,
+       cùng pattern với .cvc-hero__visual ẩn ở mobile. */
+    .cvc-cta-banner__photo {
+        display: none;
+    }
+
     .cvc-cta-banner__inner {
         flex-direction: column;
         text-align: center;
@@ -3099,10 +3189,17 @@ button.cvc-btn:disabled {
     }
 
     /* Card nổi (15rem) rộng hơn cả minh họa đã co lại (280px) ở tablet -
-       ẩn để tránh tràn, nội dung của nó không quan trọng bằng minh họa
-       chính + hero text ở màn hẹp. */
+       thay vì ẩn hẳn (Phase 10A.9, lúc minh họa còn là SVG có thể để lộ
+       vùng trống không cần che), giờ minh họa là ẢNH THẬT (Phase 10A.10)
+       và vùng dưới-phải ảnh đã được làm mờ sẵn để nhường chỗ cho đúng
+       card này - nếu ẩn card, vùng mờ đó lộ ra như 1 vệt mờ vô nghĩa.
+       Chuyển card từ absolute-overlay sang xếp bên dưới ảnh (flow bình
+       thường, full width) thay vì che chồng lên minh họa đã co nhỏ. */
     .cvc-hero-feature-card {
-        display: none;
+        position: static;
+        width: 100%;
+        max-width: 280px;
+        margin: var(--cvc-space-3) auto 0;
     }
 
     .cvc-value-strip {

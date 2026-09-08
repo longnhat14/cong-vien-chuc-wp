@@ -183,6 +183,7 @@ get_header();
 			</div>
 
 			<aside class="cvc-recruitment-panel" id="tuyen-dung" aria-label="Tuyển dụng mới nhất">
+				<?php cvc_render_recruitment_panel_banner(); ?>
 				<div class="cvc-recruitment-panel__header">
 					<h2><span class="cvc-recruitment-panel__icon"><?php cvc_render_icon( 'briefcase', 20 ); ?></span> Tuyển dụng mới nhất</h2>
 					<a class="cvc-section__more" href="<?php echo esc_url( cvc_recruitments_url() ); ?>">Xem tất cả &rarr;</a>

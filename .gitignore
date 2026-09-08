@@ -22,3 +22,9 @@ Thumbs.db
 # Node
 node_modules/
 npm-debug.log*
+
+# Phase 10A.10 - raw generated asset pack (source crops, collage boards,
+# a 7MB zip) used to derive theme/cong-vien-chuc/assets/images/homepage/.
+# Kept on disk for QA/re-derivation reference, never committed - see
+# docs/PHASE_10A.10_ASSET_INTEGRATION.md.
+/homepage-assets-incoming/

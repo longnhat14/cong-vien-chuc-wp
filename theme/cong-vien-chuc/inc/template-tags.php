@@ -1029,14 +1029,40 @@ function cvc_course_type_color( ?string $type ): string {
 }
 
 /**
- * Artwork minh họa cho course card khi chưa có thumbnail_url thật (Phase
- * 10A.7, Phần 16 COURSE ARTWORK - "được phép tạo artwork riêng cho từng
- * category... KHÔNG dùng ảnh stock generic"). Mỗi course_type 1 "scene"
- * SVG riêng (không chỉ 1 icon lặp lại như bản 10A.6) - hình khối lớn phía
- * sau + icon glyph + chi tiết phụ, gợi đúng ngữ cảnh môn học mà không cần
- * ảnh chụp (không có asset ảnh có bản quyền rõ ràng để dùng - Phần 6).
+ * Artwork minh họa cho course card khi chưa có thumbnail_url thật.
+ * Phase 10A.10: ưu tiên ảnh thật (cắt từ bộ asset ChatGPT Image
+ * Generation, đã bỏ hết badge category baked-in trùng với
+ * `.cvc-card__media-badge` thật - xem docs/PHASE_10A.10_ASSET_INTEGRATION.md
+ * mục 5). course_type không map được ảnh (giá trị lạ, ngoài enum) rơi về
+ * SVG scene (Phase 10A.9) làm fallback cuối - không bao giờ vỡ ảnh.
  */
 function cvc_render_course_thumbnail_placeholder( ?string $course_type = null, string $color = 'blue' ): void {
+	$photo_map = array(
+		'exam_prep'    => 'course-exam-prep',
+		'skill'        => 'course-skill',
+		'professional' => 'course-professional',
+		'orientation'  => 'course-orientation',
+	);
+	$photo_file = $photo_map[ $course_type ?? '' ] ?? 'course-default';
+	if ( file_exists( get_theme_file_path( "/assets/images/homepage/{$photo_file}.webp" ) ) ) {
+		?>
+		<div class="cvc-card__media cvc-card__media--photo" aria-hidden="true">
+			<picture>
+				<source srcset="<?php echo esc_url( get_theme_file_uri( "/assets/images/homepage/{$photo_file}.webp" ) ); ?>" type="image/webp">
+				<img src="<?php echo esc_url( get_theme_file_uri( "/assets/images/homepage/{$photo_file}.png" ) ); ?>" alt="" loading="lazy" width="220" height="226">
+			</picture>
+		</div>
+		<?php
+		return;
+	}
+	cvc_render_course_thumbnail_svg_fallback( $course_type, $color );
+}
+
+/**
+ * SVG scene fallback (Phase 10A.9) - dùng khi course_type không map được
+ * ảnh thật ở trên, hoặc khi thư mục assets/images/homepage bị thiếu file.
+ */
+function cvc_render_course_thumbnail_svg_fallback( ?string $course_type = null, string $color = 'blue' ): void {
 	$scenes = array(
 		// Ôn thi - bài thi + đồng hồ bấm giờ + bia điểm, kể câu chuyện
 		// "luyện đề có giới hạn thời gian, chấm điểm rõ ràng" thay vì chỉ
@@ -1596,7 +1622,39 @@ function cvc_render_search_form( string $current_q = '', string $input_id = 'cvc
  * "người học/công chức" -> icon nổi (mũ tốt nghiệp, tài liệu) làm điểm
  * nhấn. Toàn bộ vẫn SVG thuần, không phụ thuộc ảnh ngoài.
  */
+/**
+ * Phase 10A.10 - thay minh họa SVG bằng ảnh thật (người công chức + trụ sở
+ * cơ quan + cờ Tổ quốc, cắt từ bộ asset ChatGPT Image Generation, đã bỏ
+ * hết phần chữ/UI baked-in trùng với HTML thật - xem docs/PHASE_10A.10_
+ * ASSET_INTEGRATION.md mục 3). SVG cũ giữ lại làm fallback nếu file ảnh
+ * bị thiếu (ví dụ site khác dùng theme này nhưng chưa có asset).
+ */
 function cvc_render_hero_illustration(): void {
+	$file = 'assets/images/homepage/hero-photo';
+	if ( ! file_exists( get_theme_file_path( "/{$file}.webp" ) ) ) {
+		cvc_render_hero_illustration_svg_fallback();
+		return;
+	}
+	?>
+	<picture>
+		<source srcset="<?php echo esc_url( get_theme_file_uri( "/{$file}.webp" ) ); ?>" type="image/webp">
+		<img
+			class="cvc-hero__illustration cvc-hero__illustration--photo"
+			src="<?php echo esc_url( get_theme_file_uri( "/{$file}.png" ) ); ?>"
+			alt="Người công chức, viên chức trước trụ sở cơ quan nhà nước"
+			width="433" height="415"
+			fetchpriority="high"
+			decoding="async"
+		>
+	</picture>
+	<?php
+}
+
+/**
+ * Minh họa SVG gốc (Phase 10A.9) - giữ làm fallback khi chưa có asset ảnh
+ * thật (xem cvc_render_hero_illustration() ở trên).
+ */
+function cvc_render_hero_illustration_svg_fallback(): void {
 	?>
 	<svg class="cvc-hero__illustration" viewBox="0 0 480 420" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Minh họa trụ sở cơ quan nhà nước và người công chức, viên chức đang học tập, phát triển sự nghiệp">
 		<rect x="0" y="0" width="480" height="420" rx="24" fill="url(#cvcSkyGradient)"/>
@@ -2135,12 +2193,40 @@ function cvc_render_resource_hub_card( string $icon, string $title, string $desc
 }
 
 /**
+ * Ảnh minh họa đầu sidebar "Tuyển dụng mới nhất" (Phase 10A.10, Phần 8) -
+ * thuần trang trí (aria-hidden, không có alt text ý nghĩa), KHÔNG kèm số
+ * liệu/text nào - danh sách tin tuyển dụng bên dưới vẫn 100% dữ liệu thật/
+ * fixture có nhãn Demo như cũ, ảnh này không thêm bất kỳ claim nào.
+ */
+function cvc_render_recruitment_panel_banner(): void {
+	$photo = 'assets/images/homepage/recruitment-photo';
+	if ( ! file_exists( get_theme_file_path( "/{$photo}.webp" ) ) ) {
+		return;
+	}
+	?>
+	<div class="cvc-recruitment-panel__banner" aria-hidden="true">
+		<picture>
+			<source srcset="<?php echo esc_url( get_theme_file_uri( "/{$photo}.webp" ) ); ?>" type="image/webp">
+			<img src="<?php echo esc_url( get_theme_file_uri( "/{$photo}.png" ) ); ?>" alt="" loading="lazy" width="220" height="208">
+		</picture>
+	</div>
+	<?php
+}
+
+/**
  * Banner CTA cuối trang chủ (Phần 8 FINAL CTA) - dải xanh đậm full-width,
  * skyline minh họa bằng SVG (không phải ảnh ngoài).
  */
 function cvc_render_homepage_cta_banner(): void {
+	$photo = 'assets/images/homepage/cta-skyline';
 	?>
 	<section class="cvc-cta-banner">
+		<?php if ( file_exists( get_theme_file_path( "/{$photo}.webp" ) ) ) : ?>
+			<picture class="cvc-cta-banner__photo" aria-hidden="true">
+				<source srcset="<?php echo esc_url( get_theme_file_uri( "/{$photo}.webp" ) ); ?>" type="image/webp">
+				<img src="<?php echo esc_url( get_theme_file_uri( "/{$photo}.png" ) ); ?>" alt="" loading="lazy" width="214" height="226">
+			</picture>
+		<?php endif; ?>
 		<svg class="cvc-cta-banner__skyline" viewBox="0 0 1200 120" preserveAspectRatio="none" aria-hidden="true">
 			<path d="M0 120V70l40-10V50l30-15 30 15v20l50-25v30l40-8v18l60-20v20l45-10v20l55-15v25l60-10v15l50-20v25l60-8v13H0Z" fill="#ffffff" fill-opacity="0.06"/>
 		</svg>
