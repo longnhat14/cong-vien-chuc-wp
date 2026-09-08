@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">Bảo mật</title>
+  <desc id="desc">Biểu tượng duotone dùng trong hệ thống Công Viên Chức</desc>
+  <rect x="4" y="4" width="56" height="56" rx="16" fill="#2563eb" opacity=".09"/>
+  <g color="#2563eb"><path d="M32 9 50 16v14c0 12-7 20-18 25C21 50 14 42 14 30V16l18-7Z" fill="none" stroke="currentColor" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"/><path d="m24 32 6 6 11-13"/></g>
+</svg>

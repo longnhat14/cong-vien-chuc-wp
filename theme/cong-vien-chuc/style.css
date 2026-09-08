@@ -325,6 +325,17 @@ input:focus-visible {
     opacity: 0.85;
 }
 
+/* Phase 10A.17 - class dùng chung cho mọi icon render qua
+   cvc_render_cvc_icon() (CVC Design Icon Library). Icon là <img> nên cần
+   vertical-align để không lệch baseline khi đứng cạnh text inline; icon
+   đã tự có màu/nền baked-in (duotone tile) nên không cần color/background
+   CSS thêm như icon SVG inline cũ. */
+.cvc-lib-icon {
+    display: inline-block;
+    vertical-align: middle;
+    flex-shrink: 0;
+}
+
 .site-nav .cvc-nav-current a {
     color: var(--cvc-color-primary-dark);
     background: var(--cvc-color-primary-tint);
@@ -483,6 +494,21 @@ p {
     font-size: 0.95rem;
 }
 
+/* Phase 10A.17: icon thật (CVC icon library) đặt trước message trong
+   .cvc-state - thay cho emoji nhúng qua CSS content:'\...' (📂/🔍) trước
+   đây, xem cvc_render_empty_state()/cvc_render_error_state()/
+   cvc_render_notfound_state(). Icon rỗng nếu thiếu asset (không vỡ layout). */
+.cvc-state__icon {
+    display: block;
+    margin: 0 auto 0.5rem;
+    width: 28px;
+    height: 28px;
+}
+
+.cvc-state__icon:empty {
+    display: none;
+}
+
 .cvc-state--loading {
     background: var(--cvc-color-bg-alt);
     color: var(--cvc-color-text-subtle);
@@ -492,13 +518,6 @@ p {
     background: var(--cvc-color-bg-alt);
     border: 1px dashed var(--cvc-color-border-strong);
     color: var(--cvc-color-text-muted);
-}
-
-.cvc-state--empty::before {
-    content: '\1F4C2';
-    display: block;
-    font-size: 1.75rem;
-    margin-bottom: 0.5rem;
 }
 
 .cvc-state--error {
@@ -1965,6 +1984,9 @@ p {
 }
 
 .cvc-card__meta {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
     margin: 0;
     color: var(--cvc-color-text-subtle);
     font-size: 0.85rem;
@@ -1977,6 +1999,14 @@ p {
     margin: 0;
     color: var(--cvc-color-text-subtle);
     font-size: 0.85rem;
+}
+
+/* Phase 10A.17 - icon lesson/duration/question/timer đứng cạnh số liệu
+   trong meta-row (trước đây chỉ có text, không icon). */
+.cvc-card__meta-row span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
 }
 
 .cvc-card__footer {
@@ -1993,6 +2023,9 @@ p {
 }
 
 .cvc-card__deadline {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
     font-size: 0.85rem;
     color: var(--cvc-color-text-subtle);
 }
@@ -2234,13 +2267,6 @@ p {
     background: var(--cvc-color-bg-alt);
     border: 1px dashed var(--cvc-color-border-strong);
     color: var(--cvc-color-text-muted);
-}
-
-.cvc-state--notfound::before {
-    content: '\1F50D';
-    display: block;
-    font-size: 1.75rem;
-    margin-bottom: 0.5rem;
 }
 
 .cvc-state--locked {
@@ -2598,11 +2624,25 @@ button.cvc-btn:disabled {
 }
 
 .cvc-account-nav a {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
     padding: 0.55rem 0.75rem;
     border-radius: var(--cvc-radius-sm);
     color: var(--cvc-color-text);
     font-weight: 500;
+}
+
+/* Phase 10A.17 - icon menu tài khoản (CVC icon library); mục không có
+   icon khớp (vd "Tổng quan") vẫn thẳng hàng nhờ padding-left thay chỗ
+   icon lẽ ra chiếm (20px + gap 0.6rem). */
+.cvc-account-nav__icon {
+    display: inline-flex;
+    flex-shrink: 0;
+}
+
+.cvc-account-nav a:not(:has(.cvc-account-nav__icon)) {
+    padding-left: calc(0.75rem + 20px + 0.6rem);
 }
 
 .cvc-account-nav a:hover {

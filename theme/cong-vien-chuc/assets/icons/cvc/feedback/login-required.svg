@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">Yêu cầu đăng nhập</title>
+  <desc id="desc">Biểu tượng duotone dùng trong hệ thống Công Viên Chức</desc>
+  <rect x="4" y="4" width="56" height="56" rx="16" fill="#64748b" opacity=".09"/>
+  <g color="#64748b"><circle cx="25" cy="21" r="8" fill="none" stroke="currentColor" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 49c2-10 8-15 15-15s13 5 15 15M45 35h8v10h-8zM47 35v-3a3 3 0 0 1 6 0v3" fill="none" stroke="currentColor" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"/></g>
+</svg>

@@ -148,6 +148,7 @@ get_header();
 
 		<?php if ( ! $has_content ) : ?>
 			<div class="cvc-state cvc-state--locked">
+				<span class="cvc-state__icon" aria-hidden="true"><?php cvc_render_cvc_icon( 'feedback/locked', 28 ); ?></span>
 				<p>Bài học này chỉ dành cho học viên đã đăng ký khóa học trả phí.</p>
 			</div>
 		<?php else : ?>

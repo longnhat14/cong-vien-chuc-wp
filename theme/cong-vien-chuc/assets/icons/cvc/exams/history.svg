@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">Lịch sử thi</title>
+  <desc id="desc">Biểu tượng duotone dùng trong hệ thống Công Viên Chức</desc>
+  <rect x="4" y="4" width="56" height="56" rx="16" fill="#7c3aed" opacity=".09"/>
+  <g color="#7c3aed"><path d="M14 25a19 19 0 1 1 2 17" fill="none" stroke="currentColor" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 14v11h11M32 21v12l8 5"/></g>
+</svg>

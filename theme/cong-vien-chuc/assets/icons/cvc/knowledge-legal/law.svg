@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">Văn bản pháp luật</title>
+  <desc id="desc">Biểu tượng duotone dùng trong hệ thống Công Viên Chức</desc>
+  <rect x="4" y="4" width="56" height="56" rx="16" fill="#0891b2" opacity=".09"/>
+  <g color="#0891b2"><path d="M32 11v39M18 16h28M11 52h42M17 17 9 33h16l-8-16ZM47 17l-8 16h16l-8-16Z" fill="none" stroke="currentColor" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"/></g>
+</svg>

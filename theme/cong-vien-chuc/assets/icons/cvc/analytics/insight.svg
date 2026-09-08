@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">Phân tích</title>
+  <desc id="desc">Biểu tượng duotone dùng trong hệ thống Công Viên Chức</desc>
+  <rect x="4" y="4" width="56" height="56" rx="16" fill="#f59e0b" opacity=".09"/>
+  <g color="#f59e0b"><path d="M20 46h24M24 52h16M21 39c-5-4-8-9-8-15a19 19 0 0 1 38 0c0 6-3 11-8 15-3 2-4 4-4 6H25c0-2-1-4-4-6Z" fill="none" stroke="currentColor" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M32 22v13M27 28h10"/></g>
+</svg>

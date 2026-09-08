@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">Thông báo</title>
+  <desc id="desc">Biểu tượng duotone dùng trong hệ thống Công Viên Chức</desc>
+  <rect x="4" y="4" width="56" height="56" rx="16" fill="#2563eb" opacity=".09"/>
+  <g color="#2563eb"><path d="M16 45h32l-4-6V28c0-8-5-14-12-14s-12 6-12 14v11l-4 6ZM27 51h10" fill="none" stroke="currentColor" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"/></g>
+</svg>

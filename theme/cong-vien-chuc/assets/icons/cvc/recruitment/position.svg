@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">Vị trí tuyển dụng</title>
+  <desc id="desc">Biểu tượng duotone dùng trong hệ thống Công Viên Chức</desc>
+  <rect x="4" y="4" width="56" height="56" rx="16" fill="#22c55e" opacity=".09"/>
+  <g color="#22c55e"><rect x="10" y="20" width="44" height="30" rx="5" fill="none" stroke="currentColor" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M23 20v-5h18v5M10 31h44M29 31v4h6v-4"/></g>
+</svg>

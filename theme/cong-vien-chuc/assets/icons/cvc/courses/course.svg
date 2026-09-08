@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">Khóa học</title>
+  <desc id="desc">Biểu tượng duotone dùng trong hệ thống Công Viên Chức</desc>
+  <rect x="4" y="4" width="56" height="56" rx="16" fill="#2563eb" opacity=".09"/>
+  <g color="#2563eb"><path d="m8 25 24-13 24 13-24 13L8 25Z" fill="none" stroke="currentColor" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M18 31v12c8 7 20 7 28 0V31M56 25v15"/></g>
+</svg>

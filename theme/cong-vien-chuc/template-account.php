@@ -45,6 +45,24 @@ $section_titles = array(
 	'notifications'        => 'Thông báo',
 );
 
+/*
+ * Phase 10A.17: icon menu tài khoản (CVC icon library) - trước đây nav
+ * này hoàn toàn không có icon (chỉ text link). 'overview' không có icon
+ * khớp nghĩa trong bộ dashboard/analytics/recruitment - để trống, không
+ * ép. 'settings'/'security' trong bộ icon KHÔNG có section tương ứng ở
+ * đây (dashboard hiện chưa có trang cài đặt/bảo mật riêng) - không dùng.
+ */
+$section_icons = array(
+	'profile'              => 'dashboard/profile',
+	'goals'                => 'dashboard/goal',
+	'learning-path'        => 'dashboard/roadmap',
+	'bookmarks'            => 'dashboard/favorites',
+	'exam-history'         => 'dashboard/history',
+	'recommendations'      => 'analytics/insight',
+	'recruitment-matches'  => 'recruitment/position',
+	'notifications'        => 'dashboard/notification',
+);
+
 cvc_seo_set_title( $section_titles[ $section ] . ' - Tài khoản' );
 
 /**
@@ -99,7 +117,12 @@ get_header();
 						<a
 							href="<?php echo esc_url( cvc_account_url( $key ) ); ?>"
 							<?php echo $key === $section ? ' class="is-active" aria-current="page"' : ''; ?>
-						><?php echo esc_html( $label ); ?></a>
+						>
+							<?php if ( isset( $section_icons[ $key ] ) ) : ?>
+								<span class="cvc-account-nav__icon" aria-hidden="true"><?php cvc_render_cvc_icon( $section_icons[ $key ], 20 ); ?></span>
+							<?php endif; ?>
+							<?php echo esc_html( $label ); ?>
+						</a>
 					</li>
 				<?php endforeach; ?>
 			</ul>

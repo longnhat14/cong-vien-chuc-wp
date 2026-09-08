@@ -16,18 +16,44 @@ function cvc_render_loading_state( string $message = 'Đang tải dữ liệu…
 	);
 }
 
+/**
+ * Phase 10A.17: icon giờ render thật (CVC icon library, feedback/empty)
+ * thay vì emoji nhúng qua CSS content:'\1F4C2' (📂) trước đây - xem
+ * style.css, rule ::before cũ đã bị xoá cùng lúc.
+ */
 function cvc_render_empty_state( string $message = 'Chưa có dữ liệu.' ): void {
 	printf(
-		'<div class="cvc-state cvc-state--empty">%s</div>',
+		'<div class="cvc-state cvc-state--empty"><span class="cvc-state__icon" aria-hidden="true">%s</span>%s</div>',
+		cvc_get_cvc_icon_html( 'feedback/empty', 28 ),
 		esc_html( $message )
 	);
 }
 
+/**
+ * Phase 10A.17: thêm icon feedback/error (trước đây không có icon nào,
+ * chỉ có màu nền/viền đỏ) - không phải emoji, bổ sung mới hoàn toàn nên
+ * không có rủi ro "làm xấu hơn baseline".
+ */
 function cvc_render_error_state( string $message = 'Không thể tải dữ liệu, vui lòng thử lại sau.' ): void {
 	printf(
-		'<div class="cvc-state cvc-state--error">%s</div>',
+		'<div class="cvc-state cvc-state--error"><span class="cvc-state__icon" aria-hidden="true">%s</span>%s</div>',
+		cvc_get_cvc_icon_html( 'feedback/error', 28 ),
 		esc_html( $message )
 	);
+}
+
+/**
+ * Helper nội bộ: cvc_render_cvc_icon() in trực tiếp ra output (echo qua
+ * printf) nên không capture được thành string để lồng vào 1 printf khác
+ * - hàm này bọc lại bằng output buffering để dùng icon library ngay
+ * trong 1 dòng printf ở các hàm state phía trên mà không đổi kiến trúc
+ * cvc_render_cvc_icon() (vẫn dùng trực tiếp/echo ở mọi nơi khác trong
+ * theme). Trả về '' nếu thiếu asset - không vỡ HTML.
+ */
+function cvc_get_cvc_icon_html( string $key, int $size = 20, string $class = '' ): string {
+	ob_start();
+	cvc_render_cvc_icon( $key, $size, $class );
+	return ob_get_clean();
 }
 
 /**
@@ -261,6 +287,35 @@ function cvc_render_v2_asset_icon( string $relative_path, int $w, int $h, string
 }
 
 /**
+ * Render 1 icon từ "CVC Design Icon Library Core V1" (Phase 10A.17 - 59
+ * file SVG duotone 64x64, đã cắt sẵn, không xử lý runtime - xem
+ * design-assets/cvc-icon-library/cvc-design-icon-library/README.txt).
+ * $key dạng "category/name" (vd "recruitment/agency", "exams/timer") -
+ * khớp đúng cấu trúc thư mục assets/icons/cvc/. Dùng <img> trỏ thẳng file
+ * .svg (không base64, không background-image - SVG đã nhẹ sẵn, không cần
+ * picture/webp như ảnh raster). Trả về true/false để nơi gọi biết còn
+ * cần fallback (icon nội bộ cvc_render_icon()) hay không - nếu thiếu
+ * icon cho 1 trường hợp cụ thể thì KHÔNG tự vẽ thêm, giữ fallback hiện
+ * có. alt mặc định rỗng (icon trang trí, luôn đặt cạnh text thật); truyền
+ * $alt khi icon là accessible name DUY NHẤT của 1 control (vd nút icon-only).
+ */
+function cvc_render_cvc_icon( string $key, int $size = 20, string $class = '', string $alt = '' ): bool {
+	$path = "assets/icons/cvc/{$key}.svg";
+	if ( ! file_exists( get_theme_file_path( "/{$path}" ) ) ) {
+		return false;
+	}
+	printf(
+		'<img class="%s" src="%s" width="%d" height="%d" alt="%s" loading="lazy" decoding="async">',
+		esc_attr( trim( 'cvc-lib-icon ' . $class ) ),
+		esc_url( get_theme_file_uri( "/{$path}" ) ),
+		$size,
+		$size,
+		esc_attr( $alt )
+	);
+	return true;
+}
+
+/**
  * Menu mặc định khi chưa gán menu "Primary" trong wp-admin - đảm bảo
  * luôn có internal link tới các trang domain chính cho SEO + có active
  * state để người dùng biết đang ở đâu.
@@ -398,7 +453,7 @@ function cvc_render_recruitment_card( array $recruitment, int $heading_level = 2
 				<p class="cvc-card__excerpt"><?php echo esc_html( $summary ); ?></p>
 			<?php endif; ?>
 			<?php if ( null !== $totalPositions ) : ?>
-				<p class="cvc-card__meta"><?php echo esc_html( sprintf( '%d chỉ tiêu', (int) $totalPositions ) ); ?></p>
+				<p class="cvc-card__meta"><?php cvc_render_cvc_icon( 'recruitment/position', 15 ); ?> <?php echo esc_html( sprintf( '%d chỉ tiêu', (int) $totalPositions ) ); ?></p>
 			<?php endif; ?>
 			<?php if ( $code ) : ?>
 				<p class="cvc-card__meta">Mã tin: <?php echo esc_html( $code ); ?></p>
@@ -408,7 +463,7 @@ function cvc_render_recruitment_card( array $recruitment, int $heading_level = 2
 			<?php endif; ?>
 			<div class="cvc-card__footer cvc-card__footer--split">
 				<?php if ( $deadline ) : ?>
-					<span class="cvc-card__deadline">Hạn nộp: <strong><?php echo esc_html( cvc_format_date_vn( $deadline ) ); ?></strong></span>
+					<span class="cvc-card__deadline"><?php cvc_render_cvc_icon( 'recruitment/deadline', 15 ); ?> Hạn nộp: <strong><?php echo esc_html( cvc_format_date_vn( $deadline ) ); ?></strong></span>
 				<?php endif; ?>
 				<a class="cvc-btn cvc-btn--text" href="<?php echo esc_url( $url ); ?>">Xem chi tiết &rarr;</a>
 			</div>
@@ -462,10 +517,10 @@ function cvc_render_recruitment_list_item( array $recruitment ): void {
 			<?php endif; ?>
 			<p class="cvc-recruitment-row__meta">
 				<?php if ( $location ) : ?>
-					<span class="cvc-recruitment-row__meta-item"><?php cvc_render_icon( 'pin', 13 ); ?> <?php echo esc_html( $location ); ?></span>
+					<span class="cvc-recruitment-row__meta-item"><?php cvc_render_cvc_icon( 'recruitment/location', 16 ); ?> <?php echo esc_html( $location ); ?></span>
 				<?php endif; ?>
 				<?php if ( $deadline ) : ?>
-					<span class="cvc-recruitment-row__meta-item"><?php cvc_render_icon( 'calendar', 13 ); ?> Hạn nộp: <?php echo esc_html( cvc_format_date_vn( $deadline ) ); ?></span>
+					<span class="cvc-recruitment-row__meta-item"><?php cvc_render_cvc_icon( 'recruitment/deadline', 16 ); ?> Hạn nộp: <?php echo esc_html( cvc_format_date_vn( $deadline ) ); ?></span>
 				<?php endif; ?>
 			</p>
 		</div>
@@ -544,10 +599,10 @@ function cvc_render_exam_card( array $exam, int $heading_level = 2 ): void {
 			<?php endif; ?>
 			<p class="cvc-card__meta-row">
 				<?php if ( ! empty( $questionsCount ) ) : ?>
-					<span><?php echo esc_html( sprintf( '%d câu hỏi', (int) $questionsCount ) ); ?></span>
+					<span><?php cvc_render_cvc_icon( 'exams/question', 15 ); ?> <?php echo esc_html( sprintf( '%d câu hỏi', (int) $questionsCount ) ); ?></span>
 				<?php endif; ?>
 				<?php if ( $durationMinutes ) : ?>
-					<span><?php echo esc_html( sprintf( '%d phút', (int) $durationMinutes ) ); ?></span>
+					<span><?php cvc_render_cvc_icon( 'exams/timer', 15 ); ?> <?php echo esc_html( sprintf( '%d phút', (int) $durationMinutes ) ); ?></span>
 				<?php endif; ?>
 			</p>
 			<p class="cvc-card__footer">
@@ -614,10 +669,10 @@ function cvc_render_legal_document_card( array $document, int $heading_level = 2
 				<p class="cvc-card__excerpt"><?php echo esc_html( $summary ); ?></p>
 			<?php endif; ?>
 			<?php if ( $issuingAgency ) : ?>
-				<p class="cvc-card__meta"><?php echo esc_html( $issuingAgency ); ?></p>
+				<p class="cvc-card__meta"><?php cvc_render_cvc_icon( 'knowledge-legal/official', 15 ); ?> <?php echo esc_html( $issuingAgency ); ?></p>
 			<?php endif; ?>
 			<?php if ( $effectiveDate ) : ?>
-				<p class="cvc-card__meta"><?php echo esc_html( sprintf( 'Hiệu lực: %s', cvc_format_date_vn( $effectiveDate ) ) ); ?></p>
+				<p class="cvc-card__meta"><?php cvc_render_cvc_icon( 'knowledge-legal/updated', 15 ); ?> <?php echo esc_html( sprintf( 'Hiệu lực: %s', cvc_format_date_vn( $effectiveDate ) ) ); ?></p>
 			<?php endif; ?>
 			<p class="cvc-card__footer">
 				<a class="cvc-btn cvc-btn--text" href="<?php echo esc_url( $url ); ?>">Xem văn bản &rarr;</a>
@@ -627,9 +682,15 @@ function cvc_render_legal_document_card( array $document, int $heading_level = 2
 	<?php
 }
 
+/**
+ * Phase 10A.17: icon giờ render thật (CVC icon library, feedback/not-found)
+ * thay vì emoji nhúng qua CSS content:'\1F50D' (🔍) trước đây - xem
+ * style.css, rule ::before cũ đã bị xoá cùng lúc.
+ */
 function cvc_render_notfound_state( string $message ): void {
 	printf(
-		'<div class="cvc-state cvc-state--notfound">%s</div>',
+		'<div class="cvc-state cvc-state--notfound"><span class="cvc-state__icon" aria-hidden="true">%s</span>%s</div>',
+		cvc_get_cvc_icon_html( 'feedback/not-found', 28 ),
 		esc_html( $message )
 	);
 }
@@ -1257,10 +1318,10 @@ function cvc_render_course_card( array $course, int $heading_level = 2 ): void {
 			<?php endif; ?>
 			<p class="cvc-card__meta-row">
 				<?php if ( null !== $lessonCount ) : ?>
-					<span><?php echo esc_html( sprintf( '%d bài học', (int) $lessonCount ) ); ?></span>
+					<span><?php cvc_render_cvc_icon( 'courses/lesson', 15 ); ?> <?php echo esc_html( sprintf( '%d bài học', (int) $lessonCount ) ); ?></span>
 				<?php endif; ?>
 				<?php if ( ! empty( $duration ) ) : ?>
-					<span><?php echo esc_html( sprintf( '%d phút', (int) $duration ) ); ?></span>
+					<span><?php cvc_render_cvc_icon( 'courses/duration', 15 ); ?> <?php echo esc_html( sprintf( '%d phút', (int) $duration ) ); ?></span>
 				<?php endif; ?>
 			</p>
 			<p class="cvc-card__footer">
@@ -1319,10 +1380,10 @@ function cvc_render_course_card_featured( array $course ): void {
 			<?php endif; ?>
 			<p class="cvc-card__meta-row">
 				<?php if ( null !== $lessonCount ) : ?>
-					<span><?php echo esc_html( sprintf( '%d bài học', (int) $lessonCount ) ); ?></span>
+					<span><?php cvc_render_cvc_icon( 'courses/lesson', 15 ); ?> <?php echo esc_html( sprintf( '%d bài học', (int) $lessonCount ) ); ?></span>
 				<?php endif; ?>
 				<?php if ( ! empty( $duration ) ) : ?>
-					<span><?php echo esc_html( sprintf( '%d phút', (int) $duration ) ); ?></span>
+					<span><?php cvc_render_cvc_icon( 'courses/duration', 15 ); ?> <?php echo esc_html( sprintf( '%d phút', (int) $duration ) ); ?></span>
 				<?php endif; ?>
 			</p>
 			<p class="cvc-card__footer">

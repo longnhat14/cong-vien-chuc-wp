@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">Cơ quan / đơn vị</title>
+  <desc id="desc">Biểu tượng duotone dùng trong hệ thống Công Viên Chức</desc>
+  <rect x="4" y="4" width="56" height="56" rx="16" fill="#22c55e" opacity=".09"/>
+  <g color="#22c55e"><rect x="14" y="18" width="36" height="34" rx="3" fill="none" stroke="currentColor" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 52V28h20v24M19 18l13-8 13 8M26 34h4M34 34h4M26 41h4M34 41h4"/></g>
+</svg>
