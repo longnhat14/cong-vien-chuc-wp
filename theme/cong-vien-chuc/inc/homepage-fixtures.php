@@ -137,7 +137,13 @@ function cvc_homepage_demo_courses(): array {
 function cvc_homepage_demo_statistics(): array {
 	return array(
 		array(
-			'icon'  => 'graduation',
+			/*
+			 * 'graduation' không tồn tại trong $paths của cvc_render_icon()
+			 * (Phase 10A.15 QA - phát hiện qua screenshot: icon rỗng, không
+			 * phải lỗi CSS). 'courses' là icon mũ tốt nghiệp cách điệu, khớp
+			 * đúng ngữ nghĩa "tài khoản học tập" hơn.
+			 */
+			'icon'  => 'courses',
 			'value' => '10.000+',
 			'label' => 'Tài khoản học tập',
 		),

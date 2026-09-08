@@ -229,6 +229,38 @@ function cvc_render_icon( string $key, int $size = 20, string $class = '' ): voi
 }
 
 /**
+ * Render 1 asset PNG/WebP đã cắt sẵn trong assets/images/homepage-v2/
+ * (Phase 10A.16 - bộ "Homepage V2 cut assets"). Dùng chung cho value/goal
+ * icon thay vì lặp file_exists+get_theme_file_uri ở nhiều nơi. Trả về
+ * true/false để nơi gọi biết còn cần render SVG fallback hay không (real
+ * asset > SVG tự vẽ, nhưng SVG luôn là fallback cuối nếu thiếu file - xem
+ * cvc_render_icon()). width/height bắt buộc để tránh CLS; alt mặc định
+ * rỗng vì các icon này luôn đặt cạnh tiêu đề/mô tả chữ thật (không phải
+ * nguồn thông tin duy nhất).
+ */
+function cvc_render_v2_asset_icon( string $relative_path, int $w, int $h, string $class = '', string $alt = '' ): bool {
+	$path = "assets/images/homepage-v2/{$relative_path}";
+	if ( ! file_exists( get_theme_file_path( "/{$path}.png" ) ) ) {
+		return false;
+	}
+	?>
+	<picture>
+		<source srcset="<?php echo esc_url( get_theme_file_uri( "/{$path}.webp" ) ); ?>" type="image/webp">
+		<img
+			class="<?php echo esc_attr( $class ); ?>"
+			src="<?php echo esc_url( get_theme_file_uri( "/{$path}.png" ) ); ?>"
+			alt="<?php echo esc_attr( $alt ); ?>"
+			width="<?php echo esc_attr( (string) $w ); ?>"
+			height="<?php echo esc_attr( (string) $h ); ?>"
+			loading="lazy"
+			decoding="async"
+		>
+	</picture>
+	<?php
+	return true;
+}
+
+/**
  * Menu mặc định khi chưa gán menu "Primary" trong wp-admin - đảm bảo
  * luôn có internal link tới các trang domain chính cho SEO + có active
  * state để người dùng biết đang ở đâu.
@@ -1947,30 +1979,35 @@ function cvc_render_value_strip(): void {
 	$items = array(
 		array(
 			'icon'  => 'courses',
+			'image' => 'VALUE_ICONS/01_course',
 			'color' => 'blue',
 			'title' => 'Khóa học đa dạng',
 			'desc'  => 'Học theo từng chủ đề',
 		),
 		array(
 			'icon'  => 'document',
+			'image' => 'VALUE_ICONS/02_documents',
 			'color' => 'green',
 			'title' => 'Tài liệu phong phú',
 			'desc'  => 'Tra cứu kiến thức cần thiết',
 		),
 		array(
 			'icon'  => 'briefcase',
+			'image' => 'VALUE_ICONS/03_recruitment',
 			'color' => 'amber',
 			'title' => 'Tuyển dụng cập nhật',
 			'desc'  => 'Theo dõi cơ hội mới',
 		),
 		array(
 			'icon'  => 'exams',
+			'image' => 'VALUE_ICONS/04_exam',
 			'color' => 'purple',
 			'title' => 'Ôn thi hệ thống',
 			'desc'  => 'Luyện đề và theo dõi kết quả',
 		),
 		array(
 			'icon'  => 'trending',
+			'image' => 'VALUE_ICONS/05_career',
 			'color' => 'pink',
 			'title' => 'Phát triển sự nghiệp',
 			'desc'  => 'Xây dựng lộ trình cá nhân',
@@ -1980,7 +2017,19 @@ function cvc_render_value_strip(): void {
 	<ul class="cvc-value-strip">
 		<?php foreach ( $items as $item ) : ?>
 			<li class="cvc-value-strip__item">
-				<span class="cvc-value-strip__icon cvc-value-strip__icon--<?php echo esc_attr( $item['color'] ); ?>"><?php cvc_render_icon( $item['icon'], 22 ); ?></span>
+				<span class="cvc-value-strip__icon cvc-value-strip__icon--<?php echo esc_attr( $item['color'] ); ?> cvc-value-strip__icon--asset">
+					<?php
+					/*
+					 * Phase 10A.16: ưu tiên asset PNG thật (Homepage V2 cut
+					 * assets, đã đúng màu/thứ tự khớp $items) - fallback SVG
+					 * cũ nếu thiếu file. alt="" (trong helper) vì tiêu đề/mô
+					 * tả bên dưới đã là text thật - icon chỉ trang trí.
+					 */
+					if ( ! cvc_render_v2_asset_icon( $item['image'], 44, 44 ) ) {
+						cvc_render_icon( $item['icon'], 22 );
+					}
+					?>
+				</span>
 				<span class="cvc-value-strip__title"><?php echo esc_html( $item['title'] ); ?></span>
 				<span class="cvc-value-strip__desc"><?php echo esc_html( $item['desc'] ); ?></span>
 			</li>
@@ -2121,6 +2170,15 @@ function cvc_render_learning_journey_section(): void {
 }
 
 function cvc_render_goal_direction_section(): void {
+	/*
+	 * Phase 10A.16: đã thử tích hợp 04_goal_icons (Homepage V2 cut assets)
+	 * cho 4/5 mục nhưng đo thực tế cho thấy asset lệch tâm + phần nội dung
+	 * chỉ lấp 28-51% khung canvas (so với 85% ở 01_value_icons cùng bộ) -
+	 * hiển thị nhỏ/lệch rõ rệt cạnh icon SVG mục thứ 5 (không có asset
+	 * tương ứng), tạo "icon kích thước không đồng đều" giữa 5 card. Theo
+	 * đúng nguyên tắc "asset làm giao diện xấu hơn thì bỏ" - giữ nguyên
+	 * SVG cho cả 5 mục thay vì trộn PNG lệch + SVG.
+	 */
 	$directions = array(
 		array(
 			'icon'  => 'building',

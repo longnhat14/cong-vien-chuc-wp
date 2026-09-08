@@ -1046,6 +1046,24 @@ p {
     color: #db2777;
 }
 
+/* Phase 10A.16 - biến thể dùng asset PNG thật (Homepage V2 cut assets):
+   ảnh đã tự có màu tròn riêng baked-in, không cần nền màu CSS phía sau
+   nữa (đứng sau .cvc-value-strip__icon--{color} trong file nên thắng
+   cascade mà không cần !important - cùng độ đặc hiệu, thắng theo thứ tự
+   khai báo). object-fit:contain giữ nguyên toàn bộ ảnh, không crop mất
+   nội dung icon. */
+.cvc-value-strip__icon--asset {
+    background: transparent;
+    padding: 0;
+}
+
+.cvc-value-strip__icon--asset img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
 .cvc-value-strip__title {
     font-weight: 700;
     font-size: 0.98rem;
@@ -3314,25 +3332,37 @@ button.cvc-btn:disabled {
 
 .cvc-home-v2 .cvc-hero__content {
     max-width: 650px;
-    padding: 72px 0 58px;
+    /* Phase 10A.15 QA: giảm padding dọc (72/58 → 40/32) - nội dung hero
+       trước đó cao 786px (đo DOM thật), vượt xa mục tiêu 500-620px chỉ vì
+       khoảng đệm/margin quá rộng, không phải vì thiếu nội dung. */
+    padding: 40px 0 32px;
 }
 
 .cvc-home-v2 .cvc-hero__eyebrow {
-    margin-bottom: 16px;
+    margin-bottom: 10px;
     letter-spacing: .03em;
 }
 
 .cvc-home-v2 .cvc-hero h1 {
     max-width: 700px;
     margin: 0;
-    font-size: clamp(2.55rem, 4vw, 4.25rem);
-    line-height: .98;
-    letter-spacing: -.045em;
+    /* text-wrap:balance (Phase 10A.15 QA) - tự cân bằng số từ mỗi dòng
+       khi trình duyệt hỗ trợ, tránh vỡ dòng kiểu "Công chức, viên" /
+       "chức" ở màn hẹp (390px) - không hỗ trợ thì bỏ qua an toàn (vẫn
+       wrap tự nhiên như cũ), không cần đổi HTML/thêm <br>. */
+    text-wrap: balance;
+    /* Giảm từ clamp(2.55rem,4vw,4.25rem) - ở 1440px cũ ra 57.6px, khiến
+       H1 (2 cấp text, dòng accent tự nhiên xuống 2 dòng) cao tới 179px,
+       chiếm gần 1/4 chiều cao hero. Vẫn "lớn" (44.8px ở 1440px) nhưng
+       không còn áp đảo phần search/CTA/trust bên dưới. */
+    font-size: clamp(2.3rem, 3.3vw, 3.6rem);
+    line-height: 1.08;
+    letter-spacing: -.03em;
 }
 
 .cvc-home-v2 .cvc-hero__accent {
     display: inline-block;
-    margin-top: 10px;
+    margin-top: 8px;
     background: linear-gradient(90deg, #0a58ca, #1e82ef);
     -webkit-background-clip: text;
     background-clip: text;
@@ -3341,18 +3371,26 @@ button.cvc-btn:disabled {
 
 .cvc-home-v2 .cvc-hero__lead {
     max-width: 620px;
-    margin-top: 22px;
-    font-size: 1.08rem;
-    line-height: 1.7;
+    margin-top: 14px;
+    font-size: 1.05rem;
+    line-height: 1.6;
 }
 
 .cvc-home-v2 .cvc-hero .cvc-search-form {
     max-width: 610px;
-    margin-top: 28px;
+    margin-top: 18px;
+}
+
+.cvc-home-v2 .cvc-hero__quick-search {
+    margin-top: 10px;
 }
 
 .cvc-home-v2 .cvc-hero__actions {
-    margin-top: 20px;
+    margin-top: 16px;
+}
+
+.cvc-home-v2 .cvc-hero__trust {
+    margin-top: 14px;
 }
 
 .cvc-home-v2 .cvc-hero__visual {
@@ -3548,6 +3586,13 @@ button.cvc-btn:disabled {
     background: linear-gradient(135deg, rgba(255,255,255,.96), rgba(234,244,255,.96));
 }
 
+/* Phase 10A.16: đổi từ goal-journey.jpg (ảnh chụp người leo bậc thang,
+   không thật sự khớp ngữ nghĩa "mục tiêu") sang illustration 03_goal_target
+   (cắt sẵn từ bộ Homepage V2 cut assets - bia mục tiêu + sách, đúng chủ đề
+   "Bạn đang hướng đến điều gì?" của section này hơn). background-position
+   top để phần mục tiêu/sách (nửa trên ảnh) hiện rõ trong khung tròn, nửa
+   dưới có caption chữ raster bị khung tròn + opacity thấp che bớt tự
+   nhiên (không dùng caption đó thay chữ thật). */
 .cvc-home-v2 .cvc-goal-cta-card::after {
     content: '';
     position: absolute;
@@ -3555,8 +3600,8 @@ button.cvc-btn:disabled {
     bottom: -70px;
     width: 230px;
     height: 190px;
-    background: url('assets/images/homepage-v2/SECTIONS/goal-journey.jpg') center / cover no-repeat;
-    opacity: .2;
+    background: url('assets/images/homepage-v2/ILLUSTRATIONS/03_goal_target.webp') top center / cover no-repeat;
+    opacity: .22;
     border-radius: 50%;
     pointer-events: none;
 }

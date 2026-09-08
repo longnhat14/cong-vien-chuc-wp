@@ -34,3 +34,9 @@ npm-debug.log*
 # changes actually committed. Kept on disk for reference, never committed -
 # see docs/PHASE_10A.13_HOMEPAGE_V2_INTEGRATION.md.
 /_homepage-v2/
+
+# Phase 10A.16 - raw "Homepage V2 cut assets" source pack (55 pre-cut
+# assets + zip + reference board) used to selectively derive the small
+# subset actually copied into theme/cong-vien-chuc/assets/images/
+# homepage-v2/. Kept on disk for reference, never committed.
+/design-assets/
