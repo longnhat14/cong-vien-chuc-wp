@@ -997,6 +997,22 @@ function cvc_render_course_thumbnail_placeholder( string $color = 'blue' ): void
 	<?php
 }
 
+/**
+ * "Mới" - derived THẬT từ published_at (không phải flag do admin tự đặt,
+ * không phải suy đoán) - course được coi là mới nếu publish trong 30 ngày
+ * gần nhất. Khác "is_featured" (cờ do admin đặt tay) - đây tự tính từ
+ * timestamp thật, luôn chính xác, không cần đồng bộ thủ công.
+ */
+function cvc_course_is_new( ?string $publishedAt ): bool {
+	if ( empty( $publishedAt ) ) {
+		return false;
+	}
+
+	$timestamp = strtotime( $publishedAt );
+
+	return false !== $timestamp && $timestamp >= ( time() - 30 * DAY_IN_SECONDS );
+}
+
 function cvc_render_course_card( array $course, int $heading_level = 2 ): void {
 	$slug        = (string) ( $course['slug'] ?? '' );
 	$title       = (string) ( $course['title'] ?? '' );
@@ -1008,6 +1024,7 @@ function cvc_render_course_card( array $course, int $heading_level = 2 ): void {
 	$duration    = $course['duration_minutes'] ?? null;
 	$price       = $course['price'] ?? null;
 	$isFeatured  = ! empty( $course['is_featured'] );
+	$isNew       = cvc_course_is_new( $course['published_at'] ?? null );
 	$url         = cvc_course_url( $slug );
 	$tag         = 'h' . max( 2, min( 4, $heading_level ) );
 	?>
@@ -1020,19 +1037,21 @@ function cvc_render_course_card( array $course, int $heading_level = 2 ): void {
 			<?php else : ?>
 				<?php cvc_render_course_thumbnail_placeholder( $typeColor ); ?>
 			<?php endif; ?>
+			<span class="cvc-card__media-flags">
+				<?php if ( $isNew ) : ?>
+					<span class="cvc-badge cvc-badge--flag-new">Mới</span>
+				<?php elseif ( null !== $price && 0.0 === (float) $price ) : ?>
+					<?php cvc_render_free_badge( true ); ?>
+				<?php endif; ?>
+			</span>
 			<?php if ( $typeLabel ) : ?>
 				<span class="cvc-badge cvc-badge--category cvc-badge--category-<?php echo esc_attr( $typeColor ); ?> cvc-card__media-badge"><?php echo esc_html( $typeLabel ); ?></span>
 			<?php endif; ?>
 		</a>
 		<div class="cvc-card__body">
-			<?php if ( $isFeatured || null !== $price ) : ?>
+			<?php if ( $isFeatured ) : ?>
 				<div class="cvc-card__badges">
-					<?php if ( $isFeatured ) : ?>
-						<span class="cvc-badge cvc-badge--featured">Nổi bật</span>
-					<?php endif; ?>
-					<?php if ( null !== $price ) : ?>
-						<?php cvc_render_free_badge( 0.0 === (float) $price ); ?>
-					<?php endif; ?>
+					<span class="cvc-badge cvc-badge--featured">Nổi bật</span>
 				</div>
 			<?php endif; ?>
 			<<?php echo $tag; ?> class="cvc-card__title">
@@ -1050,7 +1069,71 @@ function cvc_render_course_card( array $course, int $heading_level = 2 ): void {
 				<?php endif; ?>
 			</p>
 			<p class="cvc-card__footer">
-				<a class="cvc-btn cvc-btn--primary cvc-btn--block" href="<?php echo esc_url( $url ); ?>">Xem khóa học &rarr;</a>
+				<a class="cvc-btn cvc-btn--primary cvc-btn--block" href="<?php echo esc_url( $url ); ?>">
+					<?php echo ( null !== $price && 0.0 === (float) $price ) ? 'Học miễn phí' : 'Xem khóa học'; ?> &rarr;
+				</a>
+			</p>
+		</div>
+	</article>
+	<?php
+}
+
+/**
+ * Course "featured" - bố cục ngang lớn, dùng khi chỉ có ĐÚNG 1 khóa học
+ * thật (Phase 10A.4, Phần 15/29 "ONE ITEM -> featured composition") -
+ * tránh 1 card nhỏ nằm lọt thỏm trong lưới 4 cột để trống 3 ô còn lại.
+ * KHÔNG bịa thêm khóa học giả để lấp chỗ trống.
+ */
+function cvc_render_course_card_featured( array $course ): void {
+	$slug        = (string) ( $course['slug'] ?? '' );
+	$title       = (string) ( $course['title'] ?? '' );
+	$summary     = $course['short_description'] ?? '';
+	$description = $course['description'] ?? '';
+	$thumbnail   = $course['thumbnail_url'] ?? null;
+	$typeLabel   = cvc_course_type_label( $course['course_type'] ?? null );
+	$typeColor   = cvc_course_type_color( $course['course_type'] ?? null );
+	$lessonCount = $course['published_lessons_count'] ?? $course['lesson_count'] ?? null;
+	$duration    = $course['duration_minutes'] ?? null;
+	$price       = $course['price'] ?? null;
+	$isFree      = null !== $price && 0.0 === (float) $price;
+	$url         = cvc_course_url( $slug );
+	?>
+	<article class="cvc-card cvc-card--course cvc-card--course-featured">
+		<a class="cvc-card__media-link" href="<?php echo esc_url( $url ); ?>" tabindex="-1" aria-hidden="true">
+			<?php if ( $thumbnail ) : ?>
+				<div class="cvc-card__media">
+					<img src="<?php echo esc_url( $thumbnail ); ?>" alt="" loading="lazy">
+				</div>
+			<?php else : ?>
+				<?php cvc_render_course_thumbnail_placeholder( $typeColor ); ?>
+			<?php endif; ?>
+			<?php if ( $typeLabel ) : ?>
+				<span class="cvc-badge cvc-badge--category cvc-badge--category-<?php echo esc_attr( $typeColor ); ?> cvc-card__media-badge"><?php echo esc_html( $typeLabel ); ?></span>
+			<?php endif; ?>
+		</a>
+		<div class="cvc-card__body">
+			<div class="cvc-card__badges">
+				<span class="cvc-badge cvc-badge--featured">Nổi bật</span>
+				<?php cvc_render_free_badge( $isFree ); ?>
+			</div>
+			<h3 class="cvc-card__title cvc-card__title--lg">
+				<a href="<?php echo esc_url( $url ); ?>"><?php echo esc_html( $title ); ?></a>
+			</h3>
+			<?php if ( $summary || $description ) : ?>
+				<p class="cvc-card__excerpt"><?php echo esc_html( $summary ?: $description ); ?></p>
+			<?php endif; ?>
+			<p class="cvc-card__meta-row">
+				<?php if ( null !== $lessonCount ) : ?>
+					<span><?php echo esc_html( sprintf( '%d bài học', (int) $lessonCount ) ); ?></span>
+				<?php endif; ?>
+				<?php if ( ! empty( $duration ) ) : ?>
+					<span><?php echo esc_html( sprintf( '%d phút', (int) $duration ) ); ?></span>
+				<?php endif; ?>
+			</p>
+			<p class="cvc-card__footer">
+				<a class="cvc-btn cvc-btn--primary" href="<?php echo esc_url( $url ); ?>">
+					<?php echo $isFree ? 'Học miễn phí' : 'Xem khóa học'; ?> &rarr;
+				</a>
 			</p>
 		</div>
 	</article>
@@ -1405,6 +1488,78 @@ function cvc_render_hero_illustration(): void {
 }
 
 /**
+ * "Tìm kiếm nhanh" dưới search box hero (Phase 10A.4, Phần 12 POPULAR
+ * SEARCH TAGS). KHÔNG có analytics "tìm kiếm phổ biến" thật ở backend -
+ * cố tình dùng nhãn trung tính "Tìm kiếm nhanh" thay vì "Phổ biến" để
+ * không ngụ ý đây là số liệu thống kê (Phần 31 - "không fake popularity").
+ * Mỗi tag là 1 query thật trỏ tới /tim-kiem/ (search API thật), không
+ * phải taxonomy - đây là shortcut soạn sẵn, không phải dữ liệu.
+ */
+function cvc_render_hero_quick_search_tags(): void {
+	$tags = array(
+		'Nghiệp vụ hành chính',
+		'Luật cán bộ công chức',
+		'Thi thăng hạng',
+		'Tuyển dụng 2026',
+	);
+	?>
+	<p class="cvc-hero__quick-search">
+		<span class="cvc-hero__quick-search-label">Tìm kiếm nhanh:</span>
+		<?php foreach ( $tags as $tag ) : ?>
+			<a class="cvc-tag" href="<?php echo esc_url( cvc_search_url( $tag ) ); ?>"><?php echo esc_html( $tag ); ?></a>
+		<?php endforeach; ?>
+	</p>
+	<?php
+}
+
+/**
+ * Card nổi (floating) trong hero - 4 lợi ích ngắn gọn (Phase 10A.4, đối
+ * chiếu ảnh benchmark thật §B). Đây là brand copy mô tả tính năng, không
+ * phải số liệu nên không cần API (giống cvc_render_value_strip()).
+ */
+function cvc_render_hero_feature_card(): void {
+	$items = array(
+		array(
+			'icon'  => '&#9200;',
+			'color' => 'green',
+			'title' => 'Học tập linh hoạt',
+			'desc'  => 'Mọi lúc, mọi nơi',
+		),
+		array(
+			'icon'  => '&#128506;',
+			'color' => 'blue',
+			'title' => 'Lộ trình cá nhân hóa',
+			'desc'  => 'Theo mục tiêu của bạn',
+		),
+		array(
+			'icon'  => '&#128188;',
+			'color' => 'amber',
+			'title' => 'Cơ hội nghề nghiệp',
+			'desc'  => 'Được cập nhật liên tục',
+		),
+		array(
+			'icon'  => '&#129309;',
+			'color' => 'purple',
+			'title' => 'Cộng đồng hỗ trợ',
+			'desc'  => 'Hơn cả một nền tảng học tập',
+		),
+	);
+	?>
+	<div class="cvc-hero-feature-card">
+		<?php foreach ( $items as $item ) : ?>
+			<div class="cvc-hero-feature-card__row">
+				<span class="cvc-hero-feature-card__icon cvc-hero-feature-card__icon--<?php echo esc_attr( $item['color'] ); ?>" aria-hidden="true"><?php echo $item['icon']; // phpcs:ignore -- HTML entity tĩnh. ?></span>
+				<span>
+					<strong><?php echo esc_html( $item['title'] ); ?></strong>
+					<small><?php echo esc_html( $item['desc'] ); ?></small>
+				</span>
+			</div>
+		<?php endforeach; ?>
+	</div>
+	<?php
+}
+
+/**
  * Value strip - feature ngang dưới hero (Phần 8 VALUE STRIP). Chỉ liệt kê
  * năng lực SẢN PHẨM THẬT ĐANG CÓ (khóa học/văn bản/tuyển dụng/thi trắc
  * nghiệm/lộ trình) - đây là mô tả tính năng, KHÔNG phải số liệu/thống kê
@@ -1487,6 +1642,72 @@ function cvc_render_premium_empty_state( string $icon, string $heading, string $
  * lặp lại gần giống nhau (Phần 8 RESOURCE SECTION). Chỉ hiển thị số lượng
  * thật nếu > 0 (Phần 31 - không fake, và số 0 không có giá trị thông tin).
  */
+/**
+ * Section "Bạn đang hướng đến điều gì?" (Phase 10A.4, Phần 18 CAREER/GOAL
+ * SECTION) - 5 hướng mục tiêu + 1 CTA tạo mục tiêu thật. KHÔNG có taxonomy
+ * "goal type" riêng ở backend khớp chính xác 5 nhãn này, nên mỗi thẻ trỏ
+ * tới ĐÚNG trang/filter THẬT gần nghĩa nhất đã tồn tại (recruitment_type
+ * là enum thật của RecruitmentController::index() - xem
+ * template-recruitments.php) thay vì tạo taxonomy giả hay dead link.
+ * CTA "Tạo mục tiêu ngay" trỏ thẳng flow Goal thật (/tai-khoan/muc-tieu/,
+ * tự redirect sang đăng nhập kèm intended destination nếu chưa đăng nhập -
+ * xem cvc_require_login()).
+ */
+function cvc_render_goal_direction_section(): void {
+	$directions = array(
+		array(
+			'icon'  => '&#127963;',
+			'label' => 'Thi công chức',
+			'url'   => cvc_recruitments_url() . '?recruitment_type=civil_servant',
+		),
+		array(
+			'icon'  => '&#128101;',
+			'label' => 'Thi viên chức',
+			'url'   => cvc_recruitments_url() . '?recruitment_type=public_employee',
+		),
+		array(
+			'icon'  => '&#128200;',
+			'label' => 'Thi thăng hạng',
+			'url'   => cvc_exams_url(),
+		),
+		array(
+			'icon'  => '&#128196;',
+			'label' => 'Bồi dưỡng nghiệp vụ',
+			'url'   => cvc_courses_url(),
+		),
+		array(
+			'icon'  => '&#128161;',
+			'label' => 'Nâng cao kỹ năng',
+			'url'   => cvc_knowledge_url(),
+		),
+	);
+	?>
+	<section class="cvc-section cvc-section--tint cvc-goal-section">
+		<div class="container">
+			<?php cvc_render_section_header( 'Bạn đang hướng đến điều gì?', 'Khám phá tất cả', cvc_search_url(), '&#127919;' ); ?>
+			<p class="cvc-goal-section__subtitle">Chọn hướng đi để tìm nội dung ôn tập và tin tuyển dụng phù hợp nhất.</p>
+
+			<div class="cvc-goal-section__grid">
+				<div class="cvc-goal-direction-grid">
+					<?php foreach ( $directions as $direction ) : ?>
+						<a class="cvc-goal-direction-card" href="<?php echo esc_url( $direction['url'] ); ?>">
+							<span class="cvc-goal-direction-card__icon" aria-hidden="true"><?php echo $direction['icon']; // phpcs:ignore -- HTML entity tĩnh. ?></span>
+							<span class="cvc-goal-direction-card__label"><?php echo esc_html( $direction['label'] ); ?></span>
+						</a>
+					<?php endforeach; ?>
+				</div>
+
+				<div class="cvc-goal-cta-card">
+					<h3>Chưa biết bắt đầu từ đâu?</h3>
+					<p>Hãy để chúng tôi gợi ý lộ trình phù hợp với mục tiêu của bạn.</p>
+					<a class="cvc-btn cvc-btn--primary" href="<?php echo esc_url( cvc_is_logged_in() ? cvc_account_url( 'goals' ) : cvc_login_url( cvc_account_url( 'goals' ) ) ); ?>">Tạo mục tiêu ngay</a>
+				</div>
+			</div>
+		</div>
+	</section>
+	<?php
+}
+
 function cvc_render_resource_hub_card( string $icon, string $title, string $description, string $url, ?int $count = null, string $count_label = '', string $color = 'blue' ): void {
 	?>
 	<a class="cvc-resource-card" href="<?php echo esc_url( $url ); ?>">
@@ -1512,14 +1733,16 @@ function cvc_render_homepage_cta_banner(): void {
 			<path d="M0 120V70l40-10V50l30-15 30 15v20l50-25v30l40-8v18l60-20v20l45-10v20l55-15v25l60-10v15l50-20v25l60-8v13H0Z" fill="#ffffff" fill-opacity="0.06"/>
 		</svg>
 		<div class="container cvc-cta-banner__inner">
-			<div class="cvc-cta-banner__lead">
-				<span class="cvc-cta-banner__icon" aria-hidden="true">
-					<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/></svg>
-				</span>
-				<h2>Hành trang vững vàng<br>Kiến tạo tương lai</h2>
+			<div class="cvc-cta-banner__main">
+				<p class="cvc-cta-banner__eyebrow">Công Viên Chức &ndash; Đồng hành cùng bạn</p>
+				<h2>Hành trang vững vàng<br>Kiến tạo <span>tương lai</span></h2>
+				<p class="cvc-cta-banner__desc">Tri thức hôm nay là cơ hội ngày mai. Hãy bắt đầu hành trình phát triển sự nghiệp phục vụ công vụ cùng Công Viên Chức.</p>
+				<div class="cvc-cta-banner__actions">
+					<a class="cvc-btn cvc-btn--cta" href="<?php echo esc_url( cvc_is_logged_in() ? cvc_account_url( 'goals' ) : cvc_register_url() ); ?>">Bắt đầu ngay &rarr;</a>
+					<a class="cvc-btn cvc-btn--cta-outline" href="<?php echo esc_url( cvc_courses_url() ); ?>">Xem các khóa học</a>
+				</div>
 			</div>
-			<p class="cvc-cta-banner__quote">&ldquo;Công chức, viên chức không chỉ là một nghề nghiệp,<br>mà còn là sứ mệnh phục vụ nhân dân.&rdquo;</p>
-			<a class="cvc-btn cvc-btn--cta" href="<?php echo esc_url( cvc_is_logged_in() ? cvc_account_url( 'goals' ) : cvc_register_url() ); ?>">Bắt đầu ngay &rarr;</a>
+			<p class="cvc-cta-banner__quote">&ldquo;Vì một nền công vụ chuyên nghiệp,<br>hiện đại và phục vụ nhân dân tốt hơn.&rdquo;</p>
 		</div>
 	</section>
 	<?php

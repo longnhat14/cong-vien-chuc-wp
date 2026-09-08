@@ -1,20 +1,23 @@
 <?php
 /**
- * Homepage (Phase 10A.3 - đối chiếu trực tiếp ảnh benchmark thật tại
- * docs/ui-benchmark/homepage-reference.png). Kiến trúc: Hero -> Value
- * strip -> [2 cột: (Khóa học nổi bật + Tài nguyên ôn tập) | (Tuyển dụng
- * mới nhất, sidebar dọc)] -> CTA banner. KHÔNG còn section "Thi trắc
- * nghiệm" riêng (ảnh benchmark thật không có - đề thi được gộp vào card
- * "Thi trắc nghiệm" trong Tài nguyên ôn tập + badge category "Ôn thi"
- * trên course card). Vẫn đúng 6 lệnh gọi API (1 lần list() mỗi domain),
- * không tạo dữ liệu giả để lấp chỗ trống (Phần 31/32).
+ * Homepage (Phase 10A.4 - rebuild theo ảnh master mới
+ * docs/ui-benchmark/homepage-reference.png, phân tích trực tiếp bằng
+ * Read). Kiến trúc: Hero (search + quick-search tags + floating feature
+ * card) -> Value strip (panel viền) -> [2 cột: Khóa học nổi bật + Tài
+ * nguyên ôn tập | Tuyển dụng mới nhất] -> Goal direction section -> CTA
+ * banner. KHÔNG có Statistics strip (ảnh có nhưng số liệu trong ảnh chỉ
+ * là ví dụ minh họa - dữ liệu DEV thật hiện quá nhỏ để hiển thị như "số
+ * liệu quy mô" mà không gây hiểu lầm, xem docs/PHASE_10A.4_VISUAL_REBUILD.md).
+ * KHÔNG có Community section (ảnh có "Cộng đồng học tập" nhưng backend
+ * chưa có tính năng hỏi đáp/thảo luận thật - Phần 20 "không fake discussion").
+ * Vẫn đúng 6 lệnh gọi API domain, không tạo dữ liệu giả (Phần 31/32).
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$course_result      = ( new CVC_Course_Service() )->list( array( 'per_page' => 4 ) );
+$course_result      = ( new CVC_Course_Service() )->list( array( 'per_page' => 3 ) );
 $topic_result       = ( new CVC_Topic_Service() )->list( array( 'per_page' => 1 ) );
 $recruitment_result = ( new CVC_Recruitment_Service() )->list( array( 'per_page' => 5 ) );
 $knowledge_result   = ( new CVC_Knowledge_Service() )->list( array( 'per_page' => 1 ) );
@@ -48,7 +51,6 @@ $courses         = cvc_homepage_items( $course_result );
 $recruitments    = cvc_homepage_items( $recruitment_result );
 $topics_total    = cvc_homepage_total( $topic_result );
 $knowledge_total = cvc_homepage_total( $knowledge_result );
-$exams_total     = cvc_homepage_total( $exam_result );
 $legal_total     = cvc_homepage_total( $legal_result );
 
 cvc_seo_set_title( 'Ôn thi công chức, viên chức online' );
@@ -64,20 +66,24 @@ get_header();
 	<section class="cvc-hero">
 		<div class="container cvc-hero__grid">
 			<div class="cvc-hero__content">
-				<p class="cvc-hero__eyebrow">Nền tảng hỗ trợ công chức, viên chức</p>
-				<h1>Công chức, viên chức<br>học tập &ndash; phát triển &ndash; thăng tiến</h1>
+				<p class="cvc-hero__eyebrow">Nền tảng học tập và phát triển sự nghiệp công</p>
+				<h1>Công chức, viên chức<br><span class="cvc-hero__accent">Học đúng &ndash; Thi tốt &ndash; Vươn xa</span></h1>
 				<p class="cvc-hero__lead">
-					Cung cấp khóa học chất lượng, thông tin tuyển dụng uy tín và tài liệu hữu ích
-					giúp bạn vững vàng trên con đường sự nghiệp.
+					Cung cấp khóa học chất lượng, tài liệu cập nhật, thông tin tuyển dụng uy tín
+					và công cụ luyện thi hiện đại, giúp bạn vững bước trên con đường phục vụ nhân dân.
 				</p>
 				<?php cvc_render_search_form( '', 'cvc-hero-search-q' ); ?>
+				<?php cvc_render_hero_quick_search_tags(); ?>
 				<div class="cvc-hero__actions">
 					<a class="cvc-btn cvc-btn--primary" href="<?php echo esc_url( cvc_exams_url() ); ?>">Bắt đầu ôn thi</a>
 					<a class="cvc-btn cvc-btn--secondary" href="<?php echo esc_url( cvc_recruitments_url() ); ?>">Khám phá tuyển dụng</a>
 				</div>
 			</div>
-			<div class="cvc-hero__visual" aria-hidden="true">
-				<?php cvc_render_hero_illustration(); ?>
+			<div class="cvc-hero__visual">
+				<div class="cvc-hero__visual-inner" aria-hidden="true">
+					<?php cvc_render_hero_illustration(); ?>
+				</div>
+				<?php cvc_render_hero_feature_card(); ?>
 			</div>
 		</div>
 	</section>
@@ -85,7 +91,9 @@ get_header();
 	<!-- ============ VALUE STRIP ============ -->
 	<section class="cvc-section cvc-section--tight">
 		<div class="container">
-			<?php cvc_render_value_strip(); ?>
+			<div class="cvc-value-panel">
+				<?php cvc_render_value_strip(); ?>
+			</div>
 		</div>
 	</section>
 
@@ -100,8 +108,10 @@ get_header();
 					<?php cvc_render_error_state(); ?>
 				<?php elseif ( empty( $courses ) ) : ?>
 					<?php cvc_render_premium_empty_state( '&#127891;', 'Chưa có khóa học nào', 'Khóa học mới sẽ sớm được cập nhật tại đây.', 'Xem tất cả khóa học', cvc_courses_url() ); ?>
+				<?php elseif ( 1 === count( $courses ) ) : ?>
+					<?php cvc_render_course_card_featured( $courses[0] ); ?>
 				<?php else : ?>
-					<div class="cvc-card-grid cvc-card-grid--4">
+					<div class="cvc-card-grid cvc-card-grid--3">
 						<?php foreach ( $courses as $course ) : ?>
 							<?php cvc_render_course_card( $course, 3 ); ?>
 						<?php endforeach; ?>
@@ -112,26 +122,26 @@ get_header();
 					<?php
 					cvc_render_resource_hub_card(
 						'&#128218;',
-						'Cẩm nang công chức, viên chức',
-						'Chủ đề ôn tập và kiến thức chuyên môn hệ thống theo môn thi.',
-						cvc_knowledge_url(),
-						$knowledge_total + $topics_total,
-						'nội dung',
+						'Chủ đề ôn tập',
+						'Kiến thức hệ thống theo từng chủ đề, môn thi cụ thể.',
+						cvc_topics_url(),
+						$topics_total,
+						'chủ đề',
 						'blue'
 					);
 					cvc_render_resource_hub_card(
-						'&#127942;',
-						'Thi nâng ngạch, thăng hạng',
-						'Đề thi trắc nghiệm theo môn thi, bám sát cấu trúc thi thật.',
-						cvc_exams_url(),
-						$exams_total,
-						'đề thi',
+						'&#128161;',
+						'Cẩm nang kiến thức',
+						'Bài viết, kinh nghiệm giúp ích cho công việc và ôn thi.',
+						cvc_knowledge_url(),
+						$knowledge_total,
+						'bài viết',
 						'purple'
 					);
 					cvc_render_resource_hub_card(
 						'&#128220;',
-						'Văn bản & chính sách',
-						'Văn bản pháp luật, quy định liên quan trực tiếp tới công vụ.',
+						'Văn bản pháp luật',
+						'Văn bản, quy định liên quan trực tiếp tới công vụ.',
 						cvc_legal_documents_url(),
 						$legal_total,
 						'văn bản',
@@ -162,6 +172,9 @@ get_header();
 
 		</div>
 	</section>
+
+	<!-- ============ GOAL DIRECTION ============ -->
+	<?php cvc_render_goal_direction_section(); ?>
 
 	<?php cvc_render_homepage_cta_banner(); ?>
 
