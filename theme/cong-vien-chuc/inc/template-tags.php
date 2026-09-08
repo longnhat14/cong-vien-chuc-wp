@@ -281,10 +281,19 @@ function cvc_render_icon_library_v2( string $key, int $w, int $h, string $class 
 }
 
 /**
+ * Phase 10A.19: "CVC Homepage Icon Pack V1" (68 PNG cắt sẵn, chỉ 13 file
+ * qua được audit - xem báo cáo self-review). $key dạng "positions/admin"
+ * hoặc "lecturers/expert".
+ */
+function cvc_render_homepage_icon_pack_v1( string $key, int $w, int $h, string $class = '', string $alt = '' ): bool {
+	return cvc_render_raster_icon_from( 'assets/images/cvc-homepage-icon-pack-v1', $key, $w, $h, $class, $alt );
+}
+
+/**
  * Renderer dùng chung cho mọi bộ icon dạng ảnh raster (PNG + webp sibling,
- * <picture> + fallback) - cvc_render_v2_asset_icon() và
- * cvc_render_icon_library_v2() đều gọi qua đây (Phần 4/6 - "mở rộng
- * helper hiện có thay vì tạo hệ thống trùng lặp").
+ * <picture> + fallback) - cvc_render_v2_asset_icon(), cvc_render_icon_library_v2()
+ * và cvc_render_homepage_icon_pack_v1() đều gọi qua đây (Phần 4/6 - "mở
+ * rộng helper hiện có thay vì tạo hệ thống trùng lặp").
  */
 function cvc_render_raster_icon_from( string $base_dir, string $relative_path, int $w, int $h, string $class = '', string $alt = '' ): bool {
 	$path = "{$base_dir}/{$relative_path}";

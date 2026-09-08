@@ -1742,6 +1742,48 @@ p {
     font-size: 1.05rem;
 }
 
+/* Phase 10A.19 - illustration trang trí (Lecturer/Expert, CVC Homepage
+   Icon Pack V1) cạnh tiêu đề trang Khóa học. Ẩn trên mobile để không
+   chiếm chỗ nội dung chính (Phần 15 - "mobile không bị dày đặc"). */
+.cvc-page-header--illustrated {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.cvc-page-header__illustration {
+    display: none;
+    flex-shrink: 0;
+    align-items: flex-end;
+}
+
+/* Che dải caption "0N_ten_file.png" bake sẵn ở đáy ảnh gốc (đo được ở
+   y=92-108/109px) bằng overflow:hidden - ảnh PNG/WebP không bị xử lý lại,
+   chỉ giới hạn khung hiển thị đúng phần nhân vật. */
+.cvc-lecturer-illustration {
+    display: block;
+    height: 72px;
+    width: 63px;
+    overflow: hidden;
+}
+
+.cvc-lecturer-illustration:not(:first-child) {
+    margin-left: -0.85rem;
+}
+
+.cvc-lecturer-illustration img {
+    display: block;
+    height: 86px;
+    width: 63px;
+}
+
+@media (min-width: 768px) {
+    .cvc-page-header__illustration {
+        display: flex;
+    }
+}
+
 .cvc-page-header__meta {
     color: #6b7280;
     font-size: 0.9rem;
@@ -2360,6 +2402,69 @@ p {
     background: var(--cvc-color-primary);
     border-color: var(--cvc-color-primary);
     color: #ffffff;
+}
+
+/* --- Field shortcuts (Phase 10A.19 - "Duyệt nhanh theo lĩnh vực", icon
+   Public Service Positions màu đỏ dùng làm accent phụ, nền/viền vẫn theo
+   hệ thống thiết kế hiện tại - không để đỏ lấn át xanh thương hiệu). --- */
+.cvc-field-shortcuts {
+    margin: 1.25rem 0;
+}
+
+.cvc-field-shortcuts__title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--cvc-color-text-subtle);
+    margin: 0 0 0.6rem;
+}
+
+.cvc-field-shortcuts__list {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 0.6rem;
+    margin: 0;
+    padding: 0 0 0.25rem;
+    list-style: none;
+    scrollbar-width: thin;
+}
+
+.cvc-field-shortcuts__item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+    padding: 0.5rem 0.85rem 0.5rem 0.5rem;
+    background: var(--cvc-color-bg);
+    border: 1px solid var(--cvc-color-border);
+    border-radius: 999px;
+    color: var(--cvc-color-text);
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.cvc-field-shortcuts__item:hover {
+    border-color: var(--cvc-color-primary);
+    text-decoration: none;
+}
+
+.cvc-field-shortcuts__icon {
+    display: inline-flex;
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+}
+
+.cvc-field-shortcuts__icon img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.cvc-field-shortcuts__label {
+    font-size: 0.85rem;
+    font-weight: 600;
 }
 
 /* --- Filter form (dùng cho listing có filter riêng, vd Tuyển dụng) --- */

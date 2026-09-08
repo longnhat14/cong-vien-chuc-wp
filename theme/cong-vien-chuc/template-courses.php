@@ -52,8 +52,30 @@ get_header();
 	);
 	?>
 
-	<header class="cvc-page-header">
-		<h1>Khóa học</h1>
+	<header class="cvc-page-header cvc-page-header--illustrated">
+		<div>
+			<h1>Khóa học</h1>
+		</div>
+		<?php
+		/*
+		 * Phase 10A.19: illustration Lecturer/Expert (CVC Homepage Icon
+		 * Pack V1) - thuần trang trí, KHÔNG kèm tên/chức danh/kinh nghiệm
+		 * (website chưa có dữ liệu giảng viên thật - xem migration
+		 * courses, không có field instructor nào) để tránh tạo hồ sơ giả.
+		 *
+		 * Cả 3 file gốc có caption "0N_ten_file.png" + nhãn tiếng Việt bake
+		 * sẵn ở dải cuối ảnh (y=102-108/109px, đã đo bằng background-diff -
+		 * không phải suy đoán). KHÔNG được crop lại file gốc nên dùng
+		 * .cvc-lecturer-illustration (overflow:hidden, cao 72px) để chỉ
+		 * hiển thị đúng phần nhân vật (0-91/109px) - ảnh PNG/WebP gốc giữ
+		 * nguyên 100%, không xử lý lại pixel nào.
+		 */
+		?>
+		<div class="cvc-page-header__illustration" aria-hidden="true">
+			<span class="cvc-lecturer-illustration"><?php cvc_render_homepage_icon_pack_v1( 'lecturers/lecturer-male', 63, 86 ); ?></span>
+			<span class="cvc-lecturer-illustration"><?php cvc_render_homepage_icon_pack_v1( 'lecturers/expert', 63, 86 ); ?></span>
+			<span class="cvc-lecturer-illustration"><?php cvc_render_homepage_icon_pack_v1( 'lecturers/lecturer-female', 63, 86 ); ?></span>
+		</div>
 	</header>
 
 	<?php if ( ! $ok ) : ?>

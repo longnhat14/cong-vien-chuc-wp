@@ -132,6 +132,46 @@ get_header();
 		<h1>Tuyển dụng</h1>
 	</header>
 
+	<?php
+	/*
+	 * Phase 10A.19: "Duyệt nhanh theo lĩnh vực" - dùng 10 icon Public
+	 * Service Positions (CVC Homepage Icon Pack V1). API recruitments/
+	 * positions KHÔNG có field ngành nghề/lĩnh vực riêng (chỉ có
+	 * recruitment_type: civil_servant/public_employee/other - xem migration
+	 * recruitments/positions) nên KHÔNG thể gắn icon này làm badge/filter
+	 * category cho từng tin thật. Thay vào đó dùng làm lối tắt tìm kiếm
+	 * thật qua đúng param "search" đã có sẵn (không suy diễn/gắn nhãn sai
+	 * cho dữ liệu, không thêm field giả).
+	 */
+	$field_shortcuts = array(
+		array( 'icon' => 'positions/admin', 'label' => 'Hành chính / Văn phòng', 'keyword' => 'hành chính' ),
+		array( 'icon' => 'positions/finance', 'label' => 'Tài chính / Kế toán', 'keyword' => 'tài chính' ),
+		array( 'icon' => 'positions/law', 'label' => 'Pháp luật / Tư pháp', 'keyword' => 'pháp luật' ),
+		array( 'icon' => 'positions/inspection', 'label' => 'Thanh tra / Kiểm tra', 'keyword' => 'thanh tra' ),
+		array( 'icon' => 'positions/health', 'label' => 'Y tế', 'keyword' => 'y tế' ),
+		array( 'icon' => 'positions/construction', 'label' => 'Xây dựng / Đô thị', 'keyword' => 'xây dựng' ),
+		array( 'icon' => 'positions/natural', 'label' => 'Tài nguyên / Môi trường', 'keyword' => 'tài nguyên môi trường' ),
+		array( 'icon' => 'positions/agriculture', 'label' => 'Nông nghiệp', 'keyword' => 'nông nghiệp' ),
+		array( 'icon' => 'positions/culture', 'label' => 'Văn hóa / Thể thao / Du lịch', 'keyword' => 'văn hóa' ),
+		array( 'icon' => 'positions/communication', 'label' => 'Truyền thông / Báo chí', 'keyword' => 'truyền thông' ),
+	);
+	?>
+	<nav class="cvc-field-shortcuts" aria-label="Duyệt nhanh theo lĩnh vực">
+		<h2 class="cvc-field-shortcuts__title">Duyệt nhanh theo lĩnh vực</h2>
+		<ul class="cvc-field-shortcuts__list">
+			<?php foreach ( $field_shortcuts as $shortcut ) : ?>
+				<li>
+					<a class="cvc-field-shortcuts__item" href="<?php echo esc_url( add_query_arg( array( 'search' => $shortcut['keyword'] ), cvc_recruitments_url() ) ); ?>">
+						<span class="cvc-field-shortcuts__icon" aria-hidden="true">
+							<?php cvc_render_homepage_icon_pack_v1( $shortcut['icon'], 32, 32 ); ?>
+						</span>
+						<span class="cvc-field-shortcuts__label"><?php echo esc_html( $shortcut['label'] ); ?></span>
+					</a>
+				</li>
+			<?php endforeach; ?>
+		</ul>
+	</nav>
+
 	<form class="cvc-filter-form" method="get" action="<?php echo esc_url( cvc_recruitments_url() ); ?>">
 		<div class="cvc-filter-form__field">
 			<label class="screen-reader-text" for="cvc-recruitment-search">Từ khóa</label>
