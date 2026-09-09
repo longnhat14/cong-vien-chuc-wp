@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c//**)",
+      "PowerShell($paths = @\\(\"C:\\\\xampp\\\\php\\\\php.exe\",\"C:\\\\laragon\\\\bin\\\\php\",\"C:\\\\php\\\\php.exe\",\"C:\\\\ProgramData\\\\ComposerSetup\\\\bin\",\"$env:LOCALAPPDATA\\\\Programs\\\\php\\\\php.exe\"\\); foreach \\($p in $paths\\) { Write-Output \"$p : $\\(Test-Path $p\\)\" }; where.exe php 2>&1)",
+      "Bash(curl -s -w '\\\\nHTTP_STATUS:%{http_code}\\\\n' __TRACKED_VAR__/api/courses --max-time 5)",
+      "PowerShell(try { $r = Invoke-WebRequest -Uri \"http://127.0.0.1:8000/api/courses\" -Method GET -TimeoutSec 5 -UseBasicParsing; Write-Output \"STATUS:$\\($r.StatusCode\\)\"; Write-Output $r.Headers['Access-Control-Allow-Origin']; $r.Content.Substring\\(0,[Math]::Min\\(2000,$r.Content.Length\\)\\) } catch { Write-Output \"ERROR: $\\($_.Exception.Message\\)\" })",
+      "PowerShell(wsl --list --verbose 2>&1)",
+      "Bash(wsl -d Ubuntu -- bash -lc \"which php; php -v | head -3\")",
+      "Bash(wsl -d Ubuntu -- bash -lc \"ls -la /mnt/d/Claude/Workspace/Account1/Production/congvienchuc/ 2>&1 | head -20 && echo '---' && test -f /mnt/d/Claude/Workspace/Account1/Production/congvienchuc/artisan && echo 'artisan found'\")",
+      "Bash(wsl -d Ubuntu -- bash -lc \"cd /mnt/d/Claude/Workspace/Account1/Production/congvienchuc && php artisan route:list --path=api 2>&1\")",
+      "Bash(wsl -d Ubuntu -- bash -lc \"cd /mnt/d/Claude/Workspace/Account1/Production/congvienchuc && php artisan route:list --path=api --json 2>&1\")",
+      "Read(//tmp/**)",
+      "Bash(python3 -c ' *)",
+      "Bash(wsl -d Ubuntu -- bash -lc \"which jq && jq length /mnt/c/Users/Administrator/AppData/Local/Temp/routes.json 2>&1 || echo no-jq\")",
+      "Bash(cp /tmp/routes.json \"/d/Claude/Workspace/Account1/Frontend/cong-vien-chuc-wp/../../../../scratch_routes.json\")"
+    ]
+  }
+}
