@@ -250,6 +250,7 @@ Học viện Đào tạo & Phát triển Công vụ
 <a href="<?php echo esc_url( cvc_topics_url() ); ?>" class="px-3 py-2 hover:text-azure-600 hover:bg-slate-100 rounded-xl transition-all">Lộ Trình Thăng Tiến</a>
 <a href="<?php echo esc_url( cvc_recruitments_url() ); ?>" class="px-3 py-2 hover:text-azure-600 hover:bg-slate-100 rounded-xl transition-all">Tuyển Dụng & Bổ Nhiệm</a>
 <a href="<?php echo esc_url( cvc_exams_url() ); ?>" class="px-3 py-2 hover:text-azure-600 hover:bg-slate-100 rounded-xl transition-all">Thi Trắc Nghiệm AI</a>
+<a href="<?php echo esc_url( cvc_documents_url() ); ?>" class="px-3 py-2 hover:text-azure-600 hover:bg-slate-100 rounded-xl transition-all">Kho Tài Liệu</a>
 <a href="<?php echo esc_url( cvc_legal_documents_url() ); ?>" class="px-3 py-2 hover:text-azure-600 hover:bg-slate-100 rounded-xl transition-all">Văn Bản Pháp Luật</a>
 <a href="<?php echo esc_url( cvc_knowledge_url() ); ?>" class="px-3 py-2 hover:text-azure-600 hover:bg-slate-100 rounded-xl transition-all">Kiến Thức Công Vụ</a>
 </nav>
@@ -310,6 +311,7 @@ Học Thử Demo
 <a href="<?php echo esc_url( cvc_topics_url() ); ?>" class="block px-4 py-2.5 text-slate-700 hover:bg-slate-50 font-semibold rounded-xl text-xs">Lộ Trình Thăng Tiến</a>
 <a href="<?php echo esc_url( cvc_recruitments_url() ); ?>" class="block px-4 py-2.5 text-slate-700 hover:bg-slate-50 font-semibold rounded-xl text-xs">Tuyển Dụng & Bổ Nhiệm</a>
 <a href="<?php echo esc_url( cvc_exams_url() ); ?>" class="block px-4 py-2.5 text-slate-700 hover:bg-slate-50 font-semibold rounded-xl text-xs">Thi Trắc Nghiệm AI</a>
+<a href="<?php echo esc_url( cvc_documents_url() ); ?>" class="block px-4 py-2.5 text-slate-700 hover:bg-slate-50 font-semibold rounded-xl text-xs">Kho Tài Liệu</a>
 <a href="<?php echo esc_url( cvc_legal_documents_url() ); ?>" class="block px-4 py-2.5 text-slate-700 hover:bg-slate-50 font-semibold rounded-xl text-xs">Văn Bản Pháp Luật</a>
 <a href="<?php echo esc_url( cvc_knowledge_url() ); ?>" class="block px-4 py-2.5 text-slate-700 hover:bg-slate-50 font-semibold rounded-xl text-xs">Kiến Thức Công Vụ</a>
 <div class="pt-3 border-t border-slate-100 flex gap-2">

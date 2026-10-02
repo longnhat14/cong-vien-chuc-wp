@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Tăng số này khi thêm/sửa rewrite rule để buộc flush lại đúng 1 lần.
-const CVC_REWRITE_VERSION = '7';
+const CVC_REWRITE_VERSION = '8';
 
 /**
  * Section hợp lệ của /tai-khoan/{section}/ (Phase 10) - map slug tiếng
@@ -33,6 +33,7 @@ function cvc_account_sections(): array {
 		'goi-y'             => 'recommendations',
 		'viec-lam-phu-hop'  => 'recruitment-matches',
 		'thong-bao'         => 'notifications',
+		'chung-chi'         => 'certificates',
 	);
 }
 
@@ -195,6 +196,73 @@ function cvc_register_rewrite_rules(): void {
 		'index.php?cvc_page=exam-attempt&cvc_attempt_id=$matches[1]',
 		'top'
 	);
+
+	/*
+	 * Tài liệu (Document model - Phase 11 monetization) - catalog free/
+	 * trả phí, chi tiết + mua, và proxy tải file (KHÔNG trỏ thẳng ra
+	 * Laravel - xem cvc_document_download_url() + template_redirect
+	 * handler trong inc/documents.php, lý do: cần đính kèm Bearer token
+	 * từ cookie HttpOnly phía server, trình duyệt không tự làm được qua
+	 * thẻ <a> thường).
+	 */
+	add_rewrite_rule(
+		'^tai-lieu/page/([0-9]+)/?$',
+		'index.php?cvc_page=documents&cvc_paged=$matches[1]',
+		'top'
+	);
+	add_rewrite_rule(
+		'^tai-lieu/([^/]+)/tai-xuong/?$',
+		'index.php?cvc_page=document-download&cvc_document_slug=$matches[1]',
+		'top'
+	);
+	add_rewrite_rule(
+		'^tai-lieu/([^/]+)/?$',
+		'index.php?cvc_page=document-detail&cvc_document_slug=$matches[1]',
+		'top'
+	);
+	add_rewrite_rule(
+		'^tai-lieu/?$',
+		'index.php?cvc_page=documents',
+		'top'
+	);
+
+	/*
+	 * Kết quả đơn hàng (Phase 11) - trang đích PaymentController::
+	 * vnpayReturn() redirect về sau khi thanh toán VNPay xong
+	 * (?status=success|failed&order=CODE).
+	 */
+	add_rewrite_rule(
+		'^don-hang/ket-qua/?$',
+		'index.php?cvc_page=order-result',
+		'top'
+	);
+
+	/*
+	 * Xác thực văn bằng/chứng chỉ công khai (Phase 11) - không cần đăng
+	 * nhập, ai có mã cũng tra được (đúng mục đích chống giả mạo).
+	 */
+	add_rewrite_rule(
+		'^xac-thuc-chung-chi/([^/]+)/?$',
+		'index.php?cvc_page=certificate-verify&cvc_certificate_code=$matches[1]',
+		'top'
+	);
+	add_rewrite_rule(
+		'^xac-thuc-chung-chi/?$',
+		'index.php?cvc_page=certificate-verify',
+		'top'
+	);
+
+	/*
+	 * Trang quản trị nội bộ (Phase 11) - chỉ SUPER_ADMIN/ADMIN, tự kiểm
+	 * tra role trong chính template (xem template-admin-ai-settings.php),
+	 * không tạo thêm tầng permission riêng ở WP vì auth gốc vẫn là
+	 * Laravel Sanctum + RBAC, WP chỉ đọc lại cvc_current_user()['roles'].
+	 */
+	add_rewrite_rule(
+		'^quan-tri/cau-hinh-ai/?$',
+		'index.php?cvc_page=admin-ai-settings',
+		'top'
+	);
 }
 
 add_filter( 'query_vars', 'cvc_register_query_vars' );
@@ -215,6 +283,8 @@ function cvc_register_query_vars( array $vars ): array {
 	$vars[] = 'cvc_paged';
 	$vars[] = 'cvc_account_section';
 	$vars[] = 'cvc_attempt_id';
+	$vars[] = 'cvc_document_slug';
+	$vars[] = 'cvc_certificate_code';
 
 	return $vars;
 }
@@ -295,6 +365,11 @@ function cvc_template_include( string $template ): string {
 		'register'              => 'template-register.php',
 		'account'               => 'template-account.php',
 		'exam-attempt'          => 'template-exam-attempt.php',
+		'documents'             => 'template-documents.php',
+		'document-detail'       => 'template-document-detail.php',
+		'order-result'          => 'template-order-result.php',
+		'certificate-verify'    => 'template-certificate-verify.php',
+		'admin-ai-settings'     => 'template-admin-ai-settings.php',
 	);
 
 	if ( isset( $map[ $page ] ) ) {
@@ -443,4 +518,58 @@ function cvc_exam_attempt_url( $param ): string {
 	}
 	$slug = is_string( $param ) ? $param : 'de-thi';
 	return home_url( '/thi-trac-nghiem/' . rawurlencode( $slug ) . '/lam-bai/' );
+}
+
+/**
+ * URL helpers - Tài liệu (Document model, Phase 11).
+ */
+function cvc_documents_url( int $paged = 1 ): string {
+	$path = 'tai-lieu/';
+
+	if ( $paged > 1 ) {
+		$path .= 'page/' . $paged . '/';
+	}
+
+	return home_url( '/' . $path );
+}
+
+function cvc_document_url( string $slug ): string {
+	return home_url( '/tai-lieu/' . rawurlencode( $slug ) . '/' );
+}
+
+/**
+ * URL tải file THẬT - đi qua proxy của chính theme (inc/documents.php),
+ * KHÔNG trỏ thẳng ra Laravel (xem lý do ở cvc_register_rewrite_rules()).
+ */
+function cvc_document_download_url( string $slug ): string {
+	return home_url( '/tai-lieu/' . rawurlencode( $slug ) . '/tai-xuong/' );
+}
+
+/**
+ * URL trang kết quả đơn hàng sau khi VNPay redirect về.
+ */
+function cvc_order_result_url( ?string $status = null, ?string $order = null ): string {
+	$url  = home_url( '/don-hang/ket-qua/' );
+	$args = array();
+
+	if ( null !== $status ) {
+		$args['status'] = $status;
+	}
+	if ( null !== $order ) {
+		$args['order'] = $order;
+	}
+
+	return empty( $args ) ? $url : add_query_arg( $args, $url );
+}
+
+function cvc_certificate_verify_url( string $code = '' ): string {
+	if ( '' === $code ) {
+		return home_url( '/xac-thuc-chung-chi/' );
+	}
+
+	return home_url( '/xac-thuc-chung-chi/' . rawurlencode( $code ) . '/' );
+}
+
+function cvc_admin_ai_settings_url(): string {
+	return home_url( '/quan-tri/cau-hinh-ai/' );
 }

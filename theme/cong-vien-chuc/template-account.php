@@ -44,6 +44,7 @@ $section_titles = array(
 	'recommendations'      => 'Gợi ý cho bạn',
 	'recruitment-matches'  => 'Việc làm phù hợp',
 	'notifications'        => 'Thông báo',
+	'certificates'         => 'Chứng chỉ của tôi',
 );
 
 $section_fa_icons = array(
@@ -58,6 +59,7 @@ $section_fa_icons = array(
 	'recommendations'      => 'fa-wand-magic-sparkles',
 	'recruitment-matches'  => 'fa-briefcase',
 	'notifications'        => 'fa-bell',
+	'certificates'         => 'fa-award',
 );
 
 cvc_seo_set_title( $section_titles[ $section ] . ' — Dashboard Công Viên Chức' );
