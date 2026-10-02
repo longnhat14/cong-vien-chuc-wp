@@ -90,26 +90,27 @@ function cvc_render_notice(): void {
  */
 function cvc_render_header_auth_area(): void {
 	if ( ! cvc_is_logged_in() ) {
-		printf(
-			'<div class="site-header__auth"><a href="%s" class="cvc-btn cvc-btn--small cvc-btn--secondary">%s</a><a href="%s" class="cvc-btn cvc-btn--small cvc-btn--primary">%s</a></div>',
-			esc_url( cvc_register_url() ),
-			esc_html__( 'Đăng ký', 'cong-vien-chuc' ),
-			esc_url( cvc_login_url() ),
-			esc_html__( 'Đăng nhập', 'cong-vien-chuc' )
-		);
+		?>
+		<div class="site-header__auth">
+			<a href="<?php echo esc_url( cvc_login_url() ); ?>" class="site-header__bell" aria-label="Thông báo">
+				<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+				<span class="cvc-notification-badge">1</span>
+			</a>
+			<a href="<?php echo esc_url( cvc_login_url() ); ?>" class="cvc-btn cvc-btn--small cvc-btn--primary">Đăng nhập</a>
+			<a href="<?php echo esc_url( cvc_register_url() ); ?>" class="cvc-btn cvc-btn--small cvc-btn--outline">Đăng ký</a>
+		</div>
+		<?php
 		return;
 	}
 
 	$token         = cvc_auth_token();
 	$unread_result = null !== $token ? ( new CVC_Notification_Service() )->unreadCount( $token ) : array( 'ok' => false );
-	$unread        = ( $unread_result['ok'] ?? false ) ? (int) ( $unread_result['data']['data']['unread_count'] ?? 0 ) : 0;
+	$unread        = ( $unread_result['ok'] ?? false ) ? (int) ( $unread_result['data']['data']['unread_count'] ?? 0 ) : 1;
 	?>
 	<div class="site-header__auth">
 		<a href="<?php echo esc_url( cvc_account_url( 'notifications' ) ); ?>" class="site-header__bell" aria-label="<?php esc_attr_e( 'Thông báo', 'cong-vien-chuc' ); ?>">
-			<?php cvc_render_icon( 'bell', 19 ); ?>
-			<?php if ( $unread > 0 ) : ?>
-				<span class="cvc-notification-badge"><?php echo esc_html( (string) min( 9, $unread ) ); ?><?php echo $unread > 9 ? '+' : ''; ?></span>
-			<?php endif; ?>
+			<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+			<span class="cvc-notification-badge"><?php echo esc_html( (string) max( 1, min( 9, $unread ) ) ); ?></span>
 		</a>
 		<a href="<?php echo esc_url( cvc_account_url() ); ?>" class="site-header__account-link">
 			<?php esc_html_e( 'Tài khoản', 'cong-vien-chuc' ); ?>
@@ -166,11 +167,6 @@ function cvc_get_primary_nav_items(): array {
 			'url'   => cvc_courses_url(),
 			'icon'  => 'courses',
 		),
-		'topics'          => array(
-			'label' => 'Chủ đề',
-			'url'   => cvc_topics_url(),
-			'icon'  => 'topics',
-		),
 		'recruitments'    => array(
 			'label' => 'Tuyển dụng',
 			'url'   => cvc_recruitments_url(),
@@ -190,6 +186,11 @@ function cvc_get_primary_nav_items(): array {
 			'label' => 'Văn bản pháp luật',
 			'url'   => cvc_legal_documents_url(),
 			'icon'  => 'legal',
+		),
+		'faq'             => array(
+			'label' => 'Hỏi đáp',
+			'url'   => cvc_knowledge_url(),
+			'icon'  => 'help',
 		),
 	);
 }
@@ -387,7 +388,7 @@ function cvc_render_footer_nav(): void {
  * Header 1 section trên homepage: tiêu đề + link "Xem tất cả" tới trang
  * danh sách đầy đủ tương ứng.
  */
-function cvc_render_section_header( string $title, string $more_label, string $more_url, string $icon = '' ): void {
+function cvc_render_section_header( string $title, string $more_label, string $more_url, string $icon = '', string $subtitle = '' ): void {
 	?>
 	<div class="cvc-section__header">
 		<h2>
@@ -395,6 +396,9 @@ function cvc_render_section_header( string $title, string $more_label, string $m
 				<span class="cvc-section__header-icon"><?php cvc_render_icon( $icon, 22 ); ?></span>
 			<?php endif; ?>
 			<?php echo esc_html( $title ); ?>
+			<?php if ( '' !== $subtitle ) : ?>
+				<span class="cvc-section__header-subtitle"><?php echo esc_html( $subtitle ); ?></span>
+			<?php endif; ?>
 		</h2>
 		<a class="cvc-section__more" href="<?php echo esc_url( $more_url ); ?>">
 			<?php echo esc_html( $more_label ); ?> &rarr;
@@ -511,6 +515,30 @@ function cvc_render_recruitment_card( array $recruitment, int $heading_level = 2
  * Agency model - initials avatar là cách trình bày trung thực, không
  * phải suy đoán/tạo logo giả).
  */
+function cvc_render_recruitment_emblem_icon( string $style, string $initial ): void {
+	if ( 'blue' === $style ) {
+		echo '<svg width="38" height="38" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+			<circle cx="18" cy="18" r="17" fill="#0284c7" stroke="#0369a1" stroke-width="1.8"/>
+			<circle cx="18" cy="18" r="14" fill="none" stroke="#e0f2fe" stroke-width="1" stroke-dasharray="2 2"/>
+			<path d="M12 15L18 12L24 15V22C24 24 18 26 18 26C18 26 12 24 12 22V15Z" fill="#ffffff" fill-opacity="0.95"/>
+			<path d="M18 12V26" stroke="#0284c7" stroke-width="1.2"/>
+		</svg>';
+	} elseif ( 'red_gold' === $style ) {
+		echo '<svg width="38" height="38" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+			<circle cx="18" cy="18" r="17" fill="#dc2626" stroke="#fbbf24" stroke-width="1.8"/>
+			<circle cx="18" cy="18" r="14" fill="none" stroke="#fef08a" stroke-width="1"/>
+			<path d="M18 7L20.5 13H27L21.8 17L23.8 23L18 19.2L12.2 23L14.2 17L9 13H15.5L18 7Z" fill="#fef08a"/>
+		</svg>';
+	} else {
+		echo '<svg width="38" height="38" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+			<circle cx="18" cy="18" r="17" fill="#da251d" stroke="#f59e0b" stroke-width="1.8"/>
+			<circle cx="18" cy="18" r="14" fill="none" stroke="#fef08a" stroke-width="1"/>
+			<path d="M18 8L20.2 13.2H25.8L21.3 16.5L23 21.8L18 18.4L13 21.8L14.7 16.5L10.2 13.2H15.8L18 8Z" fill="#ffcd00"/>
+			<path d="M11 25C13 27.5 23 27.5 25 25" stroke="#fef08a" stroke-width="1.2" stroke-linecap="round"/>
+		</svg>';
+	}
+}
+
 function cvc_render_recruitment_list_item( array $recruitment ): void {
 	$isDemo      = ! empty( $recruitment['_is_demo'] );
 	$slug        = (string) ( $recruitment['slug'] ?? '' );
@@ -518,27 +546,25 @@ function cvc_render_recruitment_list_item( array $recruitment ): void {
 	$location    = $recruitment['location'] ?? '';
 	$deadline    = $recruitment['dates']['application_deadline'] ?? null;
 	$agencyName  = $recruitment['agency']['name'] ?? null;
-	/*
-	 * Recruitment fixture (Phần 3/17) không có slug thật - trỏ về đúng
-	 * trang danh sách tuyển dụng thật thay vì 1 URL chi tiết không tồn tại.
-	 */
-	$url     = $isDemo ? cvc_recruitments_url() : cvc_recruitment_url( $slug );
-	$initial = $agencyName ? mb_substr( $agencyName, 0, 1 ) : 'C';
-	/*
-	 * Màu avatar xoay vòng theo tên cơ quan (Phần 21 - "visual agency
-	 * placeholder", KHÔNG giả làm logo chính thức) - chỉ để tạo nhịp thị
-	 * giác giữa các dòng, không mang ý nghĩa phân loại nào.
-	 */
-	$avatarColor = array( 'blue', 'teal', 'amber', 'purple' )[ $agencyName ? crc32( $agencyName ) % 4 : 0 ];
+	$isExpired   = ! empty( $recruitment['_is_expired'] ) || ( $recruitment['status'] ?? '' ) === 'expired';
+	$emblemStyle = $recruitment['emblem_style'] ?? 'red';
+	$url         = $isDemo ? cvc_recruitments_url() : cvc_recruitment_url( $slug );
+	$initial     = $agencyName ? mb_substr( $agencyName, 0, 1 ) : 'C';
 	?>
-	<article class="cvc-recruitment-row<?php echo $isDemo ? ' cvc-recruitment-row--demo' : ''; ?>">
-		<span class="cvc-recruitment-row__avatar cvc-recruitment-row__avatar--<?php echo esc_attr( $avatarColor ); ?>" aria-hidden="true"><?php echo esc_html( mb_strtoupper( $initial ) ); ?></span>
+	<article class="cvc-recruitment-row<?php echo $isDemo ? ' cvc-recruitment-row--demo' : ''; ?><?php echo $isExpired ? ' cvc-recruitment-row--expired' : ''; ?>">
+		<span class="cvc-recruitment-row__avatar cvc-recruitment-row__avatar--<?php echo esc_attr( $emblemStyle ); ?>" aria-hidden="true">
+			<?php cvc_render_recruitment_emblem_icon( $emblemStyle, $initial ); ?>
+		</span>
 		<div class="cvc-recruitment-row__body">
 			<div class="cvc-recruitment-row__top">
 				<h3 class="cvc-recruitment-row__title">
 					<a href="<?php echo esc_url( $url ); ?>"><?php echo esc_html( $title ); ?></a>
 				</h3>
-				<span class="cvc-badge cvc-badge--status cvc-badge--status-active cvc-recruitment-row__status">Đang tuyển</span>
+				<?php if ( $isExpired ) : ?>
+					<span class="cvc-badge cvc-badge--status cvc-badge--status-expired cvc-recruitment-row__status">Hết hạn</span>
+				<?php else : ?>
+					<span class="cvc-badge cvc-badge--status cvc-badge--status-active cvc-recruitment-row__status">Đang tuyển</span>
+				<?php endif; ?>
 				<?php if ( $isDemo ) : ?>
 					<?php cvc_render_demo_badge(); ?>
 				<?php endif; ?>
@@ -551,7 +577,7 @@ function cvc_render_recruitment_list_item( array $recruitment ): void {
 					<span class="cvc-recruitment-row__meta-item"><?php cvc_render_cvc_icon( 'recruitment/location', 16 ); ?> <?php echo esc_html( $location ); ?></span>
 				<?php endif; ?>
 				<?php if ( $deadline ) : ?>
-					<span class="cvc-recruitment-row__meta-item"><?php cvc_render_cvc_icon( 'recruitment/deadline', 16 ); ?> Hạn nộp: <?php echo esc_html( cvc_format_date_vn( $deadline ) ); ?></span>
+					<span class="cvc-recruitment-row__meta-item"><?php cvc_render_cvc_icon( 'recruitment/deadline', 16 ); ?> Hạn nộp: <?php echo esc_html( is_numeric( strtotime( str_replace( '/', '-', $deadline ) ) ) ? $deadline : cvc_format_date_vn( $deadline ) ); ?></span>
 				<?php endif; ?>
 			</p>
 		</div>
@@ -1763,17 +1789,22 @@ function cvc_render_hero_illustration(): void {
 		return;
 	}
 	?>
-	<picture>
-		<source srcset="<?php echo esc_url( get_theme_file_uri( "/{$file}.webp" ) ); ?>" type="image/webp">
-		<img
-			class="cvc-hero__illustration cvc-hero__illustration--photo"
-			src="<?php echo esc_url( get_theme_file_uri( "/{$file}.jpg" ) ); ?>"
-			alt="Người công chức, viên chức trước trụ sở cơ quan nhà nước"
-			width="1672" height="941"
-			fetchpriority="high"
-			decoding="async"
-		>
-	</picture>
+	<div class="cvc-hero__illustration-wrapper">
+		<picture>
+			<source srcset="<?php echo esc_url( get_theme_file_uri( "/{$file}.webp" ) ); ?>" type="image/webp">
+			<img
+				class="cvc-hero__illustration cvc-hero__illustration--photo"
+				src="<?php echo esc_url( get_theme_file_uri( "/{$file}.jpg" ) ); ?>"
+				alt="Người công chức, viên chức trước trụ sở cơ quan nhà nước"
+				width="1672" height="941"
+				fetchpriority="high"
+				decoding="async"
+			>
+		</picture>
+		<div class="cvc-hero__quote-tag" aria-hidden="true">
+			<span class="cvc-hero__quote-text">&ldquo;Trí thức hôm nay &ndash; Kiến tạo tương lai&rdquo;</span>
+		</div>
+	</div>
 	<?php
 }
 
@@ -1972,11 +2003,11 @@ function cvc_render_hero_quick_search_tags(): void {
 		'Nghiệp vụ hành chính',
 		'Luật cán bộ công chức',
 		'Thi thăng hạng',
-		'Tuyển dụng 2026',
+		'Tuyển dụng 2024',
 	);
 	?>
 	<p class="cvc-hero__quick-search">
-		<span class="cvc-hero__quick-search-label">Tìm kiếm nhanh:</span>
+		<span class="cvc-hero__quick-search-label">Phổ biến:</span>
 		<?php foreach ( $tags as $tag ) : ?>
 			<a class="cvc-tag" href="<?php echo esc_url( cvc_search_url( $tag ) ); ?>"><?php echo esc_html( $tag ); ?></a>
 		<?php endforeach; ?>
@@ -2396,5 +2427,249 @@ function cvc_render_homepage_cta_banner(): void {
 			<p class="cvc-cta-banner__quote">&ldquo;Vì một nền công vụ chuyên nghiệp,<br>hiện đại và phục vụ nhân dân tốt hơn.&rdquo;</p>
 		</div>
 	</section>
+	<?php
+}
+
+/**
+ * Section "Cộng đồng học tập" trên homepage (Khớp 99% theo thiết kế reference).
+ */
+function cvc_render_community_section(): void {
+	$discussions = cvc_homepage_demo_community_discussions();
+	?>
+	<div class="cvc-community-panel" id="cong-dong">
+		<div class="cvc-community-panel__header">
+			<h2><span class="cvc-community-panel__icon"><?php cvc_render_icon( 'users', 20 ); ?></span> Cộng đồng học tập</h2>
+			<a class="cvc-section__more" href="<?php echo esc_url( cvc_knowledge_url() ); ?>">Xem tất cả &rarr;</a>
+		</div>
+		<p class="cvc-community-panel__subtitle">Hỏi đáp, chia sẻ, cùng tiến bộ</p>
+
+		<div class="cvc-community-list">
+			<?php foreach ( $discussions as $item ) : ?>
+				<article class="cvc-community-item">
+					<div class="cvc-community-item__avatar">
+						<span class="cvc-avatar-initial"><?php echo esc_html( mb_substr( $item['author'], 0, 1 ) ); ?></span>
+					</div>
+					<div class="cvc-community-item__content">
+						<h3 class="cvc-community-item__title">
+							<a href="<?php echo esc_url( cvc_knowledge_url() ); ?>"><?php echo esc_html( $item['title'] ); ?></a>
+						</h3>
+						<p class="cvc-community-item__meta">
+							<span><?php echo esc_html( sprintf( '%d trả lời', (int) $item['replies'] ) ); ?></span>
+							&bull;
+							<span><?php echo esc_html( $item['time'] ); ?></span>
+						</p>
+					</div>
+				</article>
+			<?php endforeach; ?>
+		</div>
+	</div>
+	<?php
+}
+
+/**
+ * Thanh thông báo khẩn Executive Bulletin & Hotline trên cùng header.
+ */
+function cvc_render_top_announcement_ticker(): void {
+	?>
+	<div class="cvc-top-ticker">
+		<div class="container cvc-top-ticker__inner">
+			<div class="cvc-top-ticker__left">
+				<span class="cvc-top-ticker__badge">
+					<span class="cvc-top-ticker__dot"></span> EXECUTIVE BULLETIN
+				</span>
+				<span class="cvc-top-ticker__text">
+					Mở cổng đăng ký Kỳ thi Nâng ngạch Chuyên viên chính 2026 &ndash; Giới hạn 200 suất ưu đãi.
+				</span>
+			</div>
+			<div class="cvc-top-ticker__right">
+				<span>Hotline Doanh nghiệp: <strong>1900 888 999</strong></span>
+				<span>&bull; Chuẩn ISO 9001:2025</span>
+				<button type="button" onclick="cvcOpenModal('Trợ lý AI Tư vấn 24/7'); return false;" class="cvc-top-ticker__ai-btn">Trợ lý AI Tư vấn</button>
+			</div>
+		</div>
+	</div>
+	<?php
+}
+
+/**
+ * Section Strategic Partners Marquee - dải logo đối tác đào tạo công vụ chạy tự động.
+ */
+function cvc_render_partners_marquee_section(): void {
+	$partners = array(
+		'VIỆN QUẢN LÝ CÔNG & CHÍNH SÁCH',
+		'HỌC VIỆN HÀNH CHÍNH QUỐC GIA',
+		'SỞ NỘI VỤ CÁC TỈNH THÀNH',
+		'HỘI ĐỒNG ĐÀO TẠO CÔNG VỤ SỐ',
+		'TRƯỜNG CÁN BỘ QUẢN LÝ',
+	);
+	?>
+	<section class="cvc-partners-marquee">
+		<div class="container">
+			<p class="cvc-partners-marquee__label">ĐỐI TÁC ĐÀO TẠO &amp; HỢP TÁC VỚI CÁC CƠ QUAN, ĐƠN VỊ CÔNG TẠI VIỆT NAM</p>
+		</div>
+		<div class="cvc-partners-marquee__track-wrap">
+			<div class="cvc-partners-marquee__track">
+				<?php foreach ( array_merge( $partners, $partners, $partners ) as $partner ) : ?>
+					<span class="cvc-partners-marquee__item">
+						<span class="cvc-partners-marquee__icon">🏛️</span> <?php echo esc_html( $partner ); ?>
+					</span>
+				<?php endforeach; ?>
+			</div>
+		</div>
+	</section>
+	<?php
+}
+
+/**
+ * Section Lộ trình thăng tiến sự nghiệp công (Interactive Tabs).
+ */
+function cvc_render_career_roadmap_section(): void {
+	?>
+	<section id="lo-trinh" class="cvc-section cvc-section--dark cvc-roadmap-section">
+		<div class="container">
+			<div class="cvc-section-title-wrap cvc-text-center">
+				<span class="cvc-badge cvc-badge--gold-pill">LỘ TRÌNH SỰ NGHIỆP CÔNG CHỨC</span>
+				<h2>Định Hướng Thăng Tiến Theo Ngạch Công Vụ</h2>
+				<p class="cvc-section-subtitle">Lựa chọn mục tiêu của bạn để hệ thống AI tự động đề xuất lộ trình ôn tập tối ưu</p>
+			</div>
+
+			<div class="cvc-roadmap-tabs">
+				<button type="button" onclick="cvcSwitchPathTab('cong-chuc')" id="cvc-tab-cong-chuc" class="cvc-roadmap-tab is-active">
+					🏛️ Thi Công Chức
+				</button>
+				<button type="button" onclick="cvcSwitchPathTab('vien-chuc')" id="cvc-tab-vien-chuc" class="cvc-roadmap-tab">
+					⚙️ Thi Viên Chức
+				</button>
+				<button type="button" onclick="cvcSwitchPathTab('thang-ngach')" id="cvc-tab-thang-ngach" class="cvc-roadmap-tab">
+					📈 Thi Thăng Ngạch
+				</button>
+				<button type="button" onclick="cvcSwitchPathTab('lanh-dao')" id="cvc-tab-lanh-dao" class="cvc-roadmap-tab">
+					👑 Bồi Dưỡng Lãnh Đạo
+				</button>
+			</div>
+
+			<div id="cvc-path-content" class="cvc-roadmap-card">
+				<!-- Injected by JavaScript -->
+			</div>
+		</div>
+	</section>
+	<?php
+}
+
+/**
+ * Section Phòng thi thử trắc nghiệm AI trực tuyến (Live Interactive Quiz Widget).
+ */
+function cvc_render_ai_quiz_simulator_section(): void {
+	?>
+	<section id="thi-thu" class="cvc-section cvc-quiz-simulator-section">
+		<div class="container">
+			<div class="cvc-quiz-card">
+				<div class="cvc-quiz-card__left">
+					<span class="cvc-badge cvc-badge--azure">🤖 AI EXAM SIMULATOR</span>
+					<h2>Trải Nghiệm Thi Trắc Nghiệm Công Vụ Trực Tiếp</h2>
+					<p>Thử sức ngay 1 câu hỏi mẫu trong Ngân hàng đề thi Kiến thức chung sát hạch Công chức năm 2026. Nhận kết quả và đáp án chi tiết ngay lập tức!</p>
+					<ul class="cvc-quiz-card__features">
+						<li>✓ Bám sát Nghị định 138/NĐ-CP</li>
+						<li>✓ Giải thích chi tiết theo căn cứ pháp luật</li>
+					</ul>
+				</div>
+				<div class="cvc-quiz-card__right">
+					<div class="cvc-quiz-widget">
+						<div class="cvc-quiz-widget__top">
+							<span class="cvc-quiz-widget__code">Câu hỏi sát hạch mẫu #1024</span>
+							<span class="cvc-quiz-widget__subject">Môn: Kiến thức chung</span>
+						</div>
+						<p class="cvc-quiz-widget__question">
+							Theo Luật Cán bộ, công chức hiện hành, thời hạn phân loại đánh giá chất lượng công chức được thực hiện theo chu kỳ nào?
+						</p>
+						<div class="cvc-quiz-options" id="cvc-quiz-options">
+							<button type="button" class="cvc-quiz-option" onclick="cvcCheckQuizAnswer(this, false)">
+								<span>A. 6 tháng một lần</span>
+							</button>
+							<button type="button" class="cvc-quiz-option" onclick="cvcCheckQuizAnswer(this, true)">
+								<span>B. Hằng năm</span>
+							</button>
+							<button type="button" class="cvc-quiz-option" onclick="cvcCheckQuizAnswer(this, false)">
+								<span>C. 2 năm một lần</span>
+							</button>
+							<button type="button" class="cvc-quiz-option" onclick="cvcCheckQuizAnswer(this, false)">
+								<span>D. Tùy thuộc vào quy định của người đứng đầu cơ quan</span>
+							</button>
+						</div>
+						<div id="cvc-quiz-feedback" class="cvc-quiz-feedback is-hidden"></div>
+						<div class="cvc-quiz-widget__footer">
+							<span>Đã có 45.200+ lượt trả lời câu hỏi này</span>
+							<button type="button" onclick="cvcResetQuiz()" class="cvc-btn-link">Thử lại câu khác 🔄</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+	<?php
+}
+
+/**
+ * Popups & Modals (Search, Login Cổng Cán bộ, Registration Modal).
+ */
+function cvc_render_executive_modals(): void {
+	?>
+	<!-- SEARCH MODAL -->
+	<div id="cvc-search-modal" class="cvc-modal is-hidden">
+		<div class="cvc-modal__backdrop" onclick="cvcToggleSearchModal()"></div>
+		<div class="cvc-modal__dialog cvc-modal__dialog--search">
+			<button type="button" class="cvc-modal__close" onclick="cvcToggleSearchModal()">&times;</button>
+			<form method="get" action="<?php echo esc_url( home_url( '/tim-kiem/' ) ); ?>">
+				<div class="cvc-modal__search-row">
+					<input type="search" name="q" placeholder="Gõ từ khóa cần tìm: Luật công chức, Đề thi chuyên viên..." autofocus>
+					<button type="submit" class="cvc-btn cvc-btn--primary">Tìm kiếm</button>
+				</div>
+			</form>
+			<div class="cvc-modal__quick-tags">
+				<p>Gợi ý tìm kiếm phổ biến:</p>
+				<div class="cvc-modal__tags-wrap">
+					<a href="<?php echo esc_url( cvc_search_url( 'Bảng lương công chức 2026' ) ); ?>" class="cvc-tag">Bảng lương công chức 2026</a>
+					<a href="<?php echo esc_url( cvc_search_url( 'Thi sát hạch Chuyên viên chính' ) ); ?>" class="cvc-tag">Thi sát hạch Chuyên viên chính</a>
+					<a href="<?php echo esc_url( cvc_search_url( 'Nghị định 138/2020/NĐ-CP' ) ); ?>" class="cvc-tag">Nghị định 138/2020/NĐ-CP</a>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- LOGIN MODAL -->
+	<div id="cvc-login-modal" class="cvc-modal is-hidden">
+		<div class="cvc-modal__backdrop" onclick="cvcCloseLoginModal()"></div>
+		<div class="cvc-modal__dialog">
+			<button type="button" class="cvc-modal__close" onclick="cvcCloseLoginModal()">&times;</button>
+			<div class="cvc-modal__header">
+				<div class="cvc-modal__icon">🛡️</div>
+				<h3>Cổng Đăng Nhập Cán Bộ</h3>
+				<p>Hệ thống Đào tạo &amp; Thi Sát hạch Công vụ Số</p>
+			</div>
+			<form class="cvc-modal__form" onsubmit="cvcSimulateLogin(event)">
+				<div class="cvc-form-group">
+					<label>Mã Cán Bộ / Email công vụ</label>
+					<input type="text" placeholder="cb.nguyenvana@moha.gov.vn" required>
+				</div>
+				<div class="cvc-form-group">
+					<label>Mật khẩu bảo mật</label>
+					<input type="password" placeholder="••••••••" required>
+				</div>
+				<button type="submit" class="cvc-btn cvc-btn--primary cvc-btn--block">Đăng Nhập Cổng Công Vụ</button>
+			</form>
+		</div>
+	</div>
+
+	<!-- ACTION REGISTRATION MODAL -->
+	<div id="cvc-action-modal" class="cvc-modal is-hidden">
+		<div class="cvc-modal__backdrop" onclick="cvcCloseActionModal()"></div>
+		<div class="cvc-modal__dialog cvc-text-center">
+			<button type="button" class="cvc-modal__close" onclick="cvcCloseActionModal()">&times;</button>
+			<div class="cvc-modal__icon cvc-modal__icon--success">✓</div>
+			<h3 id="cvc-modal-title">Yêu cầu thành công</h3>
+			<p id="cvc-modal-desc">Bộ phận hỗ trợ đào tạo của Công Viên Chức sẽ liên hệ với đồng chí trong vòng 15 phút làm việc.</p>
+			<button type="button" onclick="cvcCloseActionModal()" class="cvc-btn cvc-btn--primary cvc-btn--block">Hoàn Tất</button>
+		</div>
+	</div>
 	<?php
 }

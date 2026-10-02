@@ -41,4 +41,8 @@ final class CVC_Exam_Attempt_Service extends CVC_Api_Service {
 	public function history( array $query, string $token ): array {
 		return $this->client->get( '/api/my-exam-attempts', $query, $token );
 	}
+
+	public function recommendations( int $attemptId, string $token ): array {
+		return $this->client->get( $this->endpoint() . '/' . $attemptId . '/recommendations', array(), $token );
+	}
 }

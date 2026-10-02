@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Tăng số này khi thêm/sửa rewrite rule để buộc flush lại đúng 1 lần.
-const CVC_REWRITE_VERSION = '5';
+const CVC_REWRITE_VERSION = '7';
 
 /**
  * Section hợp lệ của /tai-khoan/{section}/ (Phase 10) - map slug tiếng
@@ -28,6 +28,8 @@ function cvc_account_sections(): array {
 		'lo-trinh'          => 'learning-path',
 		'dau-trang'         => 'bookmarks',
 		'lich-su-thi'       => 'exam-history',
+		'khoa-hoc-cua-toi'  => 'my-courses',
+		'tai-lieu-da-mua'   => 'my-documents',
 		'goi-y'             => 'recommendations',
 		'viec-lam-phu-hop'  => 'recruitment-matches',
 		'thong-bao'         => 'notifications',
@@ -109,6 +111,11 @@ function cvc_register_rewrite_rules(): void {
 	add_rewrite_rule(
 		'^thi-trac-nghiem/page/([0-9]+)/?$',
 		'index.php?cvc_page=exams&cvc_paged=$matches[1]',
+		'top'
+	);
+	add_rewrite_rule(
+		'^thi-trac-nghiem/([^/]+)/lam-bai/?$',
+		'index.php?cvc_page=exam-attempt&cvc_exam_slug=$matches[1]',
 		'top'
 	);
 	add_rewrite_rule(
@@ -430,6 +437,10 @@ function cvc_account_url( string $section = 'overview' ): string {
 	return home_url( '/tai-khoan/' . ( false !== $slug ? $slug : 'tong-quan' ) . '/' );
 }
 
-function cvc_exam_attempt_url( int $attemptId ): string {
-	return home_url( '/lam-bai/' . $attemptId . '/' );
+function cvc_exam_attempt_url( $param ): string {
+	if ( is_numeric( $param ) && (int) $param > 0 ) {
+		return home_url( '/lam-bai/' . (int) $param . '/' );
+	}
+	$slug = is_string( $param ) ? $param : 'de-thi';
+	return home_url( '/thi-trac-nghiem/' . rawurlencode( $slug ) . '/lam-bai/' );
 }

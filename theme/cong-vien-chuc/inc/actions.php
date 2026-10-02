@@ -371,3 +371,51 @@ function cvc_handle_exam_start(): void {
 function cvc_exam_url_from_id( int $examId ): string {
 	return home_url( '/' );
 }
+
+/*
+ * ============================================================
+ * NEWSLETTER (footer.php - hiện trên MỌI trang)
+ * ============================================================
+ */
+
+/*
+ * Khác Goals/Bookmarks/... (luôn cần đăng nhập), form newsletter ở footer
+ * hiện cho CẢ khách lẫn user đã đăng nhập, và endpoint Laravel
+ * /api/newsletter/subscribe là public - KHÔNG cần token. Vẫn đăng ký đủ
+ * 2 nhánh nopriv/priv như mọi action khác trong file này (Phần XV).
+ * Redirect về đúng trang đã submit (wp_get_referer()) vì form xuất hiện
+ * ở mọi URL, không có 1 trang "trang chủ của tính năng" cố định.
+ */
+add_action( 'admin_post_nopriv_cvc_newsletter_subscribe', 'cvc_handle_newsletter_subscribe' );
+add_action( 'admin_post_cvc_newsletter_subscribe', 'cvc_handle_newsletter_subscribe' );
+
+function cvc_handle_newsletter_subscribe(): void {
+	check_admin_referer( 'cvc_newsletter_subscribe' );
+
+	$redirect_to = wp_get_referer() ?: home_url( '/' );
+	$email       = isset( $_POST['email'] ) ? sanitize_email( wp_unslash( $_POST['email'] ) ) : '';
+
+	if ( '' === $email || ! is_email( $email ) ) {
+		cvc_redirect_with_notice( $redirect_to, 'error', 'Vui lòng nhập một địa chỉ email hợp lệ.', null );
+		return;
+	}
+
+	$result = ( new CVC_Newsletter_Service() )->subscribe(
+		array(
+			'email'  => $email,
+			'source' => 'homepage_footer',
+		)
+	);
+
+	if ( ! $result['ok'] ) {
+		cvc_redirect_with_notice( $redirect_to, 'error', cvc_api_error_message( $result ), null );
+		return;
+	}
+
+	cvc_redirect_with_notice(
+		$redirect_to,
+		'success',
+		$result['data']['message'] ?? 'Đăng ký nhận bản tin thành công.',
+		null
+	);
+}

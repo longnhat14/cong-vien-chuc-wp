@@ -1,0 +1,390 @@
+/* ==========================================================================
+   CÔNG VIÊN CHỨC — EXAM OS X (Smart Exam Intelligence Platform)
+   3-Column Executive Shell Architecture & High-Conversion Theme
+   ========================================================================== */
+
+:root {
+  --bg: #03101f;
+  --bg2: #06192b;
+  --card: #071c31;
+  --card2: #09243a;
+  --line: #12415d;
+  --line2: #1d5675;
+  --text: #f4f8fc;
+  --muted: #8ea8bd;
+  --cyan: #13d9ff;
+  --blue: #168dff;
+  --gold: #f6b72d;
+  --green: #27d69a;
+  --red: #f05b69;
+  --shadow: 0 16px 45px rgba(0, 0, 0, .32);
+}
+
+/* Base Body Background for Exam Workspace */
+.cvc-exam-os-workspace {
+  background: radial-gradient(circle at 55% 25%, #0b2c48 0, #03101f 42%, #010812 100%) !important;
+  color: var(--text);
+  font-family: Inter, Segoe UI, system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+}
+
+/* Ensure Site Header stays sticky top 0 */
+header.glass-header, .site-header {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 50 !important;
+}
+
+/* Sticky Top Navigation & Exam Command Bar */
+.exam-top-sticky {
+  position: sticky;
+  top: 72px; /* Height under standard header */
+  z-index: 40;
+  background: rgba(3, 16, 31, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--line);
+}
+
+/* Sticky Right Sidebar */
+.sticky-right-sidebar {
+  position: sticky;
+  top: 88px;
+  z-index: 30;
+}
+
+/* 3-Column Shell Layout Grid */
+.exam-shell-grid {
+  display: grid;
+  grid-template-columns: 205px minmax(0, 1fr) 260px;
+  gap: 16px;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+@media (max-width: 1200px) {
+  .exam-shell-grid {
+    grid-template-columns: 180px minmax(0, 1fr) 240px;
+    gap: 12px;
+  }
+}
+
+@media (max-width: 992px) {
+  .exam-shell-grid {
+    grid-template-columns: minmax(0, 1fr) 260px;
+  }
+  .exam-left-column {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .exam-shell-grid {
+    grid-template-columns: 1fr;
+  }
+  .sticky-right-sidebar {
+    position: static;
+  }
+}
+
+/* Cards & Panel Styling */
+.exam-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  padding: 16px;
+}
+
+.exam-card-inner {
+  background: var(--card2);
+  border: 1px solid var(--line2);
+  border-radius: 12px;
+  padding: 12px;
+}
+
+/* Goal Ring Donut Chart */
+.goal-ring-chart {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: conic-gradient(var(--cyan) 72%, #0a2742 0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  position: relative;
+}
+
+.goal-ring-chart::after {
+  content: '';
+  position: absolute;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--card);
+}
+
+.goal-ring-text {
+  position: relative;
+  z-index: 2;
+  font-weight: 900;
+  font-size: 14px;
+  color: var(--cyan);
+}
+
+/* Left Sidebar Menu Items */
+.left-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.left-menu-item:hover {
+  background: var(--card2);
+  color: var(--text);
+  border-color: var(--line);
+}
+
+.left-menu-item.active {
+  background: linear-gradient(135deg, rgba(19, 217, 255, 0.15) 0%, rgba(22, 141, 255, 0.15) 100%);
+  color: var(--cyan);
+  border-color: rgba(19, 217, 255, 0.4);
+  font-weight: 800;
+}
+
+/* Exam Mode Badges */
+.exam-mode-badge {
+  background: var(--card2);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.exam-mode-badge:hover {
+  border-color: var(--cyan);
+  color: var(--cyan);
+}
+
+.exam-mode-badge.active {
+  background: linear-gradient(135deg, var(--gold) 0%, #d97706 100%);
+  color: #020c1b;
+  border-color: var(--gold);
+  font-weight: 900;
+  box-shadow: 0 4px 12px rgba(246, 183, 45, 0.3);
+}
+
+/* Question Panel & Answer Tiles */
+.answer-tile {
+  position: relative;
+  background: var(--card2);
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  user-select: none;
+}
+
+.answer-tile:hover {
+  border-color: var(--cyan);
+  box-shadow: 0 4px 20px rgba(19, 217, 255, 0.15);
+  transform: translateY(-1px);
+}
+
+.answer-tile.selected {
+  background: #0c2742;
+  border-color: var(--cyan);
+  box-shadow: 0 0 20px rgba(19, 217, 255, 0.25), inset 0 0 15px rgba(19, 217, 255, 0.1);
+  transform: translateY(-1px);
+}
+
+.answer-tile.struck-out {
+  opacity: 0.4;
+  background: #04101e;
+  border-color: #0e2d45;
+  filter: grayscale(80%);
+}
+
+.answer-tile.struck-out .answer-text {
+  text-decoration: line-through;
+  color: var(--muted);
+}
+
+.answer-letter {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--line);
+  color: var(--text);
+  font-weight: 800;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.answer-tile.selected .answer-letter {
+  background: var(--cyan);
+  color: #03101f;
+}
+
+.answer-check-mark {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1.5px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: transparent;
+  transition: all 0.2s ease;
+}
+
+.answer-tile.selected .answer-check-mark {
+  border-color: var(--cyan);
+  background: var(--cyan);
+  color: #03101f;
+}
+
+/* Filter & Action Buttons */
+.nav-filter-btn {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  background: var(--card2);
+  border: 1px solid var(--line);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.nav-filter-btn:hover, .nav-filter-btn.active {
+  background: var(--cyan);
+  color: #03101f;
+  border-color: var(--cyan);
+}
+
+/* Confidence Selector Pills */
+.confidence-pill {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  background: var(--card2);
+  border: 1px solid var(--line);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.confidence-pill:hover, .confidence-pill.active {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: rgba(246, 183, 45, 0.1);
+}
+
+/* Exam Navigator Grid Map (qmap) */
+.qmap-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+}
+
+.qmap-node {
+  aspect-ratio: 1;
+  border-radius: 8px;
+  background: var(--card2);
+  border: 1px solid var(--line);
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.qmap-node:hover {
+  border-color: var(--cyan);
+  color: var(--cyan);
+  transform: scale(1.05);
+}
+
+.qmap-node.answered {
+  background: var(--green);
+  border-color: var(--green);
+  color: #03101f;
+}
+
+.qmap-node.current {
+  border-color: var(--cyan);
+  box-shadow: 0 0 12px var(--cyan);
+  color: var(--cyan);
+  background: rgba(19, 217, 255, 0.15);
+}
+
+.qmap-node.flagged {
+  border: 2px solid var(--gold);
+}
+
+/* AI Coach & High Conversion Banners */
+.ai-coach-banner {
+  background: linear-gradient(135deg, #092847 0%, #05182c 100%);
+  border: 1px solid var(--cyan);
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 8px 25px rgba(19, 217, 255, 0.15);
+}
+
+.course-upsell-card {
+  background: linear-gradient(135deg, #0c2642 0%, #06182c 100%);
+  border: 1.5px solid var(--gold);
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 10px 30px rgba(246, 183, 45, 0.15);
+}
+
+/* Smooth Scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Explicit High Contrast Breadcrumbs */
+.cvc-breadcrumbs a {
+  color: #94a3b8 !important;
+}
+
+.cvc-breadcrumbs a:hover {
+  color: var(--cyan) !important;
+}
+
+.cvc-breadcrumbs [aria-current='page'] {
+  color: var(--text) !important;
+  font-weight: 800 !important;
+}
+
+.cvc-breadcrumbs li:not(:last-child)::after {
+  color: #64748b !important;
+}
