@@ -127,20 +127,6 @@ window.cvc_vars = {
 	<!-- 1. TOP STICKY HEADER & COMMAND BAR (TREO NGAY DƯỚI MENU CHÍNH) -->
 	<div class="exam-top-sticky shadow-xl border-b border-cyan-500/30">
 		
-		<!-- Promo Offer Banner Strip -->
-		<div class="bg-gradient-to-r from-amber-500/20 via-cyan-500/20 to-blue-500/20 border-b border-slate-800/80 py-1.5 px-4 text-xs">
-			<div class="max-w-[1440px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
-				<div class="flex items-center gap-2">
-					<span class="bg-amber-500 text-navy-950 text-[10px] font-black px-2 py-0.5 rounded uppercase">🔥 ƯU ĐÃI NÂNG HẠNG CHỨC DANH 2026</span>
-					<span class="text-slate-200 font-semibold hidden sm:inline">Giảm 30% gói Ôn thi Cấp tốc + AI Assistant 24/7. Hạn chót:</span>
-					<span id="promo-timer" class="font-mono text-amber-400 font-bold">03:21:44</span>
-				</div>
-				<a href="<?php echo esc_url( home_url('/khoa-hoc/') ); ?>" class="text-cyan-400 hover:text-cyan-300 font-extrabold flex items-center gap-1 text-[11px] transition-colors">
-					Nhận ưu đãi ngay &rarr;
-				</a>
-			</div>
-		</div>
-
 		<!-- Main Exam Command Bar & Profile Navbar -->
 		<div class="max-w-[1440px] mx-auto px-4 py-2.5 flex flex-col md:flex-row items-center justify-between gap-3 text-xs">
 			
@@ -258,7 +244,7 @@ window.cvc_vars = {
 			<div class="exam-card space-y-3">
 				<div class="flex items-center justify-between text-xs">
 					<div id="exam-mode-description" class="text-cyan-300 font-semibold flex items-center gap-2">
-						🏋️ Chế độ LUYỆN: Tự động lưu tiến độ, hiển thị AI Assist giải thích chuyên sâu.
+						🏋️ Chế độ LUYỆN: Tự động lưu tiến độ, xem giải thích chi tiết sau mỗi câu.
 					</div>
 					<div class="flex items-center gap-2 font-mono text-xs">
 						<span class="text-slate-400">Tiến độ:</span>
@@ -407,7 +393,7 @@ window.cvc_vars = {
 							✕ Loại trừ A
 						</button>
 						<button type="button" onclick="showLawModal('<?php echo esc_js($q['explanation']); ?>')" class="px-3 py-1.5 bg-[#09243a] hover:bg-slate-800 text-cyan-400 rounded-xl text-xs font-bold border border-[#12415d] transition-colors cursor-pointer flex items-center gap-1.5">
-							✦ AI Assist
+							📖 Xem Giải Thích
 						</button>
 					</div>
 

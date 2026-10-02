@@ -11,8 +11,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 $course_slug = sanitize_text_field( (string) get_query_var( 'cvc_course_slug' ) );
 $lesson_id   = absint( get_query_var( 'cvc_lesson_id' ) );
 
+$token         = cvc_auth_token();
 $service       = new CVC_Course_Service();
-$course_result = $service->find( $course_slug );
+$course_result = $service->find( $course_slug, $token );
 
 $course = null;
 if ( $course_result['ok'] && is_array( $course_result['data']['data'] ?? null ) ) {
@@ -23,7 +24,7 @@ $lesson        = null;
 $lesson_result = null;
 
 if ( $course && $lesson_id ) {
-	$lesson_result = $service->lesson( $course_slug, $lesson_id );
+	$lesson_result = $service->lesson( $course_slug, $lesson_id, $token );
 
 	if ( $lesson_result['ok'] && is_array( $lesson_result['data']['data'] ?? null ) ) {
 		$lesson = $lesson_result['data']['data'];

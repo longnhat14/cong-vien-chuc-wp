@@ -10,8 +10,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 $slug = sanitize_text_field( (string) get_query_var( 'cvc_course_slug' ) );
 
+$token   = cvc_auth_token();
 $service = new CVC_Course_Service();
-$result  = $service->find( $slug );
+$result  = $service->find( $slug, $token );
 
 $course   = null;
 $is_found = false;
@@ -66,6 +67,7 @@ get_header();
 
 		<!-- Breadcrumbs -->
 		<?php cvc_render_breadcrumbs( $breadcrumb_items ); ?>
+		<?php cvc_render_notice(); ?>
 
 		<?php if ( ! $is_found ) : ?>
 			<div class="bg-[#0D1B2A] border border-slate-800 p-8 rounded-3xl text-center space-y-4">
@@ -84,10 +86,7 @@ get_header();
 					<div class="space-y-3 max-w-3xl">
 						<div class="flex items-center gap-2 flex-wrap">
 							<span class="bg-amber-500 text-navy-950 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase">
-								🎓 HỌC VIỆN ENTERPRISE
-							</span>
-							<span class="bg-cyan-500/20 text-cyan-300 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-cyan-500/40">
-								CHUẨN BỘ NỘI VỤ 2026
+								🎓 Khóa Học Ôn Thi 2026
 							</span>
 						</div>
 
@@ -101,10 +100,19 @@ get_header();
 							</p>
 						<?php endif; ?>
 
-						<div class="flex items-center gap-4 text-xs text-slate-400 pt-1">
+						<?php
+						$course_type_labels = array(
+							'online_video' => '🎬 Video bài giảng HD',
+							'live_zoom'    => '🔴 Học trực tiếp qua Zoom',
+						);
+						$course_type_label = $course_type_labels[ $course['course_type'] ?? '' ] ?? '🎓 Khóa học trực tuyến';
+						?>
+						<div class="flex items-center gap-4 text-xs text-slate-400 pt-1 flex-wrap">
 							<span>📚 <?php echo esc_html( sprintf( '%d bài học', (int) ( $course['published_lessons_count'] ?? count( $lessons ) ) ) ); ?></span>
-							<span>⏱️ <?php echo esc_html( sprintf( '%d phút video HD', (int) ( $course['duration_minutes'] ?? 180 ) ) ); ?></span>
-							<span class="text-amber-400 font-bold">★ 4.9/5.0 Rating</span>
+							<?php if ( ! empty( $course['duration_minutes'] ) ) : ?>
+								<span>⏱️ <?php echo esc_html( sprintf( '%d phút', (int) $course['duration_minutes'] ) ); ?></span>
+							<?php endif; ?>
+							<span class="text-cyan-400 font-bold"><?php echo esc_html( $course_type_label ); ?></span>
 						</div>
 					</div>
 
@@ -183,29 +191,62 @@ get_header();
 				<aside class="lg:col-span-3 space-y-4 sticky top-[80px]">
 
 					<!-- ENROLLMENT PRICING CARD -->
+					<?php
+					$course_price = (float) ( $course['price'] ?? 0 );
+					$course_sale  = isset( $course['sale_price'] ) && null !== $course['sale_price'] ? (float) $course['sale_price'] : $course_price;
+					$is_owned     = ! empty( $course['owned'] );
+					$is_free      = $course_price <= 0;
+					?>
 					<div class="bg-gradient-to-r from-amber-500/10 via-slate-900 to-indigo-950 border-2 border-amber-500/40 p-5 rounded-2xl space-y-4 shadow-2xl">
-						<div class="flex items-baseline justify-between border-b border-slate-800 pb-2">
-							<span class="text-xs text-slate-400">Học phí ưu đãi:</span>
-							<div class="text-right">
-								<span class="text-xs text-slate-400 line-through block">850.000đ</span>
-								<span class="text-2xl font-black text-amber-400 block">599.000đ</span>
+
+						<?php if ( $is_owned ) : ?>
+							<div class="flex items-center gap-2 text-emerald-400 font-black text-xs border-b border-slate-800 pb-3">
+								<i class="fa-solid fa-circle-check"></i> Bạn đã sở hữu khóa học này
 							</div>
-						</div>
+						<?php elseif ( $is_free ) : ?>
+							<div class="flex items-center gap-2 text-emerald-400 font-black text-sm border-b border-slate-800 pb-3">
+								<i class="fa-solid fa-gift"></i> Khóa học miễn phí
+							</div>
+						<?php else : ?>
+							<div class="flex items-baseline justify-between border-b border-slate-800 pb-3">
+								<span class="text-xs text-slate-400">Học phí:</span>
+								<div class="text-right">
+									<?php if ( $course_sale < $course_price ) : ?>
+										<span class="text-xs text-slate-400 line-through block"><?php echo esc_html( number_format( $course_price, 0, ',', '.' ) ); ?>đ</span>
+									<?php endif; ?>
+									<span class="text-2xl font-black text-amber-400 block"><?php echo esc_html( number_format( $course_sale, 0, ',', '.' ) ); ?>đ</span>
+								</div>
+							</div>
+						<?php endif; ?>
 
 						<div class="space-y-2 text-xs text-slate-300">
-							<span class="flex items-center gap-2"><span class="text-emerald-400">✓</span> Sở hữu trọn đời 120 bài giảng HD</span>
-							<span class="flex items-center gap-2"><span class="text-emerald-400">✓</span> Đã bao gồm trọn bộ 50 đề thi thử PDF</span>
-							<span class="flex items-center gap-2"><span class="text-emerald-400">✓</span> AI Coach chẩn đoán câu sai 24/7</span>
+							<span class="flex items-center gap-2"><span class="text-emerald-400">✓</span> Truy cập trọn đời <?php echo esc_html( (int) ( $course['published_lessons_count'] ?? count( $lessons ) ) ); ?> bài học</span>
+							<?php if ( ! empty( $course['duration_minutes'] ) ) : ?>
+								<span class="flex items-center gap-2"><span class="text-emerald-400">✓</span> Tổng thời lượng <?php echo esc_html( (int) $course['duration_minutes'] ); ?> phút</span>
+							<?php endif; ?>
+							<span class="flex items-center gap-2"><span class="text-emerald-400">✓</span> Xem lại không giới hạn số lần</span>
 						</div>
 
-						<?php if ( ! empty( $lessons[0]['id'] ) ) : ?>
+						<?php if ( ( $is_owned || $is_free ) && ! empty( $lessons[0]['id'] ) ) : ?>
 							<a href="<?php echo esc_url( cvc_course_lesson_url( $slug, (int) $lessons[0]['id'] ) ); ?>" class="block w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-navy-950 font-black text-xs text-center rounded-xl shadow-lg transition-transform hover:scale-105">
-								Đăng Ký Học Ngay &rarr;
+								Vào Học Ngay &rarr;
 							</a>
+						<?php elseif ( $is_owned || $is_free ) : ?>
+							<p class="text-[11px] text-slate-400 text-center">Khóa học chưa có bài học nào được công bố.</p>
+						<?php elseif ( cvc_is_logged_in() ) : ?>
+							<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+								<?php wp_nonce_field( 'cvc_course_buy' ); ?>
+								<input type="hidden" name="action" value="cvc_course_buy">
+								<input type="hidden" name="course_id" value="<?php echo esc_attr( (string) ( $course['id'] ?? 0 ) ); ?>">
+								<input type="hidden" name="course_slug" value="<?php echo esc_attr( $slug ); ?>">
+								<button type="submit" class="block w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-navy-950 font-black text-xs text-center rounded-xl shadow-lg transition-transform hover:scale-105">
+									<i class="fa-solid fa-cart-shopping mr-1"></i> Mua Khóa Học — Thanh Toán VNPay
+								</button>
+							</form>
 						<?php else : ?>
-							<button onclick="alert('Đã gửi yêu cầu đăng ký khóa học!')" class="block w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-navy-950 font-black text-xs text-center rounded-xl shadow-lg transition-transform hover:scale-105">
-								Đăng Ký Học Ngay &rarr;
-							</button>
+							<a href="<?php echo esc_url( cvc_login_url( cvc_course_url( $slug ) ) ); ?>" class="block w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-navy-950 font-black text-xs text-center rounded-xl shadow-lg transition-transform hover:scale-105">
+								Đăng Nhập Để Mua Khóa Học
+							</a>
 						<?php endif; ?>
 					</div>
 

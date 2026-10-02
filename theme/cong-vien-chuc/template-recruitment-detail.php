@@ -527,15 +527,111 @@ Tôi xin cam đoan những lời khai trên đây là đúng sự thật. Nếu 
 								<?php endif; ?>
 
 								<?php if ( ! empty( $pos['exam_subjects'] ) && is_array( $pos['exam_subjects'] ) ) : ?>
-									<div class="pt-2 border-t border-slate-800 text-xs">
+									<div class="pt-2 border-t border-slate-800 text-xs space-y-3">
 										<span class="text-slate-400 font-bold block mb-1">Môn thi sát hạch quy định:</span>
-										<div class="flex flex-wrap gap-2">
-											<?php foreach ( $pos['exam_subjects'] as $sub ) : ?>
-												<span class="bg-slate-800 text-slate-200 px-2.5 py-1 rounded-lg border border-slate-700">
-													✓ <?php echo esc_html( is_array($sub) ? ($sub['name'] ?? '') : (string)$sub ); ?>
-												</span>
-											<?php endforeach; ?>
-										</div>
+
+										<?php foreach ( $pos['exam_subjects'] as $sub_index => $sub ) :
+											$sub_name     = is_array( $sub ) ? ( $sub['name'] ?? '' ) : (string) $sub;
+											$sub_required = is_array( $sub ) ? ! empty( $sub['is_required'] ) : false;
+											$dossier      = is_array( $sub ) ? ( $sub['dossier'] ?? array() ) : array();
+											$legal_docs   = ! empty( $dossier['legal_documents'] ) && is_array( $dossier['legal_documents'] ) ? $dossier['legal_documents'] : array();
+											$knowledge    = ! empty( $dossier['knowledge_items'] ) && is_array( $dossier['knowledge_items'] ) ? $dossier['knowledge_items'] : array();
+											$sample_qs    = ! empty( $dossier['sample_questions'] ) && is_array( $dossier['sample_questions'] ) ? $dossier['sample_questions'] : array();
+											$sub_docs     = ! empty( $dossier['documents'] ) && is_array( $dossier['documents'] ) ? $dossier['documents'] : array();
+											$has_dossier  = ! empty( $legal_docs ) || ! empty( $knowledge ) || ! empty( $sample_qs ) || ! empty( $sub_docs );
+										?>
+											<details class="bg-slate-800/60 border border-slate-700 rounded-xl group" <?php echo ( 0 === $sub_index ) ? 'open' : ''; ?>>
+												<summary class="cursor-pointer select-none px-3 py-2 flex items-center justify-between gap-2 list-none">
+													<span class="text-slate-100 font-bold flex items-center gap-1.5">
+														✓ <?php echo esc_html( $sub_name ); ?>
+														<?php if ( $sub_required ) : ?>
+															<span class="text-amber-300 font-black text-[9px] bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-400/30">BẮT BUỘC</span>
+														<?php endif; ?>
+													</span>
+													<?php if ( $has_dossier ) : ?>
+														<i class="fa-solid fa-chevron-down text-slate-500 text-[10px] group-open:rotate-180 transition-transform"></i>
+													<?php endif; ?>
+												</summary>
+
+												<?php if ( $has_dossier ) : ?>
+													<div class="px-3 pb-3 pt-1 space-y-3 border-t border-slate-700/60">
+
+														<?php if ( ! empty( $legal_docs ) ) : ?>
+															<div>
+																<span class="text-slate-400 font-bold block mb-1"><i class="fa-solid fa-scale-balanced mr-1"></i>Văn bản pháp luật liên quan:</span>
+																<div class="flex flex-wrap gap-1.5">
+																	<?php foreach ( $legal_docs as $ld ) : ?>
+																		<a href="<?php echo esc_url( cvc_legal_document_url( (string) ( $ld['slug'] ?? '' ) ) ); ?>" target="_blank" class="bg-slate-900 text-emerald-300 px-2 py-1 rounded-lg border border-slate-700 hover:border-emerald-500 transition-colors">
+																			<?php echo esc_html( ! empty( $ld['document_number'] ) ? $ld['document_number'] . ' — ' . $ld['title'] : $ld['title'] ); ?>
+																		</a>
+																	<?php endforeach; ?>
+																</div>
+															</div>
+														<?php endif; ?>
+
+														<?php if ( ! empty( $knowledge ) ) : ?>
+															<div>
+																<span class="text-slate-400 font-bold block mb-1"><i class="fa-solid fa-list-check mr-1"></i>Trọng tâm kiến thức (<?php echo count( $knowledge ); ?> chuyên đề):</span>
+																<ul class="space-y-0.5 text-slate-300">
+																	<?php foreach ( array_slice( $knowledge, 0, 6 ) as $ki ) : ?>
+																		<li class="flex items-start gap-1.5">
+																			<i class="fa-solid fa-circle-dot text-emerald-500 text-[6px] mt-1.5"></i>
+																			<span><strong class="text-slate-200"><?php echo esc_html( $ki['topic'] ?? '' ); ?>:</strong> <?php echo esc_html( $ki['title'] ?? '' ); ?></span>
+																		</li>
+																	<?php endforeach; ?>
+																	<?php if ( count( $knowledge ) > 6 ) : ?>
+																		<li class="text-slate-500 italic">&hellip; và <?php echo ( count( $knowledge ) - 6 ); ?> nội dung khác</li>
+																	<?php endif; ?>
+																</ul>
+															</div>
+														<?php endif; ?>
+
+														<?php if ( ! empty( $sample_qs ) ) : ?>
+															<div>
+																<span class="text-slate-400 font-bold block mb-1"><i class="fa-solid fa-circle-question mr-1"></i>Câu hỏi minh họa:</span>
+																<div class="space-y-2">
+																	<?php foreach ( $sample_qs as $sq ) : ?>
+																		<div class="bg-slate-900 border border-slate-700 rounded-lg p-2.5">
+																			<p class="text-slate-200 font-semibold mb-1"><?php echo esc_html( $sq['question_text'] ?? '' ); ?></p>
+																			<?php if ( ! empty( $sq['options'] ) && is_array( $sq['options'] ) ) : ?>
+																				<ul class="grid grid-cols-1 sm:grid-cols-2 gap-1 text-slate-400">
+																					<?php foreach ( $sq['options'] as $opt_i => $opt ) : ?>
+																						<li><?php echo esc_html( chr( 65 + $opt_i ) ); ?>. <?php echo esc_html( $opt['option_text'] ?? '' ); ?></li>
+																					<?php endforeach; ?>
+																				</ul>
+																			<?php endif; ?>
+																		</div>
+																	<?php endforeach; ?>
+																	<p class="text-slate-500 italic">Làm bài thi thử đầy đủ có chấm điểm tại mục Thi Trắc Nghiệm AI.</p>
+																</div>
+															</div>
+														<?php endif; ?>
+
+														<?php if ( ! empty( $sub_docs ) ) : ?>
+															<div>
+																<span class="text-slate-400 font-bold block mb-1"><i class="fa-solid fa-book mr-1"></i>Tài liệu ôn thi đề xuất:</span>
+																<div class="flex flex-wrap gap-2">
+																	<?php foreach ( $sub_docs as $sd ) :
+																		$sd_is_free = ! empty( $sd['is_free'] );
+																		$sd_price   = (float) ( $sd['effective_price'] ?? 0 );
+																	?>
+																		<a href="<?php echo esc_url( cvc_document_url( (string) ( $sd['slug'] ?? '' ) ) ); ?>" class="flex items-center gap-1.5 bg-slate-900 px-2.5 py-1.5 rounded-lg border border-slate-700 hover:border-emerald-500 transition-colors">
+																			<span class="text-slate-200"><?php echo esc_html( $sd['title'] ?? '' ); ?></span>
+																			<?php if ( $sd_is_free ) : ?>
+																				<span class="text-emerald-400 font-black text-[9px]">MIỄN PHÍ</span>
+																			<?php else : ?>
+																				<span class="text-amber-300 font-black text-[9px]"><?php echo esc_html( number_format( $sd_price, 0, ',', '.' ) ); ?>đ</span>
+																			<?php endif; ?>
+																		</a>
+																	<?php endforeach; ?>
+																</div>
+															</div>
+														<?php endif; ?>
+
+													</div>
+												<?php endif; ?>
+											</details>
+										<?php endforeach; ?>
 									</div>
 								<?php endif; ?>
 							</div>

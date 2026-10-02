@@ -8,89 +8,78 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 get_header();
 
-$featured_courses = [
-    [
-        'code' => 'COURSE-KTC-2026',
-        'title' => 'Khóa học Ôn thi Công chức Vòng 1 - Kiến thức chung (Cấp tốc 2026)',
-        'slug' => 'khoa-hoc-on-thi-cong-chuc-vong-1-kien-thuc-chung-cap-toc-2026',
-        'short_description' => 'Trọn bộ 60 bài giảng chuyên sâu Kiến thức chung, cam kết nắm vững Luật Cán bộ công chức & Hiến pháp.',
-        'thumbnail' => 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=600&auto=format&fit=crop&q=80',
-        'price' => '1.500.000đ',
-        'sale_price' => '890.000đ',
-        'badge' => 'Giảm 41%',
-        'rating' => '4.95',
-        'reviews' => '1.420',
-        'duration' => '1.200 Phút',
-        'lessons' => '45 Bài giảng',
-        'instructor' => 'TS. Nguyễn Văn Hùng',
-        'instructor_title' => 'Nguyên Lãnh đạo Học viện Hành chính',
-    ],
-    [
-        'code' => 'COURSE-ENG-2026',
-        'title' => 'Khóa học Ôn thi Tiếng Anh B1/B2 Công chức & Viên chức',
-        'slug' => 'khoa-hoc-on-thi-tieng-anh-b1-b2-cong-chuc-vien-chuc',
-        'short_description' => 'Mẹo làm bài trắc nghiệm Tiếng Anh Vòng 1 đạt 25-30/30 câu chuẩn khung Châu Âu.',
-        'thumbnail' => 'https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=600&auto=format&fit=crop&q=80',
-        'price' => '1.200.000đ',
-        'sale_price' => '690.000đ',
-        'badge' => 'Giảm 43%',
-        'rating' => '4.92',
-        'reviews' => '980',
-        'duration' => '900 Phút',
-        'lessons' => '30 Bài giảng',
-        'instructor' => 'ThS. Lê Hoàng Mai',
-        'instructor_title' => 'Chuyên gia Ngôn ngữ Công vụ',
-    ],
-    [
-        'code' => 'COURSE-TIN-2026',
-        'title' => 'Khóa học Ôn thi Tin học Đạt chuẩn Chuẩn kỹ năng CNTT',
-        'slug' => 'khoa-hoc-on-thi-tin-hoc-dat-chuan-chuon-ky-nang-cntt',
-        'short_description' => 'Bổ trợ kiến thức Tin học văn phòng MS Word, Excel, PowerPoint & An toàn thông tin.',
-        'thumbnail' => 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=600&auto=format&fit=crop&q=80',
-        'price' => '900.000đ',
-        'sale_price' => '490.000đ',
-        'badge' => 'Giảm 46%',
-        'rating' => '4.88',
-        'reviews' => '750',
-        'duration' => '600 Phút',
-        'lessons' => '20 Bài giảng',
-        'instructor' => 'KTS. Trần Bảo Lâm',
-        'instructor_title' => 'Chuyên gia CNTT & Số hóa Hành chính',
-    ],
-    [
-        'code' => 'COURSE-VONG2-PM',
-        'title' => 'Khóa học Chiến lược Ôn thi Vòng 2 - Nghiệp vụ Chuyên ngành & Kỹ năng Phỏng vấn',
-        'slug' => 'khoa-hoc-chien-luoc-on-thi-vong-2-nghiep-vu-chuyen-nganh-ky-nang-phong-van',
-        'short_description' => 'Chuyên gia nâng bệ điểm số Vòng 2 (Viết tự luận / Phỏng vấn) đạt điểm tối đa.',
-        'thumbnail' => 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=600&auto=format&fit=crop&q=80',
-        'price' => '2.500.000đ',
-        'sale_price' => '1.490.000đ',
-        'badge' => 'Giảm 40%',
-        'rating' => '4.98',
-        'reviews' => '2.150',
-        'duration' => '1.800 Phút',
-        'lessons' => '15 Buổi Live Zoom',
-        'instructor' => 'PGS.TS. Phạm Quốc Bảo',
-        'instructor_title' => 'Chủ tịch Hội đồng Khảo thí Công vụ',
-    ],
-];
+$featured_courses = [];
+
+$featured_result = ( new CVC_Course_Service() )->list( array(
+	'featured' => 1,
+	'per_page' => 4,
+) );
+
+if ( $featured_result['ok'] && ! empty( $featured_result['data']['data']['data'] ) && is_array( $featured_result['data']['data']['data'] ) ) {
+	$featured_courses = $featured_result['data']['data']['data'];
+}
+
+/**
+ * Nhãn khuyến mãi tính từ dữ liệu giá THẬT (price/sale_price) - không
+ * gắn cứng % như trước đây. Trả null nếu không có giảm giá thật, để nơi
+ * gọi ẩn hẳn badge thay vì hiện "Giảm 0%".
+ */
+function cvc_homepage_course_discount_badge( array $course ): ?string {
+	$price = (float) ( $course['price'] ?? 0 );
+	$sale  = isset( $course['sale_price'] ) && null !== $course['sale_price'] ? (float) $course['sale_price'] : $price;
+
+	if ( $price <= 0 || $sale >= $price ) {
+		return null;
+	}
+
+	$percent = (int) round( ( 1 - ( $sale / $price ) ) * 100 );
+
+	return $percent > 0 ? "Giảm {$percent}%" : null;
+}
+
+$course_type_badge_labels = array(
+	'online_video' => 'Video HD',
+	'live_zoom'    => 'Live Zoom',
+);
+?>
+
+<?php $cvc_combo = cvc_get_combo_courses(); ?>
+
+<?php
+/**
+ * Số liệu thật cho hero/metrics strip - thay cho các con số bịa trước
+ * đây (99.8%, 120.000+, 36.035+, 3.321 xã phường...). count() có sẵn ở
+ * CVC_Api_Service (GET per_page=1, đọc field total) - không fabricate.
+ */
+$cvc_stat_courses      = ( new CVC_Course_Service() )->count() ?? 0;
+$cvc_stat_recruitments = ( new CVC_Recruitment_Service() )->count() ?? 0;
+$cvc_stat_documents    = ( new CVC_Document_Service() )->count() ?? 0;
+$cvc_stat_legal_docs   = ( new CVC_Legal_Document_Service() )->count() ?? 0;
+$cvc_stat_topics       = ( new CVC_Topic_Service() )->count() ?? 0;
+
+$cvc_latest_recruitments = [];
+$cvc_recruitment_result  = ( new CVC_Recruitment_Service() )->list( array( 'per_page' => 3 ) );
+if ( $cvc_recruitment_result['ok'] && ! empty( $cvc_recruitment_result['data']['data']['data'] ) && is_array( $cvc_recruitment_result['data']['data']['data'] ) ) {
+	$cvc_latest_recruitments = $cvc_recruitment_result['data']['data']['data'];
+}
 ?>
 
 <main id="main" class="cvc-homepage-prototype-100 bg-slate-900 font-sans text-slate-100">
 
-<!-- 1. FLASH URGENCY BANNER TICKER -->
+<!-- 1. COMBO BANNER (dữ liệu thật từ cvc_get_combo_courses()) -->
+<?php if ( null !== $cvc_combo ) : ?>
 <div class="bg-gradient-to-r from-amber-600 via-red-600 to-amber-700 text-white text-xs py-2.5 px-4 shadow-md border-b border-amber-400/30 font-bold">
 	<div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-2">
 		<div class="flex items-center gap-2">
-			<span class="bg-white text-red-600 text-[10px] font-black uppercase px-2 py-0.5 rounded animate-pulse">FLASH SALE 2026</span>
-			<span>🔥 Combo Ôn Thi Công Chức Vòng 1 & Vòng 2: Giảm ngay <strong>48%</strong> khi nhập mã <span class="bg-black/30 text-amber-300 font-extrabold px-2 py-0.5 rounded border border-amber-300/40">TUYENDUNG2026</span></span>
+			<span class="bg-white text-red-600 text-[10px] font-black uppercase px-2 py-0.5 rounded">COMBO ƯU ĐÃI</span>
+			<span>🔥 Combo Ôn Thi Công Chức Vòng 1 & Vòng 2: Tiết kiệm <strong><?php echo esc_html( $cvc_combo['discount_percent'] ); ?>%</strong> khi mua trọn bộ 2 khóa học</span>
 		</div>
 		<div class="flex items-center gap-4 text-[11px]">
-			<span class="hidden sm:inline-block"><i class="fa-solid fa-clock mr-1 text-amber-300"></i> Ưu đãi kết thúc sau: <strong id="flash-countdown" class="text-amber-300 font-extrabold">11:59:45</strong></span>
-			<a href="#combo-hot" class="bg-amber-400 hover:bg-amber-300 text-navy-950 font-black px-3 py-1 rounded-md transition-colors text-[11px] shadow-sm">Nhận Ưu Đãi Ngay &rarr;</a>
+			<a href="#combo-hot" class="bg-amber-400 hover:bg-amber-300 text-navy-950 font-black px-3 py-1 rounded-md transition-colors text-[11px] shadow-sm">Xem Combo Ngay &rarr;</a>
 		</div>
 	</div>
 </div>
+<?php endif; ?>
 
 <!-- 2. HERO BANNER - CORPORATE FLAGSHIP -->
 <section class="hero-gradient relative overflow-hidden py-16 lg:py-24 text-white">
@@ -113,7 +102,7 @@ Vững Vàng & Vươn Tầm
 </h1>
 
 <p class="text-slate-300 text-sm sm:text-base leading-relaxed max-w-2xl font-light">
-Tập đoàn Đào tạo Công viên chức Quốc gia — Đơn vị duy nhất tích hợp <strong>Hệ thống Giám sát & Tuyển dụng tự động 3.321 Xã Phường</strong>, Ngân hàng <strong>36.035+ Đề thi trắc nghiệm AI Vòng 1</strong> chuẩn Bộ Nội vụ và Khóa học chuyên sâu Vòng 2.
+Nền tảng ôn thi công chức, viên chức — tổng hợp <strong><?php echo esc_html( number_format( $cvc_stat_recruitments, 0, ',', '.' ) ); ?>+ tin tuyển dụng</strong> mới nhất, ngân hàng câu hỏi trắc nghiệm Vòng 1 và khóa học chuyên sâu Vòng 2.
 </p>
 
 
@@ -153,34 +142,29 @@ class="w-full bg-transparent text-white text-sm placeholder-slate-400 focus:outl
 <div class="relative rounded-3xl overflow-hidden glass-dark border border-white/20 shadow-2xl p-3">
 <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80" alt="Lãnh đạo Công chức" class="w-full h-[420px] object-cover rounded-2xl filter brightness-95">
 <div class="absolute bottom-6 left-6 right-6 p-4 rounded-2xl glass-dark border border-white/20 text-white space-y-1 shadow-xl">
-<div class="flex items-center justify-between">
-<span class="bg-gold-500 text-navy-950 text-[10px] font-black px-2.5 py-0.5 rounded uppercase">Học Viên Trúng Tuyển 2025</span>
-<div class="flex text-gold-400 text-xs">
-<i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-</div>
-</div>
-<p class="font-bold text-sm text-white">Hệ Thống Đào Tạo Công Viên Chức PRO</p>
-<p class="text-xs text-slate-300">Tỷ lệ vượt qua sát hạch Vòng 1 & Vòng 2 đạt 99.8%</p>
+<span class="bg-gold-500 text-navy-950 text-[10px] font-black px-2.5 py-0.5 rounded uppercase">Hệ Thống Đào Tạo Trực Tuyến</span>
+<p class="font-bold text-sm text-white">Công Viên Chức PRO</p>
+<p class="text-xs text-slate-300">Ôn thi Vòng 1 & Vòng 2 theo đúng cấu trúc đề thi tuyển dụng công chức, viên chức 2026</p>
 </div>
 </div>
 
 <div class="absolute -top-6 -right-6 glass-dark p-4 rounded-2xl border border-gold-500/40 shadow-glow-gold flex items-center space-x-3 backdrop-blur-xl animate-bounce-slow">
 <div class="w-12 h-12 rounded-xl bg-gold-500/20 text-gold-400 flex items-center justify-center text-2xl border border-gold-500/30">
-<i class="fa-solid fa-award"></i>
+<i class="fa-solid fa-newspaper"></i>
 </div>
 <div>
-<p class="text-xl font-black text-white leading-none">99.8%</p>
-<p class="text-[10px] text-slate-300 font-bold uppercase mt-1">Đạt Chuẩn Ngạch</p>
+<p class="text-xl font-black text-white leading-none"><?php echo esc_html( number_format( $cvc_stat_recruitments, 0, ',', '.' ) ); ?>+</p>
+<p class="text-[10px] text-slate-300 font-bold uppercase mt-1">Tin Tuyển Dụng</p>
 </div>
 </div>
 
 <div class="absolute -bottom-6 -left-6 glass-dark p-4 rounded-2xl border border-azure-400/40 shadow-glow-azure flex items-center space-x-3 backdrop-blur-xl">
 <div class="w-12 h-12 rounded-xl bg-azure-500/20 text-azure-400 flex items-center justify-center text-2xl border border-azure-400/30">
-<i class="fa-solid fa-users-viewfinder"></i>
+<i class="fa-solid fa-book-open"></i>
 </div>
 <div>
-<p class="text-xl font-black text-white leading-none">120.000+</p>
-<p class="text-[10px] text-slate-300 font-bold uppercase mt-1">Học Viên Tin Dùng</p>
+<p class="text-xl font-black text-white leading-none"><?php echo esc_html( $cvc_stat_courses ); ?></p>
+<p class="text-[10px] text-slate-300 font-bold uppercase mt-1">Khóa Học Đang Mở</p>
 </div>
 </div>
 </div>
@@ -188,49 +172,26 @@ class="w-full bg-transparent text-white text-sm placeholder-slate-400 focus:outl
 
 </div>
 
-<!-- Enterprise Metrics Strip -->
-<div class="mt-16 pt-10 border-t border-slate-800/80 grid grid-cols-2 md:grid-cols-5 gap-6 text-center">
+<!-- Enterprise Metrics Strip (số liệu thật, đọc trực tiếp từ API) -->
+<div class="mt-16 pt-10 border-t border-slate-800/80 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
 <div class="space-y-1">
-<p class="text-3xl lg:text-4xl font-black text-gold-gradient">36.035+</p>
-<p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Câu Hỏi & Đề Thi Trắc Nghiệm</p>
+<p class="text-3xl lg:text-4xl font-black text-gold-gradient"><?php echo esc_html( number_format( $cvc_stat_recruitments, 0, ',', '.' ) ); ?>+</p>
+<p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Tin Tuyển Dụng Công Chức, Viên Chức</p>
 </div>
 <div class="space-y-1">
-<p class="text-3xl lg:text-4xl font-black text-amber-400">500+</p>
-<p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Khóa Học & Chuyên Đề</p>
+<p class="text-3xl lg:text-4xl font-black text-amber-400"><?php echo esc_html( $cvc_stat_courses ); ?></p>
+<p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Khóa Học Ôn Thi</p>
 </div>
 <div class="space-y-1">
-<p class="text-3xl lg:text-4xl font-black text-white">3.321</p>
-<p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Xã Phường Đã Số Hóa Website</p>
+<p class="text-3xl lg:text-4xl font-black text-white"><?php echo esc_html( $cvc_stat_legal_docs ); ?></p>
+<p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Văn Bản Pháp Luật Cập Nhật</p>
 </div>
 <div class="space-y-1">
-<p class="text-3xl lg:text-4xl font-black text-azure-400">34/34</p>
-<p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Tỉnh Thành Mới Phủ Sóng</p>
-</div>
-<div class="space-y-1">
-<p class="text-3xl lg:text-4xl font-black text-gold-gradient">100%</p>
-<p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Chuẩn Bộ Nội Vụ & Pháp Luật</p>
+<p class="text-3xl lg:text-4xl font-black text-azure-400"><?php echo esc_html( $cvc_stat_topics ); ?></p>
+<p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Chuyên Đề Ôn Tập</p>
 </div>
 </div>
 
-</div>
-</section>
-
-<!-- 3. STRATEGIC PARTNERS MARQUEE -->
-<section class="bg-navy-950 py-5 border-y border-navy-800 overflow-hidden">
-<div class="max-w-7xl mx-auto px-4 mb-2 text-center">
-<p class="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">
-ĐỐI TÁC ĐÀO TẠO & HỢP TÁC CƠ QUAN NHÀ NƯỚC, SỞ BAN NGÀNH TOÀN QUỐC
-</p>
-</div>
-<div class="flex overflow-hidden relative">
-<div class="flex animate-marquee space-x-12 whitespace-nowrap text-slate-400 text-xs font-bold items-center">
-<span class="flex items-center gap-2 hover:text-white transition-colors"><i class="fa-solid fa-building-columns text-gold-400"></i> HỌC VIỆN HÀNH CHÍNH QUỐC GIA</span>
-<span class="flex items-center gap-2 hover:text-white transition-colors"><i class="fa-solid fa-shield-halved text-azure-400"></i> SỞ NỘI VỤ TỈNH ĐẮK LẮK</span>
-<span class="flex items-center gap-2 hover:text-white transition-colors"><i class="fa-solid fa-scale-balanced text-emerald-400"></i> SỞ NỘI VỤ TỈNH KHÁNH HÒA</span>
-<span class="flex items-center gap-2 hover:text-white transition-colors"><i class="fa-solid fa-landmark text-gold-400"></i> SỞ NỘI VỤ TỈNH GIA LAI</span>
-<span class="flex items-center gap-2 hover:text-white transition-colors"><i class="fa-solid fa-award text-azure-400"></i> SỞ NỘI VỤ TỈNH QUẢNG NGÃI</span>
-<span class="flex items-center gap-2 hover:text-white transition-colors"><i class="fa-solid fa-building-columns text-gold-400"></i> HỌC VIỆN NÔNG NGHIỆP VIỆT NAM</span>
-</div>
 </div>
 </section>
 
@@ -245,35 +206,59 @@ class="w-full bg-transparent text-white text-sm placeholder-slate-400 focus:outl
 <h2 class="text-2xl sm:text-4xl font-extrabold text-white tracking-normal">
 Khóa Học Ôn Thi Thương Mại Chuẩn Quốc Gia
 </h2>
-<p class="text-xs sm:text-sm text-slate-400">Giảng dạy bởi các Chuyên gia hàng đầu từ Học viện Hành chính Quốc gia & Bộ Nội vụ</p>
+<p class="text-xs sm:text-sm text-slate-400">Lộ trình bài giảng bám sát cấu trúc đề thi tuyển dụng công chức, viên chức 2026</p>
 </div>
+<?php
+$cvc_max_course_discount = 0;
+foreach ( $featured_courses as $fc ) {
+	$fc_badge = cvc_homepage_course_discount_badge( $fc );
+	if ( $fc_badge && preg_match( '/(\d+)/', $fc_badge, $m ) ) {
+		$cvc_max_course_discount = max( $cvc_max_course_discount, (int) $m[1] );
+	}
+}
+?>
+<?php if ( $cvc_max_course_discount > 0 ) : ?>
 <div class="flex items-center gap-2">
-<span class="text-xs text-amber-300 font-bold bg-amber-500/20 px-3 py-1.5 rounded-lg border border-amber-400/40">🔥 Đang Giảm Giá Đến 46%</span>
+<span class="text-xs text-amber-300 font-bold bg-amber-500/20 px-3 py-1.5 rounded-lg border border-amber-400/40">🔥 Đang Giảm Giá Đến <?php echo esc_html( $cvc_max_course_discount ); ?>%</span>
 </div>
+<?php endif; ?>
 </div>
 
 <!-- Course Cards Grid -->
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-<?php foreach ($featured_courses as $c) : ?>
+<?php if ( empty( $featured_courses ) ) : ?>
+<p class="text-xs text-slate-400 col-span-full text-center py-8">Chưa có khóa học nổi bật nào được công bố.</p>
+<?php endif; ?>
+<?php foreach ($featured_courses as $c) :
+	$c_price    = (float) ( $c['price'] ?? 0 );
+	$c_sale     = isset( $c['sale_price'] ) && null !== $c['sale_price'] ? (float) $c['sale_price'] : $c_price;
+	$c_badge    = cvc_homepage_course_discount_badge( $c );
+	$c_lessons  = (int) ( $c['published_lessons_count'] ?? $c['lesson_count'] ?? 0 );
+	$c_type     = $course_type_badge_labels[ $c['course_type'] ?? '' ] ?? 'Khóa học';
+?>
 <div class="bg-navy-950 rounded-3xl overflow-hidden border border-slate-800 hover:border-gold-500/60 shadow-2xl hover:shadow-glow-gold transition-all duration-300 flex flex-col justify-between group">
 <div>
 <!-- Thumbnail with Badges -->
 <div class="relative h-48 overflow-hidden">
-<img src="<?php echo esc_url($c['thumbnail']); ?>" alt="<?php echo esc_attr($c['title']); ?>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-85">
+<img src="<?php echo esc_url($c['thumbnail_url'] ?? ''); ?>" alt="<?php echo esc_attr($c['title']); ?>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-85">
 <div class="absolute inset-0 bg-gradient-to-t from-navy-950 via-transparent to-transparent"></div>
+<?php if ( $c_badge ) : ?>
 <span class="absolute top-3 left-3 bg-red-600 text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow-md uppercase tracking-wider">
-<?php echo esc_html($c['badge']); ?>
+<?php echo esc_html($c_badge); ?>
 </span>
+<?php endif; ?>
+<?php if ( ! empty( $c['duration_minutes'] ) ) : ?>
 <span class="absolute bottom-3 right-3 text-[11px] font-bold text-white bg-black/60 px-2 py-0.5 rounded backdrop-blur-sm">
-<i class="fa-regular fa-clock text-amber-400 mr-1"></i> <?php echo esc_html($c['duration']); ?>
+<i class="fa-regular fa-clock text-amber-400 mr-1"></i> <?php echo esc_html( (int) $c['duration_minutes'] ); ?> phút
 </span>
+<?php endif; ?>
 </div>
 
 <!-- Body -->
 <div class="p-5 space-y-2.5">
 <div class="flex items-center justify-between text-[11px]">
-<span class="text-amber-400 font-bold bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20"><?php echo esc_html($c['lessons']); ?></span>
-<span class="text-amber-400 font-bold"><i class="fa-solid fa-star text-amber-400 mr-1"></i> <?php echo esc_html($c['rating']); ?> (<?php echo esc_html($c['reviews']); ?>)</span>
+<span class="text-amber-400 font-bold bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20"><?php echo esc_html( $c_lessons ); ?> bài giảng</span>
+<span class="text-cyan-400 font-bold"><?php echo esc_html( $c_type ); ?></span>
 </div>
 
 <h3 class="font-extrabold text-sm text-white group-hover:text-amber-400 transition-colors leading-snug line-clamp-2">
@@ -281,30 +266,30 @@ Khóa Học Ôn Thi Thương Mại Chuẩn Quốc Gia
 </h3>
 
 <p class="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
-<?php echo esc_html($c['short_description']); ?>
+<?php echo esc_html($c['short_description'] ?? ''); ?>
 </p>
-
-<div class="pt-2 border-t border-slate-800 flex items-center gap-2 text-[11px] text-slate-300">
-<i class="fa-solid fa-user-tie text-amber-400"></i>
-<span class="truncate font-semibold"><?php echo esc_html($c['instructor']); ?></span>
-</div>
 </div>
 </div>
 
 <!-- Footer Price & CTA -->
 <div class="p-5 pt-0 space-y-3">
 <div class="flex items-baseline justify-between border-t border-slate-800/80 pt-3">
+<?php if ( $c_price <= 0 ) : ?>
+<span class="text-sm font-black text-emerald-400">Miễn phí</span>
+<?php else : ?>
 <div>
-<span class="text-[10px] text-slate-500 line-through block"><?php echo esc_html($c['price']); ?></span>
-<span class="text-xl font-black text-amber-400 tracking-tight"><?php echo esc_html($c['sale_price']); ?></span>
+<?php if ( $c_sale < $c_price ) : ?>
+<span class="text-[10px] text-slate-500 line-through block"><?php echo esc_html( number_format( $c_price, 0, ',', '.' ) ); ?>đ</span>
+<?php endif; ?>
+<span class="text-xl font-black text-amber-400 tracking-tight"><?php echo esc_html( number_format( $c_sale, 0, ',', '.' ) ); ?>đ</span>
 </div>
-<span class="text-[10px] text-emerald-400 bg-emerald-500/20 px-2 py-0.5 rounded font-bold">Cam kết trúng tuyển</span>
+<?php endif; ?>
 </div>
 
-<button onclick="enrollCourse('<?php echo esc_js($c['title']); ?>')" class="w-full py-3 bg-gradient-to-r from-gold-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-navy-950 font-black text-xs rounded-xl transition-all shadow-md flex items-center justify-center gap-1.5">
-<span>ĐĂNG KÝ KHÓA NGAY</span>
+<a href="<?php echo esc_url(cvc_course_url($c['slug'])); ?>" class="w-full py-3 bg-gradient-to-r from-gold-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-navy-950 font-black text-xs rounded-xl transition-all shadow-md flex items-center justify-center gap-1.5">
+<span>XEM CHI TIẾT & ĐĂNG KÝ</span>
 <i class="fa-solid fa-arrow-right"></i>
-</button>
+</a>
 </div>
 </div>
 <?php endforeach; ?>
@@ -312,7 +297,8 @@ Khóa Học Ôn Thi Thương Mại Chuẩn Quốc Gia
 </div>
 </section>
 
-<!-- 5. FLAGSHIP MONETIZATION COMBO SHOWCASE -->
+<!-- 5. FLAGSHIP MONETIZATION COMBO SHOWCASE (dữ liệu + mua hàng thật) -->
+<?php if ( null !== $cvc_combo ) : ?>
 <section id="combo-hot" class="py-16 bg-slate-950 text-white relative overflow-hidden border-t border-slate-800">
 	<div class="absolute -top-32 -left-32 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
 	<div class="absolute -bottom-32 -right-32 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -320,13 +306,13 @@ Khóa Học Ôn Thi Thương Mại Chuẩn Quốc Gia
 	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
 		<div class="bg-gradient-to-br from-navy-950 via-slate-900 to-indigo-950 border-2 border-gold-500/50 rounded-3xl p-8 lg:p-12 shadow-2xl relative overflow-hidden">
 			<div class="absolute top-0 right-0 bg-gradient-to-l from-amber-500 to-amber-600 text-navy-950 text-xs font-black uppercase px-6 py-2 rounded-bl-2xl shadow-md">
-				★ Gói Bán Chạy Nhất Đào Tạo Công Vụ 2026
+				★ Combo Vòng 1 & Vòng 2
 			</div>
 
 			<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center mt-4">
 				<div class="lg:col-span-7 space-y-6">
 					<div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-red-500/20 border border-red-500/40 text-red-400 text-xs font-bold uppercase tracking-wider">
-						🔥 KHUYẾN MÃI ĐẶC BIỆT DÀNH CHO CÁN BỘ & THÍ SINH
+						🔥 TIẾT KIỆM <?php echo esc_html( $cvc_combo['discount_percent'] ); ?>% KHI MUA TRỌN BỘ
 					</div>
 
 					<h2 class="text-2xl sm:text-4xl font-extrabold text-white leading-tight">
@@ -335,61 +321,58 @@ Khóa Học Ôn Thi Thương Mại Chuẩn Quốc Gia
 					</h2>
 
 					<p class="text-sm text-slate-300 leading-relaxed font-light">
-						Mở khóa toàn bộ ngân hàng 50.000+ câu hỏi trắc nghiệm AI, bài giảng HD online, tài liệu tự luận Vòng 2 và nhóm hỗ trợ giải đáp 24/7 trực tiếp từ giảng viên Bộ Nội vụ.
+						Mua gộp 2 khóa học trong 1 đơn hàng, giá tốt hơn mua lẻ từng khóa.
 					</p>
 
-					<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-slate-200">
-						<div class="flex items-center gap-2.5 bg-white/5 p-3 rounded-xl border border-white/10">
-							<i class="fa-solid fa-circle-check text-emerald-400 text-sm"></i>
-							<span>Trọn bộ Kiến thức chung, Tiếng Anh B1 & Tin học</span>
-						</div>
-						<div class="flex items-center gap-2.5 bg-white/5 p-3 rounded-xl border border-white/10">
-							<i class="fa-solid fa-circle-check text-emerald-400 text-sm"></i>
-							<span>Chấm điểm AI real-time & giải thích chi tiết câu hỏi</span>
-						</div>
-						<div class="flex items-center gap-2.5 bg-white/5 p-3 rounded-xl border border-white/10">
-							<i class="fa-solid fa-circle-check text-emerald-400 text-sm"></i>
-							<span>Hướng dẫn viết bài thi tự luận Vòng 2 & Kịch bản phỏng vấn</span>
-						</div>
-						<div class="flex items-center gap-2.5 bg-white/5 p-3 rounded-xl border border-white/10">
-							<i class="fa-solid fa-circle-check text-emerald-400 text-sm"></i>
-							<span>Cam kết hoàn tiền 100% nếu không đạt vòng sát hạch</span>
-						</div>
-					</div>
-
-					<div class="flex items-center gap-3 pt-2">
-						<span class="text-xs text-slate-400">Mã Voucher giảm 48%:</span>
-						<div class="inline-flex items-center gap-2 bg-navy-900 border border-gold-400/50 px-3 py-1.5 rounded-lg text-amber-300 font-mono font-extrabold text-sm">
-							<span>TUYENDUNG2026</span>
-							<button onclick="copyCouponCode('TUYENDUNG2026')" class="hover:text-white transition-colors" title="Sao chép mã"><i class="fa-regular fa-copy"></i></button>
-						</div>
+					<div class="grid grid-cols-1 gap-3 text-xs text-slate-200">
+						<?php foreach ( $cvc_combo['courses'] as $combo_course ) :
+							$cc_sale = isset( $combo_course['sale_price'] ) && null !== $combo_course['sale_price'] ? (float) $combo_course['sale_price'] : (float) $combo_course['price'];
+						?>
+							<a href="<?php echo esc_url( cvc_course_url( $combo_course['slug'] ) ); ?>" class="flex items-center justify-between gap-2.5 bg-white/5 hover:bg-white/10 p-3 rounded-xl border border-white/10 transition-colors">
+								<span class="flex items-center gap-2.5">
+									<i class="fa-solid fa-circle-check text-emerald-400 text-sm"></i>
+									<span><?php echo esc_html( $combo_course['title'] ); ?></span>
+								</span>
+								<span class="text-amber-400 font-bold shrink-0"><?php echo esc_html( number_format( $cc_sale, 0, ',', '.' ) ); ?>đ</span>
+							</a>
+						<?php endforeach; ?>
 					</div>
 				</div>
 
 				<div class="lg:col-span-5 flex flex-col items-center justify-center bg-white/5 backdrop-blur-md p-8 rounded-2xl border border-white/10 text-center space-y-4">
-					<span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Giá Gốc Niêm Yết: <span class="line-through text-slate-500">3.600.000đ</span></span>
-					
+					<span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Mua lẻ từng khóa: <span class="line-through text-slate-500"><?php echo esc_html( number_format( $cvc_combo['total_price'], 0, ',', '.' ) ); ?>đ</span></span>
+
 					<div class="space-y-1">
-						<span class="text-xs text-amber-400 font-bold block uppercase">Giá Khuyến Mãi Hôm Nay (-48%)</span>
-						<div class="text-4xl lg:text-5xl font-black text-amber-400 tracking-tight">1.890.000đ</div>
+						<span class="text-xs text-amber-400 font-bold block uppercase">Mua Combo Hôm Nay (-<?php echo esc_html( $cvc_combo['discount_percent'] ); ?>%)</span>
+						<div class="text-4xl lg:text-5xl font-black text-amber-400 tracking-tight"><?php echo esc_html( number_format( $cvc_combo['total_sale_price'], 0, ',', '.' ) ); ?>đ</div>
 					</div>
 
-					<p class="text-[11px] text-slate-300">Áp dụng cho 100 học viên đăng ký sớm nhất trong ngày</p>
-
-					<button onclick="enrollComboCourse()" class="w-full py-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-navy-950 font-black text-sm rounded-xl transition-all shadow-glow-gold flex items-center justify-center gap-2">
-						<i class="fa-solid fa-cart-shopping"></i>
-						<span>ĐĂNG KÝ MUA GÓI COMBO NGAY</span>
-					</button>
+					<?php if ( cvc_is_logged_in() ) : ?>
+						<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="w-full">
+							<?php wp_nonce_field( 'cvc_combo_buy' ); ?>
+							<input type="hidden" name="action" value="cvc_combo_buy">
+							<button type="submit" class="w-full py-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-navy-950 font-black text-sm rounded-xl transition-all shadow-glow-gold flex items-center justify-center gap-2">
+								<i class="fa-solid fa-cart-shopping"></i>
+								<span>MUA COMBO NGAY — THANH TOÁN VNPAY</span>
+							</button>
+						</form>
+					<?php else : ?>
+						<a href="<?php echo esc_url( cvc_login_url( home_url( '/#combo-hot' ) ) ); ?>" class="w-full py-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-navy-950 font-black text-sm rounded-xl transition-all shadow-glow-gold flex items-center justify-center gap-2">
+							<i class="fa-solid fa-cart-shopping"></i>
+							<span>ĐĂNG NHẬP ĐỂ MUA COMBO</span>
+						</a>
+					<?php endif; ?>
 
 					<div class="flex items-center justify-center gap-4 text-[10px] text-slate-400 pt-2 border-t border-white/10 w-full">
-						<span><i class="fa-solid fa-shield text-emerald-400 mr-1"></i> Bảo mật 100%</span>
-						<span><i class="fa-solid fa-rotate-left text-amber-400 mr-1"></i> Hoàn tiền 7 ngày</span>
+						<span><i class="fa-solid fa-infinity text-emerald-400 mr-1"></i> Truy cập trọn đời</span>
+						<span><i class="fa-solid fa-shield text-amber-400 mr-1"></i> Thanh toán qua VNPay</span>
 					</div>
 				</div>
 			</div>
 		</div>
 	</div>
 </section>
+<?php endif; ?>
 
 <!-- 6. LIVE RECRUITMENT NOTICES FEED -->
 <section id="tuyen-dung-moi" class="py-20 bg-slate-900 border-t border-slate-800">
@@ -402,74 +385,47 @@ Khóa Học Ôn Thi Thương Mại Chuẩn Quốc Gia
 <h2 class="text-2xl sm:text-4xl font-extrabold text-white tracking-normal">
 Thông Báo Tuyển Dụng Công Chức Mới Nhất 2026
 </h2>
-<p class="text-xs sm:text-sm text-slate-400">Hệ thống cào & cập nhật tự động từ 3.321 Website UBND, Sở Nội vụ toàn quốc</p>
+<p class="text-xs sm:text-sm text-slate-400">Cập nhật thông báo tuyển dụng công chức, viên chức mới nhất trên toàn quốc</p>
 </div>
 <a href="<?php echo esc_url(cvc_recruitments_url()); ?>" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-extrabold text-xs rounded-xl transition-all border border-slate-700 flex items-center gap-2">
-<span>Xem Tất Cả 44 Tin Tuyển Dụng</span>
+<span>Xem Tất Cả <?php echo esc_html( number_format( $cvc_stat_recruitments, 0, ',', '.' ) ); ?> Tin Tuyển Dụng</span>
 <i class="fa-solid fa-arrow-right"></i>
 </a>
 </div>
 
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-<!-- Job Card 1 -->
+<?php if ( empty( $cvc_latest_recruitments ) ) : ?>
+<p class="text-xs text-slate-400 col-span-full text-center py-8">Chưa có tin tuyển dụng nào được công bố.</p>
+<?php endif; ?>
+<?php foreach ( $cvc_latest_recruitments as $rc ) :
+	$rc_agency   = is_array( $rc['agency'] ?? null ) ? ( $rc['agency']['name'] ?? '' ) : '';
+	$rc_deadline = ! empty( $rc['dates']['application_deadline'] ) ? date_i18n( 'd/m/Y', strtotime( $rc['dates']['application_deadline'] ) ) : '';
+?>
+<!-- Job Card (dữ liệu thật từ CVC_Recruitment_Service) -->
 <div class="bg-navy-950 p-6 rounded-3xl border border-slate-800 hover:border-gold-500/50 hover:shadow-glow-gold transition-all space-y-4 flex flex-col justify-between">
 <div class="space-y-3">
-<div class="flex items-center justify-between">
-<span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[10px] font-black px-2.5 py-1 rounded">SỞ NỘI VỤ ĐẮK LẮK</span>
-<span class="text-[10px] text-slate-400"><i class="fa-solid fa-clock mr-1 text-amber-400"></i> Hạn: 20/10/2026</span>
+<div class="flex items-center justify-between gap-2">
+<?php if ( $rc_agency ) : ?>
+<span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[10px] font-black px-2.5 py-1 rounded truncate"><?php echo esc_html( mb_strtoupper( $rc_agency ) ); ?></span>
+<?php endif; ?>
+<?php if ( $rc_deadline ) : ?>
+<span class="text-[10px] text-slate-400 shrink-0"><i class="fa-solid fa-clock mr-1 text-amber-400"></i> Hạn: <?php echo esc_html( $rc_deadline ); ?></span>
+<?php endif; ?>
 </div>
-<h3 class="font-extrabold text-base text-white hover:text-amber-400 transition-colors cursor-pointer leading-snug">
-Kế hoạch Tuyển dụng 14 Công chức nộp hồ sơ trực tuyến 2026
+<h3 class="font-extrabold text-base text-white hover:text-amber-400 transition-colors cursor-pointer leading-snug line-clamp-2">
+<?php echo esc_html( $rc['title'] ?? '' ); ?>
 </h3>
-<p class="text-xs text-slate-400 line-clamp-2">Công bố trên Cổng thông tin điện tử sonoivu.daklak.gov.vn. Sát hạch Vòng 1 trắc nghiệm Kiến thức chung & Tiếng Anh.</p>
+<?php if ( ! empty( $rc['summary'] ) ) : ?>
+<p class="text-xs text-slate-400 line-clamp-2"><?php echo esc_html( wp_trim_words( $rc['summary'], 20 ) ); ?></p>
+<?php endif; ?>
 </div>
-<div class="pt-3 border-t border-slate-800 flex items-center justify-between gap-2">
-<span class="text-[11px] text-amber-400 font-bold"><i class="fa-solid fa-globe mr-1"></i> .gov.vn</span>
-<a href="<?php echo esc_url(cvc_recruitment_url('thong-bao-ke-hoach-tuyen-dung-cong-chuc-nam-2026-so-noi-vu-tinh-dak-lak-c6hj')); ?>" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-navy-950 font-black text-xs rounded-xl transition-all">
+<div class="pt-3 border-t border-slate-800 flex items-center justify-end gap-2">
+<a href="<?php echo esc_url(cvc_recruitment_url( $rc['slug'] ?? '' )); ?>" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-navy-950 font-black text-xs rounded-xl transition-all">
 Xem Chi Tiết &rarr;
 </a>
 </div>
 </div>
-
-<!-- Job Card 2 -->
-<div class="bg-navy-950 p-6 rounded-3xl border border-slate-800 hover:border-azure-500/50 hover:shadow-glow-azure transition-all space-y-4 flex flex-col justify-between">
-<div class="space-y-3">
-<div class="flex items-center justify-between">
-<span class="bg-azure-500/20 text-azure-400 border border-azure-500/40 text-[10px] font-black px-2.5 py-1 rounded">SỞ NỘI VỤ KHÁNH HÒA</span>
-<span class="text-[10px] text-slate-400"><i class="fa-solid fa-clock mr-1 text-amber-400"></i> Hạn: 20/10/2026</span>
-</div>
-<h3 class="font-extrabold text-base text-white hover:text-azure-400 transition-colors cursor-pointer leading-snug">
-Tuyển dụng 29 Chỉ tiêu Công chức Ngạch Chuyên viên
-</h3>
-<p class="text-xs text-slate-400 line-clamp-2">Công bố trên Cổng thông tin điện tử snv.khanhhoa.gov.vn. Đăng ký dự tuyển trực tuyến hoặc nộp trực tiếp.</p>
-</div>
-<div class="pt-3 border-t border-slate-800 flex items-center justify-between gap-2">
-<span class="text-[11px] text-azure-400 font-bold"><i class="fa-solid fa-globe mr-1"></i> .gov.vn</span>
-<a href="<?php echo esc_url(cvc_recruitment_url('thong-bao-ke-hoach-tuyen-dung-cong-chuc-nam-2026-so-noi-vu-tinh-khanh-hoa-tm0w')); ?>" class="px-4 py-2 bg-azure-500 hover:bg-azure-600 text-white font-black text-xs rounded-xl transition-all">
-Xem Chi Tiết &rarr;
-</a>
-</div>
-</div>
-
-<!-- Job Card 3 -->
-<div class="bg-navy-950 p-6 rounded-3xl border border-slate-800 hover:border-emerald-500/50 transition-all space-y-4 flex flex-col justify-between">
-<div class="space-y-3">
-<div class="flex items-center justify-between">
-<span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[10px] font-black px-2.5 py-1 rounded">SỞ NỘI VỤ GIA LAI</span>
-<span class="text-[10px] text-slate-400"><i class="fa-solid fa-clock mr-1 text-amber-400"></i> Hạn: 20/10/2026</span>
-</div>
-<h3 class="font-extrabold text-base text-white hover:text-emerald-400 transition-colors cursor-pointer leading-snug">
-Kế hoạch Tuyển dụng 44 Công chức Hành chính 2026
-</h3>
-<p class="text-xs text-slate-400 line-clamp-2">Công bố trên Cổng thông tin điện tử sonoivu.gialai.gov.vn. Hồ sơ tiêu chuẩn theo Nghị định 138/2020/NĐ-CP.</p>
-</div>
-<div class="pt-3 border-t border-slate-800 flex items-center justify-between gap-2">
-<span class="text-[11px] text-emerald-400 font-bold"><i class="fa-solid fa-globe mr-1"></i> .gov.vn</span>
-<a href="<?php echo esc_url(cvc_recruitment_url('thong-bao-ke-hoach-tuyen-dung-cong-chuc-nam-2026-so-noi-vu-tinh-gia-lai-2oxp')); ?>" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xs rounded-xl transition-all">
-Xem Chi Tiết &rarr;
-</a>
-</div>
-</div>
+<?php endforeach; ?>
 </div>
 </div>
 </section>
@@ -601,16 +557,18 @@ Sẵn Sàng Bứt Phá Sự Nghiệp<br>
 <span class="text-gold-gradient">Cùng Công Viên Chức PRO</span>
 </h2>
 <p class="text-xs sm:text-sm text-slate-300 max-w-2xl font-light">
-Tham gia ngay cộng đồng hơn 120.000 cán bộ công chức trên toàn quốc. Đăng ký nhận tư vấn lộ trình ôn thi Vòng 1 & Vòng 2 hoàn toàn miễn phí.
+Đăng ký tài khoản miễn phí để nhận lộ trình ôn thi cá nhân hóa cho Vòng 1 & Vòng 2.
 </p>
 </div>
 <div class="lg:col-span-4 flex flex-col sm:flex-row lg:flex-col gap-3 justify-end">
-<button onclick="enrollComboCourse()" class="px-8 py-4 bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-navy-950 font-black rounded-2xl text-sm shadow-glow-gold transition-all text-center">
-ĐĂNG KÝ COMBO ƯU ĐÃI (-48%)
-</button>
-<button onclick="openLoginModal()" class="px-8 py-4 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold rounded-2xl text-sm text-center transition-all backdrop-blur-md">
-Đăng Nhập Học Viên
-</button>
+<?php if ( null !== $cvc_combo ) : ?>
+<a href="#combo-hot" class="px-8 py-4 bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-navy-950 font-black rounded-2xl text-sm shadow-glow-gold transition-all text-center">
+XEM COMBO ƯU ĐÃI (-<?php echo esc_html( $cvc_combo['discount_percent'] ); ?>%)
+</a>
+<?php endif; ?>
+<a href="<?php echo esc_url( cvc_is_logged_in() ? cvc_courses_url() : cvc_login_url() ); ?>" class="px-8 py-4 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold rounded-2xl text-sm text-center transition-all backdrop-blur-md">
+<?php echo esc_html( cvc_is_logged_in() ? 'Xem Khóa Học' : 'Đăng Nhập Học Viên' ); ?>
+</a>
 </div>
 </div>
 </div>
@@ -619,21 +577,6 @@ Tham gia ngay cộng đồng hơn 120.000 cán bộ công chức trên toàn qu�
 </main>
 
 <script>
-function copyCouponCode(code) {
-  navigator.clipboard.writeText(code);
-  alert('Đã sao chép mã ưu đãi: ' + code + '!\nHãy áp dụng khi thanh toán khóa học.');
-}
-
-function enrollCourse(courseTitle) {
-  alert('Đã chọn khóa học: ' + courseTitle + '\nChuyển hướng đến cổng thanh toán ưu đãi...');
-  window.location.href = '<?php echo esc_url(cvc_courses_url()); ?>';
-}
-
-function enrollComboCourse() {
-  alert('Đã áp dụng Mã ưu đãi TUYENDUNG2026 (Giảm 48%) cho Combo Trọn Bộ Ôn Thi Công Chức 2026!');
-  window.location.href = '<?php echo esc_url(cvc_courses_url()); ?>';
-}
-
 function handleHeroSearch() {
   let query = document.getElementById('hero-search-query').value;
   if (query) {

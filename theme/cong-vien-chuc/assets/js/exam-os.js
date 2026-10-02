@@ -301,7 +301,7 @@ window.ExamOS = (function() {
     if (descEl) {
       let descs = {
         learn: '🎓 Chế độ HỌC: Hiển thị giải thích & căn cứ pháp lý ngay dưới câu hỏi.',
-        practice: '🏋️ Chế độ LUYỆN: Hệ thống tự động lưu tiến độ, hiển thị AI Assist giải thích chuyên sâu.',
+        practice: '🏋️ Chế độ LUYỆN: Hệ thống tự động lưu tiến độ, xem giải thích chi tiết sau mỗi câu.',
         real: '⏱️ Chế độ THI THẬT: Tính thời gian đếm ngược 60 phút, không hiển thị trước đáp án.',
         mock: '🏛️ Chế độ MÔ PHỎNG: Quy chuẩn 100% thời gian, điểm đạt & giám sát sát hạch Bộ Nội Vụ.'
       };
