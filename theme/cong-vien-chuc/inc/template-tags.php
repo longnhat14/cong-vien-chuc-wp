@@ -2636,30 +2636,6 @@ function cvc_render_executive_modals(): void {
 		</div>
 	</div>
 
-	<!-- LOGIN MODAL -->
-	<div id="cvc-login-modal" class="cvc-modal is-hidden">
-		<div class="cvc-modal__backdrop" onclick="cvcCloseLoginModal()"></div>
-		<div class="cvc-modal__dialog">
-			<button type="button" class="cvc-modal__close" onclick="cvcCloseLoginModal()">&times;</button>
-			<div class="cvc-modal__header">
-				<div class="cvc-modal__icon">🛡️</div>
-				<h3>Cổng Đăng Nhập Cán Bộ</h3>
-				<p>Hệ thống Đào tạo &amp; Thi Sát hạch Công vụ Số</p>
-			</div>
-			<form class="cvc-modal__form" onsubmit="cvcSimulateLogin(event)">
-				<div class="cvc-form-group">
-					<label>Mã Cán Bộ / Email công vụ</label>
-					<input type="text" placeholder="cb.nguyenvana@moha.gov.vn" required>
-				</div>
-				<div class="cvc-form-group">
-					<label>Mật khẩu bảo mật</label>
-					<input type="password" placeholder="••••••••" required>
-				</div>
-				<button type="submit" class="cvc-btn cvc-btn--primary cvc-btn--block">Đăng Nhập Cổng Công Vụ</button>
-			</form>
-		</div>
-	</div>
-
 	<!-- ACTION REGISTRATION MODAL -->
 	<div id="cvc-action-modal" class="cvc-modal is-hidden">
 		<div class="cvc-modal__backdrop" onclick="cvcCloseActionModal()"></div>

@@ -203,6 +203,7 @@ if ( ! defined( "ABSPATH" ) ) {
 ?>
 <body <?php body_class( "bg-slate-50 text-slate-900 antialiased selection:bg-gold-500 selection:text-white" ); ?>>
 <?php wp_body_open(); ?>
+<?php cvc_render_notice(); ?>
 
 <!-- 1. TOP EXECUTIVE ANNOUNCEMENT TICKER -->
 <div class="bg-navy-950 text-slate-300 text-xs py-2 px-4 border-b border-navy-700/60 overflow-hidden relative z-50">
@@ -212,7 +213,7 @@ if ( ! defined( "ABSPATH" ) ) {
 <span class="w-2 h-2 rounded-full bg-gold-400 animate-ping"></span> EXECUTIVE BULLETIN
 </span>
 <span class="text-slate-300 font-medium text-[11px]">
-<i class="fa-solid fa-bullhorn text-gold-400 mr-1.5"></i> Mở cổng đăng ký Kỳ thi Nâng ngạch Chuyên viên chính 2026 - Giới hạn 200 suất ưu đãi.
+<i class="fa-solid fa-bullhorn text-gold-400 mr-1.5"></i> Mở cổng đăng ký Kỳ thi Nâng ngạch Chuyên viên chính 2026.
 </span>
 </div>
 <div class="hidden md:flex items-center space-x-6 text-[11px] text-slate-400 font-medium">
