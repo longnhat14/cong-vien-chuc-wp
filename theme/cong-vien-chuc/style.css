@@ -5067,5 +5067,25 @@ button.cvc-btn:disabled {
     text-decoration: none;
 }
 
+/* === Hiệu ứng xuất hiện khi cuộn trang (scroll reveal) ===
+   assets/js/scroll-reveal.js chỉ gắn class .cvc-reveal cho khối nằm
+   dưới màn hình đầu tiên - nội dung luôn hiển thị đủ nếu JS lỗi/bị chặn. */
+.cvc-reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+}
 
+.cvc-reveal.cvc-reveal--visible {
+    opacity: 1;
+    transform: translateY(0);
+}
 
+@media (prefers-reduced-motion: reduce) {
+    .cvc-reveal {
+        opacity: 1;
+        transform: none;
+        transition: none;
+    }
+}

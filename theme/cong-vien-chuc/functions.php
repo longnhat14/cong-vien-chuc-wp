@@ -70,6 +70,24 @@ function cvc_enqueue_assets(): void {
 		true
 	);
 
+	/*
+	 * TẠM TẮT (2026-10-02): hosting hiện trả 404 cho file assets/js/
+	 * scroll-reveal.js ở MỌI tổ hợp query string, kể cả không query string -
+	 * xác nhận đây là lỗi cache/hạ tầng phía Hostinger (không phải lỗi
+	 * file - file tồn tại đúng, quyền đúng, cùng cơ chế với exam-os.js đang
+	 * chạy tốt). File + CSS .cvc-reveal vẫn còn trong theme, sẵn sàng bật
+	 * lại bằng cách bỏ comment đoạn wp_enqueue_script bên dưới ngay khi lỗi
+	 * cache phía host được xử lý (liên hệ hỗ trợ Hostinger hoặc purge cache
+	 * qua hPanel).
+	 */
+	// wp_enqueue_script(
+	// 	'cvc-scroll-reveal',
+	// 	get_theme_file_uri( '/assets/js/scroll-reveal.js' ),
+	// 	array(),
+	// 	null,
+	// 	true
+	// );
+
 	wp_localize_script(
 		'cvc-engagement',
 		'cvcEngagement',

@@ -46,7 +46,7 @@ window.ExamOS = (function() {
 
     setupVisibilityMonitor();
     updateMetricsUI();
-    renderNavigatorFilters();
+    filterNavigator(state.activeFilter || 'all');
 
     // Check if there is an unfinished attempt
     if (Object.keys(state.answers).length > 0) {

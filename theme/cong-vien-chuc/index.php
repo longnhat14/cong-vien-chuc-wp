@@ -580,7 +580,7 @@ XEM COMBO ƯU ĐÃI (-<?php echo esc_html( $cvc_combo['discount_percent'] ); ?>%
 function handleHeroSearch() {
   let query = document.getElementById('hero-search-query').value;
   if (query) {
-    window.location.href = '<?php echo esc_url(cvc_courses_url()); ?>?search=' + encodeURIComponent(query);
+    window.location.href = '<?php echo esc_url( home_url( '/tim-kiem/' ) ); ?>?q=' + encodeURIComponent(query);
   }
 }
 
