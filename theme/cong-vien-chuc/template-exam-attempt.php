@@ -25,12 +25,66 @@ if ( $is_english ) {
 	$questions = CVC_Question_Bank_Fixtures::get_official_questions();
 }
 
+/*
+ * QUAN TRỌNG: response thật của GET /api/exam-attempts/{id} KHÔNG có
+ * khóa "questions" - câu hỏi nằm lồng trong data.answers[].question
+ * (kèm data.answers[].question.options). Trước đây code đọc nhầm
+ * $attempt_data['questions'] (luôn rỗng với response thật) nên MỌI
+ * lượt thi thật đều âm thầm rơi về bộ câu hỏi demo/fixture bên dưới,
+ * kể cả khi attempt_id hợp lệ - sửa lại đọc đúng field + build thêm
+ * $option_ids_map (option_key => option_id thật) để JS lưu đáp án
+ * bằng question_option_id thay vì 1 ký tự A/B/C/D vô nghĩa với backend.
+ */
+$is_demo_mode    = true;
+$option_ids_map  = array();
+$existing_state  = array();
+$real_attempt_id = 0;
+
 if ( $attempt_id > 0 && $token ) {
 	$attempt_res = ( new CVC_Exam_Attempt_Service() )->show( $attempt_id, $token );
-	if ( $attempt_res['ok'] && ! empty( $attempt_res['data']['data'] ) ) {
-		$attempt_data = $attempt_res['data']['data'];
-		if ( ! empty( $attempt_data['questions'] ) ) {
-			$questions = $attempt_data['questions'];
+
+	if ( $attempt_res['ok'] && ! empty( $attempt_res['data']['data']['answers'] ) ) {
+		$attempt_data    = $attempt_res['data']['data'];
+		$real_attempt_id = (int) ( $attempt_data['id'] ?? $attempt_id );
+		$questions       = array();
+
+		foreach ( $attempt_data['answers'] as $answer ) {
+			$question = $answer['question'] ?? null;
+
+			if ( ! $question ) {
+				continue;
+			}
+
+			$opts        = array();
+			$option_keys = array();
+			$selected_key = null;
+
+			foreach ( ( $question['options'] ?? array() ) as $i => $opt ) {
+				$key               = chr( 65 + $i );
+				$opts[ $key ]      = $opt['option_text'] ?? '';
+				$option_keys[ $key ] = $opt['id'];
+
+				if ( ! empty( $answer['question_option_id'] ) && (int) $answer['question_option_id'] === (int) $opt['id'] ) {
+					$selected_key = $key;
+				}
+			}
+
+			$questions[] = array(
+				'id'           => $question['id'],
+				'question_text' => $question['question_text'] ?? '',
+				'options'      => $opts,
+			);
+
+			$option_ids_map[ $question['id'] ] = $option_keys;
+			$existing_state[ $question['id'] ] = array(
+				'selected'         => $selected_key,
+				'is_flagged'       => (bool) ( $answer['is_flagged'] ?? false ),
+				'confidence_level' => $answer['confidence_level'] ?? null,
+			);
+		}
+
+		if ( ! empty( $questions ) ) {
+			$is_demo_mode = false;
 		}
 	}
 }
@@ -48,10 +102,22 @@ get_header();
 window.cvc_vars = {
 	ajax_url: '<?php echo esc_js( admin_url( 'admin-ajax.php' ) ); ?>',
 	nonce: '<?php echo esc_js( wp_create_nonce( 'cvc_exam_attempt' ) ); ?>',
-	attempt_id: <?php echo (int) $attempt_id; ?>,
-	home_url: '<?php echo esc_js( home_url( '/' ) ); ?>'
+	attempt_id: <?php echo (int) $real_attempt_id; ?>,
+	home_url: '<?php echo esc_js( home_url( '/' ) ); ?>',
+	is_demo: <?php echo $is_demo_mode ? 'true' : 'false'; ?>,
+	option_ids: <?php echo wp_json_encode( $option_ids_map ); ?>,
+	existing_state: <?php echo wp_json_encode( $existing_state ); ?>
 };
 </script>
+
+<?php if ( $is_demo_mode ) : ?>
+<div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+	<div class="flex items-center gap-2 bg-amber-500/10 border border-amber-500/40 text-amber-300 text-xs font-bold rounded-xl px-4 py-3">
+		<span>⚠ CHẾ ĐỘ DEMO</span>
+		<span class="font-normal text-amber-200/90">Đây là bộ câu hỏi minh họa, không lưu kết quả thật. Hãy vào từ trang đề thi thật (/thi-trac-nghiem/) để làm bài và nhận điểm chính xác.</span>
+	</div>
+</div>
+<?php endif; ?>
 
 <!-- Load EXAM OS X Design System -->
 <link rel="stylesheet" href="<?php echo esc_url( get_template_directory_uri() . '/assets/css/exam-os.css' ); ?>">
@@ -231,34 +297,13 @@ window.cvc_vars = {
 					</div>
 				</div>
 
-				<div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-					<div class="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-center space-y-1">
-						<span class="text-[10px] font-bold text-amber-800 uppercase block">Pháp Luật Công Vụ</span>
-						<span class="text-xs font-black text-amber-900 block mt-1">82% · Vững Vàng</span>
-					</div>
-					<div class="p-4 rounded-2xl bg-blue-50 border border-blue-200 text-center space-y-1">
-						<span class="text-[10px] font-bold text-blue-800 uppercase block">Quản Lý Nhà Nước</span>
-						<span class="text-xs font-black text-blue-900 block mt-1">61% · Cần Ôn Thêm</span>
-					</div>
-					<div class="p-4 rounded-2xl bg-purple-50 border border-purple-200 text-center space-y-1">
-						<span class="text-[10px] font-bold text-purple-800 uppercase block">Văn Bản Hành Chính</span>
-						<span class="text-xs font-black text-purple-900 block mt-1">73% · Khá Good</span>
-					</div>
-					<div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-center space-y-1">
-						<span class="text-[10px] font-bold text-emerald-800 uppercase block">Xác Suất Trúng Tuyển</span>
-						<span class="text-xl font-black text-emerald-700 block">88.5%</span>
-					</div>
+				<div id="quiz-topic-stats-grid" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+					<!-- Điền động từ topic_stats thật sau khi nộp bài (xem submitExam() trong script) -->
 				</div>
 
-				<div class="p-6 rounded-2xl bg-gradient-to-r from-navy-950 via-slate-900 to-indigo-950 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border border-amber-500/30">
-					<div class="space-y-1">
-						<span class="bg-amber-400 text-navy-950 text-[10px] font-black uppercase px-2.5 py-0.5 rounded">AI COACH ĐỀ XUẤT NÂNG HẠNG</span>
-						<h3 class="text-base font-bold text-white">Tạo Lộ Trình Ôn Thi Cá Nhân Hóa 7 Ngày (Giảm 30%)</h3>
-						<p class="text-xs text-slate-300">Nhập mã coupon <strong class="text-amber-300 font-extrabold">PASSER30</strong> để nhận trọn bộ bài giảng trọng tâm 2026.</p>
-					</div>
-					<a href="<?php echo esc_url( home_url('/khoa-hoc/') ); ?>" class="px-5 py-2.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-navy-950 font-black text-xs rounded-xl shadow shrink-0 transition-transform hover:scale-105">
-						Nhận Lộ Trình 7 Ngày &rarr;
-					</a>
+				<div id="quiz-recommendations-block" class="hidden p-6 rounded-2xl bg-gradient-to-r from-navy-950 via-slate-900 to-indigo-950 text-white border border-amber-500/30 space-y-3">
+					<span class="bg-amber-400 text-navy-950 text-[10px] font-black uppercase px-2.5 py-0.5 rounded">GỢI Ý ÔN TẬP THEO ĐIỂM YẾU</span>
+					<div id="quiz-recommendations-list" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
 				</div>
 			</div>
 
@@ -309,9 +354,10 @@ window.cvc_vars = {
 				</div>
 
 				<!-- Answer Tiles (Bàn thi số) -->
+				<?php $selected_opt = $existing_state[ $q['id'] ]['selected'] ?? null; ?>
 				<div id="options-container-<?php echo $q['id']; ?>" class="space-y-3">
 					<?php foreach ( $normalized_opts as $opt_key => $opt_val ) : ?>
-					<div id="tile-<?php echo $q['id']; ?>-<?php echo $opt_key; ?>" onclick="ExamOS.selectAnswerTile(<?php echo $q['id']; ?>, '<?php echo $opt_key; ?>')" class="answer-tile">
+					<div id="tile-<?php echo $q['id']; ?>-<?php echo $opt_key; ?>" onclick="ExamOS.selectAnswerTile(<?php echo $q['id']; ?>, '<?php echo $opt_key; ?>')" class="answer-tile<?php echo ( $selected_opt === $opt_key ) ? ' selected' : ''; ?>">
 						<input type="radio" name="q_<?php echo $q['id']; ?>" value="<?php echo $opt_key; ?>" class="hidden">
 						<span class="answer-letter"><?php echo esc_html($opt_key); ?></span>
 						<div class="flex-1 space-y-0.5 pt-0.5">
@@ -660,16 +706,10 @@ let timerInterval = setInterval(() => {
 }, 1000);
 
 function toggleFlagQuestion(qId) {
-  flaggedQuestions[qId] = !flaggedQuestions[qId];
-  let icon = document.getElementById('flag-icon-' + qId);
-  if (icon) {
-    icon.className = flaggedQuestions[qId] ? "fa-solid fa-star text-amber-400" : "fa-regular fa-star text-slate-400";
-  }
-  let countEl = document.getElementById('sidebar-flagged-count');
-  if (countEl) {
-    let count = Object.values(flaggedQuestions).filter(Boolean).length;
-    countEl.innerText = count;
-  }
+  // Đồng bộ thật với backend (exam_attempt_answers.is_flagged) qua
+  // ExamOS.toggleFlag - trước đây chỉ lưu vào biến JS tạm, mất khi
+  // refresh/resume. Giữ tên hàm cũ để không phải sửa mọi onclick.
+  ExamOS.toggleFlag(qId);
 }
 
 function scrollToQuestion(qId) {
@@ -680,12 +720,164 @@ function scrollToQuestion(qId) {
 }
 
 function submitQuizSimulation() {
-  clearInterval(timerInterval);
-  let scoreBanner = document.getElementById('quiz-results-banner');
-  if (scoreBanner) {
-    scoreBanner.classList.remove('hidden');
-    scoreBanner.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  // Chế độ demo (không có attempt_id thật trong DB): chỉ hiện banner
+  // minh họa, không có gì để nộp lên backend - tránh gọi AJAX vô nghĩa.
+  if (window.cvc_vars && window.cvc_vars.is_demo) {
+    clearInterval(timerInterval);
+    let demoBanner = document.getElementById('quiz-results-banner');
+    if (demoBanner) {
+      demoBanner.classList.remove('hidden');
+      demoBanner.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    return;
   }
+
+  if (!window.cvc_vars || !window.cvc_vars.attempt_id) {
+    alert('Không tìm thấy lượt thi hợp lệ để nộp bài.');
+    return;
+  }
+
+  clearInterval(timerInterval);
+  setSubmitButtonsDisabled(true);
+
+  let formData = new FormData();
+  formData.append('action', 'cvc_exam_submit');
+  formData.append('nonce', window.cvc_vars.nonce);
+  formData.append('attempt_id', window.cvc_vars.attempt_id);
+
+  fetch(window.cvc_vars.ajax_url, { method: 'POST', body: formData })
+    .then(function (res) { return res.json(); })
+    .then(function (res) {
+      if (!res.success) {
+        if (res.data && res.data.already_submitted) {
+          alert('Bài thi này đã được nộp trước đó. Vui lòng vào Lịch sử làm bài để xem kết quả.');
+        } else {
+          alert((res.data && res.data.message) || 'Nộp bài thất bại, vui lòng thử lại.');
+          setSubmitButtonsDisabled(false);
+        }
+        return;
+      }
+
+      renderExamResult(res.data);
+    })
+    .catch(function (err) {
+      console.error('Submit exam error:', err);
+      alert('Có lỗi kết nối khi nộp bài. Vui lòng kiểm tra mạng và thử lại.');
+      setSubmitButtonsDisabled(false);
+    });
+}
+
+function setSubmitButtonsDisabled(disabled) {
+  document.querySelectorAll('button[onclick="submitQuizSimulation()"]').forEach(function (btn) {
+    btn.disabled = disabled;
+    btn.classList.toggle('opacity-50', disabled);
+    btn.classList.toggle('pointer-events-none', disabled);
+  });
+}
+
+/**
+ * Vẽ kết quả thật nhận từ POST /api/exam-attempts/{id}/submit (qua AJAX
+ * cvc_exam_submit) - payload = toàn bộ JSON gốc của Laravel
+ * ({success, message, data: attempt, recommendations, topic_stats}),
+ * KHÔNG phải banner tĩnh/số liệu giả như bản cũ.
+ */
+function renderExamResult(payload) {
+  let attempt = (payload && payload.data) || {};
+  let recommendations = (payload && payload.recommendations) || [];
+  let topicStats = (payload && payload.topic_stats) || [];
+
+  let badge = document.getElementById('quiz-result-badge');
+  if (badge) {
+    if (attempt.passed === true) {
+      badge.className = 'px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300';
+      badge.innerText = '✓ ĐẠT YÊU CẦU';
+    } else if (attempt.passed === false) {
+      badge.className = 'px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-rose-100 text-rose-800 border border-rose-300';
+      badge.innerText = '✗ CHƯA ĐẠT';
+    } else {
+      badge.className = 'px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-300';
+      badge.innerText = 'ĐÃ HOÀN THÀNH BÀI THI';
+    }
+  }
+
+  let scoreEl = document.getElementById('quiz-final-score');
+  if (scoreEl) {
+    let totalScore = attempt.exam && attempt.exam.total_score ? attempt.exam.total_score : null;
+    let scoreText = (typeof attempt.score !== 'undefined' && attempt.score !== null) ? attempt.score : '--';
+    scoreEl.innerText = totalScore ? (scoreText + '/' + totalScore) : (scoreText + ' điểm');
+    if (typeof attempt.percentage !== 'undefined') {
+      scoreEl.title = attempt.percentage + '%';
+    }
+  }
+
+  let grid = document.getElementById('quiz-topic-stats-grid');
+  if (grid) {
+    if (topicStats.length > 0) {
+      grid.innerHTML = topicStats.map(function (stat) {
+        let colors = 'bg-rose-50 border-rose-200 text-rose-900';
+        if (stat.label === 'Vững vàng') colors = 'bg-emerald-50 border-emerald-200 text-emerald-900';
+        else if (stat.label === 'Khá') colors = 'bg-amber-50 border-amber-200 text-amber-900';
+
+        return '<div class="p-4 rounded-2xl border text-center space-y-1 ' + colors + '">' +
+          '<span class="text-[10px] font-bold uppercase block opacity-80">' + escapeExamHtml(stat.topic) + '</span>' +
+          '<span class="text-xs font-black block mt-1">' + stat.accuracy + '% · ' + escapeExamHtml(stat.label) + '</span>' +
+          '</div>';
+      }).join('');
+    } else {
+      grid.innerHTML = '<p class="col-span-full text-xs text-slate-400 italic">Chưa đủ dữ liệu để phân tích theo chủ đề.</p>';
+    }
+  }
+
+  let recBlock = document.getElementById('quiz-recommendations-block');
+  let recList = document.getElementById('quiz-recommendations-list');
+  if (recBlock && recList) {
+    if (recommendations.length > 0) {
+      let baseUrl = (window.cvc_vars && window.cvc_vars.home_url) || '/';
+
+      recList.innerHTML = recommendations.map(function (item) {
+        let href = baseUrl + (item.type === 'course' ? 'khoa-hoc/' : 'tai-lieu/') + item.slug + '/';
+        let priceLabel = '';
+
+        if (item.type === 'document') {
+          priceLabel = item.is_free ? 'Miễn phí' : (formatVnd(item.effective_price) + 'đ');
+        } else if (item.sale_price) {
+          priceLabel = formatVnd(item.sale_price) + 'đ';
+        } else if (item.price) {
+          priceLabel = formatVnd(item.price) + 'đ';
+        }
+
+        return '<a href="' + href + '" class="block p-4 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 transition-colors space-y-1">' +
+          '<span class="text-[10px] uppercase font-bold text-amber-300">' + (item.type === 'course' ? 'Khóa học' : 'Tài liệu') + '</span>' +
+          '<h4 class="text-sm font-bold text-white leading-snug">' + escapeExamHtml(item.title) + '</h4>' +
+          '<p class="text-[11px] text-slate-300">' + escapeExamHtml(item.reason || '') + '</p>' +
+          (priceLabel ? '<span class="inline-block text-[11px] font-black text-amber-300">' + priceLabel + '</span>' : '') +
+          '</a>';
+      }).join('');
+
+      recBlock.classList.remove('hidden');
+    } else {
+      recBlock.classList.add('hidden');
+    }
+  }
+
+  let banner = document.getElementById('quiz-results-banner');
+  if (banner) {
+    banner.classList.remove('hidden');
+    banner.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+function formatVnd(value) {
+  let num = Number(value);
+  if (isNaN(num)) return '0';
+  return num.toLocaleString('vi-VN');
+}
+
+function escapeExamHtml(str) {
+  if (typeof str !== 'string') return '';
+  return str.replace(/[&<>"']/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  });
 }
 
 function showLawModal(content) {

@@ -31,6 +31,18 @@ final class CVC_Exam_Attempt_Service extends CVC_Api_Service {
 		return $this->client->put( $this->endpoint() . '/' . $attemptId . '/answer', $payload, $token );
 	}
 
+	/**
+	 * Cập nhật riêng confidence_level/is_flagged cho 1 câu - KHÔNG đụng
+	 * đáp án đã chọn (xem ExamAttemptController::updateMeta() lý do).
+	 */
+	public function updateMeta( int $attemptId, int $questionId, array $payload, string $token ): array {
+		return $this->client->put(
+			$this->endpoint() . '/' . $attemptId . '/questions/' . $questionId . '/meta',
+			$payload,
+			$token
+		);
+	}
+
 	public function submit( int $attemptId, string $token ): array {
 		return $this->client->post( $this->endpoint() . '/' . $attemptId . '/submit', array(), $token );
 	}

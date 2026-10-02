@@ -116,6 +116,45 @@ function cvc_handle_exam_recommendations_ajax(): void {
 	wp_send_json_success( $result['data'] );
 }
 
+/* --- AJAX: CẬP NHẬT CONFIDENCE/FLAG RIÊNG CHO 1 CÂU --- */
+add_action( 'wp_ajax_cvc_exam_meta', 'cvc_handle_exam_meta_ajax' );
+add_action( 'wp_ajax_nopriv_cvc_exam_meta', 'cvc_handle_exam_meta_ajax' );
+
+function cvc_handle_exam_meta_ajax(): void {
+	check_ajax_referer( 'cvc_exam_attempt', 'nonce' );
+
+	$token = cvc_auth_token();
+
+	if ( null === $token ) {
+		wp_send_json_error( array( 'message' => 'Phiên đăng nhập đã hết hạn.' ), 401 );
+	}
+
+	$attemptId  = absint( $_POST['attempt_id'] ?? 0 );
+	$questionId = absint( $_POST['question_id'] ?? 0 );
+
+	if ( 0 === $attemptId || 0 === $questionId ) {
+		wp_send_json_error( array( 'message' => 'Dữ liệu không hợp lệ.' ), 422 );
+	}
+
+	$payload = array();
+
+	if ( isset( $_POST['confidence_level'] ) && '' !== $_POST['confidence_level'] ) {
+		$payload['confidence_level'] = sanitize_key( wp_unslash( $_POST['confidence_level'] ) );
+	}
+
+	if ( isset( $_POST['is_flagged'] ) ) {
+		$payload['is_flagged'] = '1' === $_POST['is_flagged'];
+	}
+
+	$result = ( new CVC_Exam_Attempt_Service() )->updateMeta( $attemptId, $questionId, $payload, $token );
+
+	if ( ! $result['ok'] ) {
+		wp_send_json_error( array( 'message' => cvc_api_error_message( $result ) ), $result['status'] ?: 500 );
+	}
+
+	wp_send_json_success( $result['data'] );
+}
+
 /* --- AJAX: ĐÁNH DẤU BÀI THI / BOOKMARK --- */
 add_action( 'wp_ajax_cvc_exam_bookmark', 'cvc_handle_exam_bookmark_ajax' );
 add_action( 'wp_ajax_nopriv_cvc_exam_bookmark', 'cvc_handle_exam_bookmark_ajax' );

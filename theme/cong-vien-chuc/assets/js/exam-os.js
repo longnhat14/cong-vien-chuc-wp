@@ -32,6 +32,18 @@ window.ExamOS = (function() {
     state.storageKey = 'cvc_exam_os_attempt_' + config.examId;
     
     restoreStateFromStorage();
+
+    // Server là nguồn sự thật (đồng bộ nhiều thiết bị) - ghi đè
+    // localStorage nếu có dữ liệu thật từ attempt đang resume.
+    if (window.cvc_vars && window.cvc_vars.existing_state) {
+      Object.keys(window.cvc_vars.existing_state).forEach(function (qId) {
+        let s = window.cvc_vars.existing_state[qId];
+        if (s.selected) state.answers[qId] = s.selected;
+        if (s.is_flagged) state.flagged[qId] = true;
+        if (s.confidence_level) state.confidence[qId] = s.confidence_level;
+      });
+    }
+
     setupVisibilityMonitor();
     updateMetricsUI();
     renderNavigatorFilters();
@@ -114,7 +126,23 @@ window.ExamOS = (function() {
     formData.append('nonce', window.cvc_vars.nonce);
     formData.append('attempt_id', window.cvc_vars.attempt_id);
     formData.append('question_id', qId);
-    formData.append('answer_value', optionKey);
+
+    // Backend chấm điểm dựa trên question_option_id (ID thật trong DB),
+    // KHÔNG dựa trên ký tự A/B/C/D - trước đây chỉ gửi answer_value là
+    // chữ cái nên mọi câu đều bị chấm sai dù chọn đúng. option_ids do
+    // PHP localize sẵn (window.cvc_vars.option_ids[qId][optionKey]).
+    let optionId = window.cvc_vars.option_ids &&
+      window.cvc_vars.option_ids[qId] &&
+      window.cvc_vars.option_ids[qId][optionKey];
+
+    if (optionId) {
+      formData.append('question_option_id', optionId);
+    } else {
+      formData.append('answer_value', optionKey);
+    }
+
+    let confidence = state.confidence[qId];
+    if (confidence) formData.append('confidence_level', confidence);
 
     fetch(window.cvc_vars.ajax_url, {
       method: 'POST',
@@ -134,6 +162,23 @@ window.ExamOS = (function() {
     .catch(err => console.warn('Backend sync warning:', err));
   }
 
+  /* --- SYNC CONFIDENCE/FLAG RIÊNG (không đụng question_option_id) --- */
+  function syncMeta(qId, meta) {
+    if (!window.cvc_vars || window.cvc_vars.is_demo || !window.cvc_vars.attempt_id) return;
+
+    let formData = new FormData();
+    formData.append('action', 'cvc_exam_meta');
+    formData.append('nonce', window.cvc_vars.nonce);
+    formData.append('attempt_id', window.cvc_vars.attempt_id);
+    formData.append('question_id', qId);
+    if (meta.confidence_level) formData.append('confidence_level', meta.confidence_level);
+    if (typeof meta.is_flagged === 'boolean') formData.append('is_flagged', meta.is_flagged ? '1' : '0');
+
+    fetch(window.cvc_vars.ajax_url, { method: 'POST', body: formData }).catch(function (err) {
+      console.warn('syncMeta warning:', err);
+    });
+  }
+
   /* --- CONFIDENCE LEVEL SELECTOR --- */
   function setConfidenceLevel(qId, level) {
     state.confidence[qId] = level;
@@ -145,6 +190,27 @@ window.ExamOS = (function() {
       });
     }
 
+    syncMeta(qId, { confidence_level: level });
+    persistState();
+  }
+
+  function toggleFlag(qId) {
+    state.flagged[qId] = !state.flagged[qId];
+
+    let icon = document.getElementById('flag-icon-' + qId);
+    if (icon) {
+      icon.className = state.flagged[qId]
+        ? 'fa-solid fa-star text-amber-400'
+        : 'fa-regular fa-star text-slate-400';
+    }
+
+    let countEl = document.getElementById('sidebar-flagged-count');
+    if (countEl) {
+      let count = Object.values(state.flagged).filter(Boolean).length;
+      countEl.innerText = count;
+    }
+
+    syncMeta(qId, { is_flagged: state.flagged[qId] });
     persistState();
   }
 
@@ -361,6 +427,7 @@ window.ExamOS = (function() {
     selectAnswerTile,
     toggleStrikeout,
     setConfidenceLevel,
+    toggleFlag,
     saveQuestionNote,
     toggleFontSize,
     toggleFocusMode,
