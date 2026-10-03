@@ -106,7 +106,7 @@ get_header();
 			<!-- LEFT COLUMN (3 COLS — SEARCH FILTERS & TIPS) -->
 			<aside class="lg:col-span-3 space-y-4">
 				
-				<div class="bg-[#0D1B2A] border border-slate-800 p-5 rounded-2xl space-y-3 shadow-lg text-xs">
+				<div class="bg-[#0A192F] border border-slate-800 p-5 rounded-2xl space-y-3 shadow-lg text-xs">
 					<h3 class="font-extrabold text-xs text-amber-400 uppercase tracking-wider border-b border-slate-800 pb-2 flex items-center gap-1.5">
 						<i class="fa-solid fa-lightbulb"></i> Mẹo Tìm Kiếm Chuẩn
 					</h3>
@@ -124,7 +124,7 @@ get_header();
 
 				<?php if ( ! $has_query ) : ?>
 					
-					<div class="bg-[#0D1B2A] border border-slate-800 p-8 rounded-3xl text-center space-y-4 shadow-xl">
+					<div class="bg-[#0A192F] border border-slate-800 p-8 rounded-3xl text-center space-y-4 shadow-xl">
 						<div class="w-16 h-16 mx-auto rounded-full bg-cyan-500/20 text-cyan-300 flex items-center justify-center font-black text-2xl border border-cyan-500/30">
 							🔍
 						</div>
@@ -136,7 +136,7 @@ get_header();
 
 				<?php elseif ( empty( $items ) ) : ?>
 
-					<div class="bg-[#0D1B2A] border border-slate-800 p-8 rounded-3xl text-center space-y-4 shadow-xl">
+					<div class="bg-[#0A192F] border border-slate-800 p-8 rounded-3xl text-center space-y-4 shadow-xl">
 						<div class="w-16 h-16 mx-auto rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center font-black text-2xl border border-amber-500/30">
 							⚠️
 						</div>
@@ -148,7 +148,7 @@ get_header();
 
 				<?php else : ?>
 
-					<div class="bg-[#0D1B2A] p-4 rounded-2xl border border-slate-800 flex items-center justify-between text-xs">
+					<div class="bg-[#0A192F] p-4 rounded-2xl border border-slate-800 flex items-center justify-between text-xs">
 						<span class="text-slate-300">Tìm thấy <strong class="text-cyan-400"><?php echo $total_items; ?></strong> kết quả phù hợp</span>
 						<span class="text-slate-400">Trang <?php echo $currentPg; ?> / <?php echo $lastPg; ?></span>
 					</div>
@@ -161,7 +161,7 @@ get_header();
 							$s_type  = $s_item['type_label'] ?? 'Dữ liệu';
 							$s_desc  = $s_item['summary'] ?? ($s_item['description'] ?? '');
 							?>
-							<article class="bg-[#0D1B2A] hover:bg-[#112338] border border-slate-800 hover:border-cyan-500/40 p-5 rounded-2xl space-y-2 shadow-lg transition-all group">
+							<article class="bg-[#0A192F] hover:bg-[#112338] border border-slate-800 hover:border-cyan-500/40 p-5 rounded-2xl space-y-2 shadow-lg transition-all group">
 								<div class="flex items-center justify-between text-[10px]">
 									<span class="bg-cyan-500/20 text-cyan-300 font-extrabold px-2.5 py-0.5 rounded-full border border-cyan-500/30">
 										📌 <?php echo esc_html($s_type); ?>
@@ -197,7 +197,7 @@ get_header();
 			<!-- RIGHT COLUMN (3 COLS — HOT SEARCHES & RECOMMENDATIONS) -->
 			<aside class="lg:col-span-3 space-y-4">
 
-				<div class="bg-[#0D1B2A] border border-slate-800 p-5 rounded-2xl space-y-3 shadow-xl text-xs">
+				<div class="bg-[#0A192F] border border-slate-800 p-5 rounded-2xl space-y-3 shadow-xl text-xs">
 					<h3 class="font-extrabold text-xs text-cyan-400 uppercase tracking-wider border-b border-slate-800 pb-2 flex items-center gap-1.5">
 						🔥 Từ Khóa Hot Nhất
 					</h3>

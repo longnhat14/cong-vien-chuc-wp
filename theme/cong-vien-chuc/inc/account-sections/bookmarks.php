@@ -34,6 +34,7 @@ function cvc_bookmark_present( array $bookmark ): array {
 		'App\\Models\\Topic'         => array( 'Chủ đề', 'name', 'cvc_topic_url' ),
 		'App\\Models\\KnowledgeItem' => array( 'Kiến thức', 'title', 'cvc_knowledge_item_url' ),
 		'App\\Models\\Exam'          => array( 'Đề thi', 'title', 'cvc_exam_url' ),
+		'App\\Models\\LegalDocument' => array( 'Văn bản pháp luật', 'title', 'cvc_legal_document_url' ),
 	);
 
 	if ( isset( $map[ $type ] ) ) {
@@ -42,6 +43,10 @@ function cvc_bookmark_present( array $bookmark ): array {
 		$url   = ( $slug && function_exists( $url_fn ) ) ? $url_fn( $slug ) : null;
 
 		return array( 'label' => $label, 'title' => $title, 'url' => $url );
+	}
+
+	if ( 'App\\Models\\Question' === $type ) {
+		return array( 'label' => 'Câu hỏi', 'title' => 'Câu hỏi #' . (int) ( $entity['id'] ?? 0 ), 'url' => null );
 	}
 
 	if ( 'App\\Models\\CourseLesson' === $type ) {
@@ -56,7 +61,7 @@ function cvc_bookmark_present( array $bookmark ): array {
 	<h2>Nội dung đã đánh dấu</h2>
 
 	<?php if ( empty( $bookmarks ) ) : ?>
-		<?php cvc_render_empty_state( 'Bạn chưa đánh dấu nội dung nào. Hãy bấm biểu tượng đánh dấu trên các trang khóa học, chủ đề, tin tuyển dụng, kiến thức hoặc đề thi.' ); ?>
+		<?php cvc_render_empty_state( 'Bạn chưa đánh dấu nội dung nào. Hãy bấm biểu tượng đánh dấu trên các trang khóa học, chủ đề, tin tuyển dụng, văn bản pháp luật, kiến thức hoặc đề thi.' ); ?>
 	<?php else : ?>
 		<div class="cvc-goal-list">
 			<?php foreach ( $bookmarks as $bookmark ) : ?>

@@ -9,7 +9,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$attempt_id = get_query_var( 'attempt_id' ) ?: ( isset( $_GET['attempt_id'] ) ? absint( $_GET['attempt_id'] ) : 0 );
+// Rewrite /lam-bai/{id}/ đặt query var `cvc_attempt_id` (inc/routes.php) -
+// trước 2026-10-03 template đọc nhầm `attempt_id` nên MỌI lượt thi thật mở
+// qua URL này đều rơi về bộ câu hỏi demo.
+$attempt_id = absint( get_query_var( 'cvc_attempt_id' ) ) ?: ( absint( get_query_var( 'attempt_id' ) ) ?: ( isset( $_GET['attempt_id'] ) ? absint( $_GET['attempt_id'] ) : 0 ) );
 $slug       = sanitize_text_field( (string) get_query_var( 'cvc_exam_slug' ) );
 $token      = cvc_auth_token();
 
@@ -39,6 +42,7 @@ $is_demo_mode    = true;
 $option_ids_map  = array();
 $existing_state  = array();
 $real_attempt_id = 0;
+$attempt_status  = '';
 
 if ( $attempt_id > 0 && $token ) {
 	$attempt_res = ( new CVC_Exam_Attempt_Service() )->show( $attempt_id, $token );
@@ -46,6 +50,7 @@ if ( $attempt_id > 0 && $token ) {
 	if ( $attempt_res['ok'] && ! empty( $attempt_res['data']['data']['answers'] ) ) {
 		$attempt_data    = $attempt_res['data']['data'];
 		$real_attempt_id = (int) ( $attempt_data['id'] ?? $attempt_id );
+		$attempt_status  = (string) ( $attempt_data['status'] ?? '' );
 		$questions       = array();
 
 		foreach ( $attempt_data['answers'] as $answer ) {
@@ -70,9 +75,13 @@ if ( $attempt_id > 0 && $token ) {
 			}
 
 			$questions[] = array(
-				'id'           => $question['id'],
+				'id'            => $question['id'],
 				'question_text' => $question['question_text'] ?? '',
-				'options'      => $opts,
+				'options'       => $opts,
+				'difficulty'    => $question['difficulty'] ?? null,
+				// Lượt thi thật: KHÔNG có giải thích/đáp án trong HTML - chỉ
+				// tải qua AJAX sau khi nộp bài (cvcLoadExplanation()).
+				'explanation'   => '',
 			);
 
 			$option_ids_map[ $question['id'] ] = $option_keys;
@@ -140,7 +149,7 @@ window.cvc_vars = {
 				</a>
 				
 				<div class="relative hidden sm:block">
-					<input type="text" placeholder="🔍 Tìm kiếm câu hỏi, luật..." class="bg-[#071c31] border border-[#12415d] rounded-xl px-3 py-1 text-[11px] text-slate-200 focus:outline-none focus:border-cyan-400 w-44">
+					<input type="text" placeholder="🔍 Tìm kiếm câu hỏi, luật..." class="bg-[#0A192F] border border-[#1D3557] rounded-xl px-3 py-1 text-[11px] text-slate-200 focus:outline-none focus:border-cyan-400 w-44">
 				</div>
 
 				<span class="bg-amber-500 text-navy-950 text-[10px] font-black px-2 py-0.5 rounded border border-amber-400 shrink-0 uppercase">
@@ -152,7 +161,7 @@ window.cvc_vars = {
 			</div>
 
 			<!-- Center: 4 Exam Modes Selector -->
-			<div class="flex items-center bg-[#071c31] p-1 rounded-xl border border-[#12415d] text-[11px] font-bold shrink-0">
+			<div class="flex items-center bg-[#0A192F] p-1 rounded-xl border border-[#1D3557] text-[11px] font-bold shrink-0">
 				<button type="button" onclick="ExamOS.setExamMode('learn')" data-mode="learn" class="exam-mode-badge">🎓 Học</button>
 				<button type="button" onclick="ExamOS.setExamMode('practice')" data-mode="practice" class="exam-mode-badge active">🏋️ Luyện</button>
 				<button type="button" onclick="ExamOS.setExamMode('real')" data-mode="real" class="exam-mode-badge">⏱️ Thi thật</button>
@@ -163,12 +172,12 @@ window.cvc_vars = {
 			<div class="flex items-center gap-3 shrink-0">
 				<!-- Headtools -->
 				<div class="hidden xl:flex items-center gap-1.5">
-					<button type="button" onclick="ExamOS.toggleFontSize()" title="A+ Cỡ chữ" class="px-2 py-1 bg-[#071c31] border border-[#12415d] hover:border-cyan-400 text-slate-300 rounded-lg text-[11px] font-bold cursor-pointer">A+</button>
-					<button type="button" onclick="ExamOS.toggleFocusMode()" title="Focus Mode" class="px-2 py-1 bg-[#071c31] border border-[#12415d] hover:border-cyan-400 text-slate-300 rounded-lg text-[11px] font-bold cursor-pointer">⤢</button>
+					<button type="button" onclick="ExamOS.toggleFontSize()" title="A+ Cỡ chữ" class="px-2 py-1 bg-[#0A192F] border border-[#1D3557] hover:border-cyan-400 text-slate-300 rounded-lg text-[11px] font-bold cursor-pointer">A+</button>
+					<button type="button" onclick="ExamOS.toggleFocusMode()" title="Focus Mode" class="px-2 py-1 bg-[#0A192F] border border-[#1D3557] hover:border-cyan-400 text-slate-300 rounded-lg text-[11px] font-bold cursor-pointer">⤢</button>
 				</div>
 
 				<!-- Clock & Pause Button -->
-				<div class="bg-[#071c31] border border-amber-500/40 px-3 py-1 rounded-xl flex items-center gap-2 shadow">
+				<div class="bg-[#0A192F] border border-amber-500/40 px-3 py-1 rounded-xl flex items-center gap-2 shadow">
 					<span id="quiz-timer" class="text-sm font-black text-amber-400 font-mono">⏱ 60:00</span>
 					<button type="button" title="Tạm dừng" class="text-slate-400 hover:text-white text-xs">⏸️</button>
 				</div>
@@ -253,7 +262,7 @@ window.cvc_vars = {
 					</div>
 				</div>
 
-				<div class="w-full h-2 bg-[#09243a] rounded-full overflow-hidden border border-[#12415d]">
+				<div class="w-full h-2 bg-[#112240] rounded-full overflow-hidden border border-[#1D3557]">
 					<div id="command-progress-bar-main" class="h-full bg-gradient-to-r from-cyan-500 via-blue-500 to-amber-400 w-0 transition-all duration-300"></div>
 				</div>
 
@@ -319,9 +328,15 @@ window.cvc_vars = {
 						<span class="text-xs font-black text-navy-950 bg-amber-500 px-3 py-1 rounded-md uppercase">
 							CÂU <?php echo $idx + 1; ?> / <?php echo $total_q; ?>
 						</span>
-						<span class="text-[11px] font-bold text-cyan-400 bg-cyan-500/10 border border-cyan-500/30 px-3 py-1 rounded-md uppercase">
-							ĐỘ KHÓ: TRUNG BÌNH
-						</span>
+						<?php
+						$difficulty_labels = array( 'easy' => 'DỄ', 'medium' => 'TRUNG BÌNH', 'hard' => 'KHÓ' );
+						$difficulty_key    = strtolower( (string) ( $q['difficulty'] ?? '' ) );
+						?>
+						<?php if ( isset( $difficulty_labels[ $difficulty_key ] ) ) : ?>
+							<span class="text-[11px] font-bold text-cyan-400 bg-cyan-500/10 border border-cyan-500/30 px-3 py-1 rounded-md uppercase">
+								ĐỘ KHÓ: <?php echo esc_html( $difficulty_labels[ $difficulty_key ] ); ?>
+							</span>
+						<?php endif; ?>
 						<span class="hidden sm:inline text-[11px] font-bold text-purple-300 bg-purple-500/10 border border-purple-500/30 px-2.5 py-1 rounded-md">
 							🎯 Đề thi chuẩn 2026
 						</span>
@@ -357,8 +372,9 @@ window.cvc_vars = {
 					<?php endforeach; ?>
 				</div>
 
+				<?php if ( $is_demo_mode ) : ?>
 				<!-- TÀI LIỆU LIÊN QUAN & CĂN CỨ PHÁP LÝ (PER QUESTION DOCUMENTATION) -->
-				<div class="p-3.5 rounded-xl bg-[#09243a] border border-[#12415d] space-y-2 text-xs">
+				<div class="p-3.5 rounded-xl bg-[#112240] border border-[#1D3557] space-y-2 text-xs">
 					<div class="flex items-center justify-between border-b border-slate-700/60 pb-2">
 						<span class="font-extrabold text-amber-400 flex items-center gap-1.5">
 							📚 Tài liệu liên quan câu hỏi #<?php echo $q['id']; ?>:
@@ -382,24 +398,31 @@ window.cvc_vars = {
 						</a>
 					</div>
 				</div>
+				<?php endif; ?>
 
 				<!-- Action Bar & Confidence + Quick Note -->
 				<div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-800/80">
 					<div class="flex items-center gap-2 flex-wrap">
-						<button type="button" onclick="toggleFlagQuestion(<?php echo $q['id']; ?>)" class="px-3 py-1.5 bg-[#09243a] hover:bg-slate-800 text-slate-300 rounded-xl text-xs font-bold border border-[#12415d] transition-colors flex items-center gap-1.5 cursor-pointer">
+						<button type="button" onclick="toggleFlagQuestion(<?php echo $q['id']; ?>)" class="px-3 py-1.5 bg-[#112240] hover:bg-slate-800 text-slate-300 rounded-xl text-xs font-bold border border-[#1D3557] transition-colors flex items-center gap-1.5 cursor-pointer">
 							<i class="fa-regular fa-star text-amber-400" id="flag-icon-<?php echo $q['id']; ?>"></i> Đánh dấu câu
 						</button>
-						<button type="button" onclick="ExamOS.toggleStrikeout(<?php echo $q['id']; ?>, 'A')" class="px-3 py-1.5 bg-[#09243a] hover:bg-slate-800 text-slate-300 rounded-xl text-xs font-bold border border-[#12415d] transition-colors flex items-center gap-1.5 cursor-pointer">
+						<button type="button" onclick="ExamOS.toggleStrikeout(<?php echo $q['id']; ?>, 'A')" class="px-3 py-1.5 bg-[#112240] hover:bg-slate-800 text-slate-300 rounded-xl text-xs font-bold border border-[#1D3557] transition-colors flex items-center gap-1.5 cursor-pointer">
 							✕ Loại trừ A
 						</button>
-						<button type="button" onclick="showLawModal('<?php echo esc_js($q['explanation']); ?>')" class="px-3 py-1.5 bg-[#09243a] hover:bg-slate-800 text-cyan-400 rounded-xl text-xs font-bold border border-[#12415d] transition-colors cursor-pointer flex items-center gap-1.5">
+						<?php if ( $is_demo_mode ) : ?>
+						<button type="button" onclick="showLawModal('<?php echo esc_js($q['explanation']); ?>')" class="px-3 py-1.5 bg-[#112240] hover:bg-slate-800 text-cyan-400 rounded-xl text-xs font-bold border border-[#1D3557] transition-colors cursor-pointer flex items-center gap-1.5">
 							📖 Xem Giải Thích
 						</button>
+						<?php else : ?>
+						<button type="button" onclick="cvcLoadExplanation(<?php echo (int) $q['id']; ?>)" class="px-3 py-1.5 bg-[#112240] hover:bg-slate-800 text-cyan-400 rounded-xl text-xs font-bold border border-[#1D3557] transition-colors cursor-pointer flex items-center gap-1.5">
+							📖 Xem Giải Thích
+						</button>
+						<?php endif; ?>
 					</div>
 
 					<!-- Confidence Level Selector & Quick Note Input -->
 					<div class="flex flex-wrap items-center gap-2">
-						<div id="confidence-box-<?php echo $q['id']; ?>" class="hidden items-center gap-1.5 bg-[#09243a] p-1 rounded-xl border border-[#12415d]">
+						<div id="confidence-box-<?php echo $q['id']; ?>" class="hidden items-center gap-1.5 bg-[#112240] p-1 rounded-xl border border-[#1D3557]">
 							<span class="text-[10px] text-slate-400 font-bold pl-1">Độ tự tin:</span>
 							<button type="button" onclick="ExamOS.setConfidenceLevel(<?php echo $q['id']; ?>, 'low')" data-level="low" class="confidence-pill">Chưa chắc</button>
 							<button type="button" onclick="ExamOS.setConfidenceLevel(<?php echo $q['id']; ?>, 'med')" data-level="med" class="confidence-pill">Khá chắc</button>
@@ -407,19 +430,20 @@ window.cvc_vars = {
 						</div>
 
 						<div class="flex items-center gap-1">
-							<input type="text" id="note-input-<?php echo $q['id']; ?>" placeholder="Viết ghi nhớ..." class="bg-[#09243a] border border-[#12415d] rounded-xl px-2.5 py-1 text-[11px] text-slate-200 focus:outline-none focus:border-cyan-400 w-28">
+							<input type="text" id="note-input-<?php echo $q['id']; ?>" placeholder="Viết ghi nhớ..." class="bg-[#112240] border border-[#1D3557] rounded-xl px-2.5 py-1 text-[11px] text-slate-200 focus:outline-none focus:border-cyan-400 w-28">
 							<button type="button" onclick="ExamOS.saveQuestionNote(<?php echo $q['id']; ?>)" class="px-2.5 py-1 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 font-bold text-[11px] rounded-xl border border-cyan-500/40 cursor-pointer">Lưu</button>
 						</div>
 					</div>
 				</div>
 
+				<?php if ( $is_demo_mode ) : ?>
 				<!-- AI EXPLANATION BOX (WITH 3 TABS: GIẢI THÍCH AI | CĂN CỨ PHÁP LÝ | MẸO GHI NHỚ) -->
 				<div id="explanation-<?php echo $q['id']; ?>" class="hidden ai-coach-banner space-y-3 text-xs">
 					<div class="flex items-center justify-between border-b border-slate-800 pb-2">
 						<div class="flex items-center gap-2 font-bold text-[11px]">
 							<button type="button" class="px-2.5 py-1 bg-cyan-500 text-navy-950 rounded-lg">✦ Giải thích AI</button>
-							<button type="button" onclick="showLawModal('<?php echo esc_js($q['explanation']); ?>')" class="px-2.5 py-1 bg-[#09243a] text-slate-300 hover:text-white rounded-lg border border-[#12415d]">📜 Căn cứ pháp lý</button>
-							<button type="button" class="px-2.5 py-1 bg-[#09243a] text-amber-300 rounded-lg border border-[#12415d]">💡 Mẹo ghi nhớ</button>
+							<button type="button" onclick="showLawModal('<?php echo esc_js($q['explanation']); ?>')" class="px-2.5 py-1 bg-[#112240] text-slate-300 hover:text-white rounded-lg border border-[#1D3557]">📜 Căn cứ pháp lý</button>
+							<button type="button" class="px-2.5 py-1 bg-[#112240] text-amber-300 rounded-lg border border-[#1D3557]">💡 Mẹo ghi nhớ</button>
 						</div>
 						<span class="text-cyan-300 font-bold text-xs">Đáp án chuẩn: B</span>
 					</div>
@@ -435,10 +459,17 @@ window.cvc_vars = {
 						</a>
 					</div>
 				</div>
+				<?php else : ?>
+				<!-- Lượt thi thật: hộp giải thích rỗng, chỉ được lấp sau khi nộp bài
+				     bằng dữ liệu thật (đáp án đúng từ DB + giải thích AI/có sẵn). -->
+				<div id="explanation-<?php echo (int) $q['id']; ?>" class="hidden ai-coach-banner space-y-3 text-xs" data-cvc-explanation="<?php echo (int) $q['id']; ?>">
+					<p class="text-slate-400">Đáp án và giải thích sẽ hiển thị sau khi bạn nộp bài.</p>
+				</div>
+				<?php endif; ?>
 
 				<!-- Bottom Navigation Buttons -->
 				<div class="flex items-center justify-between pt-4 border-t border-slate-800">
-					<button type="button" onclick="scrollToQuestion(Math.max(1, <?php echo $idx; ?>))" class="px-5 py-2.5 bg-[#09243a] hover:bg-slate-800 text-white font-extrabold text-xs rounded-xl border border-[#12415d] shadow cursor-pointer">
+					<button type="button" onclick="scrollToQuestion(Math.max(1, <?php echo $idx; ?>))" class="px-5 py-2.5 bg-[#112240] hover:bg-slate-800 text-white font-extrabold text-xs rounded-xl border border-[#1D3557] shadow cursor-pointer">
 						&larr; Câu trước
 					</button>
 
@@ -511,10 +542,10 @@ window.cvc_vars = {
 					</button>
 
 					<div class="flex items-center justify-center gap-2 text-slate-400 text-xs pt-1">
-						<button type="button" title="Đánh dấu câu" class="p-1.5 bg-[#09243a] rounded-lg border border-[#12415d] hover:text-white">🔖</button>
-						<button type="button" title="Focus Mode" class="p-1.5 bg-[#09243a] rounded-lg border border-[#12415d] hover:text-white">👁️</button>
-						<button type="button" title="Cài đặt" class="p-1.5 bg-[#09243a] rounded-lg border border-[#12415d] hover:text-white">⚙️</button>
-						<button type="button" title="Trợ giúp" class="p-1.5 bg-[#09243a] rounded-lg border border-[#12415d] hover:text-white">❓</button>
+						<button type="button" title="Đánh dấu câu" class="p-1.5 bg-[#112240] rounded-lg border border-[#1D3557] hover:text-white">🔖</button>
+						<button type="button" title="Focus Mode" class="p-1.5 bg-[#112240] rounded-lg border border-[#1D3557] hover:text-white">👁️</button>
+						<button type="button" title="Cài đặt" class="p-1.5 bg-[#112240] rounded-lg border border-[#1D3557] hover:text-white">⚙️</button>
+						<button type="button" title="Trợ giúp" class="p-1.5 bg-[#112240] rounded-lg border border-[#1D3557] hover:text-white">❓</button>
 					</div>
 				</div>
 			</div>
@@ -525,7 +556,7 @@ window.cvc_vars = {
 					📚 CỬA HÀNG HỌC TẬP
 				</h3>
 				<div class="space-y-2 text-xs">
-					<div class="flex items-center justify-between p-2 bg-[#09243a] rounded-xl border border-[#12415d]">
+					<div class="flex items-center justify-between p-2 bg-[#112240] rounded-xl border border-[#1D3557]">
 						<div>
 							<span class="text-slate-200 font-bold block">📘 Bộ 50 đề thi PDF</span>
 							<span class="text-[10px] text-slate-400">Giải thích 100%</span>
@@ -534,7 +565,7 @@ window.cvc_vars = {
 							49K
 						</a>
 					</div>
-					<div class="flex items-center justify-between p-2 bg-[#09243a] rounded-xl border border-[#12415d]">
+					<div class="flex items-center justify-between p-2 bg-[#112240] rounded-xl border border-[#1D3557]">
 						<div>
 							<span class="text-slate-200 font-bold block">⚖️ Sơ đồ tư duy Luật</span>
 							<span class="text-[10px] text-slate-400">Tóm tắt bẫy thi</span>
@@ -543,7 +574,7 @@ window.cvc_vars = {
 							79K
 						</a>
 					</div>
-					<div class="flex items-center justify-between p-2 bg-[#09243a] rounded-xl border border-[#12415d]">
+					<div class="flex items-center justify-between p-2 bg-[#112240] rounded-xl border border-[#1D3557]">
 						<div>
 							<span class="text-slate-200 font-bold block">🎯 Sổ tay bẫy trắc nghiệm</span>
 							<span class="text-[10px] text-slate-400">Tập trung 100 câu bẫy</span>
@@ -624,7 +655,7 @@ window.cvc_vars = {
 
 <!-- RESUME EXAM MODAL -->
 <div id="resume-exam-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden items-center justify-center p-4">
-	<div class="bg-[#071c31] border-2 border-amber-400 rounded-3xl max-w-md w-full p-6 text-center text-white space-y-4 shadow-2xl">
+	<div class="bg-[#0A192F] border-2 border-amber-400 rounded-3xl max-w-md w-full p-6 text-center text-white space-y-4 shadow-2xl">
 		<div class="w-16 h-16 rounded-full bg-amber-500/20 text-amber-400 text-2xl flex items-center justify-center mx-auto border border-amber-400/40">
 			👋
 		</div>
@@ -767,7 +798,82 @@ function setSubmitButtonsDisabled(disabled) {
  * ({success, message, data: attempt, recommendations, topic_stats}),
  * KHÔNG phải banner tĩnh/số liệu giả như bản cũ.
  */
+/**
+ * Giải thích cho 1 câu (chỉ sau khi nộp bài): đáp án đúng lấy từ DB, phần
+ * diễn giải do AI viết nếu admin đã cấu hình AI, ngược lại là giải thích
+ * có sẵn - nhãn nguồn hiển thị đúng sự thật.
+ */
+// Lượt thi đã nộp/hết giờ mở lại để xem: cho phép xem giải thích ngay.
+window.cvcExamSubmitted = <?php echo ( ! $is_demo_mode && '' !== $attempt_status && 'in_progress' !== $attempt_status ) ? 'true' : 'false'; ?>;
+
+function cvcLoadExplanation(qId) {
+  let box = document.getElementById('explanation-' + qId);
+  if (!box) return;
+
+  if (!window.cvcExamSubmitted) {
+    box.classList.remove('hidden');
+    box.innerHTML = '<p class="text-slate-400">Đáp án và giải thích sẽ hiển thị sau khi bạn nộp bài.</p>';
+    return;
+  }
+
+  box.classList.remove('hidden');
+  box.innerHTML = '<p class="text-slate-400">Đang tải giải thích…</p>';
+
+  let formData = new FormData();
+  formData.append('action', 'cvc_exam_ai_explain');
+  formData.append('nonce', window.cvc_vars.nonce);
+  formData.append('attempt_id', window.cvc_vars.attempt_id);
+  formData.append('question_id', qId);
+
+  fetch(window.cvc_vars.ajax_url, { method: 'POST', body: formData })
+    .then(function (res) { return res.json(); })
+    .then(function (res) {
+      if (!res.success) {
+        box.innerHTML = '<p class="text-rose-300">' + escapeExamHtml((res.data && res.data.message) || 'Không tải được giải thích.') + '</p>';
+        return;
+      }
+
+      let d = (res.data && res.data.data) || {};
+      let base = (window.cvc_vars && window.cvc_vars.home_url) || '/';
+      let sourceBadge = d.source === 'ai'
+        ? '<span class="px-2.5 py-1 bg-cyan-500 text-navy-950 rounded-lg font-bold">✦ Giải thích bởi AI</span>'
+        : '<span class="px-2.5 py-1 bg-slate-800 text-slate-200 rounded-lg font-bold border border-slate-700">Giải thích có sẵn</span>';
+      let verdict = d.is_correct === true
+        ? '<span class="text-emerald-300 font-bold">✓ Bạn trả lời đúng</span>'
+        : (d.is_correct === false ? '<span class="text-rose-300 font-bold">✗ Bạn trả lời sai</span>' : '<span class="text-slate-400">Bạn chưa trả lời câu này</span>');
+      let text = d.explanation ? escapeExamHtml(d.explanation).replace(/\n/g, '<br>') : '<span class="text-slate-400">Câu hỏi này chưa có giải thích.</span>';
+      let links = [];
+
+      if (d.legal_reference && d.legal_reference.slug) {
+        links.push('<a class="text-amber-300 font-bold hover:underline" href="' + base + 'van-ban-phap-luat/' + encodeURIComponent(d.legal_reference.slug) + '/">⚖️ ' + escapeExamHtml((d.legal_reference.document_number ? d.legal_reference.document_number + ' - ' : '') + d.legal_reference.title) + '</a>');
+      }
+      if (d.knowledge_item && d.knowledge_item.slug) {
+        links.push('<a class="text-cyan-300 font-bold hover:underline" href="' + base + 'kien-thuc/' + encodeURIComponent(d.knowledge_item.slug) + '/">📚 ' + escapeExamHtml(d.knowledge_item.title) + '</a>');
+      }
+      if (d.topic && d.topic.slug) {
+        links.push('<a class="text-cyan-300 font-bold hover:underline" href="' + base + 'chu-de/' + encodeURIComponent(d.topic.slug) + '/">🎯 Ôn chủ đề: ' + escapeExamHtml(d.topic.name) + '</a>');
+      }
+
+      box.innerHTML =
+        '<div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2">' +
+          '<div class="flex items-center gap-2 text-[11px]">' + sourceBadge + verdict + '</div>' +
+          (d.correct_option_key ? '<span class="text-cyan-300 font-bold text-xs">Đáp án đúng: ' + escapeExamHtml(d.correct_option_key) + '</span>' : '') +
+        '</div>' +
+        '<p class="text-slate-300 leading-relaxed">' + text + '</p>' +
+        (links.length ? '<div class="pt-2 border-t border-slate-800 flex flex-wrap gap-3 text-[11px]">' + links.join('') + '</div>' : '');
+
+      if (d.correct_option_key) {
+        let tile = document.getElementById('tile-' + qId + '-' + d.correct_option_key);
+        if (tile) tile.classList.add('is-correct-answer');
+      }
+    })
+    .catch(function () {
+      box.innerHTML = '<p class="text-rose-300">Lỗi kết nối, vui lòng thử lại.</p>';
+    });
+}
+
 function renderExamResult(payload) {
+  window.cvcExamSubmitted = true;
   let attempt = (payload && payload.data) || {};
   let recommendations = (payload && payload.recommendations) || [];
   let topicStats = (payload && payload.topic_stats) || [];

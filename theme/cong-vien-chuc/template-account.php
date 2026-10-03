@@ -45,6 +45,7 @@ $section_titles = array(
 	'recruitment-matches'  => 'Việc làm phù hợp',
 	'notifications'        => 'Thông báo',
 	'certificates'         => 'Chứng chỉ của tôi',
+	'security'             => 'Bảo mật & đăng nhập',
 );
 
 $section_fa_icons = array(
@@ -60,6 +61,7 @@ $section_fa_icons = array(
 	'recruitment-matches'  => 'fa-briefcase',
 	'notifications'        => 'fa-bell',
 	'certificates'         => 'fa-award',
+	'security'             => 'fa-shield-halved',
 );
 
 cvc_seo_set_title( $section_titles[ $section ] . ' — Dashboard Công Viên Chức' );
@@ -110,9 +112,6 @@ get_header();
 							<h1 class="text-xl sm:text-2xl font-black text-white">
 								Xin chào, <?php echo esc_html( $user['name'] ?? $user['email'] ?? 'Học viên' ); ?>
 							</h1>
-							<span class="bg-amber-500 text-navy-950 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase">
-								★ VIP MEMBER 2026
-							</span>
 						</div>
 						<p class="text-xs text-slate-300">
 							Mã học viên: <strong class="text-amber-400 font-mono">CVC-<?php echo sprintf('%05d', (int)($user['id'] ?? 1)); ?></strong> &middot; Email: <?php echo esc_html($user['email'] ?? ''); ?>
@@ -134,7 +133,7 @@ get_header();
 			<!-- LEFT SIDEBAR (3 COLS — DASHBOARD MENU) -->
 			<aside class="lg:col-span-3 space-y-4">
 				
-				<div class="bg-[#0D1B2A] border border-slate-800 p-4 rounded-2xl space-y-2 shadow-lg text-xs">
+				<div class="bg-[#0A192F] border border-slate-800 p-4 rounded-2xl space-y-2 shadow-lg text-xs">
 					<h3 class="font-extrabold text-[11px] text-amber-400 uppercase tracking-wider border-b border-slate-800 pb-2 flex items-center gap-1.5">
 						<i class="fa-solid fa-bars"></i> Danh Mục Quản Lý
 					</h3>
@@ -161,13 +160,12 @@ get_header();
 				
 				<?php cvc_render_notice(); ?>
 
-				<div class="bg-[#0D1B2A] border border-slate-800 p-6 rounded-3xl space-y-4 shadow-xl">
+				<div class="bg-[#0A192F] border border-slate-800 p-6 rounded-3xl space-y-4 shadow-xl">
 					<div class="flex items-center justify-between border-b border-slate-800 pb-3">
 						<h2 class="text-base font-black text-white flex items-center gap-2">
 							<i class="fa-solid <?php echo $section_fa_icons[$section] ?? 'fa-circle'; ?> text-amber-400"></i>
 							<?php echo esc_html( $section_titles[ $section ] ); ?>
 						</h2>
-						<span class="text-[11px] text-slate-400 font-mono">2026 Live Sync</span>
 					</div>
 
 					<div class="cvc-account-section-wrapper text-xs space-y-4">
@@ -180,39 +178,53 @@ get_header();
 			<!-- RIGHT SIDEBAR (3 COLS — STATS & SUPPORT) -->
 			<aside class="lg:col-span-3 space-y-4">
 
-				<!-- WIDGET 1: TIẾN ĐỘ HỌC TẬP TUẦN -->
-				<div class="bg-[#0D1B2A] border border-slate-800 p-5 rounded-2xl space-y-3 shadow-xl text-xs">
+				<?php
+				/*
+				 * Chỉ số học tập THẬT từ GET /api/exam-progress (trước đây là
+				 * số cứng 85% / 48/60 cho mọi tài khoản).
+				 */
+				$progress_result = null !== $token ? ( new CVC_Exam_Attempt_Service() )->progress( $token ) : array( 'ok' => false );
+				$progress_rows   = $progress_result['ok'] ? ( $progress_result['data']['data']['data'] ?? array() ) : array();
+				$attempted_exams = count( $progress_rows );
+				$completed_rows  = array_filter( $progress_rows, fn ( $r ) => (int) ( $r['completed_count'] ?? 0 ) > 0 );
+				$completed_exams = count( $completed_rows );
+				$best_values     = array_filter( array_map( fn ( $r ) => isset( $r['best_percentage'] ) ? (float) $r['best_percentage'] : null, $completed_rows ), fn ( $v ) => null !== $v );
+				$avg_best        = ! empty( $best_values ) ? (int) round( array_sum( $best_values ) / count( $best_values ) ) : null;
+				$completion_pct  = $attempted_exams > 0 ? (int) round( $completed_exams * 100 / $attempted_exams ) : 0;
+				?>
+				<div class="bg-[#0A192F] border border-slate-800 p-5 rounded-2xl space-y-3 shadow-xl text-xs">
 					<h3 class="font-extrabold text-xs text-cyan-400 uppercase tracking-wider border-b border-slate-800 pb-2 flex items-center gap-1.5">
 						<i class="fa-solid fa-chart-line"></i> Chỉ Số Học Tập
 					</h3>
-					<div class="space-y-2 text-slate-300">
-						<div class="flex justify-between">
-							<span>Tỷ lệ hoàn thành đề thi:</span>
-							<strong class="text-emerald-400">85%</strong>
+					<?php if ( ! $progress_result['ok'] ) : ?>
+						<p class="text-slate-400">Chưa tải được chỉ số học tập.</p>
+					<?php elseif ( 0 === $attempted_exams ) : ?>
+						<p class="text-slate-400">Bạn chưa làm đề thi nào. <a class="text-cyan-300 font-bold" href="<?php echo esc_url( cvc_exams_url() ); ?>">Làm đề đầu tiên</a></p>
+					<?php else : ?>
+						<div class="space-y-2 text-slate-300">
+							<div class="flex justify-between">
+								<span>Đề đã nộp / đã mở:</span>
+								<strong class="text-emerald-400"><?php echo esc_html( $completed_exams . '/' . $attempted_exams ); ?></strong>
+							</div>
+							<div class="w-full bg-slate-900 rounded-full h-2 border border-slate-800 overflow-hidden">
+								<div class="bg-emerald-400 h-2 rounded-full" style="width: <?php echo esc_attr( $completion_pct ); ?>%"></div>
+							</div>
+							<div class="flex justify-between pt-2">
+								<span>Điểm cao nhất trung bình:</span>
+								<strong class="text-amber-400"><?php echo null !== $avg_best ? esc_html( $avg_best . '%' ) : '—'; ?></strong>
+							</div>
 						</div>
-						<div class="w-full bg-slate-900 rounded-full h-2 border border-slate-800 overflow-hidden">
-							<div class="bg-emerald-400 h-2 rounded-full" style="width: 85%"></div>
-						</div>
-
-						<div class="flex justify-between pt-2">
-							<span>Điểm trung bình KTC:</span>
-							<strong class="text-amber-400">48/60 câu</strong>
-						</div>
-					</div>
+					<?php endif; ?>
 				</div>
 
-				<!-- WIDGET 2: TRỢ LÝ AI HỌC VIÊN -->
 				<div class="bg-gradient-to-r from-navy-950 via-slate-900 to-indigo-950 border border-cyan-500/30 p-5 rounded-2xl space-y-3 shadow-xl text-xs text-center">
-					<div class="w-10 h-10 mx-auto rounded-full bg-cyan-500/20 text-cyan-300 flex items-center justify-center font-black text-base border border-cyan-500/40">
-						⚡
-					</div>
-					<h4 class="font-extrabold text-white text-xs">AI Coach 24/7 Support</h4>
+					<h4 class="font-extrabold text-white text-xs">Gợi ý ôn tập cho bạn</h4>
 					<p class="text-slate-400 text-[11px]">
-						Hỗ trợ giải đáp thắc mắc về đề thi, luật cán bộ công chức & thủ tục hồ sơ.
+						Gợi ý dựa trên chủ đề bạn làm sai nhiều, khóa đang học và mục tiêu ôn thi.
 					</p>
-					<button type="button" onclick="alert('Trợ lý AI Coach đang sẵn sàng hỗ trợ bạn!')" class="w-full py-2 bg-cyan-500 hover:bg-cyan-400 text-navy-950 font-black text-xs rounded-xl shadow transition-colors">
-						Chat Với AI Coach
-					</button>
+					<a href="<?php echo esc_url( cvc_account_url( 'recommendations' ) ); ?>" class="block w-full py-2 bg-cyan-500 hover:bg-cyan-400 text-navy-950 font-black text-xs rounded-xl shadow transition-colors">
+						Xem gợi ý
+					</a>
 				</div>
 
 			</aside>

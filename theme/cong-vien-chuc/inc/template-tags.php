@@ -839,9 +839,9 @@ function cvc_seo_add_breadcrumb_jsonld( array $items ): void {
  * JobPosting JSON-LD cho 1 recruitment - CHỈ dùng field thực sự có trong
  * response của GET /api/recruitments/{slug} (Phase 3.7, Phần 15).
  *
- * Cố ý KHÔNG map employmentType: Position.employment_type là free text ở
- * backend (không phải enum chuẩn schema.org FULL_TIME/PART_TIME/...),
- * map sai sẽ là suy đoán - deferred, xem FINAL REPORT.
+ * employmentType (2026-10-03): lấy từ positions[].employment_type_schema do
+ * BACKEND map (Position::schemaOrgEmploymentType) - WordPress không tự đoán.
+ * Không có giá trị nào -> bỏ trường.
  *
  * validThrough dùng application_deadline kể cả khi recruitment đã hết
  * hạn (status=expired) - đây là semantics ĐÚNG của schema.org (báo hiệu
@@ -914,6 +914,23 @@ function cvc_build_recruitment_job_posting_jsonld( array $recruitment ): ?array 
 			'@type'   => 'Place',
 			'address' => $address,
 		);
+	}
+
+	$employment_types = array();
+	foreach ( (array) ( $recruitment['positions'] ?? array() ) as $position ) {
+		if ( is_array( $position ) && ! empty( $position['employment_type_schema'] ) ) {
+			$employment_types[] = (string) $position['employment_type_schema'];
+		}
+	}
+	$employment_types = array_values( array_unique( $employment_types ) );
+
+	if ( ! empty( $employment_types ) ) {
+		$schema['employmentType'] = 1 === count( $employment_types ) ? $employment_types[0] : $employment_types;
+	}
+
+	$total_openings = (int) ( $recruitment['total_positions'] ?? 0 );
+	if ( $total_openings > 0 ) {
+		$schema['totalJobOpenings'] = $total_openings;
 	}
 
 	return $schema;

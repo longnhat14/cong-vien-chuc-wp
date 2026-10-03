@@ -34,7 +34,7 @@ get_header();
 		);
 		?>
 
-		<div class="bg-[#0D1B2A] border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
+		<div class="bg-[#0A192F] border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
 			<div class="text-center space-y-1.5">
 				<div class="w-12 h-12 mx-auto rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-xl border border-amber-500/30">
 					<i class="fa-solid fa-award"></i>

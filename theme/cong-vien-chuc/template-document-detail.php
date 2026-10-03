@@ -57,7 +57,7 @@ get_header();
 
 		<?php cvc_render_notice(); ?>
 
-		<div class="bg-[#0D1B2A] border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
+		<div class="bg-[#0A192F] border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
 
 			<div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4 border-b border-slate-800 pb-5">
 				<div class="flex items-start gap-4">

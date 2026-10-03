@@ -85,7 +85,7 @@ get_header();
 			<aside class="lg:col-span-3 space-y-4">
 				
 				<!-- Filter Box 1: Danh mục khóa học -->
-				<div class="bg-[#0D1B2A] border border-slate-800 p-5 rounded-2xl space-y-3 shadow-lg">
+				<div class="bg-[#0A192F] border border-slate-800 p-5 rounded-2xl space-y-3 shadow-lg">
 					<h3 class="font-extrabold text-xs text-amber-400 uppercase tracking-wider flex items-center gap-1.5 border-b border-slate-800 pb-2">
 						🔍 Bộ Lọc Danh Mục
 					</h3>
@@ -114,7 +114,7 @@ get_header();
 				</div>
 
 				<!-- Filter Box 2: Trình độ sát hạch -->
-				<div class="bg-[#0D1B2A] border border-slate-800 p-5 rounded-2xl space-y-3 shadow-lg text-xs">
+				<div class="bg-[#0A192F] border border-slate-800 p-5 rounded-2xl space-y-3 shadow-lg text-xs">
 					<h3 class="font-extrabold text-xs text-white uppercase tracking-wider border-b border-slate-800 pb-2">
 						🎯 Ngạch Công Chức
 					</h3>
@@ -146,7 +146,7 @@ get_header();
 			<main class="lg:col-span-6 space-y-6">
 
 				<!-- Toolbar Header -->
-				<div class="flex items-center justify-between bg-[#0D1B2A] p-4 rounded-2xl border border-slate-800 text-xs">
+				<div class="flex items-center justify-between bg-[#0A192F] p-4 rounded-2xl border border-slate-800 text-xs">
 					<span class="text-slate-300">Hiển thị <strong class="text-white"><?php echo count( $courses ); ?></strong> khóa học chất lượng cao</span>
 					<select class="bg-slate-900 border border-slate-700 text-slate-200 rounded-xl px-3 py-1 focus:outline-none text-xs">
 						<option>🔥 Mới nhất 2026</option>
@@ -161,7 +161,7 @@ get_header();
 				<?php else : ?>
 					<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 						<?php foreach ( $courses as $course ) : ?>
-							<article class="bg-[#0D1B2A] border border-slate-800 hover:border-cyan-500/50 rounded-2xl overflow-hidden shadow-lg transition-all hover:-translate-y-1 flex flex-col justify-between">
+							<article class="bg-[#0A192F] border border-slate-800 hover:border-cyan-500/50 rounded-2xl overflow-hidden shadow-lg transition-all hover:-translate-y-1 flex flex-col justify-between">
 								<div class="p-5 space-y-3">
 									<div class="flex items-center justify-between">
 										<span class="bg-cyan-500/20 text-cyan-300 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-cyan-500/40 uppercase">
@@ -218,7 +218,7 @@ get_header();
 				</div>
 
 				<!-- AI Coach Diagnostic Banner -->
-				<div class="bg-[#0D1B2A] border border-cyan-500/40 p-5 rounded-2xl space-y-3 shadow-lg">
+				<div class="bg-[#0A192F] border border-cyan-500/40 p-5 rounded-2xl space-y-3 shadow-lg">
 					<h3 class="font-extrabold text-xs text-cyan-400 uppercase tracking-wider flex items-center gap-1.5">
 						✦ AI COURSE RECOMMENDER
 					</h3>

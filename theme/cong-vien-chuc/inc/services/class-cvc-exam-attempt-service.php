@@ -12,6 +12,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 final class CVC_Exam_Attempt_Service extends CVC_Api_Service {
 
+	/**
+	 * Tiến độ theo từng đề (GET /api/exam-progress) - dùng cho chỉ số học
+	 * tập ở sidebar Dashboard.
+	 */
+	public function progress( string $token ): array {
+		return $this->client->get( '/api/exam-progress', array( 'per_page' => 100 ), $token );
+	}
+
+	/**
+	 * Giải thích (AI thật nếu đã cấu hình) cho 1 câu đã làm trong lượt thi
+	 * đã nộp.
+	 */
+	public function aiExplain( int $attemptId, int $questionId, string $token ): array {
+		return $this->client->post( '/api/exam-attempts/' . $attemptId . '/questions/' . $questionId . '/ai-explain', array(), $token );
+	}
+
 	protected function endpoint(): string {
 		return '/api/exam-attempts';
 	}

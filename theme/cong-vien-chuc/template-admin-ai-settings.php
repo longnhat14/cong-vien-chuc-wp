@@ -23,6 +23,11 @@ $key_configured       = ! empty( $ai['ai.api_key']['configured'] );
 $key_masked           = $ai['ai.api_key']['value'] ?? '';
 $model_configured     = $ai['ai.model']['value'] ?? '';
 
+$jobs_result = ( new CVC_Setting_Service() )->ai_jobs( $token );
+$jobs_body   = $jobs_result['ok'] ? ( $jobs_result['data'] ?? array() ) : array();
+$jobs        = $jobs_body['data']['data'] ?? array();
+$job_stats   = $jobs_body['stats'] ?? array();
+
 cvc_seo_set_title( 'Cấu hình AI Coach — Quản trị' );
 cvc_seo_set_noindex();
 
@@ -44,7 +49,7 @@ get_header();
 
 		<?php cvc_render_notice(); ?>
 
-		<div class="bg-[#0D1B2A] border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
+		<div class="bg-[#0A192F] border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
 			<div class="space-y-1 border-b border-slate-800 pb-4">
 				<h1 class="text-xl font-black text-white flex items-center gap-2">
 					<i class="fa-solid fa-robot text-amber-400"></i> Cấu Hình AI Coach
@@ -97,7 +102,7 @@ get_header();
 				<div class="space-y-1.5">
 					<label for="ai_model" class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Model (tuỳ chọn)</label>
 					<input type="text" name="ai_model" id="ai_model" value="<?php echo esc_attr( $model_configured ); ?>"
-						placeholder="VD: gpt-4o-mini, gemini-1.5-flash, claude-3-5-haiku-20241022..."
+						placeholder="VD: gpt-4o-mini, gemini-2.5-flash, claude-haiku-4-5..."
 						class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white placeholder:text-slate-600 focus:border-amber-400 focus:outline-none font-mono">
 					<p class="text-[10px] text-slate-500">Để trống để dùng model mặc định của từng nhà cung cấp.</p>
 				</div>
@@ -106,6 +111,43 @@ get_header();
 					Lưu Cấu Hình
 				</button>
 			</form>
+		</div>
+
+		<div class="bg-slate-800/40 border border-slate-800 rounded-2xl p-5 space-y-3 text-xs">
+			<h2 class="text-sm font-black text-white">Nhật ký gọi AI (AI job pipeline)</h2>
+			<?php if ( ! $jobs_result['ok'] ) : ?>
+				<p class="text-slate-400">Không tải được nhật ký (cần quyền ai.view): <?php echo esc_html( cvc_api_error_message( $jobs_result ) ); ?></p>
+			<?php else : ?>
+				<p class="text-slate-300">
+					Trạng thái: <strong class="<?php echo ! empty( $jobs_body['configured'] ) ? 'text-emerald-300' : 'text-amber-300'; ?>"><?php echo ! empty( $jobs_body['configured'] ) ? 'Đã cấu hình' : 'Chưa cấu hình - học viên đang thấy giải thích có sẵn'; ?></strong>
+					<?php if ( ! empty( $jobs_body['current']['model'] ) ) : ?>
+						· Model: <code><?php echo esc_html( $jobs_body['current']['provider'] . ' / ' . $jobs_body['current']['model'] ); ?></code>
+					<?php endif; ?>
+				</p>
+				<p class="text-slate-400">
+					Tổng <?php echo (int) ( $job_stats['total'] ?? 0 ); ?> lần gọi · thành công <?php echo (int) ( $job_stats['succeeded'] ?? 0 ); ?> · lỗi <?php echo (int) ( $job_stats['failed'] ?? 0 ); ?> · trung bình <?php echo (int) ( $job_stats['avg_duration_ms'] ?? 0 ); ?> ms. Kết quả thành công được dùng lại (cache) cho cùng câu hỏi + cùng model.
+				</p>
+				<?php if ( empty( $jobs ) ) : ?>
+					<p class="text-slate-500">Chưa có lần gọi AI nào.</p>
+				<?php else : ?>
+					<div class="overflow-x-auto">
+						<table class="w-full text-left text-[11px]">
+							<thead class="text-slate-400"><tr><th class="py-1 pr-2">Thời gian</th><th class="pr-2">Câu hỏi</th><th class="pr-2">Model</th><th class="pr-2">Kết quả</th><th>ms</th></tr></thead>
+							<tbody>
+								<?php foreach ( $jobs as $job ) : ?>
+									<tr class="border-t border-slate-800">
+										<td class="py-1 pr-2 whitespace-nowrap"><?php echo esc_html( cvc_format_date_vn( $job['created_at'] ?? null ) ); ?></td>
+										<td class="pr-2">#<?php echo (int) ( $job['subject_id'] ?? 0 ); ?></td>
+										<td class="pr-2"><?php echo esc_html( ( $job['provider'] ?? '' ) . ' / ' . ( $job['model'] ?? '' ) ); ?></td>
+										<td class="pr-2 <?php echo 'succeeded' === ( $job['status'] ?? '' ) ? 'text-emerald-300' : 'text-rose-300'; ?>" title="<?php echo esc_attr( (string) ( $job['error'] ?? '' ) ); ?>"><?php echo 'succeeded' === ( $job['status'] ?? '' ) ? 'Thành công' : 'Lỗi'; ?></td>
+										<td><?php echo (int) ( $job['duration_ms'] ?? 0 ); ?></td>
+									</tr>
+								<?php endforeach; ?>
+							</tbody>
+						</table>
+					</div>
+				<?php endif; ?>
+			<?php endif; ?>
 		</div>
 
 		<div class="bg-slate-800/40 border border-slate-800 rounded-2xl p-4 text-[11px] text-slate-400 leading-relaxed">

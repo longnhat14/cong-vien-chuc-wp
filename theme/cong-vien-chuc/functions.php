@@ -29,6 +29,7 @@ require_once __DIR__ . '/inc/services/class-cvc-document-service.php';
 require_once __DIR__ . '/inc/services/class-cvc-order-service.php';
 require_once __DIR__ . '/inc/services/class-cvc-setting-service.php';
 require_once __DIR__ . '/inc/services/class-cvc-certificate-service.php';
+require_once __DIR__ . '/inc/services/class-cvc-homepage-service.php';
 require_once __DIR__ . '/inc/services/class-cvc-subpage-fixtures.php';
 require_once __DIR__ . '/inc/services/class-cvc-question-bank-fixtures.php';
 require_once __DIR__ . '/inc/template-tags.php';
@@ -41,6 +42,7 @@ require_once __DIR__ . '/inc/admin-settings.php';
 require_once __DIR__ . '/inc/combo.php';
 require_once __DIR__ . '/inc/course-purchase.php';
 require_once __DIR__ . '/inc/engagement.php';
+require_once __DIR__ . '/inc/homepage-nextgen.php';
 require_once __DIR__ . '/inc/routes.php';
 require_once __DIR__ . '/inc/dev-tools.php';
 
@@ -71,22 +73,19 @@ function cvc_enqueue_assets(): void {
 	);
 
 	/*
-	 * TẠM TẮT (2026-10-02): hosting hiện trả 404 cho file assets/js/
-	 * scroll-reveal.js ở MỌI tổ hợp query string, kể cả không query string -
-	 * xác nhận đây là lỗi cache/hạ tầng phía Hostinger (không phải lỗi
-	 * file - file tồn tại đúng, quyền đúng, cùng cơ chế với exam-os.js đang
-	 * chạy tốt). File + CSS .cvc-reveal vẫn còn trong theme, sẵn sàng bật
-	 * lại bằng cách bỏ comment đoạn wp_enqueue_script bên dưới ngay khi lỗi
-	 * cache phía host được xử lý (liên hệ hỗ trợ Hostinger hoặc purge cache
-	 * qua hPanel).
+	 * Scroll reveal - BẬT LẠI 2026-10-03. Nguyên nhân 404 trước đây KHÔNG
+	 * phải cache Hostinger: 3 thư mục của theme bị quyền 700 nên web server
+	 * không đọc được BẤT KỲ file tĩnh nào (style.css, mọi JS, ảnh) và đẩy
+	 * request về WordPress -> 404. Đã chmod thư mục 755 / file 644. Mỗi lần
+	 * deploy theme bằng scp từ Windows phải chạy lại bước chmod này.
 	 */
-	// wp_enqueue_script(
-	// 	'cvc-scroll-reveal',
-	// 	get_theme_file_uri( '/assets/js/scroll-reveal.js' ),
-	// 	array(),
-	// 	null,
-	// 	true
-	// );
+	wp_enqueue_script(
+		'cvc-scroll-reveal',
+		get_theme_file_uri( '/assets/js/scroll-reveal.js' ),
+		array(),
+		wp_get_theme()->get( 'Version' ),
+		true
+	);
 
 	wp_localize_script(
 		'cvc-engagement',

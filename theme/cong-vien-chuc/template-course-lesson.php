@@ -136,7 +136,7 @@ get_header();
 			<!-- LEFT COLUMN (3 COLS — SYLLABUS DRAWER) -->
 			<aside class="lg:col-span-3 space-y-4">
 				
-				<div class="bg-[#0D1B2A] border border-slate-800 p-5 rounded-2xl space-y-3 shadow-lg text-xs">
+				<div class="bg-[#0A192F] border border-slate-800 p-5 rounded-2xl space-y-3 shadow-lg text-xs">
 					<h3 class="font-extrabold text-xs text-amber-400 uppercase tracking-wider border-b border-slate-800 pb-2 flex items-center gap-1.5">
 						<i class="fa-solid fa-list-ol"></i> Giáo Trình Bài Học
 					</h3>
@@ -173,7 +173,7 @@ get_header();
 
 				<?php if ( ! $has_content && empty( $lesson['is_free'] ) ) : ?>
 
-					<div class="bg-[#0D1B2A] border border-amber-500/40 p-8 rounded-3xl text-center space-y-4 shadow-xl">
+					<div class="bg-[#0A192F] border border-amber-500/40 p-8 rounded-3xl text-center space-y-4 shadow-xl">
 						<div class="w-16 h-16 mx-auto rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center font-black text-2xl border border-amber-500/40">
 							🔒
 						</div>
@@ -189,7 +189,7 @@ get_header();
 				<?php else : ?>
 
 					<!-- VIDEO PLAYER CONTAINER -->
-					<div class="bg-[#0D1B2A] border border-slate-800 rounded-3xl p-4 sm:p-5 space-y-4 shadow-xl">
+					<div class="bg-[#0A192F] border border-slate-800 rounded-3xl p-4 sm:p-5 space-y-4 shadow-xl">
 						<div class="aspect-video bg-slate-950 rounded-2xl border border-slate-800 overflow-hidden relative flex items-center justify-center">
 							<?php if ( ! empty( $lesson['video_url'] ) && str_contains($lesson['video_url'], 'embed') ) : ?>
 								<iframe src="<?php echo esc_url( $lesson['video_url'] ); ?>" class="w-full h-full" frameborder="0" allowfullscreen></iframe>
@@ -243,7 +243,7 @@ get_header();
 			<aside class="lg:col-span-3 space-y-4">
 
 				<!-- PREV / NEXT NAVIGATION BUTTONS -->
-				<div class="bg-[#0D1B2A] border border-slate-800 p-4 rounded-2xl space-y-2 shadow-xl text-xs">
+				<div class="bg-[#0A192F] border border-slate-800 p-4 rounded-2xl space-y-2 shadow-xl text-xs">
 					<h3 class="font-extrabold text-[11px] text-cyan-400 uppercase tracking-wider border-b border-slate-800 pb-2">
 						Điều Hướng Bài Học
 					</h3>

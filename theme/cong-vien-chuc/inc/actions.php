@@ -143,6 +143,38 @@ function cvc_handle_learning_path_generate(): void {
  * ============================================================
  */
 
+add_action( 'admin_post_nopriv_cvc_learning_path_item_status', 'cvc_handle_learning_path_item_status' );
+add_action( 'admin_post_cvc_learning_path_item_status', 'cvc_handle_learning_path_item_status' );
+
+/**
+ * Cập nhật tiến độ 1 bước lộ trình - Post/Redirect/Get, quay lại đúng
+ * lộ trình đang xem (?path_id=).
+ */
+function cvc_handle_learning_path_item_status(): void {
+	check_admin_referer( 'cvc_learning_path_item_status' );
+	$token = cvc_require_token_or_die();
+
+	$pathId  = absint( $_POST['path_id'] ?? 0 );
+	$itemId  = absint( $_POST['item_id'] ?? 0 );
+	$status  = sanitize_key( wp_unslash( $_POST['status'] ?? '' ) );
+	$back    = add_query_arg( 'path_id', $pathId, cvc_account_url( 'learning-path' ) );
+	$allowed = array( 'pending', 'in_progress', 'completed', 'skipped' );
+
+	if ( 0 === $pathId || 0 === $itemId || ! in_array( $status, $allowed, true ) ) {
+		cvc_redirect_with_notice( $back, 'error', 'Thao tác không hợp lệ.', null );
+		return;
+	}
+
+	$result = ( new CVC_Learning_Path_Service() )->updateItemStatus( $pathId, $itemId, $status, $token );
+
+	if ( ! $result['ok'] ) {
+		cvc_redirect_with_notice( $back, 'error', cvc_api_error_message( $result ), null );
+		return;
+	}
+
+	cvc_redirect_with_notice( $back, 'success', 'Đã cập nhật tiến độ.', null );
+}
+
 add_action( 'admin_post_nopriv_cvc_bookmark_add', 'cvc_handle_bookmark_add' );
 add_action( 'admin_post_cvc_bookmark_add', 'cvc_handle_bookmark_add' );
 
@@ -313,7 +345,7 @@ function cvc_handle_profile_change_password(): void {
 	$result = ( new CVC_Profile_Service() )->changePassword( $current, $new, $confirmation, $token );
 
 	if ( ! $result['ok'] ) {
-		cvc_redirect_with_notice( cvc_account_url( 'profile' ), 'error', cvc_api_error_message( $result ), null );
+		cvc_redirect_with_notice( cvc_account_url( 'security' ), 'error', cvc_api_error_message( $result ), null );
 		return;
 	}
 

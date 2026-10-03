@@ -84,7 +84,7 @@ get_header();
 			<!-- LEFT COLUMN (3 COLS — EXAM SUBJECT FILTERS) -->
 			<aside class="lg:col-span-3 space-y-4">
 				
-				<div class="bg-[#0D1B2A] border border-slate-800 p-5 rounded-2xl space-y-3 shadow-lg text-xs">
+				<div class="bg-[#0A192F] border border-slate-800 p-5 rounded-2xl space-y-3 shadow-lg text-xs">
 					<h3 class="font-extrabold text-xs text-amber-400 uppercase tracking-wider border-b border-slate-800 pb-2">
 						📚 Môn Thi Sát Hạch
 					</h3>
@@ -113,7 +113,7 @@ get_header();
 			<!-- CENTER MAIN COLUMN (6 COLS — EXAMS GRID) -->
 			<main class="lg:col-span-6 space-y-6">
 
-				<div class="flex items-center justify-between bg-[#0D1B2A] p-4 rounded-2xl border border-slate-800 text-xs">
+				<div class="flex items-center justify-between bg-[#0A192F] p-4 rounded-2xl border border-slate-800 text-xs">
 					<span class="text-slate-300">Tổng cộng <strong class="text-white"><?php echo count( $exams ); ?></strong> bộ đề thi chuẩn sát hạch</span>
 				</div>
 
@@ -122,7 +122,7 @@ get_header();
 				<?php else : ?>
 					<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 						<?php foreach ( $exams as $exam ) : ?>
-							<article class="bg-[#0D1B2A] border border-slate-800 hover:border-amber-500/50 rounded-2xl p-5 space-y-4 shadow-lg transition-all hover:-translate-y-1">
+							<article class="bg-[#0A192F] border border-slate-800 hover:border-amber-500/50 rounded-2xl p-5 space-y-4 shadow-lg transition-all hover:-translate-y-1">
 								<div class="flex items-center justify-between border-b border-slate-800 pb-2">
 									<span class="bg-amber-500/20 text-amber-300 text-[10px] font-extrabold px-2.5 py-0.5 rounded uppercase border border-amber-500/30">
 										MÃ ĐỀ: KTC-2026
@@ -177,19 +177,19 @@ get_header();
 				</div>
 
 				<!-- CTA 2: MUA BỘ TÀI LIỆU PDF -->
-				<div class="bg-[#0D1B2A] border border-cyan-500/40 p-5 rounded-2xl space-y-3 shadow-xl">
+				<div class="bg-[#0A192F] border border-cyan-500/40 p-5 rounded-2xl space-y-3 shadow-xl">
 					<h3 class="font-extrabold text-xs text-cyan-400 uppercase tracking-wider border-b border-slate-800 pb-2 flex items-center gap-1.5">
 						📘 TÀI LIỆU ÔN THI PDF
 					</h3>
 					<div class="space-y-2 text-xs">
-						<div class="flex items-center justify-between p-2.5 bg-[#09243a] rounded-xl border border-[#12415d]">
+						<div class="flex items-center justify-between p-2.5 bg-[#112240] rounded-xl border border-[#1D3557]">
 							<div>
 								<span class="text-slate-200 font-bold block">Bộ 50 Đề Thi + Đáp Án</span>
 								<span class="text-[10px] text-slate-400">KTC · Ngoại ngữ · Tin học</span>
 							</div>
 							<a href="<?php echo esc_url( home_url('/khoa-hoc/') ); ?>" class="px-2.5 py-1.5 bg-amber-500 text-navy-950 font-black rounded-lg text-[11px] hover:bg-amber-400 shadow shrink-0">99K</a>
 						</div>
-						<div class="flex items-center justify-between p-2.5 bg-[#09243a] rounded-xl border border-[#12415d]">
+						<div class="flex items-center justify-between p-2.5 bg-[#112240] rounded-xl border border-[#1D3557]">
 							<div>
 								<span class="text-slate-200 font-bold block">Sơ Đồ Tư Duy Luật CB-CC</span>
 								<span class="text-[10px] text-slate-400">Khoanh vùng 100% bẫy thi</span>
@@ -203,7 +203,7 @@ get_header();
 				</div>
 
 				<!-- SOCIAL PROOF STRIP -->
-				<div class="bg-[#0D1B2A] border border-slate-800 p-4 rounded-2xl space-y-2 text-xs text-center">
+				<div class="bg-[#0A192F] border border-slate-800 p-4 rounded-2xl space-y-2 text-xs text-center">
 					<div class="grid grid-cols-2 gap-3">
 						<div>
 							<span class="text-lg font-black text-white block">12.450+</span>

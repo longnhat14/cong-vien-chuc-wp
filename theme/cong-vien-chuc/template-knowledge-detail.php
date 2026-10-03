@@ -64,7 +64,7 @@ get_header();
 		<?php cvc_render_breadcrumbs( $breadcrumb_items ); ?>
 
 		<?php if ( ! $is_found ) : ?>
-			<div class="bg-[#0D1B2A] border border-slate-800 p-8 rounded-3xl text-center space-y-4">
+			<div class="bg-[#0A192F] border border-slate-800 p-8 rounded-3xl text-center space-y-4">
 				<h1 class="text-2xl font-black text-white">Không tìm thấy nội dung kiến thức</h1>
 				<p class="text-xs text-slate-400">Bài viết bạn tìm không tồn tại hoặc đã được gỡ bỏ.</p>
 				<a href="<?php echo esc_url( cvc_knowledge_url() ); ?>" class="inline-block px-5 py-2.5 bg-amber-500 text-navy-950 font-black text-xs rounded-xl shadow">
@@ -117,7 +117,7 @@ get_header();
 				<!-- LEFT COLUMN (3 COLS — TOC & LEGAL REF) -->
 				<aside class="lg:col-span-3 space-y-4">
 					
-					<div class="bg-[#0D1B2A] border border-slate-800 p-5 rounded-2xl space-y-3 shadow-lg text-xs">
+					<div class="bg-[#0A192F] border border-slate-800 p-5 rounded-2xl space-y-3 shadow-lg text-xs">
 						<h3 class="font-extrabold text-xs text-cyan-400 uppercase tracking-wider border-b border-slate-800 pb-2 flex items-center gap-1.5">
 							<i class="fa-solid fa-list"></i> Mục Lục Nội Dung
 						</h3>
@@ -129,7 +129,7 @@ get_header();
 					</div>
 
 					<?php if ( $legalDoc ) : ?>
-						<div class="bg-[#0D1B2A] border border-slate-800 p-5 rounded-2xl space-y-2 shadow-lg text-xs">
+						<div class="bg-[#0A192F] border border-slate-800 p-5 rounded-2xl space-y-2 shadow-lg text-xs">
 							<h3 class="font-extrabold text-xs text-amber-400 uppercase tracking-wider border-b border-slate-800 pb-2 flex items-center gap-1.5">
 								<i class="fa-solid fa-gavel"></i> Văn Bản Pháp Luật Gốc
 							</h3>
@@ -145,7 +145,7 @@ get_header();
 				<main class="lg:col-span-6 space-y-6">
 
 					<!-- READING MODES TOOLBAR (ĐỌC NHANH, ĐỌC Ý CHÍNH, ĐỌC TOÀN BỘ) -->
-					<div class="bg-[#0D1B2A] p-4 rounded-3xl border-2 border-cyan-500/40 space-y-3 shadow-2xl">
+					<div class="bg-[#0A192F] p-4 rounded-3xl border-2 border-cyan-500/40 space-y-3 shadow-2xl">
 						<div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-slate-800 pb-2.5">
 							<span class="text-xs font-black text-white flex items-center gap-1.5 uppercase tracking-wider">
 								<i class="fa-solid fa-glasses text-cyan-400 text-sm"></i> CHẾ ĐỘ ĐỌC CHUYÊN ĐỀ TƯƠNG TÁC
@@ -247,7 +247,7 @@ get_header();
 					</div>
 
 					<!-- SECTION 3: NỘI DUNG CHUYÊN ĐỀ ĐẦY ĐỦ (FULL TEXT CONTENT) -->
-					<div id="noi-dung-chinh" class="bg-[#0D1B2A] border border-slate-800 rounded-3xl p-6 space-y-5 shadow-xl">
+					<div id="noi-dung-chinh" class="bg-[#0A192F] border border-slate-800 rounded-3xl p-6 space-y-5 shadow-xl">
 						<div class="flex items-center justify-between border-b border-slate-800 pb-3">
 							<h2 class="text-base font-black text-white flex items-center gap-2">
 								<i class="fa-solid fa-book-open text-cyan-400"></i> Toàn Văn Nội Dung Chuyên Đề Chi Tiết
@@ -276,7 +276,7 @@ get_header();
 				<!-- RIGHT SIDEBAR (3 COLS — RELATED EXAM & ENROLLMENT) -->
 				<aside class="lg:col-span-3 space-y-4">
 
-					<div class="bg-[#0D1B2A] border border-slate-800 p-5 rounded-2xl space-y-3 shadow-xl text-xs text-center">
+					<div class="bg-[#0A192F] border border-slate-800 p-5 rounded-2xl space-y-3 shadow-xl text-xs text-center">
 						<h3 class="font-extrabold text-xs text-cyan-400 uppercase border-b border-slate-800 pb-2">
 							Luyện Thi Bài Viết Này
 						</h3>

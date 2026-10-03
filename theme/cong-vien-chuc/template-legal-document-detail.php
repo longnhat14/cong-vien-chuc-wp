@@ -31,10 +31,13 @@ if ( ! $is_found ) {
 			break;
 		}
 	}
-	if ( ! $document && ! empty( $fallback_list[0] ) ) {
-		$document = $fallback_list[0];
-		$is_found = true;
-	}
+	// Bỏ fallback "lấy văn bản fixture đầu tiên" cho slug không tồn tại -
+	// trước đây mọi URL sai đều hiện 1 văn bản khác (soft-404, sai nội dung).
+}
+
+if ( ! $is_found ) {
+	status_header( 404 );
+	cvc_seo_set_noindex();
 }
 
 cvc_seo_set_title( $is_found ? (string) ( $document['title'] ?? 'Chi tiết văn bản pháp luật' ) : 'Văn bản pháp luật công vụ' );
@@ -61,6 +64,19 @@ if ( $is_found ) {
 }
 
 get_header();
+
+if ( ! $is_found ) {
+	?>
+	<main id="main" class="cvc-page bg-slate-900 text-slate-100 min-h-screen py-12">
+		<div class="max-w-3xl mx-auto px-4 space-y-4">
+			<?php cvc_render_notfound_state( 'Không tìm thấy văn bản pháp luật này. Văn bản có thể đã được gỡ hoặc đường dẫn không đúng.' ); ?>
+			<p><a class="text-cyan-300 font-bold" href="<?php echo esc_url( cvc_legal_documents_url() ); ?>">&larr; Về thư viện văn bản pháp luật</a></p>
+		</div>
+	</main>
+	<?php
+	get_footer();
+	return;
+}
 
 // Data Extraction & Normalization
 $docNumber    = $document['document_number'] ?? ($document['code'] ?? 'Luật / Nghị định chính thức');
@@ -548,6 +564,10 @@ $chapters = cvc_get_document_fulltext_chapters( $slug, $document );
 		<h1 class="text-2xl sm:text-4xl font-black leading-tight relative z-10 text-white">
 			<?php echo esc_html( $document['title'] ?? 'Văn bản pháp luật công vụ' ); ?>
 		</h1>
+
+		<?php if ( ! empty( $document['id'] ) ) : ?>
+			<div class="relative z-10"><?php cvc_render_bookmark_button( 'legal_document', (int) $document['id'] ); ?></div>
+		<?php endif; ?>
 
 		<div class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-slate-800/80 text-xs text-slate-300 relative z-10">
 			<div>

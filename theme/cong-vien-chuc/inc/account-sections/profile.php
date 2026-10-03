@@ -56,27 +56,6 @@ $profile      = is_array( $profile_user['profile'] ?? null ) ? $profile_user['pr
 </section>
 
 <section class="cvc-account-section">
-	<h2>Đổi mật khẩu</h2>
-	<form class="cvc-form" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
-		<?php wp_nonce_field( 'cvc_profile_change_password' ); ?>
-		<input type="hidden" name="action" value="cvc_profile_change_password">
-
-		<div class="cvc-form__field">
-			<label for="cvc-current-password">Mật khẩu hiện tại</label>
-			<input type="password" id="cvc-current-password" name="current_password" required autocomplete="current-password">
-		</div>
-
-		<div class="cvc-form__field">
-			<label for="cvc-new-password">Mật khẩu mới</label>
-			<input type="password" id="cvc-new-password" name="new_password" required minlength="8" autocomplete="new-password">
-		</div>
-
-		<div class="cvc-form__field">
-			<label for="cvc-new-password-confirm">Nhập lại mật khẩu mới</label>
-			<input type="password" id="cvc-new-password-confirm" name="new_password_confirmation" required minlength="8" autocomplete="new-password">
-		</div>
-
-		<p class="cvc-form__hint">Sau khi đổi mật khẩu, bạn sẽ cần đăng nhập lại.</p>
-		<button type="submit" class="cvc-btn cvc-btn--secondary">Đổi mật khẩu</button>
-	</form>
+	<h2>Mật khẩu & đăng nhập</h2>
+	<p>Đổi mật khẩu và xem phiên đăng nhập tại trang <a href="<?php echo esc_url( cvc_account_url( 'security' ) ); ?>">Bảo mật &amp; đăng nhập</a>.</p>
 </section>

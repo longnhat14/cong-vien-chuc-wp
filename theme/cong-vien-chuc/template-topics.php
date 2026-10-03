@@ -86,7 +86,7 @@ get_header();
 			<!-- LEFT COLUMN (3 COLS — ROADMAP STAGES) -->
 			<aside class="lg:col-span-3 space-y-4">
 				
-				<div class="bg-[#0D1B2A] border border-slate-800 p-5 rounded-2xl space-y-3 shadow-lg">
+				<div class="bg-[#0A192F] border border-slate-800 p-5 rounded-2xl space-y-3 shadow-lg">
 					<h3 class="font-extrabold text-xs text-cyan-400 uppercase tracking-wider border-b border-slate-800 pb-2">
 						🌱 Giai Đoạn Thăng Tiến
 					</h3>
@@ -111,7 +111,7 @@ get_header();
 			<!-- CENTER MAIN COLUMN (6 COLS — TOPICS & MINDMAPS GRID) -->
 			<main class="lg:col-span-6 space-y-6">
 
-				<div class="flex items-center justify-between bg-[#0D1B2A] p-4 rounded-2xl border border-slate-800 text-xs">
+				<div class="flex items-center justify-between bg-[#0A192F] p-4 rounded-2xl border border-slate-800 text-xs">
 					<span class="text-slate-300">Tổng cộng <strong class="text-white"><?php echo count( $topics ); ?></strong> chủ đề sơ đồ tư duy</span>
 				</div>
 
@@ -120,7 +120,7 @@ get_header();
 				<?php else : ?>
 					<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 						<?php foreach ( $topics as $topic ) : ?>
-							<article class="bg-[#0D1B2A] border border-slate-800 hover:border-cyan-500/50 rounded-2xl p-5 space-y-3 shadow-lg transition-all hover:-translate-y-1">
+							<article class="bg-[#0A192F] border border-slate-800 hover:border-cyan-500/50 rounded-2xl p-5 space-y-3 shadow-lg transition-all hover:-translate-y-1">
 								<div class="flex items-center justify-between">
 									<span class="text-2xl">🧠</span>
 									<span class="text-[10px] font-extrabold bg-slate-800 text-slate-300 px-2 py-0.5 rounded">
@@ -153,7 +153,7 @@ get_header();
 			<!-- RIGHT SIDEBAR (3 COLS — CAREER GOAL RADAR) -->
 			<aside class="lg:col-span-3 space-y-4 sticky top-[80px]">
 
-				<div class="bg-[#0D1B2A] border border-amber-500/40 p-5 rounded-2xl space-y-3 shadow-xl">
+				<div class="bg-[#0A192F] border border-amber-500/40 p-5 rounded-2xl space-y-3 shadow-xl">
 					<h3 class="font-extrabold text-xs text-amber-400 uppercase tracking-wider border-b border-slate-800 pb-2">
 						🎯 Thiết Lập Mục Tiêu Thăng Tiến
 					</h3>

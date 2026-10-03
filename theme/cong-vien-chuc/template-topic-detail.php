@@ -62,7 +62,7 @@ get_header();
 		<?php cvc_render_breadcrumbs( $breadcrumb_items ); ?>
 
 		<?php if ( ! $is_found ) : ?>
-			<div class="bg-[#0D1B2A] border border-slate-800 p-8 rounded-3xl text-center space-y-4">
+			<div class="bg-[#0A192F] border border-slate-800 p-8 rounded-3xl text-center space-y-4">
 				<h1 class="text-2xl font-black text-white">Không tìm thấy chủ đề</h1>
 				<p class="text-xs text-slate-400">Chủ đề bạn tìm không tồn tại hoặc đã được gỡ bỏ.</p>
 				<a href="<?php echo esc_url( cvc_topics_url() ); ?>" class="inline-block px-5 py-2.5 bg-amber-500 text-navy-950 font-black text-xs rounded-xl shadow">
@@ -110,7 +110,7 @@ get_header();
 				<!-- LEFT COLUMN (3 COLS — SUB-TOPICS LIST) -->
 				<aside class="lg:col-span-3 space-y-4">
 					
-					<div class="bg-[#0D1B2A] border border-slate-800 p-5 rounded-2xl space-y-3 shadow-lg text-xs">
+					<div class="bg-[#0A192F] border border-slate-800 p-5 rounded-2xl space-y-3 shadow-lg text-xs">
 						<h3 class="font-extrabold text-xs text-cyan-400 uppercase tracking-wider border-b border-slate-800 pb-2 flex items-center gap-1.5">
 							<i class="fa-solid fa-list-check"></i> Chủ Đề Con Trọng Tâm
 						</h3>
@@ -136,7 +136,7 @@ get_header();
 				<main class="lg:col-span-6 space-y-4">
 
 					<!-- MINDMAP BOX -->
-					<div class="bg-[#0D1B2A] border border-slate-800 rounded-3xl p-6 space-y-4 shadow-xl">
+					<div class="bg-[#0A192F] border border-slate-800 rounded-3xl p-6 space-y-4 shadow-xl">
 						<h2 class="text-base font-black text-white border-b border-slate-800 pb-2 flex items-center gap-2">
 							<i class="fa-solid fa-sitemap text-amber-400"></i> Sơ Đồ Năng Lực Cốt Lõi
 						</h2>
@@ -163,7 +163,7 @@ get_header();
 				<!-- RIGHT SIDEBAR (3 COLS — MONETIZATION) -->
 				<aside class="lg:col-span-3 space-y-4">
 
-					<div class="bg-[#0D1B2A] border border-slate-800 p-5 rounded-2xl space-y-3 shadow-xl text-xs text-center">
+					<div class="bg-[#0A192F] border border-slate-800 p-5 rounded-2xl space-y-3 shadow-xl text-xs text-center">
 						<h3 class="font-extrabold text-xs text-amber-400 uppercase border-b border-slate-800 pb-2">
 							Khóa Học Lộ Trình Thăng Tiến
 						</h3>

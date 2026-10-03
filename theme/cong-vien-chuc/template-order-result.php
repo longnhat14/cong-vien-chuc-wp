@@ -22,7 +22,7 @@ get_header();
 
 <main id="main" class="min-h-screen bg-slate-900 text-slate-100 py-16">
 	<div class="max-w-lg mx-auto px-4 sm:px-6">
-		<div class="bg-[#0D1B2A] border border-slate-800 rounded-3xl p-8 shadow-2xl text-center space-y-5">
+		<div class="bg-[#0A192F] border border-slate-800 rounded-3xl p-8 shadow-2xl text-center space-y-5">
 
 			<?php if ( $is_success ) : ?>
 				<div class="w-16 h-16 mx-auto rounded-full bg-emerald-500/15 border border-emerald-500/40 text-emerald-400 flex items-center justify-center text-3xl">

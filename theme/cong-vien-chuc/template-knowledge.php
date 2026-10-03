@@ -91,7 +91,7 @@ get_header();
 			<aside class="lg:col-span-3 space-y-4">
 				
 				<!-- Filter Card 1: Chuyên đề môn học -->
-				<div class="bg-[#0D1B2A] border border-slate-800 p-5 rounded-2xl space-y-3 shadow-lg">
+				<div class="bg-[#0A192F] border border-slate-800 p-5 rounded-2xl space-y-3 shadow-lg">
 					<h3 class="font-extrabold text-xs text-cyan-400 uppercase tracking-wider border-b border-slate-800 pb-2 flex items-center gap-1.5">
 						<i class="fa-solid fa-layer-group"></i> Phân Loại Chuyên Đề
 					</h3>
@@ -120,7 +120,7 @@ get_header();
 				</div>
 
 				<!-- Filter Card 2: Căn cứ pháp lý gốc -->
-				<div class="bg-[#0D1B2A] border border-slate-800 p-5 rounded-2xl space-y-3 shadow-lg">
+				<div class="bg-[#0A192F] border border-slate-800 p-5 rounded-2xl space-y-3 shadow-lg">
 					<h3 class="font-extrabold text-xs text-amber-400 uppercase tracking-wider border-b border-slate-800 pb-2 flex items-center gap-1.5">
 						<i class="fa-solid fa-gavel"></i> Căn Cứ Pháp Lý Trọng Tâm
 					</h3>
@@ -141,7 +141,7 @@ get_header();
 			<!-- CENTER MAIN COLUMN (6 COLS — KNOWLEDGE CARDS GRID) -->
 			<main class="lg:col-span-6 space-y-4">
 				
-				<div class="flex items-center justify-between bg-[#0D1B2A] p-4 rounded-2xl border border-slate-800 text-xs">
+				<div class="flex items-center justify-between bg-[#0A192F] p-4 rounded-2xl border border-slate-800 text-xs">
 					<span class="text-slate-300">Hiển thị <strong class="text-cyan-400"><?php echo count($items); ?></strong> bài viết chuyên đề</span>
 					<div class="flex items-center gap-2">
 						<span class="text-slate-400">Sắp xếp:</span>
@@ -163,7 +163,7 @@ get_header();
 						$k_topic = $k_item['topic']['name'] ?? 'Kiến Thức Chung';
 						$k_time  = $k_item['read_time'] ?? '7 phút đọc';
 						?>
-						<article class="bg-[#0D1B2A] hover:bg-[#112338] border border-slate-800 hover:border-cyan-500/40 p-5 rounded-2xl space-y-3 shadow-lg transition-all flex flex-col justify-between group">
+						<article class="bg-[#0A192F] hover:bg-[#112338] border border-slate-800 hover:border-cyan-500/40 p-5 rounded-2xl space-y-3 shadow-lg transition-all flex flex-col justify-between group">
 							<div class="space-y-2">
 								<div class="flex items-center justify-between text-[10px]">
 									<span class="bg-cyan-500/10 text-cyan-300 font-extrabold px-2.5 py-0.5 rounded-full border border-cyan-500/30">
@@ -224,7 +224,7 @@ get_header();
 				</div>
 
 				<!-- CARD 2: CTA KHÓA HỌC BỨT PHÁ -->
-				<div class="bg-[#0D1B2A] border border-cyan-500/30 p-5 rounded-2xl space-y-3 shadow-xl text-xs text-center">
+				<div class="bg-[#0A192F] border border-cyan-500/30 p-5 rounded-2xl space-y-3 shadow-xl text-xs text-center">
 					<div class="w-12 h-12 mx-auto rounded-2xl bg-cyan-500/20 text-cyan-300 flex items-center justify-center font-black text-xl border border-cyan-500/40">
 						🎓
 					</div>

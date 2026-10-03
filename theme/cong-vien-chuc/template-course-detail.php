@@ -70,7 +70,7 @@ get_header();
 		<?php cvc_render_notice(); ?>
 
 		<?php if ( ! $is_found ) : ?>
-			<div class="bg-[#0D1B2A] border border-slate-800 p-8 rounded-3xl text-center space-y-4">
+			<div class="bg-[#0A192F] border border-slate-800 p-8 rounded-3xl text-center space-y-4">
 				<h1 class="text-2xl font-black text-white">Không tìm thấy khóa học</h1>
 				<p class="text-xs text-slate-400">Khóa học bạn tìm không tồn tại hoặc đã được chuyển hướng.</p>
 				<a href="<?php echo esc_url( cvc_courses_url() ); ?>" class="inline-block px-5 py-2.5 bg-amber-500 text-navy-950 font-black text-xs rounded-xl shadow">
@@ -128,7 +128,7 @@ get_header();
 				<!-- LEFT COLUMN (3 COLS — SYLLABUS LESSON LIST) -->
 				<aside class="lg:col-span-3 space-y-4">
 					
-					<div class="bg-[#0D1B2A] border border-slate-800 p-5 rounded-2xl space-y-3 shadow-lg">
+					<div class="bg-[#0A192F] border border-slate-800 p-5 rounded-2xl space-y-3 shadow-lg">
 						<h3 class="font-extrabold text-xs text-amber-400 uppercase tracking-wider border-b border-slate-800 pb-2">
 							📜 Giáo Trình Bài Học (<?php echo count( $lessons ); ?>)
 						</h3>
@@ -140,7 +140,7 @@ get_header();
 								<?php foreach ( $lessons as $l_idx => $lesson ) : ?>
 									<?php $lesson_id = (int) ( $lesson['id'] ?? 0 ); ?>
 									<?php if ( ! $lesson_id ) continue; ?>
-									<a href="<?php echo esc_url( cvc_course_lesson_url( $slug, $lesson_id ) ); ?>" class="block p-2.5 bg-[#09243a] hover:bg-cyan-500/10 hover:border-cyan-500/40 border border-[#12415d] rounded-xl transition-all space-y-1 group">
+									<a href="<?php echo esc_url( cvc_course_lesson_url( $slug, $lesson_id ) ); ?>" class="block p-2.5 bg-[#112240] hover:bg-cyan-500/10 hover:border-cyan-500/40 border border-[#1D3557] rounded-xl transition-all space-y-1 group">
 										<div class="flex items-center justify-between text-[11px]">
 											<span class="text-amber-400 font-bold">Bài <?php echo $l_idx + 1; ?></span>
 											<?php cvc_render_free_badge( ! empty( $lesson['is_free'] ) ); ?>
@@ -160,7 +160,7 @@ get_header();
 				<main class="lg:col-span-6 space-y-6">
 
 					<!-- Video Player Preview Box -->
-					<div class="bg-[#0D1B2A] border border-slate-800 rounded-3xl p-4 sm:p-6 space-y-4 shadow-xl">
+					<div class="bg-[#0A192F] border border-slate-800 rounded-3xl p-4 sm:p-6 space-y-4 shadow-xl">
 						<div class="aspect-video bg-slate-950 rounded-2xl border border-slate-800 relative overflow-hidden flex items-center justify-center group cursor-pointer">
 							<div class="w-16 h-16 rounded-full bg-amber-500 text-navy-950 font-black text-2xl flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform">
 								▶

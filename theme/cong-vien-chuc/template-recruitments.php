@@ -292,7 +292,7 @@ get_header();
 				</div>
 
 				<!-- CARD 3: CẨM NANG PHỎNG VẤN PDF -->
-				<div class="bg-[#0D1B2A] border border-cyan-500/30 p-5 rounded-2xl space-y-3 shadow-xl text-xs">
+				<div class="bg-[#0A192F] border border-cyan-500/30 p-5 rounded-2xl space-y-3 shadow-xl text-xs">
 					<h3 class="font-extrabold text-xs text-cyan-400 uppercase tracking-wider border-b border-slate-800 pb-2 flex items-center gap-1.5">
 						📄 Cẩm Nang Tuyển Dụng
 					</h3>

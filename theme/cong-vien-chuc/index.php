@@ -57,6 +57,29 @@ $cvc_stat_documents    = ( new CVC_Document_Service() )->count() ?? 0;
 $cvc_stat_legal_docs   = ( new CVC_Legal_Document_Service() )->count() ?? 0;
 $cvc_stat_topics       = ( new CVC_Topic_Service() )->count() ?? 0;
 
+/*
+ * Homepage Next-Gen (Phase 11) - dữ liệu thật cho Live Pulse, Career
+ * Roadmap, Smart Exam, Legal Matrix (xem inc/homepage-nextgen.php).
+ */
+$cvc_home_service = new CVC_Homepage_Service();
+$cvc_pulse_result = $cvc_home_service->pulse();
+$cvc_pulse        = $cvc_pulse_result['ok'] ? ( $cvc_pulse_result['data']['data'] ?? null ) : null;
+$cvc_roadmap_res  = $cvc_home_service->careerRoadmap();
+$cvc_roadmap      = $cvc_roadmap_res['ok'] ? ( $cvc_roadmap_res['data']['data'] ?? array() ) : array();
+$cvc_exams_res    = ( new CVC_Exam_Service() )->list( array( 'per_page' => 4 ) );
+$cvc_latest_exams = $cvc_exams_res['ok'] ? ( $cvc_exams_res['data']['data']['data'] ?? array() ) : array();
+$cvc_docs_res     = ( new CVC_Document_Service() )->list( array( 'per_page' => 50 ) );
+$cvc_form_docs    = array_slice(
+	array_values(
+		array_filter(
+			$cvc_docs_res['ok'] ? ( $cvc_docs_res['data']['data']['data'] ?? array() ) : array(),
+			fn ( $d ) => 'mau-don' === ( $d['category'] ?? '' )
+		)
+	),
+	0,
+	5
+);
+
 $cvc_latest_recruitments = [];
 $cvc_recruitment_result  = ( new CVC_Recruitment_Service() )->list( array( 'per_page' => 3 ) );
 if ( $cvc_recruitment_result['ok'] && ! empty( $cvc_recruitment_result['data']['data']['data'] ) && is_array( $cvc_recruitment_result['data']['data']['data'] ) ) {
@@ -80,6 +103,8 @@ if ( $cvc_recruitment_result['ok'] && ! empty( $cvc_recruitment_result['data']['
 	</div>
 </div>
 <?php endif; ?>
+
+<?php cvc_render_live_pulse( $cvc_pulse ); ?>
 
 <!-- 2. HERO BANNER - CORPORATE FLAGSHIP -->
 <section class="hero-gradient relative overflow-hidden py-16 lg:py-24 text-white">
@@ -125,6 +150,7 @@ class="w-full bg-transparent text-white text-sm placeholder-slate-400 focus:outl
 <button onclick="setSearchTag('Ôn thi Vòng 1 Kiến thức chung')" class="px-3 py-1 bg-white/5 hover:bg-white/15 rounded-lg border border-white/10 transition-colors">Ôn thi Vòng 1 Kiến thức chung</button>
 <button onclick="setSearchTag('Khóa học Vòng 2 Phỏng vấn')" class="px-3 py-1 bg-white/5 hover:bg-white/15 rounded-lg border border-white/10 transition-colors">Khóa học Vòng 2 Phỏng vấn</button>
 </div>
+<?php cvc_render_hero_tools(); ?>
 </div>
 
 <!-- Signature Slogan Banner -->
@@ -430,118 +456,13 @@ Xem Chi Tiết &rarr;
 </div>
 </section>
 
-<!-- 7. INTERACTIVE AI MOCK EXAM SUITE SIMULATOR -->
-<section id="thi-thu-ai" class="py-20 bg-slate-950 border-t border-slate-800">
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
-<div class="text-center max-w-3xl mx-auto space-y-3">
-<span class="inline-block text-xs font-black uppercase tracking-widest text-amber-400 bg-amber-500/10 px-3.5 py-1.5 rounded-full border border-amber-500/30">
-⚡ NGÂN HÀNG THI TRẮC NGHIỆM AI VÒNG 1
-</span>
-<h2 class="text-2xl sm:text-4xl font-extrabold text-white tracking-normal">
-Trải Nghiệm Đề Thi Thử Trực Tuyến Chuẩn Bộ Nội Vụ
-</h2>
-<p class="text-xs sm:text-sm text-slate-400">
-Hệ thống AI tự động chấm điểm, tính % đạt/chưa đạt và tư vấn khóa học lấp lỗ hổng kiến thức ngay lập tức.
-</p>
-</div>
-
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-<!-- Exam Suite 1 -->
-<div class="bg-navy-950 p-6 rounded-3xl border border-slate-800 hover:border-gold-500/60 transition-all space-y-4">
-<div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-xl font-black">
-<i class="fa-solid fa-list-check"></i>
-</div>
-<h3 class="font-extrabold text-lg text-white">Đề Thi Thử Kiến Thức Chung (Bộ 01)</h3>
-<p class="text-xs text-slate-400 leading-relaxed">60 Câu hỏi trắc nghiệm Luật Cán bộ công chức, Hiến pháp và Hệ thống chính trị trong 60 phút.</p>
-<div class="pt-2 flex items-center justify-between text-xs text-slate-300">
-<span><i class="fa-solid fa-circle-play text-amber-400 mr-1"></i> Miễn Phí Thi Thử</span>
-<span class="font-bold text-emerald-400">Đạt >= 30/60</span>
-</div>
-<a href="<?php echo esc_url(cvc_exam_url('de-thi-thu-kien-thuc-chung-tuyen-dung-cong-chuc-vong-1-de-01')); ?>" class="block w-full py-3 bg-amber-500 hover:bg-amber-600 text-navy-950 font-black text-xs rounded-xl text-center transition-all">
-VÀO THI THỬ NGAY &rarr;
-</a>
-</div>
-
-<!-- Exam Suite 2 -->
-<div class="bg-navy-950 p-6 rounded-3xl border border-slate-800 hover:border-azure-500/60 transition-all space-y-4">
-<div class="w-12 h-12 rounded-2xl bg-azure-500/20 text-azure-400 flex items-center justify-center text-xl font-black">
-<i class="fa-solid fa-language"></i>
-</div>
-<h3 class="font-extrabold text-lg text-white">Đề Thi Thử Tiếng Anh B1/B2 (Bộ 01)</h3>
-<p class="text-xs text-slate-400 leading-relaxed">30 Câu hỏi trắc nghiệm Tiếng Anh Công vụ Vòng 1 trong 30 phút chuẩn khung Châu Âu.</p>
-<div class="pt-2 flex items-center justify-between text-xs text-slate-300">
-<span><i class="fa-solid fa-circle-play text-azure-400 mr-1"></i> Miễn Phí Thi Thử</span>
-<span class="font-bold text-emerald-400">Đạt >= 15/30</span>
-</div>
-<a href="<?php echo esc_url(cvc_exam_url('de-thi-thu-ngoai-ngu-tieng-anh-tuyen-dung-cong-chuc-vong-1-de-01')); ?>" class="block w-full py-3 bg-azure-500 hover:bg-azure-600 text-white font-black text-xs rounded-xl text-center transition-all">
-VÀO THI THỬ NGAY &rarr;
-</a>
-</div>
-
-<!-- Exam Suite 3 -->
-<div class="bg-navy-950 p-6 rounded-3xl border border-slate-800 hover:border-emerald-500/60 transition-all space-y-4">
-<div class="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl font-black">
-<i class="fa-solid fa-laptop-code"></i>
-</div>
-<h3 class="font-extrabold text-lg text-white">Đề Thi Thử Tin Học Văn Phòng (Bộ 01)</h3>
-<p class="text-xs text-slate-400 leading-relaxed">30 Câu hỏi trắc nghiệm Tin học CNTT Vòng 1 trong 30 phút bám sát ngân hàng câu hỏi sát hạch.</p>
-<div class="pt-2 flex items-center justify-between text-xs text-slate-300">
-<span><i class="fa-solid fa-circle-play text-emerald-400 mr-1"></i> Miễn Phí Thi Thử</span>
-<span class="font-bold text-emerald-400">Đạt >= 15/30</span>
-</div>
-<a href="<?php echo esc_url(cvc_exam_url('de-thi-thu-tin-hoc-tuyen-dung-cong-chuc-vong-1-de-01')); ?>" class="block w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xs rounded-xl text-center transition-all">
-VÀO THI THỬ NGAY &rarr;
-</a>
-</div>
-</div>
-</div>
-</section>
-
-<!-- 8. DIGITAL LAW & RESOURCE VAULT -->
-<section id="thu-vien" class="py-20 bg-slate-900 border-t border-slate-800">
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
-<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
-<div class="space-y-2">
-<span class="inline-block text-xs font-extrabold uppercase tracking-widest text-emerald-400 bg-emerald-500/10 px-3.5 py-1.5 rounded-full border border-emerald-500/30">
-KHO VĂN BẢN QUY PHẠM PHÁP LUẬT
-</span>
-<h2 class="text-2xl sm:text-4xl font-extrabold text-white tracking-normal">
-Thư Viện Pháp Luật & Nghị Định Tuyển Dụng
-</h2>
-<p class="text-xs sm:text-sm text-slate-400">Tra cứu chính xác văn bản hợp nhất, quy định sát hạch và tiêu chuẩn chức danh ngạch</p>
-</div>
-<a href="<?php echo esc_url(cvc_legal_documents_url()); ?>" class="text-xs font-extrabold text-amber-400 hover:text-amber-300 flex items-center gap-1">
-Xem Toàn Bộ Thư Viện 法 Luật <i class="fa-solid fa-arrow-right text-[10px]"></i>
-</a>
-</div>
-
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-<!-- Doc 1 -->
-<div class="bg-navy-950 p-6 rounded-3xl border border-slate-800 hover:border-amber-400 transition-all space-y-3">
-<span class="text-[10px] font-bold bg-amber-500/20 text-amber-300 px-2.5 py-0.5 rounded uppercase">Nghị định</span>
-<h4 class="font-extrabold text-base text-white">Nghị định 138/2020/NĐ-CP</h4>
-<p class="text-xs text-slate-400 leading-relaxed">Tuyển dụng, sử dụng và quản lý công chức (Quy định tiêu chuẩn thi Vòng 1 & Vòng 2).</p>
-<a href="<?php echo esc_url(cvc_legal_document_url('nghi-dinh-138-2020-nd-cp-tuyen-dung-su-dung-quan-ly-cong-chuc')); ?>" class="inline-block text-xs font-bold text-amber-400 hover:underline pt-2">Xem nội dung văn bản &rarr;</a>
-</div>
-
-<!-- Doc 2 -->
-<div class="bg-navy-950 p-6 rounded-3xl border border-slate-800 hover:border-azure-400 transition-all space-y-3">
-<span class="text-[10px] font-bold bg-azure-500/20 text-azure-300 px-2.5 py-0.5 rounded uppercase">Nghị định</span>
-<h4 class="font-extrabold text-base text-white">Nghị định 115/2020/NĐ-CP</h4>
-<p class="text-xs text-slate-400 leading-relaxed">Tuyển dụng, sử dụng và quản lý viên chức trong các đơn vị sự nghiệp công lập.</p>
-<a href="<?php echo esc_url(cvc_legal_document_url('nghi-dinh-115-2020-nd-cp-tuyen-dung-su-dung-quan-ly-vien-chuc')); ?>" class="inline-block text-xs font-bold text-azure-400 hover:underline pt-2">Xem nội dung văn bản &rarr;</a>
-</div>
-
-<!-- Doc 3 -->
-<div class="bg-navy-950 p-6 rounded-3xl border border-slate-800 hover:border-emerald-400 transition-all space-y-3">
-<span class="text-[10px] font-bold bg-emerald-500/20 text-emerald-300 px-2.5 py-0.5 rounded uppercase">Luật</span>
-<h4 class="font-extrabold text-base text-white">Luật Cán bộ, công chức 2008 (Sửa đổi 2019)</h4>
-<p class="text-xs text-slate-400 leading-relaxed">Quy định nghĩa vụ, quyền lợi, chế độ bầu cử và kỷ luật cán bộ công chức.</p>
-<a href="<?php echo esc_url(cvc_legal_document_url('luat-can-bo-cong-chuc-2008-sua-doi-2019')); ?>" class="inline-block text-xs font-bold text-emerald-400 hover:underline pt-2">Xem nội dung văn bản &rarr;</a>
-</div>
-</div>
-</div>
-</section>
+<!-- 7. CAREER ROADMAP + SMART EXAM + SALARY + LEGAL MATRIX (Next-Gen, dữ liệu thật) -->
+<?php
+cvc_render_career_roadmap( $cvc_roadmap );
+cvc_render_smart_exam_section( $cvc_latest_exams );
+cvc_render_salary_calculator();
+cvc_render_legal_matrix( $cvc_pulse['new_legal_documents'] ?? array(), $cvc_form_docs );
+?>
 
 <!-- 9. EXECUTIVE CALL-TO-ACTION BANNER -->
 <section class="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">

@@ -94,7 +94,7 @@ function cvc_document_price_badge( array $doc ): string {
 		<?php else : ?>
 			<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
 				<?php foreach ( $documents as $doc ) : ?>
-					<a href="<?php echo esc_url( cvc_document_url( $doc['slug'] ) ); ?>" class="block bg-[#0D1B2A] border border-slate-800 hover:border-amber-500/50 rounded-2xl p-5 space-y-3 shadow-lg transition-colors">
+					<a href="<?php echo esc_url( cvc_document_url( $doc['slug'] ) ); ?>" class="block bg-[#0A192F] border border-slate-800 hover:border-amber-500/50 rounded-2xl p-5 space-y-3 shadow-lg transition-colors">
 						<div class="flex items-center justify-between">
 							<div class="w-11 h-11 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-lg border border-amber-500/30">
 								<i class="fa-solid fa-file-pdf"></i>

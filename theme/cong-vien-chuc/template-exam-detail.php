@@ -105,7 +105,7 @@ get_header();
 		<?php cvc_render_breadcrumbs( $breadcrumb_items ); ?>
 
 		<?php if ( ! $is_found ) : ?>
-			<div class="bg-[#0D1B2A] border border-slate-800 p-8 rounded-3xl text-center space-y-4">
+			<div class="bg-[#0A192F] border border-slate-800 p-8 rounded-3xl text-center space-y-4">
 				<h1 class="text-2xl font-black text-white">Không tìm thấy đề thi</h1>
 				<p class="text-xs text-slate-400">Đề thi bạn tìm không tồn tại hoặc đã được gỡ bỏ.</p>
 				<a href="<?php echo esc_url( cvc_exams_url() ); ?>" class="inline-block px-5 py-2.5 bg-amber-500 text-navy-950 font-black text-xs rounded-xl shadow">
@@ -173,7 +173,7 @@ get_header();
 				<!-- LEFT COLUMN (3 COLS — EXAM METADATA & SPECS) -->
 				<aside class="lg:col-span-3 space-y-4">
 					
-					<div class="bg-[#0D1B2A] border border-slate-800 p-5 rounded-2xl space-y-4 shadow-lg text-xs">
+					<div class="bg-[#0A192F] border border-slate-800 p-5 rounded-2xl space-y-4 shadow-lg text-xs">
 						<h3 class="font-extrabold text-xs text-amber-400 uppercase tracking-wider border-b border-slate-800 pb-2 flex items-center gap-1.5">
 							<i class="fa-solid fa-sliders"></i> Thông Số Đề Thi
 						</h3>
@@ -199,7 +199,7 @@ get_header();
 					</div>
 
 					<!-- PDF DOWNLOAD CARD -->
-					<div class="bg-[#0D1B2A] border border-slate-800 p-5 rounded-2xl space-y-3 shadow-lg text-xs">
+					<div class="bg-[#0A192F] border border-slate-800 p-5 rounded-2xl space-y-3 shadow-lg text-xs">
 						<h3 class="font-extrabold text-xs text-cyan-400 uppercase tracking-wider border-b border-slate-800 pb-2 flex items-center gap-1.5">
 							<i class="fa-solid fa-file-pdf"></i> Tải Đề Thi PDF
 						</h3>
@@ -216,7 +216,7 @@ get_header();
 				<!-- CENTER MAIN COLUMN (6 COLS — QUESTION PREVIEW) -->
 				<main class="lg:col-span-6 space-y-4">
 
-					<div class="bg-[#0D1B2A] border border-slate-800 rounded-3xl p-6 space-y-5 shadow-xl">
+					<div class="bg-[#0A192F] border border-slate-800 rounded-3xl p-6 space-y-5 shadow-xl">
 						<div class="flex items-center justify-between border-b border-slate-800 pb-3">
 							<h2 class="text-base font-black text-white flex items-center gap-2">
 								<i class="fa-solid fa-eye text-cyan-400"></i> Xem Trước Cấu Trúc Câu Hỏi (<?php echo min( 5, $total_q ); ?>/<?php echo $total_q; ?> câu)
@@ -296,7 +296,7 @@ get_header();
 				</div>
 
 				<!-- UPSELL: TÀI LIỆU ÔN THI LIÊN QUAN -->
-				<div class="bg-[#0D1B2A] border border-cyan-500/30 p-5 rounded-2xl space-y-3 shadow-xl text-xs">
+				<div class="bg-[#0A192F] border border-cyan-500/30 p-5 rounded-2xl space-y-3 shadow-xl text-xs">
 					<h3 class="font-extrabold text-xs text-cyan-400 uppercase tracking-wider border-b border-slate-800 pb-2 flex items-center gap-1.5">
 						📄 Cẩm Nang Ôn Thi Liên Quan
 					</h3>

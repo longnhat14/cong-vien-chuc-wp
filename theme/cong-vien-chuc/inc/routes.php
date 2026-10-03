@@ -34,6 +34,7 @@ function cvc_account_sections(): array {
 		'viec-lam-phu-hop'  => 'recruitment-matches',
 		'thong-bao'         => 'notifications',
 		'chung-chi'         => 'certificates',
+		'bao-mat'           => 'security',
 	);
 }
 

@@ -24,6 +24,13 @@ final class CVC_Profile_Service extends CVC_Api_Service {
 		return $this->client->put( $this->endpoint(), $payload, $token );
 	}
 
+	/**
+	 * Phiên đăng nhập hiện tại (GET /api/auth/session).
+	 */
+	public function session( string $token ): array {
+		return $this->client->get( '/api/auth/session', array(), $token );
+	}
+
 	public function changePassword( string $currentPassword, string $newPassword, string $newPasswordConfirmation, string $token ): array {
 		return $this->client->post(
 			$this->endpoint() . '/change-password',
