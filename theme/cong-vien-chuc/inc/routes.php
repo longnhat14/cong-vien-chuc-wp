@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Tăng số này khi thêm/sửa rewrite rule để buộc flush lại đúng 1 lần.
-const CVC_REWRITE_VERSION = '9';
+const CVC_REWRITE_VERSION = '10';
 
 /**
  * Section hợp lệ của /tai-khoan/{section}/ (Phase 10) - map slug tiếng
@@ -274,6 +274,26 @@ function cvc_register_rewrite_rules(): void {
 		'index.php?cvc_page=admin-ai-settings',
 		'top'
 	);
+
+	/*
+	 * Khu quản trị nội dung (Phase 13) - đặt SAU rule cau-hinh-ai để
+	 * /quan-tri/cau-hinh-ai/ vẫn vào trang cấu hình AI cũ.
+	 */
+	add_rewrite_rule(
+		'^quan-tri/([a-z-]+)/(moi|[0-9]+)/?$',
+		'index.php?cvc_page=admin&cvc_admin_resource=$matches[1]&cvc_admin_item=$matches[2]',
+		'top'
+	);
+	add_rewrite_rule(
+		'^quan-tri/([a-z-]+)/?$',
+		'index.php?cvc_page=admin&cvc_admin_resource=$matches[1]',
+		'top'
+	);
+	add_rewrite_rule(
+		'^quan-tri/?$',
+		'index.php?cvc_page=admin',
+		'top'
+	);
 }
 
 add_filter( 'query_vars', 'cvc_register_query_vars' );
@@ -296,6 +316,8 @@ function cvc_register_query_vars( array $vars ): array {
 	$vars[] = 'cvc_attempt_id';
 	$vars[] = 'cvc_document_slug';
 	$vars[] = 'cvc_certificate_code';
+	$vars[] = 'cvc_admin_resource';
+	$vars[] = 'cvc_admin_item';
 
 	return $vars;
 }
@@ -383,6 +405,7 @@ function cvc_template_include( string $template ): string {
 		'order-result'          => 'template-order-result.php',
 		'certificate-verify'    => 'template-certificate-verify.php',
 		'admin-ai-settings'     => 'template-admin-ai-settings.php',
+		'admin'                 => 'template-admin.php',
 	);
 
 	if ( isset( $map[ $page ] ) ) {

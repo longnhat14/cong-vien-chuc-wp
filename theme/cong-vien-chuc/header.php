@@ -268,6 +268,9 @@ $cvc_current_url = home_url( add_query_arg( null, null ) );
 <span class="absolute top-1 right-1 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center"><?php echo esc_html( $cvc_header_unread > 9 ? '9+' : (string) $cvc_header_unread ); ?></span>
 <?php endif; ?>
 </a>
+<?php if ( function_exists( 'cvc_admin_is_staff' ) && cvc_admin_is_staff() ) : ?>
+<a href="<?php echo esc_url( cvc_admin_url() ); ?>" class="hidden sm:flex px-3 py-2.5 bg-amber-500 hover:bg-amber-400 text-navy-950 text-xs font-black rounded-xl items-center gap-1.5"><i class="fa-solid fa-gauge-high" aria-hidden="true"></i><span>Quản trị</span></a>
+<?php endif; ?>
 <a href="<?php echo esc_url( cvc_account_url() ); ?>" class="hidden sm:flex px-4 py-2.5 bg-gradient-to-r from-navy-950 to-navy-800 hover:from-navy-900 hover:to-navy-700 text-white text-xs font-bold rounded-xl shadow-md items-center gap-2 border border-slate-700/40">
 <i class="fa-solid fa-user-shield text-gold-400" aria-hidden="true"></i><span>Tài khoản</span>
 </a>
@@ -287,6 +290,9 @@ $cvc_current_url = home_url( add_query_arg( null, null ) );
 <?php endforeach; ?>
 <div class="pt-3 border-t border-slate-100 flex gap-2">
 <?php if ( $cvc_header_logged_in ) : ?>
+<?php if ( function_exists( 'cvc_admin_is_staff' ) && cvc_admin_is_staff() ) : ?>
+<a href="<?php echo esc_url( cvc_admin_url() ); ?>" class="flex-1 py-2.5 bg-amber-500 text-navy-950 font-black rounded-xl text-xs text-center">Quản trị</a>
+<?php endif; ?>
 <a href="<?php echo esc_url( cvc_account_url() ); ?>" class="flex-1 py-2.5 bg-navy-950 text-white font-bold rounded-xl text-xs text-center">Tài khoản</a>
 <a href="<?php echo esc_url( cvc_logout_url() ); ?>" class="flex-1 py-2.5 bg-slate-100 text-slate-800 font-bold rounded-xl text-xs text-center">Đăng xuất</a>
 <?php else : ?>

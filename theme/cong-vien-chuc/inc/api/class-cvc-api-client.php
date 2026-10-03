@@ -117,6 +117,63 @@ final class CVC_Api_Client {
 	/**
 	 * @param array<string, mixed> $body
 	 */
+	/**
+	 * POST multipart/form-data (tải tệp lên admin API - Phase 13). $fields
+	 * có thể chứa mảng 1 cấp; $files dạng name => [đường dẫn tạm, tên tệp,
+	 * mime]. Với cập nhật dùng $fields['_method'] = 'PUT' (Laravel không đọc
+	 * tệp trong request PUT multipart).
+	 *
+	 * @param array<string, mixed>                             $fields
+	 * @param array<string, array{0: string, 1: string, 2: string}> $files
+	 */
+	public function post_multipart( string $path, array $fields, array $files, ?string $token = null ): array {
+		$boundary = 'cvc' . wp_generate_password( 24, false );
+		$eol      = "\r\n";
+		$body     = '';
+
+		foreach ( $fields as $name => $value ) {
+			$values = is_array( $value ) ? $value : array( $value );
+			$key    = is_array( $value ) ? $name . '[]' : $name;
+			foreach ( $values as $v ) {
+				if ( null === $v ) {
+					continue;
+				}
+				$body .= '--' . $boundary . $eol
+					. 'Content-Disposition: form-data; name="' . $key . '"' . $eol . $eol
+					. ( is_bool( $v ) ? ( $v ? '1' : '0' ) : (string) $v ) . $eol;
+			}
+		}
+
+		foreach ( $files as $name => $file ) {
+			$contents = file_get_contents( $file[0] );
+			if ( false === $contents ) {
+				continue;
+			}
+			$filename = str_replace( array( '"', "\r", "\n" ), '', $file[1] );
+			$body    .= '--' . $boundary . $eol
+				. 'Content-Disposition: form-data; name="' . $name . '"; filename="' . $filename . '"' . $eol
+				. 'Content-Type: ' . $file[2] . $eol . $eol
+				. $contents . $eol;
+		}
+
+		$body .= '--' . $boundary . '--' . $eol;
+
+		$response = wp_remote_request(
+			$this->build_url( $path, array() ),
+			array(
+				'method'  => 'POST',
+				'timeout' => max( $this->timeout, 60 ),
+				'headers' => array_merge(
+					$this->headers( $token ),
+					array( 'Content-Type' => 'multipart/form-data; boundary=' . $boundary )
+				),
+				'body'    => $body,
+			)
+		);
+
+		return $this->handle_response( $response );
+	}
+
 	private function send( string $method, string $path, array $body, ?string $token ): array {
 		$url = $this->build_url( $path, array() );
 
