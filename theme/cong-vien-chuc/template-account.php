@@ -156,7 +156,7 @@ get_header();
 			</aside>
 
 			<!-- CENTER MAIN CONTENT (6 COLS — SECTION DYNAMIC RENDER) -->
-			<main class="lg:col-span-6 space-y-4">
+			<div class="lg:col-span-6 space-y-4">
 				
 				<?php cvc_render_notice(); ?>
 
@@ -173,7 +173,7 @@ get_header();
 					</div>
 				</div>
 
-			</main>
+			</div>
 
 			<!-- RIGHT SIDEBAR (3 COLS — STATS & SUPPORT) -->
 			<aside class="lg:col-span-3 space-y-4">

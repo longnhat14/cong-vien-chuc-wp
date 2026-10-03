@@ -69,6 +69,9 @@ $status_labels = array(
 									<?php if ( null !== $passed ) : ?>
 										<?php echo $passed ? '· Đạt' : '· Chưa đạt'; ?>
 									<?php endif; ?>
+									<?php if ( ! empty( $attempt['total_questions'] ) ) : ?>
+										<br><small><?php echo esc_html( sprintf( '%d/%d câu đúng', (int) ( $attempt['correct_count'] ?? 0 ), (int) $attempt['total_questions'] ) ); ?></small>
+									<?php endif; ?>
 								<?php else : ?>
 									&mdash;
 								<?php endif; ?>

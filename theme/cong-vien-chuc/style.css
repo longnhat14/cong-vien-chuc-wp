@@ -3,7 +3,7 @@ Theme Name: Công Viên Chức
 Theme URI: https://congvienchuc.com
 Author: PCTech
 Description: Frontend WordPress cho nền tảng Công Viên Chức.
-Version: 1.1.0
+Version: 1.2.0
 */
 
 /* --- Design tokens --- */
@@ -5275,4 +5275,47 @@ button.cvc-btn:disabled {
     .cvc-ticker {
         overflow-x: auto;
     }
+}
+
+/* ==========================================================================
+   Phase 12 - Các mục trong trang tài khoản nằm trên nền tối (#0A192F) nhưng
+   thẻ .cvc-card/.cvc-form dùng token nền sáng -> chữ tối trên nền tối, thẻ
+   trắng lạc tông. Định nghĩa lại token màu trong phạm vi khung tài khoản.
+   ========================================================================== */
+.cvc-account-section-wrapper {
+    --cvc-color-text: #e2e8f0;
+    --cvc-color-text-muted: #94a3b8;
+    --cvc-color-text-subtle: #94a3b8;
+    --cvc-color-border: #1d3557;
+    --cvc-color-border-strong: #24406b;
+    --cvc-color-bg: #112240;
+    --cvc-color-bg-alt: #0a192f;
+    --cvc-color-bg-tint: #112240;
+    --cvc-color-primary-tint: rgba(6, 182, 212, 0.12);
+    --cvc-color-primary-tint-strong: rgba(6, 182, 212, 0.22);
+    color: var(--cvc-color-text);
+}
+
+.cvc-account-section-wrapper h2,
+.cvc-account-section-wrapper h3,
+.cvc-account-section-wrapper h4,
+.cvc-account-section-wrapper strong {
+    color: #f8fafc;
+}
+
+.cvc-account-section-wrapper input:not([type="checkbox"]):not([type="radio"]),
+.cvc-account-section-wrapper select,
+.cvc-account-section-wrapper textarea {
+    background: #0a192f;
+    color: #e2e8f0;
+    border-color: #1d3557;
+}
+
+.cvc-account-section-wrapper a:not(.cvc-btn):not([class*="bg-"]) {
+    color: #67e8f9;
+}
+
+/* Gợi ý dưới ô nhập (đăng ký, đặt lại mật khẩu). */
+.cvc-form__hint {
+    display: block;
 }

@@ -22,17 +22,10 @@ if ( $result['ok'] ?? false ) {
 	$is_found = null !== $item && ! empty( $item );
 }
 
+// Slug không tồn tại -> 404 thật (trước đây hiện nội dung mẫu/fixture: soft-404, sai nội dung).
 if ( ! $is_found ) {
-	$fallback_list = CVC_Subpage_Fixtures::get_knowledge_items();
-	$matched       = null;
-	foreach ( $fallback_list as $fb ) {
-		if ( ( $fb['slug'] ?? '' ) === $slug ) {
-			$matched = $fb;
-			break;
-		}
-	}
-	$item     = $matched ?? ( $fallback_list[0] ?? null );
-	$is_found = null !== $item;
+	status_header( 404 );
+	cvc_seo_set_noindex();
 }
 
 cvc_seo_set_title( $is_found ? (string) $item['title'] : 'Chi tiết bài viết kiến thức' );
@@ -72,6 +65,7 @@ get_header();
 				</a>
 			</div>
 		<?php else : ?>
+			<?php cvc_render_track_marker( 'knowledge_viewed', 'knowledge_item', (int) ( $item['id'] ?? 0 ) ); ?>
 			<?php $legalDoc = is_array( $item['legal_document'] ?? null ) ? $item['legal_document'] : null; ?>
 
 			<!-- HERO ARTICLE HEADER BANNER -->
@@ -142,7 +136,7 @@ get_header();
 				</aside>
 
 				<!-- CENTER MAIN COLUMN (6 COLS — ARTICLE PROSE & KEY TAKEAWAYS) -->
-				<main class="lg:col-span-6 space-y-6">
+				<div class="lg:col-span-6 space-y-6">
 
 					<!-- READING MODES TOOLBAR (ĐỌC NHANH, ĐỌC Ý CHÍNH, ĐỌC TOÀN BỘ) -->
 					<div class="bg-[#0A192F] p-4 rounded-3xl border-2 border-cyan-500/40 space-y-3 shadow-2xl">
@@ -271,7 +265,7 @@ get_header();
 						</div>
 					</div>
 
-				</main>
+				</div>
 
 				<!-- RIGHT SIDEBAR (3 COLS — RELATED EXAM & ENROLLMENT) -->
 				<aside class="lg:col-span-3 space-y-4">

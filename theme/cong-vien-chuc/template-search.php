@@ -63,7 +63,7 @@ get_header();
 		<section class="bg-gradient-to-r from-navy-950 via-slate-900 to-indigo-950 p-6 sm:p-8 rounded-3xl border border-cyan-500/40 shadow-2xl space-y-4">
 			<div class="max-w-3xl space-y-3">
 				<span class="bg-cyan-500 text-navy-950 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider">
-					🔍 AI SEARCH ENGINE 2026
+					Tìm kiếm
 				</span>
 				<h1 class="text-2xl sm:text-3xl font-black text-white">
 					<?php echo $has_query ? esc_html( sprintf( 'Kết quả cho: "%s"', $q ) ) : 'Tìm Kiếm Toàn Bộ Dữ Liệu Công Vụ'; ?>
@@ -120,7 +120,7 @@ get_header();
 			</aside>
 
 			<!-- CENTER MAIN COLUMN (6 COLS — RESULTS LISTING) -->
-			<main class="lg:col-span-6 space-y-4">
+			<div class="lg:col-span-6 space-y-4">
 
 				<?php if ( ! $has_query ) : ?>
 					
@@ -130,7 +130,7 @@ get_header();
 						</div>
 						<h2 class="text-xl font-black text-white">Bắt Đầu Tìm Kiếm Dữ Liệu Công Vụ</h2>
 						<p class="text-xs text-slate-400 max-w-md mx-auto">
-							Vui lòng nhập từ khóa tìm kiếm ở khung trên để khám phá 1.000+ đề thi trắc nghiệm, khóa học bồi dưỡng & tin tuyển dụng công chức 2026.
+							Vui lòng nhập từ khóa tìm kiếm ở khung trên để tìm đề thi, khóa học, văn bản pháp luật, kiến thức và tin tuyển dụng.
 						</p>
 					</div>
 
@@ -192,7 +192,7 @@ get_header();
 
 				<?php endif; ?>
 
-			</main>
+			</div>
 
 			<!-- RIGHT COLUMN (3 COLS — HOT SEARCHES & RECOMMENDATIONS) -->
 			<aside class="lg:col-span-3 space-y-4">

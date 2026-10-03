@@ -24,4 +24,29 @@ final class CVC_Course_Service extends CVC_Api_Service {
 			$token
 		);
 	}
+
+	/**
+	 * Ghi danh (POST /api/course-enrollments). Khóa trả phí cần đã mua
+	 * (Entitlement) - backend trả 402 nếu chưa.
+	 */
+	public function enroll( int $course_id, string $token ): array {
+		return $this->client->post( '/api/course-enrollments', array( 'course_id' => $course_id ), $token );
+	}
+
+	/**
+	 * Cập nhật tiến độ 1 bài (PUT /api/course-lessons/{id}/progress). Đủ mọi
+	 * bài -> backend tự đánh dấu hoàn thành khóa và cấp chứng chỉ.
+	 *
+	 * @param array<string, mixed> $payload
+	 */
+	public function update_lesson_progress( int $lesson_id, array $payload, string $token ): array {
+		return $this->client->put( '/api/course-lessons/' . $lesson_id . '/progress', $payload, $token );
+	}
+
+	/**
+	 * @param array<string, mixed> $query
+	 */
+	public function my_courses( array $query, string $token ): array {
+		return $this->client->get( '/api/my-courses', $query, $token );
+	}
 }

@@ -98,10 +98,65 @@ if ( $attempt_id > 0 && $token ) {
 	}
 }
 
+/*
+ * Không còn "chế độ demo" với bộ câu hỏi mẫu không liên quan tới đề (trước
+ * đây mọi nút "Vào thi" ở danh sách/chi tiết đề đều mở chế độ này nên người
+ * dùng làm bộ câu hỏi giả, không lưu kết quả). Lượt thi thật luôn bắt đầu từ
+ * nút "Bắt đầu làm bài" ở trang chi tiết đề (POST cvc_exam_start).
+ */
+if ( $is_demo_mode ) {
+	if ( '' !== $slug ) {
+		wp_safe_redirect( cvc_exam_url( $slug ) );
+		exit;
+	}
+
+	if ( ! $token ) {
+		wp_safe_redirect( cvc_login_url( home_url( add_query_arg( null, null ) ) ) );
+		exit;
+	}
+
+	status_header( 404 );
+	cvc_seo_set_noindex();
+	cvc_seo_set_title( 'Không tìm thấy lượt thi' );
+	get_header();
+	?>
+	<main id="main" class="cvc-page bg-slate-900 text-slate-100 min-h-screen py-12">
+		<div class="max-w-3xl mx-auto px-4 space-y-4">
+			<?php cvc_render_notfound_state( 'Không tìm thấy lượt thi này trong tài khoản của bạn.' ); ?>
+			<p class="flex gap-4 flex-wrap">
+				<a class="text-cyan-300 font-bold" href="<?php echo esc_url( cvc_account_url( 'exam-history' ) ); ?>">Xem lịch sử làm bài</a>
+				<a class="text-cyan-300 font-bold" href="<?php echo esc_url( cvc_exams_url() ); ?>">Danh sách đề thi</a>
+			</p>
+		</div>
+	</main>
+	<?php
+	get_footer();
+	return;
+}
+
 $total_q = count( $questions );
 
-cvc_seo_set_title( 'EXAM OS X - Hệ Thống Thi Trắc Nghiệm AI Công Viên Chức' );
-cvc_seo_set_description( 'Hệ thống Smart Exam Intelligence Platform luyện thi Kiến thức chung công chức chuẩn Bộ Nội Vụ 2026.' );
+/*
+ * Thông tin đề và đồng hồ lấy từ lượt thi thật (trước đây mọi đề đều hiện
+ * "Đề Thi Sát Hạch Kiến Thức Chung Vòng 1", mã "KTC-2026-01" và đồng hồ 60
+ * phút đếm lại từ đầu mỗi lần tải trang).
+ */
+$exam_info      = is_array( $attempt_data['exam'] ?? null ) ? $attempt_data['exam'] : array();
+$exam_title     = (string) ( $exam_info['title'] ?? 'Bài thi trắc nghiệm' );
+$exam_code      = (string) ( $exam_info['code'] ?? '' );
+$exam_duration  = (int) ( $exam_info['duration_minutes'] ?? 0 );
+$started_ts     = ! empty( $attempt_data['started_at'] ) ? strtotime( (string) $attempt_data['started_at'] ) : false;
+$is_submitted   = '' !== $attempt_status && 'in_progress' !== $attempt_status;
+$timer_mode     = $is_submitted ? 'done' : ( $exam_duration > 0 && $started_ts ? 'countdown' : 'elapsed' );
+$timer_seconds  = 0;
+if ( 'countdown' === $timer_mode ) {
+	$timer_seconds = max( 0, $exam_duration * 60 - ( time() - (int) $started_ts ) );
+} elseif ( 'elapsed' === $timer_mode && $started_ts ) {
+	$timer_seconds = max( 0, time() - (int) $started_ts );
+}
+
+cvc_seo_set_title( 'Làm bài: ' . $exam_title );
+cvc_seo_set_noindex();
 
 get_header();
 ?>
@@ -114,6 +169,7 @@ window.cvc_vars = {
 	attempt_id: <?php echo (int) $real_attempt_id; ?>,
 	home_url: '<?php echo esc_js( home_url( '/' ) ); ?>',
 	is_demo: <?php echo $is_demo_mode ? 'true' : 'false'; ?>,
+	submitted: <?php echo ( ! $is_demo_mode && '' !== $attempt_status && 'in_progress' !== $attempt_status ) ? 'true' : 'false'; ?>,
 	option_ids: <?php echo wp_json_encode( $option_ids_map ); ?>,
 	existing_state: <?php echo wp_json_encode( $existing_state ); ?>
 };
@@ -148,24 +204,10 @@ window.cvc_vars = {
 					<span class="font-black text-sm text-white tracking-normal hidden lg:inline">CÔNG VIÊN CHỨC</span>
 				</a>
 				
-				<div class="relative hidden sm:block">
-					<input type="text" placeholder="🔍 Tìm kiếm câu hỏi, luật..." class="bg-[#0A192F] border border-[#1D3557] rounded-xl px-3 py-1 text-[11px] text-slate-200 focus:outline-none focus:border-cyan-400 w-44">
-				</div>
-
-				<span class="bg-amber-500 text-navy-950 text-[10px] font-black px-2 py-0.5 rounded border border-amber-400 shrink-0 uppercase">
-					KTC-2026-01
-				</span>
-				<span class="font-extrabold text-sm text-white truncate max-w-[180px] sm:max-w-none">
-					Đề Thi Sát Hạch Kiến Thức Chung Vòng 1
-				</span>
-			</div>
-
-			<!-- Center: 4 Exam Modes Selector -->
-			<div class="flex items-center bg-[#0A192F] p-1 rounded-xl border border-[#1D3557] text-[11px] font-bold shrink-0">
-				<button type="button" onclick="ExamOS.setExamMode('learn')" data-mode="learn" class="exam-mode-badge">🎓 Học</button>
-				<button type="button" onclick="ExamOS.setExamMode('practice')" data-mode="practice" class="exam-mode-badge active">🏋️ Luyện</button>
-				<button type="button" onclick="ExamOS.setExamMode('real')" data-mode="real" class="exam-mode-badge">⏱️ Thi thật</button>
-				<button type="button" onclick="ExamOS.setExamMode('mock')" data-mode="mock" class="exam-mode-badge">🏛️ Mô phỏng</button>
+				<?php if ( '' !== $exam_code ) : ?>
+					<span class="bg-amber-500 text-navy-950 text-[10px] font-black px-2 py-0.5 rounded border border-amber-400 shrink-0 uppercase"><?php echo esc_html( $exam_code ); ?></span>
+				<?php endif; ?>
+				<h1 class="font-extrabold text-sm text-white truncate max-w-[220px] sm:max-w-[420px]" title="<?php echo esc_attr( $exam_title ); ?>"><?php echo esc_html( $exam_title ); ?></h1>
 			</div>
 
 			<!-- Right: Headtools, Timer, Profile Avatar & Submit Button -->
@@ -178,21 +220,14 @@ window.cvc_vars = {
 
 				<!-- Clock & Pause Button -->
 				<div class="bg-[#0A192F] border border-amber-500/40 px-3 py-1 rounded-xl flex items-center gap-2 shadow">
-					<span id="quiz-timer" class="text-sm font-black text-amber-400 font-mono">⏱ 60:00</span>
-					<button type="button" title="Tạm dừng" class="text-slate-400 hover:text-white text-xs">⏸️</button>
+					<span id="quiz-timer" class="text-sm font-black text-amber-400 font-mono" title="<?php echo esc_attr( 'countdown' === $timer_mode ? 'Thời gian còn lại' : ( 'elapsed' === $timer_mode ? 'Thời gian đã làm' : 'Đã nộp bài' ) ); ?>"><?php echo 'done' === $timer_mode ? 'Đã nộp' : '--:--'; ?></span>
 				</div>
 
-				<!-- Profile & VIP Badge -->
-				<div class="hidden sm:flex items-center gap-2 pl-2 border-l border-slate-800">
-					<div class="w-7 h-7 rounded-full bg-cyan-500 text-navy-950 font-black flex items-center justify-center text-xs">
-						CB
-					</div>
-					<span class="bg-gradient-to-r from-amber-400 to-amber-500 text-navy-950 font-black text-[9px] px-1.5 py-0.5 rounded-full uppercase">👑 VIP PRO</span>
-				</div>
-
-				<button onclick="submitQuizSimulation()" class="px-4 py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-navy-950 font-black text-xs rounded-xl shadow transition-transform hover:scale-105 cursor-pointer">
-					Nộp Bài Thi
+				<?php if ( ! $is_submitted ) : ?>
+				<button onclick="submitQuizSimulation()" class="px-4 py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-navy-950 font-black text-xs rounded-xl shadow cursor-pointer">
+					Nộp bài
 				</button>
+				<?php endif; ?>
 			</div>
 
 		</div>
@@ -204,45 +239,13 @@ window.cvc_vars = {
 		<!-- ==================== LEFT COLUMN (205px) ==================== -->
 		<aside class="exam-left-column space-y-4">
 
-			<!-- Block 1: Donut Goal Ring (72% Tỷ lệ chính xác target) -->
-			<div class="exam-card text-center space-y-3">
-				<span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">MỤC TIÊU SÁT HẠCH</span>
-				<div class="goal-ring-chart">
-					<span class="goal-ring-text">72%</span>
-				</div>
-				<div>
-					<span class="text-xs font-black text-white block">Tỷ Lệ Chính Xác Target</span>
-					<span class="text-[10px] text-cyan-400 font-medium">Đạt chuẩn Vòng 1 Bộ Nội Vụ</span>
-				</div>
-			</div>
-
-			<!-- Block 2: Left Navigation Menu -->
-			<div class="exam-card space-y-1">
-				<a class="left-menu-item active" title="Trang thi trắc nghiệm">
-					<span>📝</span> Làm bài thi
-				</a>
-				<a href="<?php echo esc_url( home_url('/tai-khoan/?section=analytics') ); ?>" class="left-menu-item" title="Phân tích kết quả & lỗ hổng">
-					<span>📊</span> Phân tích kết quả
-				</a>
-				<a href="<?php echo esc_url( home_url('/tai-khoan/?section=exam-history') ); ?>" class="left-menu-item" title="Lịch sử làm bài thi">
-					<span>📜</span> Lịch sử làm bài
-				</a>
-				<a href="<?php echo esc_url( home_url('/tai-khoan/?section=my-courses') ); ?>" class="left-menu-item" title="Các khóa học đã đăng ký">
-					<span>🎓</span> Khóa học của tôi
-				</a>
-				<a href="<?php echo esc_url( home_url('/tai-khoan/?section=my-documents') ); ?>" class="left-menu-item" title="Tài liệu & đề thi đã sở hữu">
-					<span>📑</span> Tài liệu đã mua
-				</a>
-				<a class="left-menu-item" title="Trợ lý AI 24/7">
-					<span>✦</span> AI Coach 24/7
-				</a>
-				<a href="<?php echo esc_url( home_url('/de-thi/') ); ?>" class="left-menu-item" title="Ngân hàng đề thi">
-					<span>📚</span> Kho đề công chức
-				</a>
-				<a class="left-menu-item" title="Cài đặt hệ thống">
-					<span>⚙️</span> Cài đặt
-				</a>
-			</div>
+			<nav class="exam-card space-y-1" aria-label="Liên kết nhanh">
+				<span class="left-menu-item active"><span aria-hidden="true">📝</span> Làm bài thi</span>
+				<a href="<?php echo esc_url( cvc_account_url( 'exam-history' ) ); ?>" class="left-menu-item"><span aria-hidden="true">📜</span> Lịch sử làm bài</a>
+				<a href="<?php echo esc_url( cvc_account_url( 'recommendations' ) ); ?>" class="left-menu-item"><span aria-hidden="true">💡</span> Gợi ý ôn tập</a>
+				<a href="<?php echo esc_url( cvc_account_url( 'my-courses' ) ); ?>" class="left-menu-item"><span aria-hidden="true">🎓</span> Khóa học của tôi</a>
+				<a href="<?php echo esc_url( cvc_exams_url() ); ?>" class="left-menu-item"><span aria-hidden="true">📚</span> Danh sách đề thi</a>
+			</nav>
 
 		</aside>
 
@@ -253,7 +256,7 @@ window.cvc_vars = {
 			<div class="exam-card space-y-3">
 				<div class="flex items-center justify-between text-xs">
 					<div id="exam-mode-description" class="text-cyan-300 font-semibold flex items-center gap-2">
-						🏋️ Chế độ LUYỆN: Tự động lưu tiến độ, xem giải thích chi tiết sau mỗi câu.
+						<?php echo $is_submitted ? 'Bài đã nộp - xem đáp án và giải thích từng câu bên dưới.' : 'Bài làm được lưu tự động. Nộp bài để xem điểm, đáp án và giải thích.'; ?>
 					</div>
 					<div class="flex items-center gap-2 font-mono text-xs">
 						<span class="text-slate-400">Tiến độ:</span>
@@ -485,19 +488,6 @@ window.cvc_vars = {
 			</article>
 			<?php endforeach; ?>
 
-			<!-- Bottom AI Coach Banner -->
-			<div class="ai-coach-banner flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
-				<div class="space-y-1">
-					<span class="text-cyan-400 font-extrabold text-sm block">✦ AI COACH CHẨN ĐOÁN LỖ HỔNG</span>
-					<p class="text-slate-300">
-						Bạn đang làm tốt phần Luật Công Vụ. Cần chú ý thêm nhóm câu về <strong class="text-amber-400">Thẩm quyền xử lý kỷ luật</strong>.
-					</p>
-				</div>
-				<a href="<?php echo esc_url( home_url('/khoa-hoc/') ); ?>" class="px-5 py-2.5 bg-gradient-to-r from-cyan-400 to-blue-500 text-navy-950 font-black rounded-xl shadow shrink-0 hover:scale-105 transition-transform">
-					Nhận lộ trình 7 ngày &rarr;
-				</a>
-			</div>
-
 		</main>
 
 		<!-- ==================== RIGHT SIDEBAR (260px STICKY) ==================== -->
@@ -550,66 +540,10 @@ window.cvc_vars = {
 				</div>
 			</div>
 
-			<!-- BLOCK 2: 📚 CỬA HÀNG HỌC TẬP (HIGH CONVERSION UPSELL STORE) -->
-			<div class="exam-card border border-amber-500/40 space-y-3">
-				<h3 class="font-extrabold text-xs text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
-					📚 CỬA HÀNG HỌC TẬP
-				</h3>
-				<div class="space-y-2 text-xs">
-					<div class="flex items-center justify-between p-2 bg-[#112240] rounded-xl border border-[#1D3557]">
-						<div>
-							<span class="text-slate-200 font-bold block">📘 Bộ 50 đề thi PDF</span>
-							<span class="text-[10px] text-slate-400">Giải thích 100%</span>
-						</div>
-						<a href="<?php echo esc_url( home_url('/khoa-hoc/') ); ?>" class="px-2.5 py-1 bg-amber-500 text-navy-950 font-black rounded-lg text-[11px] hover:bg-amber-400 shadow">
-							49K
-						</a>
-					</div>
-					<div class="flex items-center justify-between p-2 bg-[#112240] rounded-xl border border-[#1D3557]">
-						<div>
-							<span class="text-slate-200 font-bold block">⚖️ Sơ đồ tư duy Luật</span>
-							<span class="text-[10px] text-slate-400">Tóm tắt bẫy thi</span>
-						</div>
-						<a href="<?php echo esc_url( home_url('/khoa-hoc/') ); ?>" class="px-2.5 py-1 bg-amber-500 text-navy-950 font-black rounded-lg text-[11px] hover:bg-amber-400 shadow">
-							79K
-						</a>
-					</div>
-					<div class="flex items-center justify-between p-2 bg-[#112240] rounded-xl border border-[#1D3557]">
-						<div>
-							<span class="text-slate-200 font-bold block">🎯 Sổ tay bẫy trắc nghiệm</span>
-							<span class="text-[10px] text-slate-400">Tập trung 100 câu bẫy</span>
-						</div>
-						<a href="<?php echo esc_url( home_url('/khoa-hoc/') ); ?>" class="px-2.5 py-1 bg-amber-500 text-navy-950 font-black rounded-lg text-[11px] hover:bg-amber-400 shadow">
-							99K
-						</a>
-					</div>
-				</div>
-			</div>
-
-			<!-- BLOCK 3: 🎓 KHÓA HỌC PHÙ HỢP (HIGH CONVERSION CARD) -->
-			<div class="course-upsell-card space-y-3 relative overflow-hidden">
-				<div class="flex items-center justify-between">
-					<span class="bg-amber-500 text-navy-950 text-[9px] font-black px-2 py-0.5 rounded uppercase">BÁN CHẠY NHẤT</span>
-					<span class="text-[10px] text-emerald-400 font-bold">⚡ Giảm 30% hôm nay</span>
-				</div>
-				<div class="space-y-1">
-					<h4 class="font-extrabold text-xs text-white">Khóa Ôn Thi Công Chức Vòng 1</h4>
-					<p class="text-[11px] text-slate-300">120 bài giảng + AI Coach 1-on-1 sát hạch 2026</p>
-					<div class="flex items-baseline gap-2 pt-1">
-						<span class="text-base font-black text-amber-400">599.000đ</span>
-						<span class="text-xs text-slate-400 line-through">850.000đ</span>
-					</div>
-				</div>
-				<a href="<?php echo esc_url( home_url('/khoa-hoc/') ); ?>" class="block w-full py-2.5 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-navy-950 font-black text-xs text-center rounded-xl shadow-lg transition-transform hover:scale-[1.02]">
-					Đăng ký ngay &rarr;
-				</a>
-			</div>
-
 			<!-- BLOCK 4: TIẾN ĐỘ (GỌN, KHÔNG TRÙNG VỚI NAVIGATOR) -->
 			<div class="exam-card space-y-2 text-xs">
 				<div class="flex items-center justify-between">
 					<span class="font-bold text-slate-300 text-[11px] uppercase tracking-wide">📊 Tiến độ nhanh</span>
-					<span class="text-xs font-black text-amber-400">🔥 Streak hôm nay</span>
 				</div>
 				<div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
 					<div id="command-progress-bar-side" class="h-full bg-gradient-to-r from-amber-500 to-cyan-400 w-0 transition-all duration-300"></div>
@@ -618,38 +552,11 @@ window.cvc_vars = {
 					<span>Đã trả lời: <span id="sidebar-answered-count" class="font-bold text-white">0 / <?php echo $total_q; ?></span></span>
 					<span>Đánh dấu: <span id="sidebar-flagged-count" class="font-bold text-amber-400">0</span></span>
 				</div>
-				<!-- Social proof live -->
-				<div class="pt-1 border-t border-slate-800 flex items-center justify-center gap-1.5 text-[10px] text-emerald-400 font-bold">
-					<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-					1.234 học viên đang thi cùng bạn
-				</div>
 			</div>
 
 		</aside>
 
 	</div>
-
-	<!-- 3. FOOTER STATS STRIP -->
-	<footer class="border-t border-slate-800 bg-[#03101f] py-8 mt-12 text-slate-400 text-xs">
-		<div class="max-w-[1440px] mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-			<div>
-				<span class="text-xl font-black text-white block">12.450+</span>
-				<span class="text-[11px]">Học viên ôn luyện thành công</span>
-			</div>
-			<div>
-				<span class="text-xl font-black text-cyan-400 block">94.8%</span>
-				<span class="text-[11px]">Tỷ lệ đỗ Vòng 1 Kiến thức chung</span>
-			</div>
-			<div>
-				<span class="text-xl font-black text-amber-400 block">1.200+</span>
-				<span class="text-[11px]">Đề thi trắc nghiệm chuẩn Bộ Nội Vụ</span>
-			</div>
-			<div>
-				<span class="text-xl font-black text-emerald-400 block">24/7</span>
-				<span class="text-[11px]">Hỗ trợ giải đáp pháp lý AI Coach</span>
-			</div>
-		</div>
-	</footer>
 
 </div>
 
@@ -695,32 +602,46 @@ window.cvc_vars = {
 </div>
 
 <!-- Load EXAM OS X Client-side Engine -->
-<script src="<?php echo esc_url( get_template_directory_uri() . '/assets/js/exam-os.js' ); ?>"></script>
+<script src="<?php echo esc_url( get_template_directory_uri() . '/assets/js/exam-os.js?ver=' . (string) filemtime( get_theme_file_path( '/assets/js/exam-os.js' ) ) ); ?>"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 	ExamOS.init({
-		examId: 'ktc_vong1_2026',
+		examId: 'attempt_<?php echo (int) $real_attempt_id; ?>',
 		totalQuestions: <?php echo $total_q; ?>
 	});
 });
 
 let userAnswers = {};
 let flaggedQuestions = {};
-let remainingSeconds = 3600;
+// Đồng hồ thật: đếm ngược theo thời lượng đề tính từ lúc bắt đầu lượt thi
+// (không reset khi tải lại trang); đề không giới hạn thời gian thì đếm xuôi.
+const timerMode = <?php echo wp_json_encode( $timer_mode ); ?>;
+let remainingSeconds = <?php echo (int) $timer_seconds; ?>;
 
-let timerInterval = setInterval(() => {
-  remainingSeconds--;
-  let m = Math.floor(remainingSeconds / 60);
-  let s = remainingSeconds % 60;
+function cvcFormatClock(total) {
+  total = Math.max(0, total);
+  let h = Math.floor(total / 3600);
+  let m = Math.floor((total % 3600) / 60);
+  let sec = total % 60;
+  let mm = (m < 10 ? '0' : '') + m;
+  let ss = (sec < 10 ? '0' : '') + sec;
+  return h > 0 ? h + ':' + mm + ':' + ss : mm + ':' + ss;
+}
+
+let timerInterval = null;
+if (timerMode !== 'done') {
   let timerEl = document.getElementById('quiz-timer');
-  if (timerEl) {
-    timerEl.innerText = (m < 10 ? '0' + m : m) + ':' + (s < 10 ? '0' + s : s);
-  }
-  if (remainingSeconds <= 0) {
-    clearInterval(timerInterval);
-    submitQuizSimulation();
-  }
-}, 1000);
+  if (timerEl) { timerEl.innerText = cvcFormatClock(remainingSeconds); }
+  timerInterval = setInterval(() => {
+    remainingSeconds += (timerMode === 'countdown' ? -1 : 1);
+    let el = document.getElementById('quiz-timer');
+    if (el) { el.innerText = cvcFormatClock(remainingSeconds); }
+    if (timerMode === 'countdown' && remainingSeconds <= 0) {
+      clearInterval(timerInterval);
+      submitQuizSimulation();
+    }
+  }, 1000);
+}
 
 function toggleFlagQuestion(qId) {
   // Đồng bộ thật với backend (exam_attempt_answers.is_flagged) qua

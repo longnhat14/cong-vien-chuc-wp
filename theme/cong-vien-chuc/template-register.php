@@ -59,7 +59,8 @@ get_header();
 
 		<div class="cvc-form__field">
 			<label for="cvc-register-password">Mật khẩu</label>
-			<input type="password" id="cvc-register-password" name="password" required minlength="8" autocomplete="new-password">
+			<input type="password" id="cvc-register-password" name="password" required minlength="8" autocomplete="new-password" aria-describedby="cvc-register-password-hint">
+			<small id="cvc-register-password-hint" class="cvc-form__hint">Ít nhất 8 ký tự, gồm cả chữ và số.</small>
 		</div>
 
 		<div class="cvc-form__field">

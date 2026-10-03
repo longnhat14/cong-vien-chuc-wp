@@ -13,43 +13,39 @@ if ( ! defined( 'ABSPATH' ) ) {
 <i class="fa-solid fa-landmark-dome"></i>
 </div>
 <div>
-<p class="font-black text-lg text-white tracking-tight">CÔNG VIÊN CHỨC PRO</p>
-<p class="text-[10px] text-gold-400 uppercase tracking-widest font-bold">Học viện Đào tạo & Phát triển Công vụ</p>
+<p class="font-black text-lg text-white tracking-tight">CÔNG VIÊN CHỨC</p>
+<p class="text-[10px] text-gold-400 uppercase tracking-widest font-bold">Ôn thi công chức, viên chức</p>
 </div>
 </div>
 <p class="text-slate-400 leading-relaxed text-xs">
-Nền tảng số 1 tại Việt Nam về bồi dưỡng kiến thức quản lý nhà nước, thi trắc nghiệm AI công chức - viên chức và kết nối cơ hội bổ nhiệm sự nghiệp công.
+Nền tảng ôn thi công chức, viên chức: khóa học, đề thi trắc nghiệm có chấm điểm, văn bản pháp luật và tin tuyển dụng theo từng đợt.
 </p>
-<div class="flex items-center space-x-3 text-slate-300 pt-1">
-<span class="text-emerald-400 font-bold"><i class="fa-solid fa-shield-check mr-1"></i> </span>
-</div>
 </div>
 <!-- Col 2: Chương trình học (2 cols) -->
 <div class="lg:col-span-2 space-y-3">
-<h4 class="text-white font-extrabold text-xs uppercase tracking-wider">Chương Trình Đào Tạo</h4>
+<h4 class="text-white font-extrabold text-xs uppercase tracking-wider">Ôn thi</h4>
 <ul class="space-y-2">
-<li><a href="<?php echo esc_url( cvc_courses_url() ); ?>" class="hover:text-gold-400 transition-colors">Ngạch Chuyên Viên 2026</a></li>
-<li><a href="<?php echo esc_url( cvc_courses_url() ); ?>" class="hover:text-gold-400 transition-colors">Ngạch Chuyên Viên Chính</a></li>
-<li><a href="<?php echo esc_url( cvc_courses_url() ); ?>" class="hover:text-gold-400 transition-colors">Chuyên Viên Cao Cấp</a></li>
-<li><a href="<?php echo esc_url( cvc_topics_url() ); ?>" class="hover:text-gold-400 transition-colors">Lộ Trình Thăng Tiến</a></li>
-<li><a href="<?php echo esc_url( cvc_exams_url() ); ?>" class="hover:text-gold-400 transition-colors">Thi Trắc Nghiệm EXAM OS X</a></li>
+<li><a href="<?php echo esc_url( cvc_courses_url() ); ?>" class="hover:text-gold-400 transition-colors">Khóa học</a></li>
+<li><a href="<?php echo esc_url( cvc_exams_url() ); ?>" class="hover:text-gold-400 transition-colors">Đề thi thử</a></li>
+<li><a href="<?php echo esc_url( cvc_topics_url() ); ?>" class="hover:text-gold-400 transition-colors">Chủ đề ôn thi</a></li>
+<li><a href="<?php echo esc_url( cvc_knowledge_url() ); ?>" class="hover:text-gold-400 transition-colors">Kiến thức</a></li>
+<li><a href="<?php echo esc_url( cvc_documents_url() ); ?>" class="hover:text-gold-400 transition-colors">Tài liệu</a></li>
 </ul>
 </div>
 <!-- Col 3: Thư viện & Tuyển dụng (2 cols) -->
 <div class="lg:col-span-2 space-y-3">
-<h4 class="text-white font-extrabold text-xs uppercase tracking-wider">Tài Nguyên & Tuyển Dụng</h4>
+<h4 class="text-white font-extrabold text-xs uppercase tracking-wider">Tuyển dụng & pháp luật</h4>
 <ul class="space-y-2">
-<li><a href="<?php echo esc_url( cvc_recruitments_url() ); ?>" class="hover:text-gold-400 transition-colors">Tuyển Dụng 3.240 Xã Phường</a></li>
-<li><a href="<?php echo esc_url( cvc_legal_documents_url() ); ?>" class="hover:text-gold-400 transition-colors">Thư Viện Văn Bản Pháp Luật</a></li>
-<li><a href="<?php echo esc_url( cvc_knowledge_url() ); ?>" class="hover:text-gold-400 transition-colors">Chuyên Đề Kiến Thức Công Vụ</a></li>
+<li><a href="<?php echo esc_url( cvc_recruitments_url() ); ?>" class="hover:text-gold-400 transition-colors">Tin tuyển dụng</a></li>
+<li><a href="<?php echo esc_url( cvc_legal_documents_url() ); ?>" class="hover:text-gold-400 transition-colors">Văn bản pháp luật</a></li>
 <li><a href="<?php echo esc_url( get_template_directory_uri() . '/assets/downloads/Phieu-dang-ky-du-tuyen-Mau-01-ND138-BNV.docx' ); ?>" download class="hover:text-gold-400 transition-colors">Tải Mẫu 01 (NĐ 138/2020)</a></li>
-<li><a href="<?php echo esc_url( cvc_account_url() ); ?>" class="hover:text-gold-400 transition-colors">Cổng Hồ Sơ Học Viên</a></li>
+<li><a href="<?php echo esc_url( cvc_account_url() ); ?>" class="hover:text-gold-400 transition-colors">Tài khoản học viên</a></li>
 </ul>
 </div>
 <!-- Col 4: Newsletter & Contact (4 cols) -->
 <div class="lg:col-span-4 space-y-4">
-<h4 class="text-white font-extrabold text-xs uppercase tracking-wider">Đăng Ký Nhận Bản Tin Công Vụ</h4>
-<p class="text-xs text-slate-400">Nhận ngay thông báo đợt thi nâng ngạch và văn bản pháp luật mới nhất tuần này.</p>
+<h4 class="text-white font-extrabold text-xs uppercase tracking-wider">Nhận bản tin qua email</h4>
+<p class="text-xs text-slate-400">Đăng ký để nhận thông tin tuyển dụng và văn bản pháp luật mới.</p>
 <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="relative max-w-sm">
 <input type="hidden" name="action" value="cvc_newsletter_subscribe">
 <?php wp_nonce_field( 'cvc_newsletter_subscribe' ); ?>
@@ -58,20 +54,13 @@ Nền tảng số 1 tại Việt Nam về bồi dưỡng kiến thức quản l�
 <i class="fa-solid fa-paper-plane"></i>
 </button>
 </form>
-<div class="flex items-center space-x-3 pt-2">
-<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="w-9 h-9 rounded-xl bg-navy-900 border border-slate-700 hover:border-gold-500 text-slate-300 hover:text-gold-400 flex items-center justify-center transition-all"><i class="fa-brands fa-facebook-f"></i></a>
-<a href="<?php echo esc_url( cvc_courses_url() ); ?>" class="w-9 h-9 rounded-xl bg-navy-900 border border-slate-700 hover:border-gold-500 text-slate-300 hover:text-gold-400 flex items-center justify-center transition-all"><i class="fa-brands fa-youtube"></i></a>
-<a href="<?php echo esc_url( cvc_account_url() ); ?>" class="w-9 h-9 rounded-xl bg-navy-900 border border-slate-700 hover:border-gold-500 text-slate-300 hover:text-gold-400 flex items-center justify-center transition-all"><i class="fa-solid fa-comment-dots"></i></a>
-</div>
 </div>
 </div>
 <!-- Bottom Copyright Bar -->
 <div class="pt-8 border-t border-navy-800 flex flex-col sm:flex-row justify-between items-center text-[11px] text-slate-500 gap-2">
-<p>© 2026 CÔNG VIÊN CHỨC PRO. Tất cả quyền được bảo lưu.</p>
+<p>© <?php echo esc_html( wp_date( 'Y' ) ); ?> Công Viên Chức. Tất cả quyền được bảo lưu.</p>
 <div class="flex space-x-4">
-<a href="<?php echo esc_url( cvc_legal_documents_url() ); ?>" class="hover:text-slate-300">Bảo Mật Thông Tin</a>
-<a href="<?php echo esc_url( cvc_legal_documents_url() ); ?>" class="hover:text-slate-300">Điều Khoản Sử Dụng</a>
-<a href="<?php echo esc_url( cvc_search_url() ); ?>" class="hover:text-slate-300">Sơ Đồ Trang Site</a>
+<a href="<?php echo esc_url( cvc_search_url() ); ?>" class="hover:text-slate-300">Tìm kiếm</a>
 </div>
 </div>
 </div>

@@ -65,6 +65,10 @@ get_header();
 	</form>
 
 	<p class="cvc-auth-switch">
+		<a href="<?php echo esc_url( cvc_forgot_password_url() ); ?>">Quên mật khẩu?</a>
+	</p>
+
+	<p class="cvc-auth-switch">
 		Chưa có tài khoản?
 		<a href="<?php echo esc_url( cvc_register_url() ); ?>">Đăng ký ngay</a>
 	</p>

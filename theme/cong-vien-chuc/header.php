@@ -205,119 +205,94 @@ if ( ! defined( "ABSPATH" ) ) {
 <?php wp_body_open(); ?>
 <?php cvc_render_notice(); ?>
 
-<!-- 1. TOP EXECUTIVE ANNOUNCEMENT TICKER -->
-<div class="bg-navy-950 text-slate-300 text-xs py-2 px-4 border-b border-navy-700/60 overflow-hidden relative z-50">
-<div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
-<div class="flex items-center space-x-3 text-nowrap">
-<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-gold-500/20 text-gold-400 font-bold border border-gold-500/30 text-[10px] uppercase tracking-wider">
-<span class="w-2 h-2 rounded-full bg-gold-400 animate-ping"></span> EXECUTIVE BULLETIN
-</span>
-<span class="text-slate-300 font-medium text-[11px]">
-<i class="fa-solid fa-bullhorn text-gold-400 mr-1.5"></i> Mở cổng đăng ký Kỳ thi Nâng ngạch Chuyên viên chính 2026.
-</span>
-</div>
-<div class="hidden md:flex items-center space-x-6 text-[11px] text-slate-400 font-medium">
-<span class="flex items-center gap-1.5"><i class="fa-solid fa-phone-volume text-azure-400"></i> Hotline Doanh nghiệp: <strong class="text-white">1900 888 999</strong></span>
-
-<a href="#tro-ly-ai" class="text-gold-400 hover:text-gold-300 font-bold transition-colors"><i class="fa-solid fa-robot mr-1"></i> Trợ lý AI Tư vấn</a>
-</div>
+<?php
+/*
+ * Header (viết lại Phase 12): bỏ nội dung giả - bản tin "EXECUTIVE BULLETIN"
+ * bịa, hotline 1900 888 999 không có thật, link "Trợ lý AI" chết, chuông
+ * thông báo luôn có chấm đỏ và 2 thông báo mẫu, nút "Đăng Nhập" hiện cả khi
+ * đã đăng nhập. Menu thu về nút 3 gạch dưới 1280px để không bị chật.
+ */
+$cvc_header_logged_in = cvc_is_logged_in();
+$cvc_header_unread    = 0;
+if ( $cvc_header_logged_in && cvc_auth_token() ) {
+	$cvc_unread_result = ( new CVC_Notification_Service() )->unreadCount( (string) cvc_auth_token() );
+	$cvc_header_unread = ! empty( $cvc_unread_result['ok'] ) ? (int) ( $cvc_unread_result['data']['data']['unread_count'] ?? 0 ) : 0;
+}
+$cvc_nav_items = array(
+	array( 'label' => 'Khóa học', 'url' => cvc_courses_url() ),
+	array( 'label' => 'Chủ đề ôn thi', 'url' => cvc_topics_url() ),
+	array( 'label' => 'Tuyển dụng', 'url' => cvc_recruitments_url() ),
+	array( 'label' => 'Thi thử', 'url' => cvc_exams_url() ),
+	array( 'label' => 'Tài liệu', 'url' => cvc_documents_url() ),
+	array( 'label' => 'Văn bản pháp luật', 'url' => cvc_legal_documents_url() ),
+	array( 'label' => 'Kiến thức', 'url' => cvc_knowledge_url() ),
+);
+$cvc_current_url = home_url( add_query_arg( null, null ) );
+?>
+<!-- 1. THANH THÔNG TIN -->
+<div class="bg-navy-950 text-slate-300 text-xs py-2 px-4 border-b border-navy-700/60 relative z-50">
+<div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
+<a href="<?php echo esc_url( cvc_recruitments_url() ); ?>" class="text-[11px] text-slate-300 hover:text-white truncate">
+<i class="fa-solid fa-bullhorn text-gold-400 mr-1.5" aria-hidden="true"></i> Tin tuyển dụng công chức, viên chức mới cập nhật — xem hạn nộp hồ sơ
+</a>
+<a href="<?php echo esc_url( cvc_search_url() ); ?>" class="hidden sm:inline text-[11px] text-gold-400 hover:text-gold-300 font-bold shrink-0"><i class="fa-solid fa-magnifying-glass mr-1" aria-hidden="true"></i> Tìm kiếm</a>
 </div>
 </div>
 <!-- 2. NAVIGATION HEADER -->
 <header class="sticky top-0 z-40 glass-header border-b border-slate-200/80 shadow-sm transition-all duration-300">
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-<div class="flex items-center justify-between h-20">
-<!-- Logo & Brand Header -->
-<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="flex items-center space-x-3.5 group">
-<div class="relative">
-<div class="w-12 h-12 bg-gradient-to-tr from-navy-950 via-navy-900 to-navy-700 text-white rounded-2xl flex items-center justify-center text-2xl shadow-xl shadow-navy-950/20 group-hover:scale-105 transition-transform border border-slate-700/50">
+<div class="flex items-center justify-between gap-4 h-20">
+<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="flex items-center gap-3 group shrink-0">
+<span class="w-11 h-11 bg-gradient-to-tr from-navy-950 via-navy-900 to-navy-700 text-white rounded-2xl flex items-center justify-center text-xl shadow-xl shadow-navy-950/20 border border-slate-700/50" aria-hidden="true">
 <i class="fa-solid fa-landmark-dome text-gold-400"></i>
-</div>
-<span class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full" title="Hệ thống trực tuyến 24/7"></span>
-</div>
-<div class="flex flex-col justify-center py-1">
-<span class="text-xl sm:text-2xl font-black text-navy-950 tracking-normal leading-snug group-hover:text-azure-600 transition-colors block">
-CÔNG VIÊN CHỨC
 </span>
-<span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-0.5 block">
-Học viện Đào tạo & Phát triển Công vụ
+<span class="flex flex-col justify-center">
+<span class="text-lg sm:text-xl font-black text-navy-950 leading-tight whitespace-nowrap group-hover:text-azure-600 transition-colors">CÔNG VIÊN CHỨC</span>
+<span class="hidden sm:block text-[10px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Ôn thi công chức, viên chức</span>
 </span>
-</div>
 </a>
-<!-- Desktop Menu -->
-<nav class="hidden lg:flex items-center space-x-1 xl:space-x-1.5 text-xs font-bold uppercase tracking-wider text-slate-700">
-<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="px-3 py-2 text-navy-900 bg-slate-100 rounded-xl border-b-2 border-gold-500 transition-all">Trang chủ</a>
-<a href="<?php echo esc_url( cvc_courses_url() ); ?>" class="px-3 py-2 hover:text-azure-600 hover:bg-slate-100 rounded-xl transition-all">Khóa Học Enterprise</a>
-<a href="<?php echo esc_url( cvc_topics_url() ); ?>" class="px-3 py-2 hover:text-azure-600 hover:bg-slate-100 rounded-xl transition-all">Lộ Trình Thăng Tiến</a>
-<a href="<?php echo esc_url( cvc_recruitments_url() ); ?>" class="px-3 py-2 hover:text-azure-600 hover:bg-slate-100 rounded-xl transition-all">Tuyển Dụng & Bổ Nhiệm</a>
-<a href="<?php echo esc_url( cvc_exams_url() ); ?>" class="px-3 py-2 hover:text-azure-600 hover:bg-slate-100 rounded-xl transition-all">Thi Trắc Nghiệm AI</a>
-<a href="<?php echo esc_url( cvc_documents_url() ); ?>" class="px-3 py-2 hover:text-azure-600 hover:bg-slate-100 rounded-xl transition-all">Kho Tài Liệu</a>
-<a href="<?php echo esc_url( cvc_legal_documents_url() ); ?>" class="px-3 py-2 hover:text-azure-600 hover:bg-slate-100 rounded-xl transition-all">Văn Bản Pháp Luật</a>
-<a href="<?php echo esc_url( cvc_knowledge_url() ); ?>" class="px-3 py-2 hover:text-azure-600 hover:bg-slate-100 rounded-xl transition-all">Kiến Thức Công Vụ</a>
+<nav class="hidden xl:flex items-center gap-0.5 text-[13px] font-bold text-slate-700" aria-label="Menu chính">
+<?php foreach ( $cvc_nav_items as $cvc_nav ) : ?>
+<?php $cvc_active = 0 === strpos( $cvc_current_url, $cvc_nav['url'] ); ?>
+<a href="<?php echo esc_url( $cvc_nav['url'] ); ?>" class="px-2.5 py-2 rounded-xl whitespace-nowrap transition-colors <?php echo $cvc_active ? 'text-navy-900 bg-slate-100 border-b-2 border-gold-500' : 'hover:text-azure-600 hover:bg-slate-100'; ?>" <?php echo $cvc_active ? 'aria-current="page"' : ''; ?>><?php echo esc_html( $cvc_nav['label'] ); ?></a>
+<?php endforeach; ?>
 </nav>
-<!-- Header Controls & User Portal -->
-<div class="flex items-center space-x-3">
-<!-- Search Modal Trigger -->
-<button onclick="toggleSearchModal()" class="w-10 h-10 text-slate-600 hover:text-azure-600 hover:bg-slate-100 rounded-xl flex items-center justify-center transition-colors">
-<i class="fa-solid fa-magnifying-glass text-base"></i>
+<div class="flex items-center gap-2 shrink-0">
+<button type="button" onclick="toggleSearchModal()" class="w-10 h-10 text-slate-600 hover:text-azure-600 hover:bg-slate-100 rounded-xl flex items-center justify-center transition-colors" aria-label="Tìm kiếm">
+<i class="fa-solid fa-magnifying-glass text-base" aria-hidden="true"></i>
 </button>
-<!-- Notifications Button -->
-<div class="relative">
-<button onclick="toggleNotifications()" class="w-10 h-10 text-slate-600 hover:text-azure-600 hover:bg-slate-100 rounded-xl flex items-center justify-center transition-colors relative">
-<i class="fa-regular fa-bell text-base"></i>
-<span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full animate-ping"></span>
-<span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
-</button>
-<!-- Notification Dropdown -->
-<div id="notif-dropdown" class="hidden absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-2xl border border-slate-100 p-4 z-50 animate-fadeIn">
-<div class="flex items-center justify-between pb-3 border-b border-slate-100">
-<h4 class="text-xs font-bold text-slate-900 uppercase">Thông báo từ Cổng Công vụ</h4>
-<span class="text-[10px] bg-azure-50 text-azure-600 font-bold px-2 py-0.5 rounded-full">3 Mới</span>
-</div>
-<div class="space-y-2 mt-3 max-h-60 overflow-y-auto">
-<a href="<?php echo esc_url( cvc_legal_documents_url() ); ?>" class="block p-2.5 bg-slate-50 hover:bg-azure-50/50 rounded-xl transition-colors text-xs">
-<p class="font-bold text-navy-950">Đã cập nhật Nghị định 2026</p>
-<p class="text-[11px] text-slate-500 mt-0.5">Quy định mới về bảng lương và nâng ngạch công chức.</p>
-<span class="text-[9px] text-slate-400 mt-1 block">10 phút trước</span>
+<?php if ( $cvc_header_logged_in ) : ?>
+<a href="<?php echo esc_url( cvc_account_url( 'notifications' ) ); ?>" class="w-10 h-10 text-slate-600 hover:text-azure-600 hover:bg-slate-100 rounded-xl flex items-center justify-center transition-colors relative" aria-label="<?php echo esc_attr( $cvc_header_unread > 0 ? sprintf( 'Thông báo: %d chưa đọc', $cvc_header_unread ) : 'Thông báo' ); ?>">
+<i class="fa-regular fa-bell text-base" aria-hidden="true"></i>
+<?php if ( $cvc_header_unread > 0 ) : ?>
+<span class="absolute top-1 right-1 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center"><?php echo esc_html( $cvc_header_unread > 9 ? '9+' : (string) $cvc_header_unread ); ?></span>
+<?php endif; ?>
 </a>
-<a href="<?php echo esc_url( cvc_exams_url() ); ?>" class="block p-2.5 bg-slate-50 hover:bg-azure-50/50 rounded-xl transition-colors text-xs">
-<p class="font-bold text-navy-950">Lịch thi thử vòng 1</p>
-<p class="text-[11px] text-slate-500 mt-0.5">Phòng thi AI trực tuyến sẽ mở vào lúc 20:00 hôm nay.</p>
-<span class="text-[9px] text-slate-400 mt-1 block">1 giờ trước</span>
+<a href="<?php echo esc_url( cvc_account_url() ); ?>" class="hidden sm:flex px-4 py-2.5 bg-gradient-to-r from-navy-950 to-navy-800 hover:from-navy-900 hover:to-navy-700 text-white text-xs font-bold rounded-xl shadow-md items-center gap-2 border border-slate-700/40">
+<i class="fa-solid fa-user-shield text-gold-400" aria-hidden="true"></i><span>Tài khoản</span>
 </a>
-</div>
-</div>
-</div>
-<!-- Auth Portal Action Buttons -->
-<div class="hidden sm:flex items-center space-x-2">
-<a href="<?php echo esc_url( cvc_courses_url() ); ?>" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold rounded-xl transition-all">
-Học Thử Demo
-</a>
-<a href="<?php echo esc_url( cvc_account_url() ); ?>" class="px-5 py-2.5 bg-gradient-to-r from-navy-950 to-navy-800 hover:from-navy-900 hover:to-navy-700 text-white text-xs font-bold rounded-xl shadow-md shadow-navy-950/20 hover:shadow-xl hover:shadow-navy-950/30 transition-all flex items-center gap-2 border border-slate-700/40">
-<i class="fa-solid fa-user-shield text-gold-400"></i>
-<span>Cổng Học Viên</span>
-</a>
-</div>
-<!-- Mobile Drawer Toggle Button -->
-<button onclick="toggleMobileMenu()" class="lg:hidden w-10 h-10 text-slate-700 hover:bg-slate-100 rounded-xl flex items-center justify-center">
-<i class="fa-solid fa-bars text-xl"></i>
+<?php else : ?>
+<a href="<?php echo esc_url( cvc_login_url( $cvc_current_url ) ); ?>" class="hidden sm:inline-flex px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold rounded-xl">Đăng nhập</a>
+<a href="<?php echo esc_url( cvc_register_url() ); ?>" class="hidden sm:inline-flex px-4 py-2.5 bg-gradient-to-r from-navy-950 to-navy-800 text-white text-xs font-bold rounded-xl shadow-md border border-slate-700/40">Đăng ký</a>
+<?php endif; ?>
+<button type="button" onclick="toggleMobileMenu()" class="xl:hidden w-10 h-10 text-slate-700 hover:bg-slate-100 rounded-xl flex items-center justify-center" aria-label="Mở menu" aria-controls="mobile-menu">
+<i class="fa-solid fa-bars text-xl" aria-hidden="true"></i>
 </button>
 </div>
 </div>
 </div>
-<!-- Mobile Drawer Menu -->
-<div id="mobile-menu" class="hidden lg:hidden bg-white border-b border-slate-200 px-4 py-5 space-y-3 shadow-xl">
-<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="block px-4 py-2.5 bg-navy-950 text-white font-bold rounded-xl text-xs">Trang chủ</a>
-<a href="<?php echo esc_url( cvc_courses_url() ); ?>" class="block px-4 py-2.5 text-slate-700 hover:bg-slate-50 font-semibold rounded-xl text-xs">Khóa Học Enterprise</a>
-<a href="<?php echo esc_url( cvc_topics_url() ); ?>" class="block px-4 py-2.5 text-slate-700 hover:bg-slate-50 font-semibold rounded-xl text-xs">Lộ Trình Thăng Tiến</a>
-<a href="<?php echo esc_url( cvc_recruitments_url() ); ?>" class="block px-4 py-2.5 text-slate-700 hover:bg-slate-50 font-semibold rounded-xl text-xs">Tuyển Dụng & Bổ Nhiệm</a>
-<a href="<?php echo esc_url( cvc_exams_url() ); ?>" class="block px-4 py-2.5 text-slate-700 hover:bg-slate-50 font-semibold rounded-xl text-xs">Thi Trắc Nghiệm AI</a>
-<a href="<?php echo esc_url( cvc_documents_url() ); ?>" class="block px-4 py-2.5 text-slate-700 hover:bg-slate-50 font-semibold rounded-xl text-xs">Kho Tài Liệu</a>
-<a href="<?php echo esc_url( cvc_legal_documents_url() ); ?>" class="block px-4 py-2.5 text-slate-700 hover:bg-slate-50 font-semibold rounded-xl text-xs">Văn Bản Pháp Luật</a>
-<a href="<?php echo esc_url( cvc_knowledge_url() ); ?>" class="block px-4 py-2.5 text-slate-700 hover:bg-slate-50 font-semibold rounded-xl text-xs">Kiến Thức Công Vụ</a>
+<div id="mobile-menu" class="hidden xl:hidden bg-white border-b border-slate-200 px-4 py-5 space-y-2 shadow-xl">
+<?php foreach ( $cvc_nav_items as $cvc_nav ) : ?>
+<a href="<?php echo esc_url( $cvc_nav['url'] ); ?>" class="block px-4 py-2.5 text-slate-700 hover:bg-slate-50 font-semibold rounded-xl text-sm"><?php echo esc_html( $cvc_nav['label'] ); ?></a>
+<?php endforeach; ?>
 <div class="pt-3 border-t border-slate-100 flex gap-2">
-<a href="<?php echo esc_url( cvc_courses_url() ); ?>" class="flex-1 py-2.5 bg-slate-100 text-slate-800 font-bold rounded-xl text-xs text-center">Học Thử</a>
-<a href="<?php echo esc_url( cvc_account_url() ); ?>" class="flex-1 py-2.5 bg-navy-950 text-white font-bold rounded-xl text-xs text-center">Đăng Nhập</a>
+<?php if ( $cvc_header_logged_in ) : ?>
+<a href="<?php echo esc_url( cvc_account_url() ); ?>" class="flex-1 py-2.5 bg-navy-950 text-white font-bold rounded-xl text-xs text-center">Tài khoản</a>
+<a href="<?php echo esc_url( cvc_logout_url() ); ?>" class="flex-1 py-2.5 bg-slate-100 text-slate-800 font-bold rounded-xl text-xs text-center">Đăng xuất</a>
+<?php else : ?>
+<a href="<?php echo esc_url( cvc_login_url( $cvc_current_url ) ); ?>" class="flex-1 py-2.5 bg-slate-100 text-slate-800 font-bold rounded-xl text-xs text-center">Đăng nhập</a>
+<a href="<?php echo esc_url( cvc_register_url() ); ?>" class="flex-1 py-2.5 bg-navy-950 text-white font-bold rounded-xl text-xs text-center">Đăng ký</a>
+<?php endif; ?>
 </div>
 </div>
 </header>

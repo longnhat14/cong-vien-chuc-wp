@@ -49,7 +49,9 @@ window.ExamOS = (function() {
     filterNavigator(state.activeFilter || 'all');
 
     // Check if there is an unfinished attempt
-    if (Object.keys(state.answers).length > 0) {
+    // Bài đã nộp thì không hỏi "làm tiếp" (Phase 12).
+    var submitted = !!(window.cvc_vars && window.cvc_vars.submitted);
+    if (!submitted && Object.keys(state.answers).length > 0) {
       showResumePrompt();
     }
   }

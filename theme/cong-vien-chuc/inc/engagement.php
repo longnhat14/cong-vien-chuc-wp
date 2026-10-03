@@ -55,3 +55,22 @@ function cvc_handle_track_event(): void {
 
 	wp_send_json_success();
 }
+
+/**
+ * Đánh dấu 1 lượt xem trang chi tiết để assets/js/engagement.js gửi
+ * POST /api/engagement/events (Phase 12 - backend đã có endpoint). Chỉ
+ * render khi đã đăng nhập; backend tự whitelist type/target và gộp các lượt
+ * xem trùng trong 30 phút. Dữ liệu dùng cho chuỗi ngày học.
+ */
+function cvc_render_track_marker( string $type, string $target_type, int $target_id ): void {
+	if ( $target_id <= 0 || ! cvc_is_logged_in() ) {
+		return;
+	}
+
+	printf(
+		'<span hidden data-cvc-track="%1$s" data-cvc-target-type="%2$s" data-cvc-target-id="%3$d"></span>',
+		esc_attr( $type ),
+		esc_attr( $target_type ),
+		$target_id
+	);
+}

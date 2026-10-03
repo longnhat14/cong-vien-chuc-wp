@@ -22,17 +22,10 @@ if ( $result['ok'] ?? false ) {
 	$is_found = null !== $topic && ! empty( $topic );
 }
 
+// Slug không tồn tại -> 404 thật (trước đây hiện nội dung mẫu/fixture: soft-404, sai nội dung).
 if ( ! $is_found ) {
-	$fallback_list = CVC_Subpage_Fixtures::get_topics();
-	$matched       = null;
-	foreach ( $fallback_list as $fb ) {
-		if ( ( $fb['slug'] ?? '' ) === $slug ) {
-			$matched = $fb;
-			break;
-		}
-	}
-	$topic    = $matched ?? ( $fallback_list[0] ?? null );
-	$is_found = null !== $topic;
+	status_header( 404 );
+	cvc_seo_set_noindex();
 }
 
 cvc_seo_set_title( $is_found ? (string) $topic['name'] : 'Chi tiết chủ đề thăng tiến' );
@@ -70,6 +63,7 @@ get_header();
 				</a>
 			</div>
 		<?php else : ?>
+			<?php cvc_render_track_marker( 'topic_viewed', 'topic', (int) ( $topic['id'] ?? 0 ) ); ?>
 			<?php $children = is_array( $topic['children'] ?? null ) ? $topic['children'] : array(); ?>
 
 			<!-- HERO TOPIC HEADER BANNER -->
@@ -133,7 +127,7 @@ get_header();
 				</aside>
 
 				<!-- CENTER MAIN COLUMN (6 COLS — MINDMAP & GUIDANCE) -->
-				<main class="lg:col-span-6 space-y-4">
+				<div class="lg:col-span-6 space-y-4">
 
 					<!-- MINDMAP BOX -->
 					<div class="bg-[#0A192F] border border-slate-800 rounded-3xl p-6 space-y-4 shadow-xl">
@@ -158,7 +152,7 @@ get_header();
 						</div>
 					</div>
 
-				</main>
+				</div>
 
 				<!-- RIGHT SIDEBAR (3 COLS — MONETIZATION) -->
 				<aside class="lg:col-span-3 space-y-4">

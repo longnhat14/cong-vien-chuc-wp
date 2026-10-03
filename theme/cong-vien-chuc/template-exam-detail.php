@@ -22,54 +22,10 @@ if ( $result['ok'] ) {
 	$is_found = null !== $exam;
 }
 
+// Slug không tồn tại -> 404 thật (trước đây hiện nội dung mẫu/fixture: soft-404, sai nội dung).
 if ( ! $is_found ) {
-	$fallback_list = CVC_Subpage_Fixtures::get_exams();
-	$s_lower       = strtolower( $slug );
-	$is_english    = strpos( $s_lower, 'tieng-anh' ) !== false || strpos( $s_lower, 'ngoai-ngu' ) !== false || strpos( $s_lower, 'english' ) !== false;
-	$is_it         = strpos( $s_lower, 'tin-hoc' ) !== false || strpos( $s_lower, 'cntt' ) !== false;
-
-	foreach ( $fallback_list as $item ) {
-		if ( isset( $item['slug'] ) && $item['slug'] === $slug ) {
-			$exam     = $item;
-			$is_found = true;
-			break;
-		}
-	}
-
-	if ( ! $is_found ) {
-		foreach ( $fallback_list as $item ) {
-			$item_slug = strtolower( $item['slug'] ?? '' );
-			if ( $is_english && ( strpos( $item_slug, 'tieng-anh' ) !== false || strpos( $item_slug, 'ngoai-ngu' ) !== false ) ) {
-				$exam     = $item;
-				$is_found = true;
-				break;
-			}
-			if ( $is_it && strpos( $item_slug, 'tin-hoc' ) !== false ) {
-				$exam     = $item;
-				$is_found = true;
-				break;
-			}
-		}
-	}
-
-	if ( ! $is_found ) {
-		$clean_title = ucwords( str_replace( '-', ' ', $slug ) );
-		if ( $is_english ) {
-			$clean_title = 'Đề Thi Thử Ngoại Ngữ Tiếng Anh Tuyển Dụng Công Chức Vòng 1 (Đề 01 - B1/B2)';
-		} elseif ( $is_it ) {
-			$clean_title = 'Đề Thi Trắc Nghiệm Tin Học Văn Phòng Chuẩn CNTT Công Chức';
-		}
-		$exam     = array(
-			'id'               => 399,
-			'slug'             => $slug,
-			'title'            => $clean_title,
-			'duration_minutes' => $is_english ? 30 : ( $is_it ? 30 : 60 ),
-			'passing_score'    => $is_english ? '15/30 câu' : ( $is_it ? '15/30 câu' : '30/60 câu' ),
-			'category'         => $is_english ? 'Ngoại Ngữ Công Vụ' : ( $is_it ? 'Tin Học Công Vụ' : 'Kiến Thức Chung' ),
-			'description'      => $is_english ? 'Ngân hàng đề thi trắc nghiệm Ngoại ngữ Tiếng Anh B1/B2 tuyển dụng công chức Vòng 1 khoanh vùng ngữ pháp, từ vựng hành chính và đọc hiểu.' : ( $is_it ? 'Đề thi trắc nghiệm Tin học văn phòng chuẩn kỹ năng CNTT cơ bản.' : 'Ngân hàng đề thi trắc nghiệm Kiến thức chung khoanh vùng trọng tâm Luật Cán bộ, công chức, Nghị định 138/2020/NĐ-CP và các quy định sửa đổi mới nhất.' ),
-		);
-		$is_found = true;
-	}
+	status_header( 404 );
+	cvc_seo_set_noindex();
 }
 
 cvc_seo_set_title( $is_found ? (string) $exam['title'] : 'Chi tiết đề thi trắc nghiệm' );
@@ -114,24 +70,25 @@ get_header();
 			</div>
 		<?php else : ?>
 			<?php
-			$s_lower    = strtolower( $slug );
-			$is_english = strpos( $s_lower, 'tieng-anh' ) !== false || strpos( $s_lower, 'ngoai-ngu' ) !== false || strpos( $s_lower, 'english' ) !== false;
-			$is_it      = strpos( $s_lower, 'tin-hoc' ) !== false || strpos( $s_lower, 'cntt' ) !== false;
-
-			if ( ! empty( $exam['questions'] ) && is_array( $exam['questions'] ) ) {
-				$questions = $exam['questions'];
-			} elseif ( $is_english ) {
-				$questions = CVC_Question_Bank_Fixtures::get_english_questions();
-			} elseif ( $is_it ) {
-				$questions = CVC_Question_Bank_Fixtures::get_it_questions();
-			} else {
-				$questions = CVC_Question_Bank_Fixtures::get_official_questions();
+			// Chỉ dùng câu hỏi thật đã công bố của đề - không còn bộ câu hỏi mẫu.
+			$questions  = is_array( $exam['questions'] ?? null ) ? $exam['questions'] : array();
+			$duration   = (int) ( $exam['duration_minutes'] ?? 0 );
+			$total_q    = (int) ( $exam['questions_count'] ?? count( $questions ) );
+			$pass_score = null;
+			if ( isset( $exam['passing_score'] ) && is_numeric( $exam['passing_score'] ) && (float) $exam['passing_score'] > 0 ) {
+				$pass_score = rtrim( rtrim( number_format( (float) $exam['passing_score'], 2, ',', '.' ), '0' ), ',' );
+				if ( isset( $exam['total_score'] ) && is_numeric( $exam['total_score'] ) && (float) $exam['total_score'] > 0 ) {
+					$pass_score .= '/' . rtrim( rtrim( number_format( (float) $exam['total_score'], 2, ',', '.' ), '0' ), ',' ) . ' điểm';
+				}
 			}
-
-			$duration   = (int) ( $exam['duration_minutes'] ?? ( $is_english ? 30 : 60 ) );
-			$total_q    = count( $questions );
-			$pass_score = $exam['passing_score'] ?? ( $is_english ? '15/30 câu' : '30/60 câu' );
+			$exam_subject_names = array();
+			foreach ( (array) ( $exam['exam_subjects'] ?? array() ) as $subject ) {
+				if ( is_array( $subject ) && ! empty( $subject['name'] ) ) {
+					$exam_subject_names[] = (string) $subject['name'];
+				}
+			}
 			?>
+			<?php cvc_render_track_marker( 'exam_viewed', 'exam', (int) ( $exam['id'] ?? 0 ) ); ?>
 
 			<!-- HERO EXAM HEADER BANNER -->
 			<section class="bg-gradient-to-r from-navy-950 via-slate-900 to-indigo-950 p-6 sm:p-8 rounded-3xl border border-amber-500/40 shadow-2xl space-y-4">
@@ -139,25 +96,34 @@ get_header();
 					<div class="space-y-3 max-w-3xl">
 						<div class="flex items-center gap-2 flex-wrap text-xs">
 							<span class="bg-amber-500 text-navy-950 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase">
-								🏛️ <?php echo esc_html( $exam['category'] ?? 'DE THI CHUAN NĐ 138/2020' ); ?>
+								Đề thi trắc nghiệm
 							</span>
-							<span class="bg-cyan-500/20 text-cyan-300 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-cyan-500/40">
-								<?php echo $is_english ? 'ENGLISH-B1-EXAM' : ( $is_it ? 'IT-OFFICE-EXAM' : 'KTC-2026-EXAM' ); ?>
-							</span>
+							<?php if ( ! empty( $exam['code'] ) ) : ?>
+								<span class="bg-cyan-500/20 text-cyan-300 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-cyan-500/40">
+									Mã đề: <?php echo esc_html( (string) $exam['code'] ); ?>
+								</span>
+							<?php endif; ?>
+							<?php foreach ( $exam_subject_names as $subject_name ) : ?>
+								<span class="bg-slate-800 text-slate-200 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-slate-700">
+									<?php echo esc_html( $subject_name ); ?>
+								</span>
+							<?php endforeach; ?>
 						</div>
 
 						<h1 class="text-2xl sm:text-4xl font-black text-white leading-snug">
 							<?php echo esc_html( $exam['title'] ); ?>
 						</h1>
 
-						<p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
-							<?php echo esc_html( $exam['description'] ?? 'Ngân hàng đề thi trắc nghiệm khoanh vùng trọng tâm theo quy định của Bộ Nội vụ.' ); ?>
-						</p>
+						<?php if ( ! empty( $exam['description'] ) ) : ?>
+							<p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+								<?php echo esc_html( (string) $exam['description'] ); ?>
+							</p>
+						<?php endif; ?>
 
-						<div class="flex items-center gap-4 text-xs text-slate-400 pt-1">
-							<span>⏱️ <?php echo $duration; ?> Phút</span>
-							<span>📝 <?php echo $total_q; ?> Câu hỏi</span>
-							<span class="text-emerald-400 font-bold">✓ Điểm đạt: <?php echo esc_html( $pass_score ); ?></span>
+						<div class="flex items-center gap-4 text-xs text-slate-400 pt-1 flex-wrap">
+							<?php if ( $duration > 0 ) : ?><span><i class="fa-regular fa-clock" aria-hidden="true"></i> <?php echo esc_html( $duration ); ?> phút</span><?php endif; ?>
+							<span><i class="fa-regular fa-file-lines" aria-hidden="true"></i> <?php echo esc_html( $total_q ); ?> câu hỏi</span>
+							<?php if ( null !== $pass_score ) : ?><span class="text-emerald-400 font-bold">Điểm đạt: <?php echo esc_html( $pass_score ); ?></span><?php endif; ?>
 						</div>
 					</div>
 
@@ -181,50 +147,40 @@ get_header();
 						<div class="space-y-2.5 text-slate-300">
 							<div class="flex justify-between border-b border-slate-800/60 pb-1.5">
 								<span class="text-slate-400">Thời gian:</span>
-								<strong class="text-white font-mono"><?php echo $duration; ?> Phút</strong>
+								<strong class="text-white font-mono"><?php echo $duration > 0 ? esc_html( $duration . ' phút' ) : 'Không giới hạn'; ?></strong>
 							</div>
 							<div class="flex justify-between border-b border-slate-800/60 pb-1.5">
 								<span class="text-slate-400">Số câu trắc nghiệm:</span>
-								<strong class="text-cyan-300 font-mono"><?php echo $total_q; ?> Câu</strong>
+								<strong class="text-cyan-300 font-mono"><?php echo esc_html( $total_q ); ?> câu</strong>
 							</div>
-							<div class="flex justify-between border-b border-slate-800/60 pb-1.5">
-								<span class="text-slate-400">Hình thức:</span>
-								<span class="text-emerald-400 font-bold">Trắc nghiệm 4 lựa chọn</span>
-							</div>
+							<?php if ( null !== $pass_score ) : ?>
+								<div class="flex justify-between border-b border-slate-800/60 pb-1.5">
+									<span class="text-slate-400">Điểm đạt:</span>
+									<strong class="text-emerald-400"><?php echo esc_html( $pass_score ); ?></strong>
+								</div>
+							<?php endif; ?>
 							<div class="flex justify-between">
-								<span class="text-slate-400">Chất lượng:</span>
-								<span class="text-amber-400 font-bold">★ AI Verified 2026</span>
+								<span class="text-slate-400">Hình thức:</span>
+								<span class="text-emerald-400 font-bold">Trắc nghiệm, chấm tự động</span>
 							</div>
 						</div>
-					</div>
-
-					<!-- PDF DOWNLOAD CARD -->
-					<div class="bg-[#0A192F] border border-slate-800 p-5 rounded-2xl space-y-3 shadow-lg text-xs">
-						<h3 class="font-extrabold text-xs text-cyan-400 uppercase tracking-wider border-b border-slate-800 pb-2 flex items-center gap-1.5">
-							<i class="fa-solid fa-file-pdf"></i> Tải Đề Thi PDF
-						</h3>
-						<p class="text-slate-400 text-[11px]">
-							Tải bản in PDF kèm đáp án chi tiết phục vụ luyện thi offline.
-						</p>
-						<a href="<?php echo esc_url( get_template_directory_uri() . '/assets/downloads/' . ( $is_english ? 'Tai-lieu-on-thi-Ngoai-ngu-Tieng-Anh-B1-Cong-Chuc.pdf' : 'Bo-de-trac-nghiem-Luat-Can-bo-Cong-chuc-60-cau-dap-an.pdf' ) ); ?>" download="<?php echo esc_attr( sanitize_title( $exam['title'] ) . '-2026.pdf' ); ?>" class="w-full py-2 bg-slate-900 hover:bg-slate-800 text-cyan-300 border border-cyan-500/30 font-bold rounded-xl text-center text-xs transition-colors flex items-center justify-center gap-1.5">
-							<i class="fa-solid fa-download"></i> Tải Bộ Đề PDF Chính Thức
-						</a>
 					</div>
 
 				</aside>
 
 				<!-- CENTER MAIN COLUMN (6 COLS — QUESTION PREVIEW) -->
-				<main class="lg:col-span-6 space-y-4">
+				<div class="lg:col-span-6 space-y-4">
 
 					<div class="bg-[#0A192F] border border-slate-800 rounded-3xl p-6 space-y-5 shadow-xl">
 						<div class="flex items-center justify-between border-b border-slate-800 pb-3">
 							<h2 class="text-base font-black text-white flex items-center gap-2">
-								<i class="fa-solid fa-eye text-cyan-400"></i> Xem Trước Cấu Trúc Câu Hỏi (<?php echo min( 5, $total_q ); ?>/<?php echo $total_q; ?> câu)
+								<i class="fa-solid fa-eye text-cyan-400"></i> Xem trước câu hỏi (<?php echo esc_html( min( 5, count( $questions ) ) ); ?>/<?php echo esc_html( $total_q ); ?> câu)
 							</h2>
-							<span class="text-[10px] bg-cyan-500/20 text-cyan-300 font-bold px-2 py-0.5 rounded border border-cyan-500/30">
-								SECURITY SAFE PREVIEW
-							</span>
 						</div>
+
+						<?php if ( empty( $questions ) ) : ?>
+							<?php cvc_render_empty_state( 'Đề thi này chưa có câu hỏi được công bố.' ); ?>
+						<?php endif; ?>
 
 						<div class="space-y-4">
 							<?php
@@ -270,7 +226,7 @@ get_header();
 						</div>
 					</div>
 
-				</main>
+				</div>
 
 				<!-- RIGHT SIDEBAR (3 COLS — LAUNCH EXAM OS X CTA + UPSELL) -->
 			<aside class="lg:col-span-3 space-y-4 sticky top-[80px]">
@@ -284,42 +240,38 @@ get_header();
 					<div class="space-y-1">
 						<h3 class="text-lg font-black text-white">Sẵn Sàng Làm Bài Thi?</h3>
 						<p class="text-xs text-slate-300">
-							Kích hoạt giao diện thi chuẩn <strong>EXAM OS X</strong> với bộ đếm giờ tự động & AI chấm điểm tức thì.
+							Có đồng hồ đếm giờ, đánh dấu câu hỏi và chấm điểm ngay khi nộp bài.
 						</p>
 					</div>
 
-					<?php $attempt_url = cvc_exam_attempt_url( $slug ); ?>
-					<a href="<?php echo esc_url( $attempt_url ); ?>" class="block w-full py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-navy-950 font-black text-sm rounded-2xl shadow-xl transition-transform hover:scale-105">
-						🚀 Bắt Đầu Làm Bài Thi &rarr;
-					</a>
-					<p class="text-[10px] text-slate-400">✓ Miễn phí · Không cần đăng nhập</p>
+					<?php if ( empty( $questions ) ) : ?>
+						<p class="text-xs text-slate-400">Đề chưa có câu hỏi nên chưa thể làm bài.</p>
+					<?php elseif ( ! cvc_is_logged_in() ) : ?>
+						<a href="<?php echo esc_url( cvc_login_url( cvc_exam_url( $slug ) ) ); ?>" class="block w-full py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-navy-950 font-black text-sm rounded-2xl shadow-xl">
+							Đăng nhập để làm bài &rarr;
+						</a>
+						<p class="text-[10px] text-slate-400">Miễn phí. Cần tài khoản để lưu kết quả và xem giải thích từng câu.</p>
+					<?php else : ?>
+						<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+							<?php wp_nonce_field( 'cvc_exam_start' ); ?>
+							<input type="hidden" name="action" value="cvc_exam_start">
+							<input type="hidden" name="exam_id" value="<?php echo esc_attr( (string) (int) ( $exam['id'] ?? 0 ) ); ?>">
+							<input type="hidden" name="mode" value="mock">
+							<button type="submit" class="block w-full py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-navy-950 font-black text-sm rounded-2xl shadow-xl">
+								Bắt đầu làm bài &rarr;
+							</button>
+						</form>
+						<p class="text-[10px] text-slate-400">Bài làm được lưu tự động; nộp bài để xem điểm và giải thích.</p>
+					<?php endif; ?>
 				</div>
 
-				<!-- UPSELL: TÀI LIỆU ÔN THI LIÊN QUAN -->
-				<div class="bg-[#0A192F] border border-cyan-500/30 p-5 rounded-2xl space-y-3 shadow-xl text-xs">
-					<h3 class="font-extrabold text-xs text-cyan-400 uppercase tracking-wider border-b border-slate-800 pb-2 flex items-center gap-1.5">
-						📄 Cẩm Nang Ôn Thi Liên Quan
-					</h3>
-					<p class="text-slate-400 text-[11px]">Tải bộ tài liệu khoanh vùng trọng tâm theo đề thi này.</p>
-					<a href="<?php echo esc_url( get_template_directory_uri() . '/assets/downloads/' . ( $is_english ? 'Tai-lieu-on-thi-Ngoai-ngu-Tieng-Anh-B1-Cong-Chuc.pdf' : 'Bo-de-trac-nghiem-Luat-Can-bo-Cong-chuc-60-cau-dap-an.pdf' ) ); ?>" download class="w-full py-2 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 font-bold rounded-xl text-center transition-colors flex items-center justify-center gap-1.5">
-						⬇ Tải PDF Miễn Phí
-					</a>
-				</div>
-
-				<!-- UPSELL: KHÓA HỌC VIDEO -->
-				<div class="bg-gradient-to-br from-amber-500/10 to-slate-900 border border-amber-500/30 p-5 rounded-2xl space-y-3 shadow-xl text-xs">
-					<span class="bg-amber-500 text-navy-950 text-[9px] font-black px-2 py-0.5 rounded-full uppercase">🔥 ĐỀ XUẤT</span>
-					<div class="space-y-1 pt-1">
-						<h3 class="text-sm font-black text-white leading-snug">Khóa Học Video<br>Chuyên Đề Vòng 1</h3>
-						<p class="text-[11px] text-slate-300">120 bài giảng + AI Coach luyện riêng chuẩn sát hạch 2026.</p>
-						<div class="flex items-baseline gap-2 pt-1">
-							<span class="text-base font-black text-amber-400">599.000đ</span>
-							<span class="text-xs text-slate-400 line-through">850.000đ</span>
-						</div>
+				<div class="bg-[#0A192F] border border-slate-800 p-5 rounded-2xl space-y-2 shadow-xl text-xs">
+					<h3 class="font-extrabold text-xs text-cyan-400 uppercase tracking-wider">Ôn thêm trước khi thi</h3>
+					<p class="text-slate-400 text-[11px]">Xem khóa học và tài liệu ôn thi đang có trên hệ thống.</p>
+					<div class="flex gap-2">
+						<a href="<?php echo esc_url( cvc_courses_url() ); ?>" class="flex-1 py-2 bg-slate-900 hover:bg-slate-800 text-cyan-300 border border-cyan-500/30 font-bold rounded-xl text-center">Khóa học</a>
+						<a href="<?php echo esc_url( cvc_documents_url() ); ?>" class="flex-1 py-2 bg-slate-900 hover:bg-slate-800 text-cyan-300 border border-cyan-500/30 font-bold rounded-xl text-center">Tài liệu</a>
 					</div>
-					<a href="<?php echo esc_url( home_url('/khoa-hoc/') ); ?>" class="block w-full py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-navy-950 font-black text-xs rounded-xl shadow-lg text-center transition-transform hover:scale-[1.02]">
-						Đăng Ký Khóa Học &rarr;
-					</a>
 				</div>
 
 			</aside>

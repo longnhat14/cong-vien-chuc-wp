@@ -146,6 +146,22 @@ final class CVC_Api_Client {
 			$headers['Authorization'] = 'Bearer ' . $token;
 		}
 
+		/*
+		 * Mọi request API đi ra từ máy chủ WordPress nên backend chỉ thấy 1 IP
+		 * -> throttle (đăng nhập, đăng ký, mini quiz) thành giới hạn chung cho
+		 * toàn site. Gửi kèm IP thật của người dùng + khóa bí mật dùng chung
+		 * (CVC_PROXY_KEY trong wp-config.php, CVC_PROXY_KEY trong .env Laravel)
+		 * để backend tính giới hạn theo từng người. Không có khóa thì không gửi.
+		 */
+		if ( defined( 'CVC_PROXY_KEY' ) && is_string( CVC_PROXY_KEY ) && '' !== CVC_PROXY_KEY ) {
+			$client_ip = isset( $_SERVER['REMOTE_ADDR'] ) ? (string) $_SERVER['REMOTE_ADDR'] : '';
+
+			if ( filter_var( $client_ip, FILTER_VALIDATE_IP ) ) {
+				$headers['X-CVC-Proxy-Key'] = CVC_PROXY_KEY;
+				$headers['X-CVC-Client-IP'] = $client_ip;
+			}
+		}
+
 		return $headers;
 	}
 

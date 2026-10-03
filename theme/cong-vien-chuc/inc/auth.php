@@ -249,6 +249,72 @@ function cvc_handle_register(): void {
 	exit;
 }
 
+/*
+ * Quên / đặt lại mật khẩu (Phase 12) - backend gửi email chứa link về
+ * /dat-lai-mat-khau/?token=...&email=... Nếu backend báo chưa cấu hình mail
+ * (503) thì hiện đúng thông báo đó, không giả vờ "đã gửi".
+ */
+add_action( 'admin_post_nopriv_cvc_forgot_password', 'cvc_handle_forgot_password' );
+add_action( 'admin_post_cvc_forgot_password', 'cvc_handle_forgot_password' );
+
+function cvc_handle_forgot_password(): void {
+	check_admin_referer( 'cvc_forgot_password' );
+
+	$email  = sanitize_email( wp_unslash( $_POST['email'] ?? '' ) );
+	$result = ( new CVC_Api_Client() )->post( '/api/auth/forgot-password', array( 'email' => $email ) );
+
+	if ( ! $result['ok'] ) {
+		$message = 503 === (int) $result['status'] && ! empty( $result['data']['message'] )
+			? (string) $result['data']['message']
+			: cvc_api_error_message( $result );
+		cvc_redirect_with_notice( cvc_forgot_password_url(), 'error', $message, null );
+		return;
+	}
+
+	cvc_redirect_with_notice(
+		cvc_forgot_password_url(),
+		'success',
+		(string) ( $result['data']['message'] ?? 'Nếu email này đã đăng ký, bạn sẽ nhận được thư hướng dẫn đặt lại mật khẩu.' ),
+		null
+	);
+}
+
+add_action( 'admin_post_nopriv_cvc_reset_password', 'cvc_handle_reset_password' );
+add_action( 'admin_post_cvc_reset_password', 'cvc_handle_reset_password' );
+
+function cvc_handle_reset_password(): void {
+	check_admin_referer( 'cvc_reset_password' );
+
+	$token = sanitize_text_field( wp_unslash( $_POST['token'] ?? '' ) );
+	$email = sanitize_email( wp_unslash( $_POST['email'] ?? '' ) );
+
+	$result = ( new CVC_Api_Client() )->post(
+		'/api/auth/reset-password',
+		array(
+			'token'                 => $token,
+			'email'                 => $email,
+			'password'              => (string) ( $_POST['password'] ?? '' ),
+			'password_confirmation' => (string) ( $_POST['password_confirmation'] ?? '' ),
+		)
+	);
+
+	if ( ! $result['ok'] ) {
+		$back = add_query_arg(
+			array(
+				'token' => rawurlencode( $token ),
+				'email' => rawurlencode( $email ),
+			),
+			cvc_reset_password_url()
+		);
+		cvc_redirect_with_notice( $back, 'error', cvc_api_error_message( $result ), null );
+		return;
+	}
+
+	// Backend đã thu hồi mọi phiên cũ - xóa luôn cookie phía WordPress.
+	cvc_clear_auth_cookie();
+	cvc_redirect_with_notice( cvc_login_url(), 'success', (string) ( $result['data']['message'] ?? 'Đặt lại mật khẩu thành công. Vui lòng đăng nhập.' ), null );
+}
+
 add_action( 'admin_post_nopriv_cvc_logout', 'cvc_handle_logout' );
 add_action( 'admin_post_cvc_logout', 'cvc_handle_logout' );
 
@@ -331,6 +397,14 @@ function cvc_login_url( ?string $redirect_to = null ): string {
 
 function cvc_register_url(): string {
 	return home_url( '/dang-ky/' );
+}
+
+function cvc_forgot_password_url(): string {
+	return home_url( '/quen-mat-khau/' );
+}
+
+function cvc_reset_password_url(): string {
+	return home_url( '/dat-lai-mat-khau/' );
 }
 
 function cvc_logout_url(): string {

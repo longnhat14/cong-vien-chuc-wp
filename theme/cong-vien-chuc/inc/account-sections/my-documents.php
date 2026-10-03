@@ -23,10 +23,10 @@ $documents = $result['data']['data'] ?? array();
 
 <div class="space-y-6">
 
-	<div class="flex items-center justify-between border-b border-slate-200 pb-4">
+	<div class="flex items-center justify-between border-b border-slate-800 pb-4">
 		<div>
-			<h2 class="text-xl font-extrabold text-slate-900">📑 Tài Liệu Đã Mua</h2>
-			<p class="text-xs text-slate-500 mt-1">Kho tài liệu PDF, bộ đề sát hạch và sơ đồ tư duy luật bạn đã sở hữu bản quyền.</p>
+			<h2 class="text-xl font-extrabold text-white">📑 Tài Liệu Đã Mua</h2>
+			<p class="text-xs text-slate-400 mt-1">Kho tài liệu PDF, bộ đề sát hạch và sơ đồ tư duy luật bạn đã sở hữu bản quyền.</p>
 		</div>
 		<a href="<?php echo esc_url( cvc_documents_url() ); ?>" class="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold text-xs rounded-xl shadow">
 			+ Mua Thêm Tài Liệu
@@ -38,18 +38,18 @@ $documents = $result['data']['data'] ?? array();
 	<?php else : ?>
 		<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 			<?php foreach ( $documents as $doc ) : ?>
-				<div class="bg-white rounded-2xl border border-slate-200 p-4 space-y-3 shadow-sm hover:shadow-md transition-shadow">
+				<div class="bg-[#0A192F] rounded-2xl border border-slate-800 p-4 space-y-3 shadow-sm hover:shadow-md transition-shadow">
 					<div class="flex items-center gap-3">
 						<div class="w-10 h-10 rounded-xl bg-red-100 text-red-600 font-bold flex items-center justify-center text-lg shrink-0">
 							<i class="fa-solid fa-file-pdf"></i>
 						</div>
 						<div>
 							<span class="text-[10px] font-bold text-emerald-600 uppercase block">ĐÃ SỞ HỮU</span>
-							<h3 class="font-extrabold text-xs text-slate-900 leading-snug"><?php echo esc_html( $doc['title'] ?? '' ); ?></h3>
+							<h3 class="font-extrabold text-xs text-white leading-snug"><?php echo esc_html( $doc['title'] ?? '' ); ?></h3>
 						</div>
 					</div>
-					<p class="text-[11px] text-slate-500 line-clamp-2"><?php echo esc_html( $doc['description'] ?? '' ); ?></p>
-					<div class="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+					<p class="text-[11px] text-slate-400 line-clamp-2"><?php echo esc_html( $doc['description'] ?? '' ); ?></p>
+					<div class="pt-2 border-t border-slate-800 flex items-center justify-between text-xs">
 						<span class="text-slate-400 font-mono text-[10px]"><?php echo esc_html( size_format( (int) ( $doc['file_size'] ?? 0 ) ) ); ?></span>
 						<a href="<?php echo esc_url( cvc_document_download_url( $doc['slug'] ) ); ?>" class="px-3 py-1 bg-amber-500 hover:bg-amber-600 text-navy-950 font-black rounded-lg text-xs shadow flex items-center gap-1">
 							<i class="fa-solid fa-download text-[10px]"></i> Tải Về

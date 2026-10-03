@@ -79,6 +79,7 @@ get_header();
 ?>
 
 <main id="main" class="cvc-page bg-slate-900 text-slate-100 min-h-screen py-8">
+<?php cvc_render_track_marker( 'recruitment_viewed', 'recruitment', (int) ( $recruitment['id'] ?? 0 ) ); ?>
 <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
 
 	<?php cvc_render_breadcrumbs( $breadcrumb_items ); ?>

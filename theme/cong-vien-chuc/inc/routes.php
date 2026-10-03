@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Tăng số này khi thêm/sửa rewrite rule để buộc flush lại đúng 1 lần.
-const CVC_REWRITE_VERSION = '8';
+const CVC_REWRITE_VERSION = '9';
 
 /**
  * Section hợp lệ của /tai-khoan/{section}/ (Phase 10) - map slug tiếng
@@ -173,6 +173,16 @@ function cvc_register_rewrite_rules(): void {
 	add_rewrite_rule(
 		'^dang-ky/?$',
 		'index.php?cvc_page=register',
+		'top'
+	);
+	add_rewrite_rule(
+		'^quen-mat-khau/?$',
+		'index.php?cvc_page=forgot-password',
+		'top'
+	);
+	add_rewrite_rule(
+		'^dat-lai-mat-khau/?$',
+		'index.php?cvc_page=reset-password',
 		'top'
 	);
 	add_rewrite_rule(
@@ -364,6 +374,8 @@ function cvc_template_include( string $template ): string {
 		'search'                => 'template-search.php',
 		'login'                 => 'template-login.php',
 		'register'              => 'template-register.php',
+		'forgot-password'       => 'template-forgot-password.php',
+		'reset-password'        => 'template-reset-password.php',
 		'account'               => 'template-account.php',
 		'exam-attempt'          => 'template-exam-attempt.php',
 		'documents'             => 'template-documents.php',
