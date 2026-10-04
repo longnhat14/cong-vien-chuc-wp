@@ -42,6 +42,7 @@ function cvc_ingestion_tabs( string $active ): void {
 		'queue'  => array( 'Hàng chờ', cvc_admin_url( 'thu-thap' ) ),
 		'nguon'  => array( 'Nguồn & chỉ số', cvc_admin_url( 'thu-thap', null, array( 'xem' => 'nguon' ) ) ),
 		'kiem-tra' => array( 'Kiểm tra mẫu', cvc_admin_url( 'thu-thap', null, array( 'xem' => 'kiem-tra' ) ) ),
+		'on-tap'   => array( 'Ôn tập & văn bản', cvc_admin_url( 'thu-thap', null, array( 'xem' => 'on-tap' ) ) ),
 	);
 	echo '<nav class="flex flex-wrap gap-1 border-b border-slate-800" aria-label="Thu thập tin">';
 	foreach ( $tabs as $key => $tab ) {

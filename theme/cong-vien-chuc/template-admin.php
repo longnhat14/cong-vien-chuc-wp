@@ -231,6 +231,13 @@ get_header();
 				cvc_admin_render_ingestion_sources();
 			} elseif ( 'kiem-tra' === $cvc_ing_view ) {
 				cvc_admin_render_ingestion_review();
+			} elseif ( 'on-tap' === $cvc_ing_view ) {
+				$cvc_syl_id = absint( $_GET['id'] ?? 0 ); // phpcs:ignore WordPress.Security.NonceVerification
+				$cvc_syl_id ? cvc_admin_render_syllabus_detail( $cvc_syl_id ) : cvc_admin_render_syllabus_index();
+			} elseif ( 'van-ban' === $cvc_ing_view ) {
+				cvc_admin_render_legal_document( absint( $_GET['id'] ?? 0 ) ); // phpcs:ignore WordPress.Security.NonceVerification
+			} elseif ( 'duyet-ai' === $cvc_ing_view ) {
+				cvc_admin_render_content_review();
 			} else {
 				cvc_admin_render_ingestion_index();
 			}
