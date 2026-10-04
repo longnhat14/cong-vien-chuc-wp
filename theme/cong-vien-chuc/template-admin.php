@@ -224,8 +224,13 @@ get_header();
 
 		<?php elseif ( 'ingestion' === $view ) : ?>
 			<?php
+			$cvc_ing_view = sanitize_key( wp_unslash( $_GET['xem'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
 			if ( ctype_digit( $item_param ) ) {
 				cvc_admin_render_ingestion_detail( (int) $item_param );
+			} elseif ( 'nguon' === $cvc_ing_view ) {
+				cvc_admin_render_ingestion_sources();
+			} elseif ( 'kiem-tra' === $cvc_ing_view ) {
+				cvc_admin_render_ingestion_review();
 			} else {
 				cvc_admin_render_ingestion_index();
 			}

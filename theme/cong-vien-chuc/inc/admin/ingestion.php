@@ -34,6 +34,23 @@ function cvc_ingestion_date( $value ): string {
 	return $ts ? wp_date( 'd/m/Y', $ts ) : '—';
 }
 
+/**
+ * Thanh tab của khu Thu thập tin (Phase 15).
+ */
+function cvc_ingestion_tabs( string $active ): void {
+	$tabs = array(
+		'queue'  => array( 'Hàng chờ', cvc_admin_url( 'thu-thap' ) ),
+		'nguon'  => array( 'Nguồn & chỉ số', cvc_admin_url( 'thu-thap', null, array( 'xem' => 'nguon' ) ) ),
+		'kiem-tra' => array( 'Kiểm tra mẫu', cvc_admin_url( 'thu-thap', null, array( 'xem' => 'kiem-tra' ) ) ),
+	);
+	echo '<nav class="flex flex-wrap gap-1 border-b border-slate-800" aria-label="Thu thập tin">';
+	foreach ( $tabs as $key => $tab ) {
+		$is = $key === $active;
+		echo '<a href="' . esc_url( $tab[1] ) . '" class="px-3 py-2 text-sm font-bold border-b-2 -mb-px ' . ( $is ? 'border-cyan-400 text-cyan-200' : 'border-transparent text-slate-400 hover:text-slate-200' ) . '"' . ( $is ? ' aria-current="page"' : '' ) . '>' . esc_html( $tab[0] ) . '</a>';
+	}
+	echo '</nav>';
+}
+
 function cvc_ingestion_op_form( string $op, int $id, string $label, string $class, string $confirm = '', array $extra = array() ): string {
 	$html  = '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" class="inline"' . ( '' !== $confirm ? ' data-cvc-confirm="' . esc_attr( $confirm ) . '"' : '' ) . '>';
 	$html .= wp_nonce_field( 'cvc_admin_ingestion', '_wpnonce', true, false );
@@ -78,6 +95,7 @@ function cvc_admin_render_ingestion_index(): void {
 			<?php endif; ?>
 		</div>
 	</header>
+	<?php cvc_ingestion_tabs( 'queue' ); ?>
 
 	<?php if ( ! $overview['ok'] ) : ?>
 		<?php cvc_render_error_state( cvc_admin_error_message( $overview ) ); ?>
@@ -120,7 +138,7 @@ function cvc_admin_render_ingestion_index(): void {
 
 		<dl class="grid grid-cols-2 sm:grid-cols-3 gap-2">
 			<?php
-			$tiles = array( 'qa_pending', 'published', 'validation_failed', 'duplicate', 'failed', 'ignored' );
+			$tiles = array( 'qa_pending', 'published', 'event_pending', 'validation_failed', 'duplicate', 'failed', 'ignored' );
 			foreach ( $tiles as $t ) :
 				$info = $ov['states'][ $t ] ?? array( 'label' => $t, 'total' => 0 );
 				?>
@@ -548,6 +566,24 @@ function cvc_admin_handle_ingestion(): void {
 			cvc_admin_redirect( $new_id ? cvc_admin_url( 'thu-thap', $new_id ) : $index, 'success', (string) ( $result['data']['message'] ?? 'Đã nhập công văn.' ) );
 			return;
 
+		case 'recheck':
+			$client = new CVC_Api_Client( null, 70 );
+			$result = $client->post( '/api/admin/sources/' . $id . '/recheck', array(), $token );
+			cvc_admin_redirect( cvc_admin_url( 'thu-thap', null, array( 'xem' => 'nguon' ) ), $result['ok'] ? 'success' : 'error', $result['ok'] ? (string) ( $result['data']['message'] ?? 'Đã kiểm tra.' ) : cvc_admin_error_message( $result ) );
+			return;
+
+		case 'review':
+			$result = $client->post(
+				'/api/admin/ingestion/items/' . $id . '/review',
+				array(
+					'result' => sanitize_key( wp_unslash( $_POST['result'] ?? '' ) ),
+					'notes'  => sanitize_text_field( wp_unslash( $_POST['notes'] ?? '' ) ),
+				),
+				$token
+			);
+			cvc_admin_redirect( cvc_admin_url( 'thu-thap', null, array( 'xem' => 'kiem-tra' ) ), $result['ok'] ? 'success' : 'error', $result['ok'] ? (string) ( $result['data']['message'] ?? 'Đã ghi nhận.' ) : cvc_admin_error_message( $result ) );
+			return;
+
 		case 'run':
 			$client = new CVC_Api_Client( null, 170 );
 			$result = $client->post( '/api/admin/ingestion/run', array( 'limit' => 5 ), $token );
@@ -602,5 +638,281 @@ function cvc_admin_handle_ingestion_file(): void {
 		header( 'Content-Disposition: ' . $disposition );
 	}
 	echo wp_remote_retrieve_body( $response ); // phpcs:ignore WordPress.Security.EscapeOutput -- file nhị phân.
+	exit;
+}
+
+/* ------------------------------------------------------------------ */
+/* Phase 15 - Nguồn & chỉ số                                           */
+/* ------------------------------------------------------------------ */
+
+function cvc_ingestion_cell( string $status ): array {
+	return array(
+		'ok'         => array( 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40', 'Đang chạy' ),
+		'no_listing' => array( 'bg-amber-500/20 text-amber-300 border-amber-500/40', 'Thiếu trang danh mục' ),
+		'inactive'   => array( 'bg-slate-600/30 text-slate-300 border-slate-500/40', 'Tạm dừng' ),
+		'down'       => array( 'bg-rose-500/20 text-rose-300 border-rose-500/40', 'Không truy cập được' ),
+		'not_found'  => array( 'bg-rose-500/20 text-rose-300 border-rose-500/40', 'Chưa xác minh được' ),
+		'pending'    => array( 'bg-slate-800 text-slate-500 border-slate-700', 'Chưa dò' ),
+	)[ $status ] ?? array( 'bg-slate-800 text-slate-500 border-slate-700', $status );
+}
+
+function cvc_admin_render_ingestion_sources(): void {
+	$days   = in_array( absint( $_GET['ngay'] ?? 30 ), array( 7, 30, 90 ), true ) ? absint( $_GET['ngay'] ?? 30 ) : 30; // phpcs:ignore WordPress.Security.NonceVerification
+	$result = cvc_admin_api_get( '/api/admin/ingestion/sources-report', array( 'days' => $days ) );
+	$btn    = 'px-3 py-1.5 rounded-lg text-xs font-bold';
+	?>
+	<header class="flex flex-wrap items-end justify-between gap-3">
+		<div>
+			<h1 class="text-2xl font-black text-white">Nguồn & chỉ số thu thập</h1>
+			<p class="text-sm text-slate-400">Danh bạ nguồn đã xác minh, độ phủ 34 tỉnh và 7 chỉ số đo chất lượng.</p>
+		</div>
+		<div class="flex flex-wrap gap-2 items-center">
+			<?php foreach ( array( 7, 30, 90 ) as $d ) : ?>
+				<a class="<?php echo esc_attr( $btn ); ?> <?php echo $d === $days ? 'bg-cyan-500 text-slate-950' : 'bg-slate-800 text-slate-300'; ?>" href="<?php echo esc_url( cvc_admin_url( 'thu-thap', null, array( 'xem' => 'nguon', 'ngay' => $d ) ) ); ?>"><?php echo esc_html( $d . ' ngày' ); ?></a>
+			<?php endforeach; ?>
+			<a class="<?php echo esc_attr( $btn ); ?> bg-slate-800 text-slate-200" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=cvc_admin_ingestion_csv&days=' . $days ), 'cvc_admin_ingestion_csv' ) ); ?>"><i class="fa-solid fa-file-csv mr-1" aria-hidden="true"></i>Xuất CSV</a>
+			<a class="<?php echo esc_attr( $btn ); ?> bg-slate-800 text-slate-200" href="<?php echo esc_url( cvc_admin_url( 'sources', 'new' ) ); ?>">+ Thêm nguồn</a>
+		</div>
+	</header>
+	<?php cvc_ingestion_tabs( 'nguon' ); ?>
+	<?php
+	if ( ! $result['ok'] ) {
+		cvc_render_error_state( cvc_admin_error_message( $result ) );
+		return;
+	}
+	$d     = (array) ( $result['data']['data'] ?? array() );
+	$k     = (array) ( $d['kpi'] ?? array() );
+	$types = (array) ( $k['types'] ?? array() );
+	$type_labels = array( 'recruitment' => 'tuyển dụng', 'exam_schedule' => 'lịch thi', 'result' => 'kết quả', 'study_material' => 'tài liệu', 'other' => 'khác' );
+	$type_text   = array();
+	foreach ( $types as $type => $count ) {
+		$type_text[] = ( $type_labels[ $type ] ?? ( $type ?: 'chưa phân loại' ) ) . ' ' . (int) $count;
+	}
+	$kinds  = (array) ( $k['content_kinds'] ?? array() );
+	$sample = (array) ( $k['sample'] ?? array() );
+	$fmt    = static fn ( $v, string $suffix = '' ) => null === $v ? '—' : number_format_i18n( (float) $v, is_float( $v ) && floor( (float) $v ) !== (float) $v ? 1 : 0 ) . $suffix;
+	$kpis   = array(
+		array( 'Tin mới / tháng', $fmt( $k['notices_per_month'] ?? null ), 'tuyển dụng + sự kiện, quy đổi 30 ngày' ),
+		array( 'Nguồn hoạt động', $fmt( $k['active_rate'] ?? null, '%' ), (int) ( $k['active_sources'] ?? 0 ) . ' nguồn bật · có lượt truy cập được trong 7 ngày' ),
+		array( 'Tần suất cập nhật', null === ( $k['median_update_gap_days'] ?? null ) ? '—' : $fmt( $k['median_update_gap_days'] ) . ' ngày', 'trung vị giữa 2 tin mới của cùng nguồn' ),
+		array( 'Cơ cấu loại tin', empty( $type_text ) ? '—' : (string) array_sum( array_map( 'intval', $types ) ), empty( $type_text ) ? 'chưa có dữ liệu' : implode( ' · ', $type_text ) ),
+		array( 'Chất lượng dữ liệu', $fmt( $k['avg_completeness'] ?? null, '/100' ), 'điểm đầy đủ TB · ' . ( null === ( $k['manual_edit_rate'] ?? null ) ? 'chưa có tin đăng' : $fmt( $k['manual_edit_rate'], '%' ) . ' tin phải sửa tay' ) ),
+		array( 'PDF / HTML', $fmt( $kinds['pdf_scan'] ?? null, '%' ) . ' scan', 'HTML ' . $fmt( $kinds['html'] ?? null, '%' ) . ' · PDF chữ ' . $fmt( $kinds['pdf_text'] ?? null, '%' ) ),
+		array( 'Ổn định URL', (string) (int) ( $k['url_changes'] ?? 0 ), 'lần đổi địa chỉ · ' . (int) ( $k['attachments_failed'] ?? 0 ) . ' công văn không tải được' ),
+		array( 'Kiểm tra mẫu', (int) ( $sample['reviewed'] ?? 0 ) . ' tin', 'lỗi nặng ' . $fmt( isset( $sample['major_rate'] ) ? $sample['major_rate'] * 100 : null, '%' ) . ' · chờ kiểm ' . (int) ( $sample['pending'] ?? 0 ) ),
+	);
+	?>
+	<dl class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+		<?php foreach ( $kpis as $kpi ) : ?>
+			<div class="bg-[#0A192F] border border-slate-800 rounded-2xl p-4">
+				<dt class="text-[11px] font-bold uppercase tracking-wider text-slate-400"><?php echo esc_html( $kpi[0] ); ?></dt>
+				<dd class="text-2xl font-black text-white tabular-nums mt-1"><?php echo esc_html( (string) $kpi[1] ); ?></dd>
+				<dd class="text-xs text-slate-400 mt-0.5"><?php echo esc_html( $kpi[2] ); ?></dd>
+			</div>
+		<?php endforeach; ?>
+	</dl>
+
+	<section class="bg-[#0A192F] border border-slate-800 rounded-2xl p-5 space-y-3" aria-labelledby="cvc-cov">
+		<div class="flex flex-wrap items-center justify-between gap-2">
+			<h2 id="cvc-cov" class="text-sm font-black text-white">Độ phủ nhóm A — 34 tỉnh/thành</h2>
+			<div class="flex flex-wrap gap-2 text-[11px]">
+				<?php foreach ( array( 'ok', 'no_listing', 'down', 'not_found', 'inactive', 'pending' ) as $st ) : ?>
+					<?php $c = cvc_ingestion_cell( $st ); ?>
+					<span class="px-2 py-0.5 rounded border <?php echo esc_attr( $c[0] ); ?>"><?php echo esc_html( $c[1] ); ?></span>
+				<?php endforeach; ?>
+			</div>
+		</div>
+		<div class="overflow-x-auto">
+			<table class="w-full text-xs">
+				<thead class="text-[11px] uppercase tracking-wider text-slate-400 text-left">
+					<tr><th class="py-2 pr-3">Tỉnh/thành</th><th class="py-2 pr-3">Sở Nội vụ</th><th class="py-2 pr-3">Sở GD&amp;ĐT</th><th class="py-2">Sở Y tế</th></tr>
+				</thead>
+				<tbody class="divide-y divide-slate-800">
+					<?php foreach ( (array) ( $d['coverage'] ?? array() ) as $row ) : ?>
+						<tr>
+							<td class="py-1.5 pr-3 text-slate-200 whitespace-nowrap"><?php echo esc_html( (string) $row['province'] ); ?></td>
+							<?php foreach ( array( 'snv', 'sgddt', 'syt' ) as $cat ) : ?>
+								<?php
+								$cell = (array) ( $row['cells'][ $cat ] ?? array( 'status' => 'pending' ) );
+								$c    = cvc_ingestion_cell( (string) $cell['status'] );
+								?>
+								<td class="py-1.5 pr-3">
+									<?php if ( ! empty( $cell['source_id'] ) ) : ?>
+										<a class="inline-block px-2 py-0.5 rounded border <?php echo esc_attr( $c[0] ); ?>" href="<?php echo esc_url( cvc_admin_url( 'sources', (int) $cell['source_id'] ) ); ?>"><?php echo esc_html( $c[1] ); ?></a>
+									<?php else : ?>
+										<span class="inline-block px-2 py-0.5 rounded border <?php echo esc_attr( $c[0] ); ?>"><?php echo esc_html( $c[1] ); ?></span>
+									<?php endif; ?>
+								</td>
+							<?php endforeach; ?>
+						</tr>
+					<?php endforeach; ?>
+				</tbody>
+			</table>
+		</div>
+		<p class="text-xs text-slate-500">Hệ thống tự dò mỗi lượt thu thập (Sở Nội vụ trước, rồi Sở GD&amp;ĐT, Sở Y tế, Bộ/ngành). Nguồn xác minh được (HTTP 200 + tiêu đề khớp cơ quan và tỉnh) tự bật thu thập. Ô đỏ: đã thử các địa chỉ ứng viên nhưng không khớp — khai báo tay qua "Thêm nguồn".</p>
+	</section>
+
+	<section class="bg-[#0A192F] border border-slate-800 rounded-2xl p-5 space-y-3" aria-labelledby="cvc-src">
+		<h2 id="cvc-src" class="text-sm font-black text-white">Từng nguồn (<?php echo esc_html( (string) $days ); ?> ngày)</h2>
+		<div class="overflow-x-auto">
+			<table class="w-full text-xs">
+				<thead class="text-[11px] uppercase tracking-wider text-slate-400 text-left">
+					<tr>
+						<th class="py-2 pr-3">Nguồn</th><th class="py-2 pr-3">Nhóm</th><th class="py-2 pr-3">Kiểm tra gần nhất</th>
+						<th class="py-2 pr-3 text-right">Tin</th><th class="py-2 pr-3 text-right">Đã đăng</th><th class="py-2 pr-3 text-right">Đầy đủ</th>
+						<th class="py-2 pr-3 text-right">Tin cậy</th><th class="py-2 text-right">Thao tác</th>
+					</tr>
+				</thead>
+				<tbody class="divide-y divide-slate-800">
+					<?php foreach ( (array) ( $d['sources'] ?? array() ) as $src ) : ?>
+						<?php if ( 'manual_upload' === ( $src['category'] ?? '' ) ) { continue; } ?>
+						<tr class="align-top <?php echo empty( $src['is_active'] ) ? 'opacity-60' : ''; ?>">
+							<td class="py-2 pr-3 min-w-[220px]">
+								<a class="font-bold text-slate-100 hover:text-cyan-300" href="<?php echo esc_url( cvc_admin_url( 'sources', (int) $src['id'] ) ); ?>"><?php echo esc_html( (string) $src['name'] ); ?></a>
+								<div class="text-slate-500 break-all"><?php echo esc_html( (string) $src['url'] ); ?></div>
+								<div class="text-slate-500">
+									<?php echo esc_html( (string) ( $src['province'] ?? '' ) ); ?>
+									<?php echo empty( $src['has_listing'] ) ? '<span class="text-amber-300"> · chưa có trang danh mục</span>' : ''; ?>
+									<?php echo ! empty( $src['wildcard_dns'] ) ? '<span class="text-slate-400"> · wildcard DNS</span>' : ''; ?>
+									<?php echo empty( $src['is_active'] ) ? '<span class="text-slate-400"> · tạm dừng</span>' : ''; ?>
+								</div>
+							</td>
+							<td class="py-2 pr-3 text-slate-300"><?php echo esc_html( (string) $src['category_label'] ); ?></td>
+							<td class="py-2 pr-3 whitespace-nowrap">
+								<span class="<?php echo ! empty( $src['active_7d'] ) ? 'text-emerald-300' : 'text-rose-300'; ?>"><?php echo esc_html( null === $src['last_http_status'] ? '—' : 'HTTP ' . $src['last_http_status'] ); ?></span><br>
+								<span class="text-slate-500"><?php echo esc_html( cvc_admin_format( $src['last_checked_at'] ?? null, 'datetime' ) ); ?></span>
+							</td>
+							<td class="py-2 pr-3 text-right tabular-nums"><?php echo esc_html( (string) (int) $src['notices'] ); ?></td>
+							<td class="py-2 pr-3 text-right tabular-nums"><?php echo esc_html( (string) (int) $src['published'] ); ?></td>
+							<td class="py-2 pr-3 text-right tabular-nums"><?php echo esc_html( null === $src['avg_completeness'] ? '—' : (string) $src['avg_completeness'] ); ?></td>
+							<td class="py-2 pr-3 text-right tabular-nums"><?php echo esc_html( null === $src['reliability_score'] ? '—' : (string) round( (float) $src['reliability_score'] ) ); ?></td>
+							<td class="py-2 text-right whitespace-nowrap">
+								<?php if ( cvc_admin_can( 'recruitment.update' ) ) : ?>
+									<?php echo cvc_ingestion_op_form( 'recheck', (int) $src['id'], 'Kiểm tra lại', $btn . ' bg-slate-800 text-slate-300 hover:bg-slate-700' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+								<?php endif; ?>
+							</td>
+						</tr>
+					<?php endforeach; ?>
+				</tbody>
+			</table>
+		</div>
+	</section>
+
+	<?php if ( ! empty( $d['probes'] ) ) : ?>
+		<details class="bg-[#0A192F] border border-slate-800 rounded-2xl p-5">
+			<summary class="cursor-pointer text-sm font-black text-white">Lượt dò nguồn gần đây</summary>
+			<ul class="mt-3 space-y-2 text-xs">
+				<?php foreach ( (array) $d['probes'] as $probe ) : ?>
+					<li class="border border-slate-800 rounded-xl p-3">
+						<div class="flex flex-wrap justify-between gap-2">
+							<span class="text-slate-100 font-bold"><?php echo esc_html( (string) $probe['province'] . ' · ' . (string) $probe['category'] ); ?></span>
+							<span class="<?php echo in_array( $probe['result'], array( 'found', 'exists' ), true ) ? 'text-emerald-300' : 'text-rose-300'; ?>"><?php echo esc_html( array( 'found' => 'Tìm thấy', 'exists' => 'Đã có', 'not_found' => 'Không xác minh được', 'error' => 'Lỗi' )[ $probe['result'] ] ?? (string) $probe['result'] ); ?> · <?php echo esc_html( cvc_admin_format( $probe['probed_at'] ?? null, 'datetime' ) ); ?></span>
+						</div>
+						<?php if ( ! empty( $probe['notes'] ) ) : ?>
+							<pre class="mt-1 whitespace-pre-wrap text-slate-400 font-sans"><?php echo esc_html( (string) $probe['notes'] ); ?></pre>
+						<?php endif; ?>
+					</li>
+				<?php endforeach; ?>
+			</ul>
+		</details>
+	<?php endif; ?>
+	<?php
+}
+
+/* ------------------------------------------------------------------ */
+/* Phase 15 - Kiểm tra mẫu tin tự đăng                                 */
+/* ------------------------------------------------------------------ */
+
+function cvc_admin_render_ingestion_review(): void {
+	$result  = cvc_admin_api_get( '/api/admin/ingestion/review' );
+	$can_pub = cvc_admin_can( 'recruitment.publish' );
+	$btn     = 'px-3 py-1.5 rounded-lg text-xs font-bold';
+	$labels  = array( 'pending' => 'Chờ kiểm', 'correct' => 'Đúng', 'minor_error' => 'Lỗi nhỏ', 'major_error' => 'Lỗi nặng' );
+	?>
+	<header>
+		<h1 class="text-2xl font-black text-white">Kiểm tra mẫu tin tự đăng</h1>
+		<p class="text-sm text-slate-400">Mỗi tuần hệ thống chọn tối đa 20 tin tự đăng trong 7 ngày. Đối chiếu từng tin với công văn gốc: cơ quan, tỉnh, hạn nộp, vị trí, chỉ tiêu. Nếu tỷ lệ lỗi nặng vượt 5% (khi đã kiểm từ 10 tin), hệ thống tự chuyển về duyệt 1 click.</p>
+	</header>
+	<?php cvc_ingestion_tabs( 'kiem-tra' ); ?>
+	<?php
+	if ( ! $result['ok'] ) {
+		cvc_render_error_state( cvc_admin_error_message( $result ) );
+		return;
+	}
+	$d     = (array) ( $result['data']['data'] ?? array() );
+	$stats = (array) ( $d['stats'] ?? array() );
+	?>
+	<dl class="grid grid-cols-2 sm:grid-cols-5 gap-2 text-sm">
+		<?php foreach ( array( 'pending' => 'Chờ kiểm', 'correct' => 'Đúng', 'minor_error' => 'Lỗi nhỏ', 'major_error' => 'Lỗi nặng' ) as $key => $label ) : ?>
+			<div class="bg-[#0A192F] border border-slate-800 rounded-xl p-3"><dt class="text-[11px] font-bold text-slate-400"><?php echo esc_html( $label ); ?></dt><dd class="text-xl font-black text-white tabular-nums"><?php echo esc_html( (string) (int) ( $stats[ $key ] ?? 0 ) ); ?></dd></div>
+		<?php endforeach; ?>
+		<div class="bg-[#0A192F] border border-slate-800 rounded-xl p-3"><dt class="text-[11px] font-bold text-slate-400">Tỷ lệ lỗi nặng</dt><dd class="text-xl font-black <?php echo (float) ( $stats['major_rate'] ?? 0 ) > 0.05 ? 'text-rose-300' : 'text-white'; ?> tabular-nums"><?php echo esc_html( round( (float) ( $stats['major_rate'] ?? 0 ) * 100, 1 ) . '%' ); ?></dd></div>
+	</dl>
+
+	<?php if ( empty( $d['items'] ) ) : ?>
+		<p class="text-sm text-slate-400">Chưa có tin nào trong mẫu kiểm tra. Mẫu được chọn mỗi thứ Hai từ các tin tự đăng của tuần trước.</p>
+		<?php return; ?>
+	<?php endif; ?>
+
+	<ul class="space-y-3">
+		<?php foreach ( (array) $d['items'] as $it ) : ?>
+			<li class="bg-[#0A192F] border <?php echo 'pending' === $it['review_sample'] ? 'border-amber-500/40' : 'border-slate-800'; ?> rounded-2xl p-4 space-y-2">
+				<div class="flex flex-wrap justify-between gap-2">
+					<a class="font-bold text-slate-100 hover:text-cyan-300" href="<?php echo esc_url( cvc_admin_url( 'thu-thap', (int) $it['id'] ) ); ?>"><?php echo esc_html( (string) ( $it['title'] ?? '(chưa có tiêu đề)' ) ); ?></a>
+					<span class="text-xs font-bold <?php echo 'major_error' === $it['review_sample'] ? 'text-rose-300' : ( 'correct' === $it['review_sample'] ? 'text-emerald-300' : 'text-amber-300' ); ?>"><?php echo esc_html( $labels[ $it['review_sample'] ] ?? (string) $it['review_sample'] ); ?></span>
+				</div>
+				<p class="text-xs text-slate-400">
+					<?php echo esc_html( (string) ( $it['source'] ?? '' ) ); ?> · đăng <?php echo esc_html( cvc_admin_format( $it['published_at'] ?? null, 'datetime' ) ); ?> · điểm đầy đủ <?php echo esc_html( null === $it['completeness_score'] ? '—' : (string) $it['completeness_score'] ); ?>
+					· <a class="text-cyan-300 underline" href="<?php echo esc_url( (string) $it['source_url'] ); ?>" target="_blank" rel="noopener nofollow">Trang gốc</a>
+					<?php if ( ! empty( $it['recruitment']['slug'] ) ) : ?>
+						· <a class="text-emerald-300 underline" href="<?php echo esc_url( cvc_recruitment_url( (string) $it['recruitment']['slug'] ) ); ?>" target="_blank" rel="noopener">Tin đã đăng</a>
+					<?php endif; ?>
+				</p>
+				<?php if ( ! empty( $it['review_notes'] ) ) : ?>
+					<p class="text-xs text-slate-300">Ghi chú: <?php echo esc_html( (string) $it['review_notes'] ); ?> <span class="text-slate-500">— <?php echo esc_html( (string) $it['reviewed_by'] ); ?></span></p>
+				<?php endif; ?>
+				<?php if ( $can_pub ) : ?>
+					<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="flex flex-wrap items-center gap-2">
+						<?php wp_nonce_field( 'cvc_admin_ingestion' ); ?>
+						<input type="hidden" name="action" value="cvc_admin_ingestion">
+						<input type="hidden" name="op" value="review">
+						<input type="hidden" name="id" value="<?php echo esc_attr( (string) $it['id'] ); ?>">
+						<input type="text" name="notes" maxlength="1000" placeholder="Ghi chú (sai trường nào…)" class="<?php echo esc_attr( cvc_admin_input_class() ); ?> !mt-0 w-72">
+						<button name="result" value="correct" class="<?php echo esc_attr( $btn ); ?> bg-emerald-500 text-slate-950">Đúng</button>
+						<button name="result" value="minor_error" class="<?php echo esc_attr( $btn ); ?> bg-amber-500 text-slate-950">Lỗi nhỏ</button>
+						<button name="result" value="major_error" class="<?php echo esc_attr( $btn ); ?> bg-rose-500 text-white">Lỗi nặng</button>
+					</form>
+				<?php endif; ?>
+			</li>
+		<?php endforeach; ?>
+	</ul>
+	<p class="text-xs text-slate-500">Lỗi nặng: sai cơ quan, sai tỉnh, sai hạn nộp, sai chỉ tiêu, hoặc không phải tin tuyển dụng. Lỗi nhỏ: sai chính tả, tóm tắt thiếu, vị trí gộp chưa tách.</p>
+	<?php
+}
+
+add_action( 'admin_post_cvc_admin_ingestion_csv', 'cvc_admin_handle_ingestion_csv' );
+add_action( 'admin_post_nopriv_cvc_admin_ingestion_csv', 'cvc_admin_handle_ingestion_csv' );
+
+function cvc_admin_handle_ingestion_csv(): void {
+	check_admin_referer( 'cvc_admin_ingestion_csv' );
+	$token = cvc_admin_require_staff();
+	$days  = in_array( absint( $_GET['days'] ?? 30 ), array( 7, 30, 90 ), true ) ? absint( $_GET['days'] ) : 30;
+
+	$response = wp_remote_get(
+		cvc_api_base_url() . '/api/admin/ingestion/sources-report?format=csv&days=' . $days,
+		array(
+			'timeout' => 60,
+			'headers' => array( 'Authorization' => 'Bearer ' . $token, 'Accept' => 'text/csv' ),
+		)
+	);
+
+	if ( is_wp_error( $response ) || 200 !== (int) wp_remote_retrieve_response_code( $response ) ) {
+		wp_die( esc_html__( 'Không xuất được báo cáo.', 'cvc' ), '', array( 'response' => 502 ) );
+	}
+
+	nocache_headers();
+	header( 'Content-Type: text/csv; charset=UTF-8' );
+	header( 'Content-Disposition: attachment; filename="nguon-tuyen-dung-' . $days . '-ngay.csv"' );
+	echo wp_remote_retrieve_body( $response ); // phpcs:ignore WordPress.Security.EscapeOutput -- CSV.
 	exit;
 }

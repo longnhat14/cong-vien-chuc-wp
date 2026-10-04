@@ -179,6 +179,7 @@ function cvc_admin_resources(): array {
 			'title'    => 'name',
 			'columns'  => array(
 				array( 'key' => 'name', 'label' => 'Tên nguồn', 'link' => true ),
+				array( 'key' => 'category_label', 'label' => 'Nhóm' ),
 				array( 'key' => 'province.name', 'label' => 'Tỉnh/thành' ),
 				array( 'key' => 'trust_level', 'label' => 'Tin cậy' ),
 				array( 'key' => 'published_count', 'label' => 'Tin đã đăng' ),
@@ -193,6 +194,7 @@ function cvc_admin_resources(): array {
 				array( 'name' => 'name', 'label' => 'Tên nguồn', 'type' => 'text', 'required' => true, 'wide' => true ),
 				array( 'name' => 'url', 'label' => 'Địa chỉ trang chủ', 'type' => 'text', 'required' => true, 'wide' => true, 'help' => 'VD https://sonoivu.tinh.gov.vn — hệ thống dò link có từ khóa tuyển dụng từ trang này.' ),
 				array( 'name' => 'trust_level', 'label' => 'Mức tin cậy', 'type' => 'select', 'required' => true, 'options' => array( 'tier_1' => 'Tier 1 — cơ quan nhà nước (được tự đăng)', 'tier_2' => 'Tier 2 — đơn vị sự nghiệp công lập (được tự đăng)', 'tier_3' => 'Tier 3 — nguồn khác (luôn cần duyệt)' ) ),
+				array( 'name' => 'category', 'label' => 'Nhóm nguồn', 'type' => 'select', 'options' => array( 'snv' => 'Sở Nội vụ', 'sgddt' => 'Sở Giáo dục và Đào tạo', 'syt' => 'Sở Y tế', 'province_portal' => 'Cổng thông tin tỉnh', 'ministry' => 'Bộ, cơ quan ngang bộ', 'central_agency' => 'Cơ quan thuộc Chính phủ', 'hospital' => 'Bệnh viện công', 'university' => 'Đại học công lập', 'college' => 'Cao đẳng công lập', 'research_institute' => 'Viện nghiên cứu', 'commune' => 'Xã/phường/đặc khu', 'other' => 'Khác' ) ),
 				array( 'name' => 'province_id', 'label' => 'Tỉnh/thành mặc định', 'type' => 'province' ),
 				array( 'name' => 'crawl_frequency_tier', 'label' => 'Tần suất dò link', 'type' => 'select', 'options' => array( 'high' => 'Cao — 6 giờ/lần', 'medium' => 'Vừa — 12 giờ/lần', 'low' => 'Thấp — 2 ngày/lần' ) ),
 				array( 'name' => 'adapter_key', 'label' => 'Bộ đọc', 'type' => 'select', 'nullable' => true, 'options' => array( '' => 'Tự động (bộ đọc chung + AI)', 'gov_portal_html' => 'Cổng SharePoint (Quảng Ninh…)', 'haiphong_portal' => 'Cổng Hải Phòng' ) ),

@@ -55,6 +55,17 @@ function cvc_handle_ai_settings_save(): void {
 		$values['ai.model'] = sanitize_text_field( wp_unslash( $_POST['ai_model'] ) );
 	}
 
+	// Phase 15: nhà cung cấp đọc công văn scan (PDF) - dùng khi nhà cung cấp chính không đọc được file.
+	if ( isset( $_POST['ai_doc_provider'] ) ) {
+		$values['ai.doc_provider'] = sanitize_key( wp_unslash( $_POST['ai_doc_provider'] ) );
+	}
+	if ( isset( $_POST['ai_doc_api_key'] ) && '' !== trim( wp_unslash( $_POST['ai_doc_api_key'] ) ) ) {
+		$values['ai.doc_api_key'] = sanitize_text_field( wp_unslash( $_POST['ai_doc_api_key'] ) );
+	}
+	if ( isset( $_POST['ai_doc_model'] ) ) {
+		$values['ai.doc_model'] = sanitize_text_field( wp_unslash( $_POST['ai_doc_model'] ) );
+	}
+
 	$result = ( new CVC_Setting_Service() )->update( 'ai', $values, $token );
 
 	if ( ! $result['ok'] ) {
@@ -63,5 +74,5 @@ function cvc_handle_ai_settings_save(): void {
 		return;
 	}
 
-	cvc_redirect_with_notice( cvc_admin_ai_settings_url(), 'success', 'Đã lưu cấu hình AI Coach.', null );
+	cvc_redirect_with_notice( cvc_admin_ai_settings_url(), 'success', 'Đã lưu cấu hình AI.', null );
 }

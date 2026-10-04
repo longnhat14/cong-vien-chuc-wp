@@ -22,6 +22,11 @@ $provider_configured = $ai['ai.provider']['value'] ?? '';
 $key_configured       = ! empty( $ai['ai.api_key']['configured'] );
 $key_masked           = $ai['ai.api_key']['value'] ?? '';
 $model_configured     = $ai['ai.model']['value'] ?? '';
+$provider_configured  = '' !== $provider_configured ? $provider_configured : 'deepseek';
+$doc_provider         = $ai['ai.doc_provider']['value'] ?? '';
+$doc_key_configured   = ! empty( $ai['ai.doc_api_key']['configured'] );
+$doc_key_masked       = $ai['ai.doc_api_key']['value'] ?? '';
+$doc_model            = $ai['ai.doc_model']['value'] ?? '';
 
 $jobs_result = ( new CVC_Setting_Service() )->ai_jobs( $token );
 $jobs_body   = $jobs_result['ok'] ? ( $jobs_result['data'] ?? array() ) : array();
@@ -42,7 +47,7 @@ get_header();
 			array(
 				array( 'label' => 'Trang chủ', 'url' => home_url( '/' ) ),
 				array( 'label' => 'Quản trị' ),
-				array( 'label' => 'Cấu hình AI Coach' ),
+				array( 'label' => 'Cấu hình AI' ),
 			)
 		);
 		?>
@@ -52,7 +57,7 @@ get_header();
 		<div class="bg-[#0A192F] border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
 			<div class="space-y-1 border-b border-slate-800 pb-4">
 				<h1 class="text-xl font-black text-white flex items-center gap-2">
-					<i class="fa-solid fa-robot text-amber-400"></i> Cấu Hình AI Coach
+					<i class="fa-solid fa-robot text-amber-400"></i> Cấu Hình AI
 				</h1>
 				<p class="text-xs text-slate-400">
 					Chọn nhà cung cấp AI và nhập API Key riêng của bạn. Key được <strong class="text-slate-200">mã hoá khi lưu</strong> ở backend, không hiển thị lại dạng gốc sau khi lưu, và không bao giờ cần dán vào bất kỳ đoạn chat/trao đổi nào khác.
@@ -77,6 +82,7 @@ get_header();
 					<select name="ai_provider" id="ai_provider" class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white focus:border-amber-400 focus:outline-none">
 						<?php
 						$providers = array(
+							'deepseek' => 'DeepSeek (mặc định)',
 							'openai' => 'OpenAI (GPT)',
 							'gemini' => 'Google Gemini',
 							'claude' => 'Anthropic Claude',
@@ -102,10 +108,37 @@ get_header();
 				<div class="space-y-1.5">
 					<label for="ai_model" class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Model (tuỳ chọn)</label>
 					<input type="text" name="ai_model" id="ai_model" value="<?php echo esc_attr( $model_configured ); ?>"
-						placeholder="VD: gpt-4o-mini, gemini-2.5-flash, claude-haiku-4-5..."
+						placeholder="VD: deepseek-flash, gpt-4o-mini, gemini-2.5-flash..."
 						class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white placeholder:text-slate-600 focus:border-amber-400 focus:outline-none font-mono">
 					<p class="text-[10px] text-slate-500">Để trống để dùng model mặc định của từng nhà cung cấp.</p>
 				</div>
+
+				<fieldset class="border border-slate-800 rounded-2xl p-4 space-y-4">
+					<legend class="px-2 text-[11px] font-extrabold uppercase tracking-wider text-cyan-300">Đọc công văn scan (PDF)</legend>
+					<p class="text-[11px] text-slate-400">Công văn dạng scan (không có lớp chữ): DeepSeek đọc qua ảnh từng trang (tối đa 6 trang đầu, model <code>deepseek-flash</code>); OpenAI/Gemini/Claude đọc thẳng file PDF. Chỉ cần mục này nếu muốn dùng riêng một nhà cung cấp đọc PDF (được ưu tiên khi đã nhập key), hoặc khi nhà cung cấp chính là Qwen.</p>
+					<?php if ( 'qwen' === $provider_configured && ! $doc_key_configured ) : ?>
+						<p class="text-[11px] text-amber-400 font-bold"><i class="fa-solid fa-triangle-exclamation"></i> Chưa có nhà cung cấp đọc PDF — tin tuyển dụng chỉ có công văn scan sẽ nằm ở hàng chờ.</p>
+					<?php endif; ?>
+					<div class="space-y-1.5">
+						<label for="ai_doc_provider" class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Nhà cung cấp đọc PDF</label>
+						<select name="ai_doc_provider" id="ai_doc_provider" class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white focus:border-amber-400 focus:outline-none">
+							<?php foreach ( array( 'none' => 'Không dùng', 'gemini' => 'Google Gemini', 'claude' => 'Anthropic Claude', 'openai' => 'OpenAI (GPT)' ) as $value => $label ) : ?>
+								<option value="<?php echo esc_attr( $value ); ?>" <?php selected( '' !== $doc_provider ? $doc_provider : 'none', $value ); ?>><?php echo esc_html( $label ); ?></option>
+							<?php endforeach; ?>
+						</select>
+					</div>
+					<div class="space-y-1.5">
+						<label for="ai_doc_api_key" class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">API Key đọc PDF</label>
+						<input type="password" name="ai_doc_api_key" id="ai_doc_api_key" autocomplete="off"
+							placeholder="<?php echo $doc_key_configured ? esc_attr( 'Để trống nếu không đổi (' . $doc_key_masked . ')' ) : 'Dán API Key tại đây'; ?>"
+							class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white placeholder:text-slate-600 focus:border-amber-400 focus:outline-none font-mono">
+					</div>
+					<div class="space-y-1.5">
+						<label for="ai_doc_model" class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Model đọc PDF (tuỳ chọn)</label>
+						<input type="text" name="ai_doc_model" id="ai_doc_model" value="<?php echo esc_attr( $doc_model ); ?>" placeholder="VD: gemini-2.5-flash"
+							class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white placeholder:text-slate-600 focus:border-amber-400 focus:outline-none font-mono">
+					</div>
+				</fieldset>
 
 				<button type="submit" class="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-navy-950 font-black text-sm rounded-xl shadow-lg transition-transform hover:scale-[1.01]">
 					Lưu Cấu Hình
@@ -152,7 +185,7 @@ get_header();
 
 		<div class="bg-slate-800/40 border border-slate-800 rounded-2xl p-4 text-[11px] text-slate-400 leading-relaxed">
 			<i class="fa-solid fa-circle-info text-cyan-400"></i>
-			AI Coach dùng key này để giải thích chuyên sâu từng câu hỏi sau khi học viên nộp bài thi. Nếu chưa cấu hình hoặc gọi API lỗi, hệ thống tự động dùng lại phần giải thích tĩnh có sẵn trong ngân hàng câu hỏi — học viên không bao giờ thấy lỗi hay màn hình trống.
+			Key này dùng cho: giải thích câu hỏi sau khi học viên nộp bài, và phân tích tin tuyển dụng thu thập tự động (trích cơ quan, hạn nộp, vị trí, chỉ tiêu). Nếu chưa cấu hình hoặc gọi API lỗi, hệ thống tự động dùng lại phần giải thích tĩnh có sẵn trong ngân hàng câu hỏi — học viên không bao giờ thấy lỗi hay màn hình trống.
 		</div>
 
 	</div>
