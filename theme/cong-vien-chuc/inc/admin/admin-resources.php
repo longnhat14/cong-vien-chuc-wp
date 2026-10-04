@@ -26,6 +26,7 @@ function cvc_admin_status_labels(): array {
 		'paid'      => 'Đã thanh toán',
 		'failed'    => 'Thất bại',
 		'cancelled' => 'Đã hủy',
+		'inactive'  => 'Tạm dừng',
 		'1'         => 'Đang dùng',
 		'0'         => 'Tạm ẩn',
 		'true'      => 'Đang dùng',
@@ -35,7 +36,7 @@ function cvc_admin_status_labels(): array {
 
 function cvc_admin_menu_groups(): array {
 	return array(
-		'Tuyển dụng'       => array( 'recruitments', 'positions', 'agencies' ),
+		'Tuyển dụng'       => array( 'recruitments', 'positions', 'agencies', 'sources' ),
 		'Nội dung ôn thi'  => array( 'exam-subjects', 'topics', 'knowledge-items', 'legal-documents', 'questions', 'question-tags', 'exams' ),
 		'Đào tạo & bán hàng' => array( 'courses', 'course-lessons', 'documents', 'orders' ),
 		'Hệ thống'         => array( 'users' ),
@@ -158,7 +159,7 @@ function cvc_admin_resources(): array {
 				array( 'name' => 'name', 'label' => 'Tên cơ quan', 'type' => 'text', 'required' => true, 'wide' => true ),
 				array( 'name' => 'slug', 'label' => 'Đường dẫn (slug)', 'type' => 'slug', 'from' => 'name', 'required' => true ),
 				array( 'name' => 'code', 'label' => 'Mã', 'type' => 'text', 'required' => true ),
-				array( 'name' => 'agency_type', 'label' => 'Loại cơ quan', 'type' => 'select', 'options' => array( 'ministry' => 'Bộ, ngành', 'department' => 'Sở, ban, ngành', 'provincial_department' => 'Cơ quan cấp tỉnh', 'ubnd' => 'UBND', 'ubnd_district' => 'UBND cấp huyện/xã', 'so' => 'Sở' ) ),
+				array( 'name' => 'agency_type', 'label' => 'Loại cơ quan', 'type' => 'select', 'options' => array( 'ministry' => 'Bộ, ngành', 'department' => 'Sở, ban, ngành', 'provincial_department' => 'Cơ quan cấp tỉnh', 'ubnd' => 'UBND', 'ubnd_district' => 'UBND cấp huyện/xã', 'so' => 'Sở', 'education' => 'Cơ sở giáo dục', 'health' => 'Y tế', 'other' => 'Khác' ) ),
 				array( 'name' => 'province_id', 'label' => 'Tỉnh/thành', 'type' => 'province', 'required' => true ),
 				array( 'name' => 'admin_unit_id', 'label' => 'Đơn vị hành chính', 'type' => 'admin_unit' ),
 				array( 'name' => 'address', 'label' => 'Địa chỉ', 'type' => 'text', 'wide' => true ),
@@ -167,6 +168,40 @@ function cvc_admin_resources(): array {
 				array( 'name' => 'website', 'label' => 'Website', 'type' => 'text', 'wide' => true ),
 				array( 'name' => 'status', 'label' => 'Đang dùng', 'type' => 'checkbox' ),
 			),
+		),
+
+		'sources' => array(
+			'label'    => 'Nguồn thu thập',
+			'singular' => 'nguồn',
+			'icon'     => 'fa-satellite-dish',
+			'endpoint' => '/api/admin/sources',
+			'module'   => 'recruitment',
+			'title'    => 'name',
+			'columns'  => array(
+				array( 'key' => 'name', 'label' => 'Tên nguồn', 'link' => true ),
+				array( 'key' => 'province.name', 'label' => 'Tỉnh/thành' ),
+				array( 'key' => 'trust_level', 'label' => 'Tin cậy' ),
+				array( 'key' => 'published_count', 'label' => 'Tin đã đăng' ),
+				array( 'key' => 'pending_count', 'label' => 'Chờ duyệt' ),
+				array( 'key' => 'last_discovery_at', 'label' => 'Dò link lần cuối', 'format' => 'datetime' ),
+				array( 'key' => 'status', 'label' => 'Trạng thái', 'format' => 'status' ),
+			),
+			'filters'  => array(
+				'status' => array( 'label' => 'Trạng thái', 'options' => array( 'active' => 'Đang chạy', 'inactive' => 'Tạm dừng' ) ),
+			),
+			'fields'   => array(
+				array( 'name' => 'name', 'label' => 'Tên nguồn', 'type' => 'text', 'required' => true, 'wide' => true ),
+				array( 'name' => 'url', 'label' => 'Địa chỉ trang chủ', 'type' => 'text', 'required' => true, 'wide' => true, 'help' => 'VD https://sonoivu.tinh.gov.vn — hệ thống dò link có từ khóa tuyển dụng từ trang này.' ),
+				array( 'name' => 'trust_level', 'label' => 'Mức tin cậy', 'type' => 'select', 'required' => true, 'options' => array( 'tier_1' => 'Tier 1 — cơ quan nhà nước (được tự đăng)', 'tier_2' => 'Tier 2 — đơn vị sự nghiệp công lập (được tự đăng)', 'tier_3' => 'Tier 3 — nguồn khác (luôn cần duyệt)' ) ),
+				array( 'name' => 'province_id', 'label' => 'Tỉnh/thành mặc định', 'type' => 'province' ),
+				array( 'name' => 'crawl_frequency_tier', 'label' => 'Tần suất dò link', 'type' => 'select', 'options' => array( 'high' => 'Cao — 6 giờ/lần', 'medium' => 'Vừa — 12 giờ/lần', 'low' => 'Thấp — 2 ngày/lần' ) ),
+				array( 'name' => 'adapter_key', 'label' => 'Bộ đọc', 'type' => 'select', 'nullable' => true, 'options' => array( '' => 'Tự động (bộ đọc chung + AI)', 'gov_portal_html' => 'Cổng SharePoint (Quảng Ninh…)', 'haiphong_portal' => 'Cổng Hải Phòng' ) ),
+				array( 'name' => 'listing_urls', 'label' => 'Trang danh mục tin tuyển dụng', 'type' => 'textarea', 'wide' => true, 'help' => 'Mỗi dòng 1 địa chỉ. Để trống: dò từ trang chủ. Hệ thống tự thêm trang danh mục phát hiện được.' ),
+				array( 'name' => 'link_include_patterns', 'label' => 'Chỉ lấy link chứa', 'type' => 'textarea', 'wide' => true, 'help' => 'Mỗi dòng 1 cụm (VD /tuyen-dung/). Để trống: lọc theo từ khóa tuyển dụng.' ),
+				array( 'name' => 'description', 'label' => 'Ghi chú', 'type' => 'textarea', 'wide' => true ),
+				array( 'name' => 'is_active', 'label' => 'Đang chạy', 'type' => 'checkbox', 'default' => true ),
+			),
+			'note'     => 'Nguồn tier 1/2 được tự đăng khi bật chế độ tự động. Xem hàng chờ ở mục Thu thập tin.',
 		),
 
 		'exam-subjects' => array(

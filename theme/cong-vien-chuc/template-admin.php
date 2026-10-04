@@ -39,6 +39,8 @@ $view         = 'dashboard';
 
 if ( 'thanh-toan' === $resource_key ) {
 	$view = 'payment';
+} elseif ( 'thu-thap' === $resource_key ) {
+	$view = cvc_admin_can( 'recruitment.view' ) ? 'ingestion' : 'forbidden';
 } elseif ( '' !== $resource_key ) {
 	if ( ! $res || ! cvc_admin_can( $res['module'] . '.view' ) ) {
 		$view = 'forbidden';
@@ -70,6 +72,8 @@ if ( 'list' === $view || 'form' === $view ) {
 	$page_title = $res['label'] . ( 'form' === $view ? ( $is_create ? ' — Thêm mới' : ' — ' . cvc_admin_item_title( $res, $item ) ) : '' );
 } elseif ( 'payment' === $view ) {
 	$page_title = 'Cấu hình thanh toán';
+} elseif ( 'ingestion' === $view ) {
+	$page_title = 'Thu thập tin tuyển dụng';
 }
 
 cvc_seo_set_title( $page_title . ' | Quản trị' );
@@ -92,6 +96,9 @@ get_header();
 			</summary>
 			<nav class="mt-3 space-y-4 text-sm" aria-label="Menu quản trị">
 				<a href="<?php echo esc_url( cvc_admin_url() ); ?>" class="flex items-center gap-2 px-2.5 py-2 rounded-lg <?php echo 'dashboard' === $view ? 'bg-cyan-500/15 text-cyan-200 font-bold' : 'text-slate-300 hover:bg-slate-800'; ?>"><i class="fa-solid fa-chart-pie w-4" aria-hidden="true"></i> Tổng quan</a>
+				<?php if ( cvc_admin_can( 'recruitment.view' ) ) : ?>
+					<a href="<?php echo esc_url( cvc_admin_url( 'thu-thap' ) ); ?>" class="flex items-center gap-2 px-2.5 py-2 rounded-lg <?php echo 'ingestion' === $view ? 'bg-cyan-500/15 text-cyan-200 font-bold' : 'text-slate-300 hover:bg-slate-800'; ?>"><i class="fa-solid fa-robot w-4" aria-hidden="true"></i> Thu thập tin</a>
+				<?php endif; ?>
 				<?php foreach ( cvc_admin_menu_groups() as $group_label => $keys ) : ?>
 					<?php
 					$visible = array_filter( $keys, static function ( $k ) {
@@ -214,6 +221,15 @@ get_header();
 					</section>
 				</div>
 			<?php endif; ?>
+
+		<?php elseif ( 'ingestion' === $view ) : ?>
+			<?php
+			if ( ctype_digit( $item_param ) ) {
+				cvc_admin_render_ingestion_detail( (int) $item_param );
+			} else {
+				cvc_admin_render_ingestion_index();
+			}
+			?>
 
 		<?php elseif ( 'payment' === $view ) : ?>
 			<?php

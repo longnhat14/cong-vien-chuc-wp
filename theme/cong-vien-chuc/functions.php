@@ -36,6 +36,8 @@ require_once __DIR__ . '/inc/template-tags.php';
 require_once __DIR__ . '/inc/listing-components.php';
 require_once __DIR__ . '/inc/admin/admin-resources.php';
 require_once __DIR__ . '/inc/admin/admin-engine.php';
+require_once __DIR__ . '/inc/admin/ingestion.php';
+require_once __DIR__ . '/inc/ingestion-cron.php';
 require_once __DIR__ . '/inc/seo.php';
 require_once __DIR__ . '/inc/auth.php';
 require_once __DIR__ . '/inc/actions.php';

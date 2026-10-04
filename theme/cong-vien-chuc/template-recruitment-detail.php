@@ -50,6 +50,8 @@ $legal_docs  = is_array( $dossier['legal_documents'] ?? null ) ? $dossier['legal
 $is_open     = ! empty( $recruitment['is_open'] );
 $status      = (string) ( $recruitment['status'] ?? '' );
 $source_url  = (string) ( $recruitment['source_url'] ?? '' );
+$source_info = is_array( $recruitment['source'] ?? null ) ? $recruitment['source'] : array();
+$attachments = is_array( $recruitment['attachments'] ?? null ) ? $recruitment['attachments'] : array();
 $total       = (int) ( $recruitment['total_positions'] ?? 0 );
 if ( 0 === $total ) {
 	$total = array_sum( array_map( fn ( $p ) => (int) ( $p['quantity'] ?? 0 ), $positions ) );
@@ -206,6 +208,34 @@ get_header();
 					<a href="<?php echo esc_url( $source_url ); ?>" target="_blank" rel="noopener nofollow" class="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-amber-300 text-xs font-bold rounded-xl border border-amber-400/40">
 						<i class="fa-solid fa-up-right-from-square"></i> Đọc toàn văn thông báo trên cổng thông tin của cơ quan
 					</a>
+				<?php endif; ?>
+				<?php if ( ! empty( $attachments ) || '' !== $source_url ) : ?>
+					<div class="border-t border-slate-800 pt-4 space-y-3" id="van-ban-goc">
+						<h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-400">Nguồn trích dẫn &amp; văn bản gốc</h3>
+						<?php if ( '' !== $source_url ) : ?>
+							<p class="text-xs text-slate-400 break-all">
+								Nguồn: <?php echo esc_html( (string) ( $source_info['name'] ?? ( wp_parse_url( $source_url, PHP_URL_HOST ) ?: '' ) ) ); ?> —
+								<a class="text-amber-300 underline" href="<?php echo esc_url( $source_url ); ?>" target="_blank" rel="noopener nofollow"><?php echo esc_html( $source_url ); ?></a>
+							</p>
+						<?php endif; ?>
+						<?php if ( ! empty( $attachments ) ) : ?>
+							<ul class="space-y-2">
+								<?php foreach ( $attachments as $att ) : ?>
+									<li class="flex flex-wrap items-center justify-between gap-2 p-3 bg-slate-900 rounded-xl border border-slate-800 text-xs">
+										<span class="text-slate-200 font-bold break-all"><i class="fa-solid fa-file-<?php echo 'pdf' === ( $att['extension'] ?? '' ) ? 'pdf text-rose-300' : 'word text-sky-300'; ?> mr-1.5"></i><?php echo esc_html( (string) ( $att['title'] ?? $att['filename'] ?? 'Công văn' ) ); ?></span>
+										<span class="flex items-center gap-3 shrink-0">
+											<span class="text-slate-500"><?php echo esc_html( strtoupper( (string) ( $att['extension'] ?? '' ) ) . ( ! empty( $att['size'] ) ? ' · ' . size_format( (int) $att['size'] ) : '' ) ); ?></span>
+											<a class="text-emerald-300 font-bold" href="<?php echo esc_url( (string) ( $att['download_url'] ?? '' ) ); ?>" rel="nofollow">Tải bản lưu</a>
+											<?php if ( ! empty( $att['original_url'] ) ) : ?>
+												<a class="text-slate-400 underline" href="<?php echo esc_url( (string) $att['original_url'] ); ?>" target="_blank" rel="noopener nofollow">Link gốc</a>
+											<?php endif; ?>
+										</span>
+									</li>
+								<?php endforeach; ?>
+							</ul>
+							<p class="text-[11px] text-slate-500">Bản lưu được tải nguyên vẹn từ cổng thông tin của cơ quan để tra cứu khi trang gốc thay đổi. Văn bản có giá trị pháp lý là bản do cơ quan ban hành.</p>
+						<?php endif; ?>
+					</div>
 				<?php endif; ?>
 			</section>
 
