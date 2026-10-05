@@ -120,7 +120,9 @@ get_header();
 
 								<div class="p-4 bg-[#091726] border-t border-slate-800 flex items-center justify-between">
 									<div>
-										<?php if ( $c_final <= 0 ) : ?>
+										<?php if ( ! empty( $course['is_coming_soon'] ) ) : ?>
+											<span class="text-base font-black text-cyan-300 block">Sắp mở</span>
+										<?php elseif ( $c_final <= 0 ) : ?>
 											<span class="text-base font-black text-emerald-400 block">Miễn phí</span>
 										<?php else : ?>
 											<?php if ( null !== $c_sale && $c_sale < $c_price ) : ?>

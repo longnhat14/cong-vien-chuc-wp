@@ -233,12 +233,18 @@ get_header();
 					$course_sale  = isset( $course['sale_price'] ) && null !== $course['sale_price'] ? (float) $course['sale_price'] : $course_price;
 					$is_owned     = ! empty( $course['owned'] );
 					$is_free      = $course_price <= 0;
+					$is_soon      = ! empty( $course['is_coming_soon'] ) && ! $is_owned;
 					?>
 					<div class="bg-gradient-to-r from-amber-500/10 via-slate-900 to-indigo-950 border-2 border-amber-500/40 p-5 rounded-2xl space-y-4 shadow-2xl">
 
 						<?php if ( $is_owned ) : ?>
 							<div class="flex items-center gap-2 text-emerald-400 font-black text-xs border-b border-slate-800 pb-3">
 								<i class="fa-solid fa-circle-check"></i> Bạn đã sở hữu khóa học này
+							</div>
+						<?php elseif ( $is_soon ) : ?>
+							<div class="space-y-1 border-b border-slate-800 pb-3">
+								<p class="flex items-center gap-2 text-cyan-300 font-black text-sm"><i class="fa-solid fa-hourglass-half"></i> Sắp mở</p>
+								<p class="text-[11px] text-slate-400">Khóa học đang biên soạn bài giảng, chưa nhận đăng ký. Trong lúc chờ, bạn có thể ôn bằng đề thi thử và bài học theo văn bản miễn phí.</p>
 							</div>
 						<?php elseif ( $is_free ) : ?>
 							<div class="flex items-center gap-2 text-emerald-400 font-black text-sm border-b border-slate-800 pb-3">
@@ -269,7 +275,7 @@ get_header();
 								</div>
 								<p class="text-[11px] text-slate-400"><?php echo esc_html( (int) ( $enrollment['completed_lessons'] ?? 0 ) . '/' . $published_count ); ?> bài đã học xong</p>
 							</div>
-						<?php else : ?>
+						<?php elseif ( ! $is_soon ) : ?>
 							<ul class="space-y-2 text-xs text-slate-300">
 								<li class="flex items-center gap-2"><span class="text-emerald-400" aria-hidden="true">✓</span> <?php echo esc_html( $published_count ); ?> bài học đã công bố</li>
 								<?php if ( ! empty( $course['duration_minutes'] ) ) : ?>
@@ -280,7 +286,10 @@ get_header();
 						<?php endif; ?>
 
 						<?php $cta_class = 'block w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-navy-950 font-black text-xs text-center rounded-xl shadow-lg'; ?>
-						<?php if ( empty( $flat_lessons ) && ( $is_owned || $is_free ) ) : ?>
+						<?php if ( $is_soon ) : ?>
+							<a href="<?php echo esc_url( cvc_exams_url() ); ?>" class="<?php echo esc_attr( $cta_class ); ?>">Làm đề thi thử miễn phí &rarr;</a>
+							<a href="<?php echo esc_url( cvc_knowledge_url() ); ?>" class="block text-center text-[11px] text-cyan-300 font-bold">Học bài theo văn bản pháp luật</a>
+						<?php elseif ( empty( $flat_lessons ) && ( $is_owned || $is_free ) ) : ?>
 							<p class="text-[11px] text-slate-400 text-center">Khóa học chưa có bài học nào được công bố.</p>
 						<?php elseif ( $enrollment ) : ?>
 							<?php if ( 'completed' === ( $enrollment['status'] ?? '' ) ) : ?>

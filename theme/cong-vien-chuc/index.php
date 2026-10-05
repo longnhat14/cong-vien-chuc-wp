@@ -25,6 +25,9 @@ if ( $featured_result['ok'] && ! empty( $featured_result['data']['data']['data']
  * gọi ẩn hẳn badge thay vì hiện "Giảm 0%".
  */
 function cvc_homepage_course_discount_badge( array $course ): ?string {
+	if ( ! empty( $course['is_coming_soon'] ) ) {
+		return null;
+	}
 	$price = (float) ( $course['price'] ?? 0 );
 	$sale  = isset( $course['sale_price'] ) && null !== $course['sale_price'] ? (float) $course['sale_price'] : $price;
 
@@ -283,7 +286,7 @@ foreach ( $featured_courses as $fc ) {
 <!-- Body -->
 <div class="p-5 space-y-2.5">
 <div class="flex items-center justify-between text-[11px]">
-<span class="text-amber-400 font-bold bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20"><?php echo esc_html( $c_lessons ); ?> bài giảng</span>
+<span class="text-amber-400 font-bold bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20"><?php echo esc_html( $c_lessons > 0 ? $c_lessons . ' bài giảng' : 'Sắp mở' ); ?></span>
 <span class="text-cyan-400 font-bold"><?php echo esc_html( $c_type ); ?></span>
 </div>
 
@@ -300,7 +303,9 @@ foreach ( $featured_courses as $fc ) {
 <!-- Footer Price & CTA -->
 <div class="p-5 pt-0 space-y-3">
 <div class="flex items-baseline justify-between border-t border-slate-800/80 pt-3">
-<?php if ( $c_price <= 0 ) : ?>
+<?php if ( ! empty( $c['is_coming_soon'] ) ) : ?>
+<span class="text-sm font-black text-cyan-300">Sắp mở <span class="block text-[10px] font-semibold text-slate-400">Đang biên soạn bài giảng</span></span>
+<?php elseif ( $c_price <= 0 ) : ?>
 <span class="text-sm font-black text-emerald-400">Miễn phí</span>
 <?php else : ?>
 <div>

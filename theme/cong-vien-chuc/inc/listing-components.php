@@ -75,7 +75,7 @@ function cvc_render_listing_explore_nav( string $current ): void {
  * @return array<int, array<string, mixed>>
  */
 function cvc_featured_courses(): array {
-	$cached = get_transient( 'cvc_featured_courses_v1' );
+	$cached = get_transient( 'cvc_featured_courses_v2' );
 	if ( is_array( $cached ) ) {
 		return $cached;
 	}
@@ -94,6 +94,7 @@ function cvc_featured_courses(): array {
 				'price'       => (float) ( $course['price'] ?? 0 ),
 				'sale_price'  => isset( $course['sale_price'] ) && null !== $course['sale_price'] ? (float) $course['sale_price'] : null,
 				'is_featured' => ! empty( $course['is_featured'] ),
+				'coming_soon' => ! empty( $course['is_coming_soon'] ),
 			);
 		}
 		usort(
@@ -101,7 +102,7 @@ function cvc_featured_courses(): array {
 			static fn ( $a, $b ) => (int) $b['is_featured'] <=> (int) $a['is_featured']
 		);
 		$courses = array_slice( $courses, 0, 3 );
-		set_transient( 'cvc_featured_courses_v1', $courses, 10 * MINUTE_IN_SECONDS );
+		set_transient( 'cvc_featured_courses_v2', $courses, 10 * MINUTE_IN_SECONDS );
 	}
 
 	return $courses;
@@ -128,7 +129,9 @@ function cvc_render_study_sidebar(): void {
 						<a href="<?php echo esc_url( cvc_course_url( $course['slug'] ) ); ?>" class="block p-3 bg-slate-900 hover:bg-slate-800 rounded-2xl border border-slate-800 space-y-1.5">
 							<span class="block font-bold text-white leading-snug"><?php echo esc_html( $course['title'] ); ?></span>
 							<span class="flex items-baseline gap-2">
-								<?php if ( $final <= 0 ) : ?>
+								<?php if ( ! empty( $course['coming_soon'] ) ) : ?>
+									<strong class="text-cyan-300">Sắp mở</strong>
+								<?php elseif ( $final <= 0 ) : ?>
 									<strong class="text-emerald-400">Miễn phí</strong>
 								<?php else : ?>
 									<strong class="text-amber-400"><?php echo esc_html( cvc_format_vnd( $final ) ); ?></strong>

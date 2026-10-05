@@ -50,7 +50,8 @@ function cvc_get_combo_courses(): ?array {
 		$result = $service->find( $slug );
 		$course = $result['ok'] ? ( $result['data']['data'] ?? null ) : null;
 
-		if ( ! is_array( $course ) || empty( $course['id'] ) ) {
+		// Khoa hoc chua co bai giang (sap mo) -> an han khoi combo, khong ban.
+		if ( ! is_array( $course ) || empty( $course['id'] ) || ! empty( $course['is_coming_soon'] ) ) {
 			$cache = false;
 			return null;
 		}
