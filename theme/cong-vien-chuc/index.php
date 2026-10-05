@@ -127,7 +127,7 @@ Vững Vàng & Vươn Tầm
 </h1>
 
 <p class="text-slate-300 text-sm sm:text-base leading-relaxed max-w-2xl font-light">
-Nền tảng ôn thi công chức, viên chức — tổng hợp <strong><?php echo esc_html( number_format( $cvc_stat_recruitments, 0, ',', '.' ) ); ?>+ tin tuyển dụng</strong> mới nhất, ngân hàng câu hỏi trắc nghiệm Vòng 1 và khóa học chuyên sâu Vòng 2.
+Nền tảng ôn thi công chức, viên chức — tổng hợp <strong><?php echo $cvc_stat_recruitments > 0 ? esc_html( number_format( $cvc_stat_recruitments, 0, ',', '.' ) ) . '+ ' : ''; ?>tin tuyển dụng</strong> mới nhất, ngân hàng câu hỏi trắc nghiệm Vòng 1 và khóa học chuyên sâu Vòng 2.
 </p>
 
 
@@ -179,7 +179,7 @@ class="w-full bg-transparent text-white text-sm placeholder-slate-400 focus:outl
 <i class="fa-solid fa-newspaper"></i>
 </div>
 <div>
-<p class="text-xl font-black text-white leading-none"><?php echo esc_html( number_format( $cvc_stat_recruitments, 0, ',', '.' ) ); ?>+</p>
+<p class="text-xl font-black text-white leading-none"><?php echo $cvc_stat_recruitments > 0 ? esc_html( number_format( $cvc_stat_recruitments, 0, ',', '.' ) ) . '+' : 'Mới'; ?></p>
 <p class="text-[10px] text-slate-300 font-bold uppercase mt-1">Tin Tuyển Dụng</p>
 </div>
 </div>
@@ -201,7 +201,7 @@ class="w-full bg-transparent text-white text-sm placeholder-slate-400 focus:outl
 <!-- Enterprise Metrics Strip (số liệu thật, đọc trực tiếp từ API) -->
 <div class="mt-16 pt-10 border-t border-slate-800/80 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
 <div class="space-y-1">
-<p class="text-3xl lg:text-4xl font-black text-gold-gradient"><?php echo esc_html( number_format( $cvc_stat_recruitments, 0, ',', '.' ) ); ?>+</p>
+<p class="text-3xl lg:text-4xl font-black text-gold-gradient"><?php echo $cvc_stat_recruitments > 0 ? esc_html( number_format( $cvc_stat_recruitments, 0, ',', '.' ) ) . '+' : 'Mới'; ?></p>
 <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Tin Tuyển Dụng Công Chức, Viên Chức</p>
 </div>
 <div class="space-y-1">
@@ -414,7 +414,7 @@ Thông Báo Tuyển Dụng Công Chức Mới Nhất 2026
 <p class="text-xs sm:text-sm text-slate-400">Cập nhật thông báo tuyển dụng công chức, viên chức mới nhất trên toàn quốc</p>
 </div>
 <a href="<?php echo esc_url(cvc_recruitments_url()); ?>" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-extrabold text-xs rounded-xl transition-all border border-slate-700 flex items-center gap-2">
-<span>Xem Tất Cả <?php echo esc_html( number_format( $cvc_stat_recruitments, 0, ',', '.' ) ); ?> Tin Tuyển Dụng</span>
+<span><?php echo $cvc_stat_recruitments > 0 ? 'Xem Tất Cả ' . esc_html( number_format( $cvc_stat_recruitments, 0, ',', '.' ) ) . ' Tin Tuyển Dụng' : 'Xem Trang Tuyển Dụng'; ?></span>
 <i class="fa-solid fa-arrow-right"></i>
 </a>
 </div>

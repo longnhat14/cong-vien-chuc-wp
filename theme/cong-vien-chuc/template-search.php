@@ -111,7 +111,7 @@ get_header();
 						<i class="fa-solid fa-lightbulb"></i> Mẹo Tìm Kiếm Chuẩn
 					</h3>
 					<div class="space-y-2 text-slate-300 leading-relaxed text-[11px]">
-						<p>• Nhập chính xác <strong>Số hiệu văn bản</strong> (Ví dụ: <em>138/2020/NĐ-CP</em>) để trích xuất toàn văn nhanh nhất.</p>
+						<p>• Nhập chính xác <strong>Số hiệu văn bản</strong> (Ví dụ: <em>170/2025/NĐ-CP</em>) để trích xuất toàn văn nhanh nhất.</p>
 						<p>• Nhập tên <strong>Đơn vị tuyển dụng</strong> (Ví dụ: <em>UBND TP.HCM</em>) để xem chỉ tiêu mới nhất.</p>
 						<p>• Chọn từng Tab chuyên biệt để thu hẹp phạm vi kết quả.</p>
 					</div>
@@ -202,7 +202,7 @@ get_header();
 						🔥 Từ Khóa Hot Nhất
 					</h3>
 					<div class="flex flex-wrap gap-1.5">
-						<a href="<?php echo esc_url( cvc_search_url('Nghị định 138') ); ?>" class="px-2.5 py-1 bg-slate-900 hover:bg-cyan-500/20 text-slate-300 hover:text-cyan-300 rounded-lg border border-slate-800">Nghị định 138</a>
+						<a href="<?php echo esc_url( cvc_search_url('Nghị định 170') ); ?>" class="px-2.5 py-1 bg-slate-900 hover:bg-cyan-500/20 text-slate-300 hover:text-cyan-300 rounded-lg border border-slate-800">Nghị định 170</a>
 						<a href="<?php echo esc_url( cvc_search_url('Luật Cán bộ công chức') ); ?>" class="px-2.5 py-1 bg-slate-900 hover:bg-cyan-500/20 text-slate-300 hover:text-cyan-300 rounded-lg border border-slate-800">Luật CBCC</a>
 						<a href="<?php echo esc_url( cvc_search_url('Đề thi Kiến thức chung') ); ?>" class="px-2.5 py-1 bg-slate-900 hover:bg-cyan-500/20 text-slate-300 hover:text-cyan-300 rounded-lg border border-slate-800">Đề thi KTC</a>
 						<a href="<?php echo esc_url( cvc_search_url('Tuyển dụng UBND') ); ?>" class="px-2.5 py-1 bg-slate-900 hover:bg-cyan-500/20 text-slate-300 hover:text-cyan-300 rounded-lg border border-slate-800">Tuyển dụng 2026</a>

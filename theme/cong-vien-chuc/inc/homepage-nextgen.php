@@ -149,8 +149,12 @@ function cvc_render_live_pulse( ?array $pulse ): void {
 		<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
 			<div class="flex flex-wrap items-center gap-x-4 gap-y-1 shrink-0">
 				<span class="inline-flex items-center gap-1.5 font-black text-emerald-300"><span class="cvc-pulse-dot" aria-hidden="true"></span> TRỰC TIẾP</span>
-				<span><strong class="text-white"><?php echo esc_html( number_format( (int) ( $live['open_recruitments'] ?? 0 ), 0, ',', '.' ) ); ?></strong> đợt đang nhận hồ sơ</span>
-				<span><strong class="text-white"><?php echo esc_html( number_format( (int) ( $live['open_positions_quota'] ?? 0 ), 0, ',', '.' ) ); ?></strong> chỉ tiêu</span>
+				<?php if ( (int) ( $live['open_recruitments'] ?? 0 ) > 0 ) : ?>
+					<span><strong class="text-white"><?php echo esc_html( number_format( (int) $live['open_recruitments'], 0, ',', '.' ) ); ?></strong> đợt đang nhận hồ sơ</span>
+					<?php if ( (int) ( $live['open_positions_quota'] ?? 0 ) > 0 ) : ?>
+						<span><strong class="text-white"><?php echo esc_html( number_format( (int) $live['open_positions_quota'], 0, ',', '.' ) ); ?></strong> chỉ tiêu</span>
+					<?php endif; ?>
+				<?php endif; ?>
 				<?php if ( ! empty( $live['closing_within_7_days'] ) ) : ?>
 					<span class="text-rose-300 font-bold"><?php echo (int) $live['closing_within_7_days']; ?> đợt hết hạn trong 7 ngày</span>
 				<?php endif; ?>

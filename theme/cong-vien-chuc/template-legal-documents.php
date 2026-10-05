@@ -12,14 +12,22 @@ $paged = absint( get_query_var( 'cvc_paged' ) );
 $paged = $paged > 0 ? $paged : 1;
 $q     = cvc_listing_query();
 
-$service = new CVC_Legal_Document_Service();
-$result  = $service->list(
-	array(
-		'per_page' => 12,
-		'page'     => $paged,
-		'search'   => $q,
-	)
+// Loc theo loai van ban (?loai=) - gia tri hop le lay tu danh sach co dinh.
+$type_options = array( 'Luật', 'Nghị định', 'Nghị quyết', 'Thông tư', 'Quyết định' );
+$type_filter  = isset( $_GET['loai'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['loai'] ) ) : '';
+$type_filter  = in_array( $type_filter, $type_options, true ) ? $type_filter : '';
+
+$params = array(
+	'per_page' => 12,
+	'page'     => $paged,
+	'search'   => $q,
 );
+if ( '' !== $type_filter ) {
+	$params['document_type'] = $type_filter;
+}
+
+$service = new CVC_Legal_Document_Service();
+$result  = $service->list( $params );
 
 $ok         = (bool) $result['ok'];
 $pagination = $ok ? ( $result['data']['data'] ?? array() ) : array();
@@ -72,12 +80,21 @@ get_header();
 			<!-- CENTER MAIN COLUMN (6 COLS — LEGAL DOCUMENTS CARDS WITH EXTRACTION) -->
 			<div class="lg:col-span-6 space-y-6">
 
-				<div class="flex items-center justify-between bg-navy-950 p-4 rounded-2xl border border-slate-800 text-xs shadow-md">
-					<span class="text-slate-300">Đang hiển thị <strong class="text-cyan-400 font-extrabold"><?php echo count( $documents ); ?></strong> văn bản pháp luật công vụ chính thức</span>
-					<div class="flex items-center gap-2 text-slate-400">
-						<span>Sắp xếp:</span>
-					</div>
-				</div>
+				<nav class="flex flex-wrap items-center gap-2 bg-navy-950 p-3 rounded-2xl border border-slate-800 text-xs shadow-md" aria-label="Lọc theo loại văn bản">
+					<?php
+					$type_url = static function ( string $t ) use ( $q ): string {
+						$u = cvc_legal_documents_url();
+						if ( '' !== $q ) {
+							$u = add_query_arg( 'q', rawurlencode( $q ), $u );
+						}
+						return '' !== $t ? add_query_arg( 'loai', rawurlencode( $t ), $u ) : $u;
+					};
+					?>
+					<a href="<?php echo esc_url( $type_url( '' ) ); ?>" class="px-3 py-1.5 rounded-xl font-bold <?php echo '' === $type_filter ? 'bg-cyan-500 text-navy-950' : 'bg-slate-900 text-slate-300 hover:bg-slate-800'; ?>">Tất cả</a>
+					<?php foreach ( $type_options as $opt ) : ?>
+						<a href="<?php echo esc_url( $type_url( $opt ) ); ?>" class="px-3 py-1.5 rounded-xl font-bold <?php echo $opt === $type_filter ? 'bg-cyan-500 text-navy-950' : 'bg-slate-900 text-slate-300 hover:bg-slate-800'; ?>"><?php echo esc_html( $opt ); ?></a>
+					<?php endforeach; ?>
+				</nav>
 
 				<?php if ( ! $ok ) : ?>
 					<?php cvc_render_error_state( 'Không tải được danh sách văn bản pháp luật, vui lòng thử lại sau.' ); ?>
@@ -111,9 +128,17 @@ get_header();
 											<?php echo esc_html( $docType ); ?>
 										</span>
 									</div>
-									<?php if ( ! empty( $replacedBy ) ) : ?>
-										<span class="text-xs text-rose-300 font-extrabold">Đã có văn bản thay thế</span>
-									<?php endif; ?>
+									<div class="flex items-center gap-2">
+										<?php if ( ! empty( $doc['has_full_text'] ) ) : ?>
+											<span class="text-[10px] font-bold px-2 py-0.5 rounded border border-emerald-500/40 bg-emerald-500/10 text-emerald-300">Có toàn văn</span>
+										<?php endif; ?>
+										<?php if ( ! empty( $doc['has_file'] ) ) : ?>
+											<span class="text-[10px] font-bold px-2 py-0.5 rounded border border-amber-500/40 bg-amber-500/10 text-amber-300">Tải bản gốc</span>
+										<?php endif; ?>
+										<?php if ( ! empty( $replacedBy ) ) : ?>
+											<span class="text-xs text-rose-300 font-extrabold">Đã có văn bản thay thế</span>
+										<?php endif; ?>
+									</div>
 								</div>
 
 								<!-- TITLE & LINK -->
@@ -149,7 +174,17 @@ get_header();
 						<?php endforeach; ?>
 					</div>
 
-					<?php cvc_render_pagination( $currentPg, $lastPg, cvc_listing_page_url_builder( 'cvc_legal_documents_url', $q ) ); ?>
+					<?php
+					$page_builder = cvc_listing_page_url_builder( 'cvc_legal_documents_url', $q );
+					cvc_render_pagination(
+						$currentPg,
+						$lastPg,
+						static function ( int $n ) use ( $page_builder, $type_filter ): string {
+							$u = $page_builder( $n );
+							return '' !== $type_filter ? add_query_arg( 'loai', rawurlencode( $type_filter ), $u ) : $u;
+						}
+					);
+					?>
 				<?php endif; ?>
 
 			</div>

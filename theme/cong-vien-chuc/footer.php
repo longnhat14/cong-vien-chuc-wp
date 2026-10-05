@@ -38,7 +38,7 @@ Nền tảng ôn thi công chức, viên chức: khóa học, đề thi trắc n
 <ul class="space-y-2">
 <li><a href="<?php echo esc_url( cvc_recruitments_url() ); ?>" class="hover:text-gold-400 transition-colors">Tin tuyển dụng</a></li>
 <li><a href="<?php echo esc_url( cvc_legal_documents_url() ); ?>" class="hover:text-gold-400 transition-colors">Văn bản pháp luật</a></li>
-<li><a href="<?php echo esc_url( get_template_directory_uri() . '/assets/downloads/Phieu-dang-ky-du-tuyen-Mau-01-ND138-BNV.docx' ); ?>" download class="hover:text-gold-400 transition-colors">Tải Mẫu 01 (NĐ 138/2020)</a></li>
+<li><a href="<?php echo esc_url( cvc_documents_url() ); ?>" class="hover:text-gold-400 transition-colors">Mẫu hồ sơ &amp; tài liệu</a></li>
 <li><a href="<?php echo esc_url( cvc_account_url() ); ?>" class="hover:text-gold-400 transition-colors">Tài khoản học viên</a></li>
 </ul>
 </div>
@@ -78,7 +78,7 @@ Nền tảng ôn thi công chức, viên chức: khóa học, đề thi trắc n
 <div class="flex flex-wrap gap-2">
 <a href="<?php echo esc_url( cvc_search_url( 'Bảng lương công chức 2026' ) ); ?>" class="px-3 py-1 bg-slate-100 hover:bg-gold-100 rounded-lg cursor-pointer">Bảng lương công chức 2026</a>
 <a href="<?php echo esc_url( cvc_search_url( 'Thi sát hạch Chuyên viên chính' ) ); ?>" class="px-3 py-1 bg-slate-100 hover:bg-gold-100 rounded-lg cursor-pointer">Thi sát hạch Chuyên viên chính</a>
-<a href="<?php echo esc_url( cvc_search_url( 'Nghị định 138/2020/NĐ-CP' ) ); ?>" class="px-3 py-1 bg-slate-100 hover:bg-gold-100 rounded-lg cursor-pointer">Nghị định 138/2020/NĐ-CP</a>
+<a href="<?php echo esc_url( cvc_search_url( 'Nghị định 170/2025/NĐ-CP' ) ); ?>" class="px-3 py-1 bg-slate-100 hover:bg-gold-100 rounded-lg cursor-pointer">Nghị định 170/2025/NĐ-CP</a>
 </div>
 </div>
 </div>

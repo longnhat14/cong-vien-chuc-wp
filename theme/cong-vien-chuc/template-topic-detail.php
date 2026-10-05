@@ -28,11 +28,11 @@ if ( ! $is_found ) {
 	cvc_seo_set_noindex();
 }
 
-cvc_seo_set_title( $is_found ? (string) $topic['name'] : 'Chi tiết chủ đề thăng tiến' );
+cvc_seo_set_title( $is_found ? (string) $topic['name'] : 'Chi tiết chủ đề ôn thi' );
 
 $breadcrumb_items = array(
 	array( 'label' => 'Trang chủ', 'url' => home_url( '/' ) ),
-	array( 'label' => 'Lộ trình thăng tiến', 'url' => cvc_topics_url() ),
+	array( 'label' => 'Chủ đề ôn thi', 'url' => cvc_topics_url() ),
 	array( 'label' => $is_found ? (string) $topic['name'] : 'Chi tiết chủ đề' ),
 );
 
@@ -72,7 +72,7 @@ get_header();
 					<div class="space-y-3 max-w-3xl">
 						<div class="flex items-center gap-2 flex-wrap text-xs">
 							<span class="bg-cyan-500 text-navy-950 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase">
-								🗺️ CAREER ROADMAP DETAIL
+								Chủ đề ôn thi
 							</span>
 							<?php if ( ! empty( $topic['exam_subject']['name'] ) ) : ?>
 								<span class="bg-amber-500/20 text-amber-300 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-amber-500/40">
@@ -126,49 +126,56 @@ get_header();
 
 				</aside>
 
-				<!-- CENTER MAIN COLUMN (6 COLS — MINDMAP & GUIDANCE) -->
+				<!-- CENTER: bai hoc that cua chu de -->
+				<?php
+				$k_items  = is_array( $topic['knowledge_items'] ?? null ) ? $topic['knowledge_items'] : array();
+				$t_doc    = is_array( $topic['legal_document'] ?? null ) ? $topic['legal_document'] : null;
+				$t_exam   = is_array( $topic['practice_exam'] ?? null ) ? $topic['practice_exam'] : null;
+				$t_qcount = (int) ( $topic['questions_count'] ?? 0 );
+				?>
 				<div class="lg:col-span-6 space-y-4">
-
-					<!-- MINDMAP BOX -->
-					<div class="bg-[#0A192F] border border-slate-800 rounded-3xl p-6 space-y-4 shadow-xl">
-						<h2 class="text-base font-black text-white border-b border-slate-800 pb-2 flex items-center gap-2">
-							<i class="fa-solid fa-sitemap text-amber-400"></i> Sơ Đồ Năng Lực Cốt Lõi
-						</h2>
-
-						<div class="aspect-video bg-slate-950 rounded-2xl border border-slate-800 p-6 flex flex-col items-center justify-center text-center space-y-3 relative overflow-hidden">
-							<div class="w-16 h-16 rounded-full bg-cyan-500/20 text-cyan-300 flex items-center justify-center font-black text-2xl border border-cyan-500/40">
-								💡
-							</div>
-							<h3 class="font-black text-white text-sm">Sơ Đồ Tư Duy Khoanh Vùng Trọng Tâm</h3>
-							<p class="text-xs text-slate-400 max-w-sm">
-								Hệ thống hóa toàn bộ kiến thức theo chuẩn sơ đồ cây năng lực của Bộ Nội Vụ.
-							</p>
+					<section class="bg-[#0A192F] border border-slate-800 rounded-3xl p-6 space-y-4 shadow-xl">
+						<div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2">
+							<h2 class="text-base font-black text-white">Bài học trong chủ đề</h2>
+							<span class="text-xs text-slate-400"><?php echo esc_html( count( $k_items ) . ' bài' . ( $t_qcount > 0 ? ' · ' . number_format_i18n( $t_qcount ) . ' câu hỏi' : '' ) ); ?></span>
 						</div>
-
-						<div class="text-xs text-slate-300 leading-relaxed space-y-2 pt-2">
-							<h4 class="font-black text-white text-sm">Hướng Dẫn Ôn Thi Chuyên Đề:</h4>
-							<p>1. Nắm chắc định nghĩa & phạm vi điều chỉnh của từng văn bản luật liên quan.</p>
-							<p>2. Luyện tập bộ câu hỏi trắc nghiệm khoanh vùng 60 câu để đạt trên 85% điểm số.</p>
-						</div>
-					</div>
-
+						<?php if ( empty( $k_items ) ) : ?>
+							<p class="text-sm text-slate-400">Chủ đề này chưa có bài học. Xem các <a class="text-cyan-300 font-bold" href="<?php echo esc_url( cvc_topics_url() ); ?>">chủ đề khác</a> hoặc <a class="text-cyan-300 font-bold" href="<?php echo esc_url( cvc_legal_documents_url() ); ?>">văn bản pháp luật</a>.</p>
+						<?php else : ?>
+							<ol class="space-y-2">
+								<?php foreach ( $k_items as $ki ) : ?>
+									<?php if ( empty( $ki['slug'] ) ) { continue; } ?>
+									<li>
+										<a href="<?php echo esc_url( cvc_knowledge_item_url( (string) $ki['slug'] ) ); ?>" class="block p-3 bg-slate-900 hover:bg-slate-800 rounded-xl border border-slate-800">
+											<span class="block text-sm font-bold text-white"><?php echo esc_html( (string) ( $ki['title'] ?? '' ) ); ?></span>
+											<?php if ( ! empty( $ki['summary'] ) ) : ?><span class="block text-xs text-slate-400 line-clamp-2 mt-0.5"><?php echo esc_html( (string) $ki['summary'] ); ?></span><?php endif; ?>
+										</a>
+									</li>
+								<?php endforeach; ?>
+							</ol>
+						<?php endif; ?>
+					</section>
 				</div>
 
-				<!-- RIGHT SIDEBAR (3 COLS — MONETIZATION) -->
+				<!-- RIGHT: luyen tap + van ban goc -->
 				<aside class="lg:col-span-3 space-y-4">
-
 					<div class="bg-[#0A192F] border border-slate-800 p-5 rounded-2xl space-y-3 shadow-xl text-xs text-center">
-						<h3 class="font-extrabold text-xs text-amber-400 uppercase border-b border-slate-800 pb-2">
-							Khóa Học Lộ Trình Thăng Tiến
-						</h3>
-						<p class="text-slate-400 text-[11px]">
-							Tham gia chương trình đào tạo chuyên sâu chuẩn ngạch Chuyên viên / Chuyên viên chính.
-						</p>
-						<a href="<?php echo esc_url( cvc_courses_url() ); ?>" class="block w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-navy-950 font-black rounded-xl shadow">
-							Đăng Ký Ngay
-						</a>
+						<h3 class="font-extrabold text-xs text-cyan-400 uppercase border-b border-slate-800 pb-2">Luyện tập</h3>
+						<?php if ( $t_exam && ! empty( $t_exam['slug'] ) ) : ?>
+							<p class="text-slate-400 text-[11px]">Đề luyện tập <?php echo esc_html( (string) (int) $t_exam['total_questions'] ); ?> câu theo văn bản của chủ đề, chấm điểm và giải thích ngay.</p>
+							<a href="<?php echo esc_url( cvc_exam_url( (string) $t_exam['slug'] ) ); ?>" class="block w-full py-2.5 bg-cyan-500 hover:bg-cyan-400 text-navy-950 font-black rounded-xl shadow">Làm đề luyện tập</a>
+						<?php else : ?>
+							<p class="text-slate-400 text-[11px]">Làm đề thi thử có chấm điểm và giải thích từng câu.</p>
+							<a href="<?php echo esc_url( cvc_exams_url() ); ?>" class="block w-full py-2.5 bg-cyan-500 hover:bg-cyan-400 text-navy-950 font-black rounded-xl shadow">Vào danh sách đề thi</a>
+						<?php endif; ?>
 					</div>
-
+					<?php if ( $t_doc && ! empty( $t_doc['slug'] ) ) : ?>
+						<div class="bg-[#0A192F] border border-slate-800 p-5 rounded-2xl space-y-2 shadow-xl text-xs">
+							<h3 class="font-extrabold text-xs text-amber-400 uppercase border-b border-slate-800 pb-2">Văn bản pháp luật gốc</h3>
+							<a href="<?php echo esc_url( cvc_legal_document_url( (string) $t_doc['slug'] ) ); ?>" class="block font-bold text-white hover:text-cyan-300"><?php echo esc_html( (string) ( $t_doc['title'] ?? '' ) ); ?></a>
+							<a href="<?php echo esc_url( cvc_legal_document_url( (string) $t_doc['slug'] ) . '#toan-van' ); ?>" class="inline-block text-cyan-300 font-semibold">Đọc toàn văn &rarr;</a>
+						</div>
+					<?php endif; ?>
 				</aside>
 
 			</div>

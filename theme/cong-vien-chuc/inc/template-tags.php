@@ -2586,7 +2586,7 @@ function cvc_render_ai_quiz_simulator_section(): void {
 					<h2>Trải Nghiệm Thi Trắc Nghiệm Công Vụ Trực Tiếp</h2>
 					<p>Thử sức ngay 1 câu hỏi mẫu trong Ngân hàng đề thi Kiến thức chung sát hạch Công chức năm 2026. Nhận kết quả và đáp án chi tiết ngay lập tức!</p>
 					<ul class="cvc-quiz-card__features">
-						<li>✓ Bám sát Nghị định 138/NĐ-CP</li>
+						<li>✓ Bám sát Nghị định 170/2025/NĐ-CP</li>
 						<li>✓ Giải thích chi tiết theo căn cứ pháp luật</li>
 					</ul>
 				</div>
@@ -2647,7 +2647,7 @@ function cvc_render_executive_modals(): void {
 				<div class="cvc-modal__tags-wrap">
 					<a href="<?php echo esc_url( cvc_search_url( 'Bảng lương công chức 2026' ) ); ?>" class="cvc-tag">Bảng lương công chức 2026</a>
 					<a href="<?php echo esc_url( cvc_search_url( 'Thi sát hạch Chuyên viên chính' ) ); ?>" class="cvc-tag">Thi sát hạch Chuyên viên chính</a>
-					<a href="<?php echo esc_url( cvc_search_url( 'Nghị định 138/2020/NĐ-CP' ) ); ?>" class="cvc-tag">Nghị định 138/2020/NĐ-CP</a>
+					<a href="<?php echo esc_url( cvc_search_url( 'Nghị định 170/2025/NĐ-CP' ) ); ?>" class="cvc-tag">Nghị định 170/2025/NĐ-CP</a>
 				</div>
 			</div>
 		</div>
