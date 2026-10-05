@@ -139,7 +139,7 @@ function cvc_admin_render_ingestion_index(): void {
 
 		<dl class="grid grid-cols-2 sm:grid-cols-3 gap-2">
 			<?php
-			$tiles = array( 'qa_pending', 'published', 'event_pending', 'validation_failed', 'duplicate', 'failed', 'ignored' );
+			$tiles = array( 'qa_pending', 'published', 'event_pending', 'validation_failed', 'duplicate', 'failed', 'ignored', 'expired' );
 			foreach ( $tiles as $t ) :
 				$info = $ov['states'][ $t ] ?? array( 'label' => $t, 'total' => 0 );
 				?>
@@ -157,6 +157,8 @@ function cvc_admin_render_ingestion_index(): void {
 			</div>
 		</dl>
 	</section>
+
+	<?php cvc_admin_render_prefilter_panel( (array) ( $ov['prefilter'] ?? array() ), $can_pub ); ?>
 
 	<?php if ( cvc_admin_can( 'recruitment.create' ) ) : ?>
 		<details class="bg-[#0A192F] border border-slate-800 rounded-2xl p-5">
@@ -459,6 +461,99 @@ function cvc_admin_render_ingestion_detail( int $id ): void {
 	<?php
 }
 
+/**
+ * Bo loc truoc khi tai: che do (tat / chay thu / ap dung), nguong, thong ke 14 ngay.
+ *
+ * @param array<string, mixed> $pf Du lieu overview.prefilter.
+ */
+function cvc_admin_render_prefilter_panel( array $pf, bool $can_edit ): void {
+	if ( empty( $pf ) ) {
+		return;
+	}
+	$modes  = array(
+		'off'     => 'Tắt',
+		'shadow'  => 'Chạy thử (chỉ ghi lại, vẫn tải như cũ)',
+		'enforce' => 'Áp dụng (bỏ qua thật)',
+	);
+	$mode   = (string) ( $pf['mode'] ?? 'shadow' );
+	$badge  = array(
+		'off'     => 'bg-slate-700/40 text-slate-300 border-slate-600',
+		'shadow'  => 'bg-amber-500/15 text-amber-300 border-amber-500/30',
+		'enforce' => 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
+	);
+	$stages = array(
+		'listing'      => 'Trang danh sách',
+		'page'         => 'Trang chi tiết',
+		'attachment'   => 'Đính kèm trùng văn bản',
+		'legal_expiry' => 'Văn bản hết hiệu lực',
+		'ocr_budget'   => 'Vượt ngân sách OCR',
+	);
+	$counts = array();
+	foreach ( (array) ( $pf['stats_14d'] ?? array() ) as $r ) {
+		$counts[ (string) $r['stage'] ][ (string) $r['decision'] ] = (int) $r['total'];
+	}
+	$btn = 'px-3 py-1.5 rounded-lg text-xs font-bold';
+	?>
+	<details class="bg-[#0A192F] border border-slate-800 rounded-2xl p-5" <?php echo 'shadow' === $mode ? 'open' : ''; ?>>
+		<summary class="cursor-pointer text-sm font-black text-white flex flex-wrap items-center gap-2">
+			<i class="fa-solid fa-filter text-cyan-300" aria-hidden="true"></i>Bộ lọc trước khi tải
+			<span class="px-2 py-0.5 rounded-full text-[11px] font-bold border <?php echo esc_attr( $badge[ $mode ] ?? $badge['shadow'] ); ?>"><?php echo esc_html( $modes[ $mode ] ?? $mode ); ?></span>
+		</summary>
+		<p class="text-sm text-slate-400 mt-3">Tin hết hạn nộp / quá cũ, văn bản hết hiệu lực và file trùng văn bản đã có sẽ không tải đính kèm, không OCR, không gọi AI. Nên để <strong>Chạy thử</strong> 1–2 tuần, xem bảng dưới (cột “Bỏ qua”) rồi mới bật <strong>Áp dụng</strong>.</p>
+		<div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+			<div class="overflow-x-auto">
+				<table class="w-full text-xs text-slate-300">
+					<caption class="text-left text-[11px] font-bold text-slate-400 mb-1">Quyết định 14 ngày qua</caption>
+					<thead><tr class="text-slate-500"><th class="text-left py-1">Tầng</th><th class="text-right">Bỏ qua</th><th class="text-right">Tải</th><th class="text-right">Chưa rõ</th></tr></thead>
+					<tbody>
+					<?php foreach ( $stages as $k => $label ) : ?>
+						<tr class="border-t border-slate-800">
+							<td class="py-1"><?php echo esc_html( $label ); ?></td>
+							<td class="text-right tabular-nums"><?php echo esc_html( (string) ( $counts[ $k ]['skip'] ?? 0 ) ); ?></td>
+							<td class="text-right tabular-nums"><?php echo esc_html( (string) ( $counts[ $k ]['fetch'] ?? 0 ) ); ?></td>
+							<td class="text-right tabular-nums"><?php echo esc_html( (string) ( $counts[ $k ]['unknown'] ?? 0 ) ); ?></td>
+						</tr>
+					<?php endforeach; ?>
+					</tbody>
+				</table>
+				<p class="text-[11px] text-slate-500 mt-2">
+					Tin hết hạn không tải: <?php echo esc_html( (string) (int) ( $pf['expired_items'] ?? 0 ) ); ?> ·
+					Đính kèm dùng văn bản có sẵn: <?php echo esc_html( (string) (int) ( $pf['linked_attachments'] ?? 0 ) ); ?> ·
+					File dùng lại (không tải lại): <?php echo esc_html( (string) (int) ( $pf['reused_attachments'] ?? 0 ) ); ?>
+				</p>
+			</div>
+			<?php if ( $can_edit ) : ?>
+				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="grid grid-cols-2 gap-3">
+					<?php wp_nonce_field( 'cvc_admin_ingestion' ); ?>
+					<input type="hidden" name="action" value="cvc_admin_ingestion">
+					<input type="hidden" name="op" value="prefilter">
+					<label class="col-span-2 block text-xs font-bold text-slate-300" for="cvc-pf-mode">Chế độ
+						<select id="cvc-pf-mode" name="prefilter_mode" class="<?php echo esc_attr( cvc_admin_input_class() ); ?>">
+							<?php foreach ( $modes as $mv => $ml ) : ?>
+								<option value="<?php echo esc_attr( $mv ); ?>" <?php selected( $mode, $mv ); ?>><?php echo esc_html( $ml ); ?></option>
+							<?php endforeach; ?>
+						</select>
+					</label>
+					<label class="block text-xs font-bold text-slate-300" for="cvc-pf-age">Tin quá (tháng)
+						<input id="cvc-pf-age" type="number" min="1" max="60" name="max_age_months" value="<?php echo esc_attr( (string) (int) ( $pf['max_age_months'] ?? 6 ) ); ?>" class="<?php echo esc_attr( cvc_admin_input_class() ); ?>">
+					</label>
+					<label class="block text-xs font-bold text-slate-300" for="cvc-pf-event">Lịch thi/kết quả quá (tháng)
+						<input id="cvc-pf-event" type="number" min="1" max="60" name="event_max_age_months" value="<?php echo esc_attr( (string) (int) ( $pf['event_max_age_months'] ?? 12 ) ); ?>" class="<?php echo esc_attr( cvc_admin_input_class() ); ?>">
+					</label>
+					<label class="block text-xs font-bold text-slate-300" for="cvc-pf-grace">Dự phòng sau hạn nộp (ngày)
+						<input id="cvc-pf-grace" type="number" min="0" max="60" name="grace_days" value="<?php echo esc_attr( (string) (int) ( $pf['grace_days'] ?? 3 ) ); ?>" class="<?php echo esc_attr( cvc_admin_input_class() ); ?>">
+					</label>
+					<label class="block text-xs font-bold text-slate-300" for="cvc-pf-ocr">Ngân sách OCR / văn bản (trang)
+						<input id="cvc-pf-ocr" type="number" min="5" max="2000" name="ocr_max_pages" value="<?php echo esc_attr( (string) (int) ( $pf['ocr_max_pages'] ?? 80 ) ); ?>" class="<?php echo esc_attr( cvc_admin_input_class() ); ?>">
+					</label>
+					<div class="col-span-2"><button type="submit" class="<?php echo esc_attr( $btn ); ?> bg-cyan-500 text-slate-950 hover:bg-cyan-400">Lưu bộ lọc</button></div>
+				</form>
+			<?php endif; ?>
+		</div>
+	</details>
+	<?php
+}
+
 /* ------------------------------------------------------------------ */
 /* Handlers                                                            */
 /* ------------------------------------------------------------------ */
@@ -480,6 +575,17 @@ function cvc_admin_handle_ingestion(): void {
 		case 'settings':
 			$on     = '1' === (string) ( $_POST['auto_publish'] ?? '0' );
 			$result = $client->put( '/api/admin/ingestion/settings', array( 'auto_publish' => $on ), $token );
+			cvc_admin_redirect( $index, $result['ok'] ? 'success' : 'error', $result['ok'] ? (string) ( $result['data']['message'] ?? 'Đã lưu.' ) : cvc_admin_error_message( $result ) );
+			return;
+
+		case 'prefilter':
+			$payload = array( 'prefilter_mode' => sanitize_key( wp_unslash( $_POST['prefilter_mode'] ?? 'shadow' ) ) );
+			foreach ( array( 'max_age_months', 'event_max_age_months', 'grace_days', 'ocr_max_pages' ) as $f ) {
+				if ( isset( $_POST[ $f ] ) && '' !== $_POST[ $f ] ) {
+					$payload[ $f ] = absint( $_POST[ $f ] );
+				}
+			}
+			$result = $client->put( '/api/admin/ingestion/settings', $payload, $token );
 			cvc_admin_redirect( $index, $result['ok'] ? 'success' : 'error', $result['ok'] ? (string) ( $result['data']['message'] ?? 'Đã lưu.' ) : cvc_admin_error_message( $result ) );
 			return;
 
