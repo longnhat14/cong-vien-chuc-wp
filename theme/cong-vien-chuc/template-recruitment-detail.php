@@ -192,7 +192,7 @@ get_header();
 					<a href="#lo-trinh-on" class="block p-2 rounded-xl hover:bg-slate-900 hover:text-emerald-400 text-emerald-300">Lộ trình ôn theo danh mục</a>
 				<?php endif; ?>
 				<a href="#ho-so-on-thi" class="block p-2 rounded-xl hover:bg-slate-900 hover:text-emerald-400">Hồ sơ ôn thi</a>
-				<a href="#mau-ho-so" class="block p-2 rounded-xl hover:bg-slate-900 hover:text-emerald-400">Mẫu phiếu đăng ký</a>
+				<a href="#chuan-bi-ho-so" class="block p-2 rounded-xl hover:bg-slate-900 hover:text-emerald-400">Chuẩn bị hồ sơ &amp; điểm ưu tiên</a>
 			</nav>
 
 			<div class="bg-navy-950 p-5 rounded-3xl border border-slate-800 space-y-3 shadow-xl text-xs">
@@ -507,14 +507,7 @@ get_header();
 				<?php endif; ?>
 			</section>
 
-			<section id="mau-ho-so" class="bg-navy-950 p-6 sm:p-8 rounded-3xl border border-slate-800 space-y-3 shadow-xl text-sm text-slate-300">
-				<h2 class="text-lg font-extrabold text-amber-400 border-b border-slate-800 pb-3">Mẫu phiếu đăng ký dự tuyển</h2>
-				<p>Phiếu đăng ký dự tuyển công chức theo Mẫu số 01 ban hành kèm Nghị định 138/2020/NĐ-CP (viên chức: Nghị định 115/2020/NĐ-CP). Bản dưới đây là bản soạn lại để tham khảo - hãy đối chiếu với mẫu chính thức trong thông báo của cơ quan tuyển dụng trước khi nộp.</p>
-				<div class="flex flex-wrap gap-2 text-xs">
-					<a href="<?php echo esc_url( get_theme_file_uri( '/assets/downloads/Phieu-dang-ky-du-tuyen-Mau-01-ND138.docx' ) ); ?>" class="inline-flex items-center gap-2 px-4 py-2 bg-azure-500 hover:bg-azure-600 text-white font-black rounded-xl"><i class="fa-solid fa-file-word"></i> Tải Mẫu 01 (.docx, tham khảo)</a>
-					<a href="<?php echo esc_url( cvc_documents_url() ); ?>" class="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-amber-300 font-bold rounded-xl border border-amber-400/40">Kho tài liệu &amp; mẫu hồ sơ</a>
-				</div>
-			</section>
+			<?php cvc_render_candidate_kit( $recruitment ); ?>
 
 			<p><a class="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl" href="<?php echo esc_url( cvc_recruitments_url() ); ?>">&larr; Xem tất cả tin tuyển dụng</a></p>
 		</div>
@@ -545,41 +538,7 @@ get_header();
 				</div>
 			<?php endif; ?>
 
-			<?php
-			$majors = array_values( array_filter( array_map( fn ( $p ) => trim( (string) ( $p['major_requirements'] ?? '' ) ), $positions ) ) );
-			if ( ! empty( $majors ) ) :
-				?>
-				<div class="bg-navy-950 p-6 rounded-3xl border border-slate-800 space-y-3 shadow-xl text-xs" data-cvc-major-check='<?php echo esc_attr( wp_json_encode( array_map( fn ( $p ) => array( 'name' => (string) ( $p['name'] ?? '' ), 'major' => (string) ( $p['major_requirements'] ?? '' ) ), array_filter( $positions, fn ( $p ) => ! empty( $p['major_requirements'] ) ) ) ) ); ?>'>
-					<h2 class="font-extrabold uppercase tracking-wider text-emerald-400 border-b border-slate-800 pb-3">Đối chiếu chuyên ngành</h2>
-					<p class="text-slate-300">Nhập chuyên ngành của bạn để so khớp với yêu cầu chuyên ngành đã công bố của từng vị trí.</p>
-					<label for="cvc-major-input" class="sr-only">Chuyên ngành của bạn</label>
-					<input type="text" id="cvc-major-input" placeholder="VD: Luật, Kế toán, Công nghệ thông tin" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-emerald-400">
-					<button type="button" id="cvc-major-check-btn" class="w-full py-2.5 bg-emerald-500 hover:bg-emerald-600 text-navy-950 font-black rounded-xl">Đối chiếu</button>
-					<div id="cvc-major-result" class="hidden space-y-1" aria-live="polite"></div>
-					<p class="text-[10px] text-slate-500">Chỉ so khớp từ khóa, không phải kết luận đủ điều kiện - điều kiện chính thức theo thông báo của cơ quan tuyển dụng.</p>
-				</div>
-				<script>
-				(function () {
-					var box = document.querySelector('[data-cvc-major-check]');
-					if (!box) return;
-					var positions = JSON.parse(box.getAttribute('data-cvc-major-check') || '[]');
-					var norm = function (s) { return (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd').trim(); };
-					document.getElementById('cvc-major-check-btn').addEventListener('click', function () {
-						var input = norm(document.getElementById('cvc-major-input').value);
-						var out = document.getElementById('cvc-major-result');
-						out.classList.remove('hidden');
-						if (input.length < 2) { out.innerHTML = '<p class="text-amber-300">Vui lòng nhập chuyên ngành.</p>'; return; }
-						var hits = positions.filter(function (p) {
-							return norm(p.major).split(/[,;\/]+/).some(function (m) { m = m.trim(); return m && (m.indexOf(input) !== -1 || input.indexOf(m) !== -1); });
-						});
-						var esc = function (s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; };
-						out.innerHTML = hits.length
-							? '<p class="text-emerald-300 font-bold">Có ' + hits.length + ' vị trí ghi chuyên ngành khớp:</p><ul class="list-disc pl-4 text-slate-300">' + hits.map(function (p) { return '<li>' + esc(p.name) + '</li>'; }).join('') + '</ul>'
-							: '<p class="text-slate-300">Không vị trí nào ghi chuyên ngành khớp với từ khóa này. Hãy thử cách viết khác hoặc đọc kỹ thông báo gốc.</p>';
-					});
-				})();
-				</script>
-			<?php endif; ?>
+			<?php if ( ! empty( $positions ) ) { cvc_render_eligibility_widget( (string) ( $recruitment['slug'] ?? '' ) ); } ?>
 
 			<div class="bg-navy-950 p-6 rounded-3xl border border-slate-800 space-y-3 shadow-xl text-xs">
 				<h2 class="font-extrabold uppercase tracking-wider text-azure-400 border-b border-slate-800 pb-3">Luyện thi</h2>

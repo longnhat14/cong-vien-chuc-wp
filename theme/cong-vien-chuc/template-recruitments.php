@@ -159,6 +159,8 @@ get_header();
 
 				<?php cvc_render_pagination( $currentPg, $lastPg, cvc_listing_page_url_builder( 'cvc_recruitments_url', $q ) ); ?>
 
+				<?php cvc_render_suggest_widget(); ?>
+
 				<?php if ( ! empty( $cvc_examining ) ) : ?>
 					<section class="space-y-3 pt-2" aria-labelledby="cvc-examining">
 						<h2 id="cvc-examining" class="text-sm font-black text-amber-300 uppercase tracking-wider"><i class="fa-solid fa-hourglass-half mr-1.5" aria-hidden="true"></i>Đợt tuyển dụng đang tổ chức thi</h2>

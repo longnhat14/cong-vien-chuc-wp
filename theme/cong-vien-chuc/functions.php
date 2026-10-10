@@ -36,6 +36,7 @@ require_once __DIR__ . '/inc/template-tags.php';
 require_once __DIR__ . '/inc/listing-components.php';
 require_once __DIR__ . '/inc/content-slot.php';
 require_once __DIR__ . '/inc/recruitment-study.php';
+require_once __DIR__ . '/inc/candidate-tools.php';
 require_once __DIR__ . '/inc/admin/admin-resources.php';
 require_once __DIR__ . '/inc/admin/admin-engine.php';
 require_once __DIR__ . '/inc/admin/ingestion.php';
