@@ -59,6 +59,7 @@ $doc_number  = (string) ( $recruitment['doc_number'] ?? '' );
 $round_docs  = is_array( $recruitment['round_documents'] ?? null ) ? $recruitment['round_documents'] : array();
 $changes     = is_array( $recruitment['changes'] ?? null ) ? $recruitment['changes'] : array();
 $study_plan  = is_array( $recruitment['study_plan'] ?? null ) ? $recruitment['study_plan'] : array();
+$evidence    = is_array( $recruitment['evidence'] ?? null ) ? $recruitment['evidence'] : array();
 $legal_basis = is_array( $recruitment['legal_basis'] ?? null ) ? $recruitment['legal_basis'] : array();
 // De thi thu theo danh muc (RS-...) hien o muc lo trinh on, khong lap lai o danh sach de chung.
 if ( ! empty( $study_plan ) ) {
@@ -215,6 +216,13 @@ get_header();
 							<span class="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
 							<span class="text-slate-400 block text-[10px]"><?php echo esc_html( $label ); ?></span>
 							<strong class="text-white"><?php echo esc_html( cvc_format_date_vn( $dates[ $key ] ) ); ?></strong>
+							<?php $ev = $evidence[ $key ] ?? null; ?>
+							<?php if ( is_array( $ev ) && ! empty( $ev['snippet'] ) ) : ?>
+								<details class="mt-1 group">
+									<summary class="cursor-pointer text-[10px] text-emerald-300/90 list-none"><i class="fa-solid fa-circle-check mr-1" aria-hidden="true"></i>Đã đối chiếu văn bản gốc</summary>
+									<p class="mt-1 text-[10px] text-slate-400 leading-relaxed">“<?php echo esc_html( (string) $ev['snippet'] ); ?>”<br><span class="text-slate-500"><?php echo esc_html( (string) ( $ev['source'] ?? '' ) ); ?><?php echo ! empty( $ev['note'] ) ? ' - ' . esc_html( (string) $ev['note'] ) : ''; ?></span></p>
+								</details>
+							<?php endif; ?>
 						</li>
 					<?php endforeach; ?>
 					<?php if ( ! $has_milestone ) : ?>

@@ -391,6 +391,27 @@ function cvc_admin_render_ingestion_detail( int $id ): void {
 				<input type="hidden" name="op" value="curate">
 				<input type="hidden" name="id" value="<?php echo esc_attr( (string) $id ); ?>">
 				<?php $dis = $editable && $can_upd ? '' : ' disabled'; ?>
+				<?php
+				// GD1: bang chung - doan van ban goc chua gia tri da trich.
+				$ev_labels = array( 'application_deadline' => 'Hạn nộp', 'application_start_date' => 'Bắt đầu nhận', 'announcement_date' => 'Ngày thông báo', 'total_positions' => 'Tổng chỉ tiêu', 'agency_name' => 'Cơ quan', 'positions' => 'Biểu vị trí' );
+				$ev_all    = is_array( $r['_evidence'] ?? null ) ? $r['_evidence'] : array();
+				?>
+				<?php if ( ! empty( $ev_all ) ) : ?>
+					<div class="md:col-span-2 rounded-xl border border-slate-700 bg-slate-900/60 p-3 space-y-1.5 text-xs">
+						<p class="font-bold text-slate-200">Đối chiếu văn bản gốc</p>
+						<?php foreach ( $ev_labels as $ek => $el ) : ?>
+							<?php if ( ! array_key_exists( $ek, $ev_all ) ) { continue; } $ev = $ev_all[ $ek ]; ?>
+							<p class="<?php echo $ev ? 'text-slate-300' : 'text-amber-300'; ?>">
+								<strong><?php echo esc_html( $el ); ?>:</strong>
+								<?php if ( $ev ) : ?>
+									“<?php echo esc_html( (string) ( $ev['snippet'] ?? '' ) ); ?>” <span class="text-slate-500">- <?php echo esc_html( (string) ( $ev['source'] ?? '' ) ); ?></span>
+								<?php else : ?>
+									chưa tìm thấy trong trang tin / file - kiểm tra lại trước khi đăng
+								<?php endif; ?>
+							</p>
+						<?php endforeach; ?>
+					</div>
+				<?php endif; ?>
 				<label class="md:col-span-2 text-sm"><span class="font-bold text-slate-300">Tiêu đề</span><input name="title" class="<?php echo esc_attr( $input ); ?>" value="<?php echo esc_attr( (string) ( $r['title'] ?? '' ) ); ?>"<?php echo $dis; // phpcs:ignore ?>></label>
 				<label class="md:col-span-2 text-sm"><span class="font-bold text-slate-300">Cơ quan tuyển dụng</span><input name="agency_name" class="<?php echo esc_attr( $input ); ?>" value="<?php echo esc_attr( (string) ( $r['agency_name'] ?? '' ) ); ?>"<?php echo $dis; // phpcs:ignore ?>><span class="text-xs text-slate-500">Ghi đúng tên đầy đủ; chưa có trong hệ thống sẽ được tạo mới theo tỉnh.</span></label>
 				<label class="text-sm"><span class="font-bold text-slate-300">Tỉnh/thành</span>
