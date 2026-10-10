@@ -58,6 +58,12 @@ $stage_label = (string) ( $recruitment['stage_label'] ?? '' );
 $doc_number  = (string) ( $recruitment['doc_number'] ?? '' );
 $round_docs  = is_array( $recruitment['round_documents'] ?? null ) ? $recruitment['round_documents'] : array();
 $changes     = is_array( $recruitment['changes'] ?? null ) ? $recruitment['changes'] : array();
+$study_plan  = is_array( $recruitment['study_plan'] ?? null ) ? $recruitment['study_plan'] : array();
+$legal_basis = is_array( $recruitment['legal_basis'] ?? null ) ? $recruitment['legal_basis'] : array();
+// De thi thu theo danh muc (RS-...) hien o muc lo trinh on, khong lap lai o danh sach de chung.
+if ( ! empty( $study_plan ) ) {
+	$exams = array_values( array_filter( $exams, fn ( $e ) => 0 !== strpos( (string) ( $e['code'] ?? '' ), 'RS-' ) ) );
+}
 $in_progress = ! $is_open && in_array( $stage, array( 'examining', 'result' ), true );
 if ( 0 === $total ) {
 	$total = array_sum( array_map( fn ( $p ) => (int) ( $p['quantity'] ?? 0 ), $positions ) );
@@ -182,6 +188,9 @@ get_header();
 				<?php if ( ! empty( $round_docs ) ) : ?>
 					<a href="#van-ban-dot" class="block p-2 rounded-xl hover:bg-slate-900 hover:text-emerald-400">Văn bản của đợt tuyển (<?php echo count( $round_docs ); ?>)</a>
 				<?php endif; ?>
+				<?php if ( ! empty( $study_plan ) ) : ?>
+					<a href="#lo-trinh-on" class="block p-2 rounded-xl hover:bg-slate-900 hover:text-emerald-400 text-emerald-300">Lộ trình ôn theo danh mục</a>
+				<?php endif; ?>
 				<a href="#ho-so-on-thi" class="block p-2 rounded-xl hover:bg-slate-900 hover:text-emerald-400">Hồ sơ ôn thi</a>
 				<a href="#mau-ho-so" class="block p-2 rounded-xl hover:bg-slate-900 hover:text-emerald-400">Mẫu phiếu đăng ký</a>
 			</nav>
@@ -304,6 +313,7 @@ get_header();
 							</li>
 						<?php endforeach; ?>
 					</ol>
+					<?php cvc_render_recruitment_legal_basis( $legal_basis ); ?>
 				</section>
 			<?php endif; ?>
 
@@ -401,6 +411,8 @@ get_header();
 				<?php endif; ?>
 			</section>
 
+			<?php if ( ! empty( $study_plan ) ) { cvc_render_recruitment_study_plan( $study_plan ); } ?>
+
 			<section id="ho-so-on-thi" class="bg-navy-950 p-6 sm:p-8 rounded-3xl border border-slate-800 space-y-5 shadow-xl">
 				<div class="border-b border-slate-800 pb-3">
 					<h2 class="text-lg font-extrabold text-cyan-400">Hồ sơ ôn thi cho đợt tuyển dụng này</h2>
@@ -422,7 +434,7 @@ get_header();
 										<?php echo esc_html( implode( ' · ', array_filter( array(
 											! empty( $exam['total_questions'] ) ? (int) $exam['total_questions'] . ' câu' : null,
 											! empty( $exam['duration_minutes'] ) ? (int) $exam['duration_minutes'] . ' phút' : null,
-											! empty( $exam['exam_stage'] ) ? 'Vòng ' . $exam['exam_stage'] : null,
+											! empty( $exam['exam_stage'] ) ? cvc_exam_stage_label( (string) $exam['exam_stage'] ) : null,
 										) ) ) ); ?>
 									</span>
 								</a>
