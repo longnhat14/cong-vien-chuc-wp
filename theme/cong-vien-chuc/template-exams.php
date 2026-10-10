@@ -118,7 +118,7 @@ get_header();
 
 			<!-- RIGHT SIDEBAR (3 COLS — HIGH-CONVERSION CTA) -->
 			<aside class="lg:col-span-3 space-y-4 sticky top-[80px]">
-				<?php cvc_render_study_sidebar(); ?>
+				<?php cvc_render_study_sidebar( array( 'exams' ) ); ?>
 			</aside>
 
 		</div>

@@ -147,7 +147,7 @@ get_header();
 
 			<!-- RIGHT COLUMN (3 COLS — MONETIZATION & DOWNLOADS) -->
 			<aside class="lg:col-span-3 space-y-4">
-				<?php cvc_render_study_sidebar(); ?>
+				<?php cvc_render_study_sidebar( array( 'topics' ) ); ?>
 			</aside>
 
 		</div>

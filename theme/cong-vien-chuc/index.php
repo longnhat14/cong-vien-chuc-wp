@@ -54,7 +54,9 @@ $course_type_badge_labels = array(
  * đây (99.8%, 120.000+, 36.035+, 3.321 xã phường...). count() có sẵn ở
  * CVC_Api_Service (GET per_page=1, đọc field total) - không fabricate.
  */
-$cvc_stat_courses      = ( new CVC_Course_Service() )->count() ?? 0;
+// Chi tinh khoa hoc da co bai giang (ban duoc) - khoa "Sap mo" khong tinh la "dang mo".
+$cvc_sellable_res      = ( new CVC_Course_Service() )->list( array( 'sellable' => 1, 'per_page' => 1 ) );
+$cvc_stat_courses      = $cvc_sellable_res['ok'] ? (int) ( $cvc_sellable_res['data']['data']['total'] ?? 0 ) : 0;
 $cvc_stat_recruitments = ( new CVC_Recruitment_Service() )->count() ?? 0;
 $cvc_stat_documents    = ( new CVC_Document_Service() )->count() ?? 0;
 $cvc_stat_legal_docs   = ( new CVC_Legal_Document_Service() )->count() ?? 0;
@@ -67,6 +69,7 @@ $cvc_stat_topics       = ( new CVC_Topic_Service() )->count() ?? 0;
 $cvc_home_service = new CVC_Homepage_Service();
 $cvc_pulse_result = $cvc_home_service->pulse();
 $cvc_pulse        = $cvc_pulse_result['ok'] ? ( $cvc_pulse_result['data']['data'] ?? null ) : null;
+$cvc_stat_exams   = (int) ( $cvc_pulse['live']['published_exams'] ?? 0 );
 $cvc_roadmap_res  = $cvc_home_service->careerRoadmap();
 $cvc_roadmap      = $cvc_roadmap_res['ok'] ? ( $cvc_roadmap_res['data']['data'] ?? array() ) : array();
 $cvc_exams_res    = ( new CVC_Exam_Service() )->list( array( 'per_page' => 4 ) );
@@ -192,8 +195,13 @@ class="w-full bg-transparent text-white text-sm placeholder-slate-400 focus:outl
 <i class="fa-solid fa-book-open"></i>
 </div>
 <div>
+<?php if ( $cvc_stat_courses > 0 ) : ?>
 <p class="text-xl font-black text-white leading-none"><?php echo esc_html( $cvc_stat_courses ); ?></p>
 <p class="text-[10px] text-slate-300 font-bold uppercase mt-1">Khóa Học Đang Mở</p>
+<?php else : ?>
+<p class="text-xl font-black text-white leading-none"><?php echo esc_html( number_format( $cvc_stat_exams, 0, ',', '.' ) ); ?></p>
+<p class="text-[10px] text-slate-300 font-bold uppercase mt-1">Đề Thi Thử Miễn Phí</p>
+<?php endif; ?>
 </div>
 </div>
 </div>
@@ -208,8 +216,13 @@ class="w-full bg-transparent text-white text-sm placeholder-slate-400 focus:outl
 <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Tin Tuyển Dụng Công Chức, Viên Chức</p>
 </div>
 <div class="space-y-1">
+<?php if ( $cvc_stat_courses > 0 ) : ?>
 <p class="text-3xl lg:text-4xl font-black text-amber-400"><?php echo esc_html( $cvc_stat_courses ); ?></p>
 <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Khóa Học Ôn Thi</p>
+<?php else : ?>
+<p class="text-3xl lg:text-4xl font-black text-amber-400"><?php echo esc_html( number_format( $cvc_stat_exams, 0, ',', '.' ) ); ?></p>
+<p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Đề Thi Thử Miễn Phí</p>
+<?php endif; ?>
 </div>
 <div class="space-y-1">
 <p class="text-3xl lg:text-4xl font-black text-white"><?php echo esc_html( $cvc_stat_legal_docs ); ?></p>
@@ -224,7 +237,21 @@ class="w-full bg-transparent text-white text-sm placeholder-slate-400 focus:outl
 </div>
 </section>
 
-<!-- 4. FEATURED COMMERCIAL COURSES (HIGH CONVERTING) -->
+<!-- 4. KHU KHOA HOC: du >= 3 khoa ban duoc thi hien khoa hoc; neu khong, khung tu lap day
+     (tuyen dung con han -> de thi thu -> van ban moi -> chu de), khong lap voi khu khac tren trang. -->
+<?php
+$featured_courses = array_values( array_filter( $featured_courses, fn ( $c ) => empty( $c['is_coming_soon'] ) ) );
+if ( count( $featured_courses ) < 3 ) :
+	$cvc_home_exclude = array( 'legal' ); // Trang chu da co khu "Van ban moi".
+	if ( ! empty( $cvc_latest_recruitments ) ) :
+		$cvc_home_exclude[] = 'recruitments';
+	endif;
+	$cvc_home_slot = cvc_content_slot( 'home_featured', $cvc_home_exclude, array_map( fn ( $e ) => (int) ( $e['id'] ?? 0 ), $cvc_latest_exams ), 4 );
+	if ( null !== $cvc_home_slot ) :
+		cvc_render_content_slot_section( $cvc_home_slot, array( 'id' => 'khoa-hoc-noi-bat' ) );
+	endif;
+else :
+?>
 <section id="khoa-hoc-noi-bat" class="py-20 bg-slate-900 border-t border-slate-800">
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
 <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -328,6 +355,8 @@ foreach ( $featured_courses as $fc ) {
 </div>
 </section>
 
+<?php endif; ?>
+
 <!-- 5. FLAGSHIP MONETIZATION COMBO SHOWCASE (dữ liệu + mua hàng thật) -->
 <?php if ( null !== $cvc_combo ) : ?>
 <section id="combo-hot" class="py-16 bg-slate-950 text-white relative overflow-hidden border-t border-slate-800">
@@ -406,6 +435,7 @@ foreach ( $featured_courses as $fc ) {
 <?php endif; ?>
 
 <!-- 6. LIVE RECRUITMENT NOTICES FEED -->
+<?php if ( ! empty( $cvc_latest_recruitments ) ) : // Chua co tin -> an ca khu (khong hien 'chua co du lieu'). ?>
 <section id="tuyen-dung-moi" class="py-20 bg-slate-900 border-t border-slate-800">
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
 <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -460,6 +490,7 @@ Xem Chi Tiết &rarr;
 </div>
 </div>
 </section>
+<?php endif; ?>
 
 <!-- 7. CAREER ROADMAP + SMART EXAM + SALARY + LEGAL MATRIX (Next-Gen, dữ liệu thật) -->
 <?php

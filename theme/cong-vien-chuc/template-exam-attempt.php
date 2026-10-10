@@ -848,11 +848,16 @@ function renderExamResult(payload) {
       let baseUrl = (window.cvc_vars && window.cvc_vars.home_url) || '/';
 
       recList.innerHTML = recommendations.map(function (item) {
-        let href = baseUrl + (item.type === 'course' ? 'khoa-hoc/' : 'tai-lieu/') + item.slug + '/';
+        // Khung tu lap day: chua co khoa hoc -> goi y van ban / chu de / de khac (mien phi).
+        let paths = { course: 'khoa-hoc/', document: 'tai-lieu/', legal_document: 'van-ban-phap-luat/', topic: 'chu-de/', exam: 'thi-trac-nghiem/' };
+        let labels = { course: 'Khóa học', document: 'Tài liệu', legal_document: 'Văn bản', topic: 'Chủ đề ôn tập', exam: 'Đề thi' };
+        let href = baseUrl + (paths[item.type] || 'tai-lieu/') + encodeURIComponent(item.slug) + '/';
         let priceLabel = '';
 
         if (item.type === 'document') {
           priceLabel = item.is_free ? 'Miễn phí' : (formatVnd(item.effective_price) + 'đ');
+        } else if (item.type !== 'course') {
+          priceLabel = '';
         } else if (item.sale_price) {
           priceLabel = formatVnd(item.sale_price) + 'đ';
         } else if (item.price) {
@@ -860,7 +865,7 @@ function renderExamResult(payload) {
         }
 
         return '<a href="' + href + '" class="block p-4 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 transition-colors space-y-1">' +
-          '<span class="text-[10px] uppercase font-bold text-amber-300">' + (item.type === 'course' ? 'Khóa học' : 'Tài liệu') + '</span>' +
+          '<span class="text-[10px] uppercase font-bold text-amber-300">' + (labels[item.type] || 'Gợi ý') + '</span>' +
           '<h4 class="text-sm font-bold text-white leading-snug">' + escapeExamHtml(item.title) + '</h4>' +
           '<p class="text-[11px] text-slate-300">' + escapeExamHtml(item.reason || '') + '</p>' +
           (priceLabel ? '<span class="inline-block text-[11px] font-black text-amber-300">' + priceLabel + '</span>' : '') +

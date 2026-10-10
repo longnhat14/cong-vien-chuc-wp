@@ -29,6 +29,13 @@ $lastPg     = (int) ( $pagination['last_page'] ?? 1 );
 
 // Không còn fallback dữ liệu mẫu (fixture) khi API lỗi/trống - hiện đúng trạng thái.
 
+// Chưa có khóa học nào bán được (tất cả "Sắp mở") và không tìm kiếm -> báo sắp mở,
+// mời đăng ký nhận tin + gợi ý ôn miễn phí (khung tự lấp đầy: đề thi -> văn bản -> chủ đề).
+$cvc_all_soon    = $ok && '' === $q && ! empty( $courses ) && 1 === $paged
+	&& count( array_filter( $courses, fn ( $c ) => empty( $c['is_coming_soon'] ) ) ) === 0;
+$cvc_no_courses  = $ok && '' === $q && empty( $courses ) && 1 === $paged;
+$cvc_course_slot = ( $cvc_all_soon || $cvc_no_courses ) ? cvc_content_slot( 'courses_page', array(), array(), 6 ) : null;
+
 cvc_seo_set_title( 'Khóa học ôn thi công chức, viên chức' );
 cvc_seo_set_description( 'Khóa học ôn thi công chức, viên chức có lộ trình bài giảng, theo dõi tiến độ và chứng chỉ khi hoàn thành.' );
 cvc_seo_set_listing_pagination_state( $currentPg, 'cvc_courses_url' );
@@ -77,11 +84,49 @@ get_header();
 					<span class="text-slate-300">Hiển thị <strong class="text-white"><?php echo count( $courses ); ?></strong> khóa học</span>
 				</div>
 
+				<?php if ( $cvc_all_soon || $cvc_no_courses ) : ?>
+					<section class="bg-gradient-to-br from-cyan-500/10 to-slate-900 border border-cyan-500/30 p-5 sm:p-6 rounded-3xl space-y-4" aria-labelledby="cvc-courses-soon">
+						<div class="space-y-1.5">
+							<h2 id="cvc-courses-soon" class="text-lg sm:text-xl font-black text-white"><i class="fa-solid fa-hourglass-half text-cyan-300 mr-2" aria-hidden="true"></i>Khóa học đang được biên soạn</h2>
+							<p class="text-sm text-slate-300">Các khóa học bên dưới sẽ mở khi có đủ bài giảng. Để lại email để được báo khi khóa học mở; trong lúc chờ, bạn có thể luyện đề và đọc văn bản miễn phí.</p>
+						</div>
+						<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="flex flex-col sm:flex-row gap-2 max-w-xl">
+							<input type="hidden" name="action" value="cvc_newsletter_subscribe">
+							<input type="hidden" name="source" value="courses_coming_soon">
+							<?php wp_nonce_field( 'cvc_newsletter_subscribe' ); ?>
+							<label for="cvc-soon-email" class="sr-only">Email nhận thông báo</label>
+							<input id="cvc-soon-email" type="email" name="email" required placeholder="Email của bạn" class="flex-1 min-w-0 px-4 py-3 rounded-xl bg-navy-900 border border-slate-700 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400">
+							<button type="submit" class="px-5 py-3 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black text-sm rounded-xl">Báo tôi khi mở</button>
+						</form>
+					</section>
+					<?php if ( null !== $cvc_course_slot ) : ?>
+						<section class="space-y-3" aria-labelledby="cvc-courses-slot" data-cvc-slot-kind="<?php echo esc_attr( (string) $cvc_course_slot['kind'] ); ?>">
+							<div class="flex flex-wrap items-end justify-between gap-2">
+								<div>
+									<h2 id="cvc-courses-slot" class="text-base sm:text-lg font-black text-white"><?php echo esc_html( (string) $cvc_course_slot['title'] ); ?></h2>
+									<p class="text-xs text-slate-400"><?php echo esc_html( (string) $cvc_course_slot['subtitle'] ); ?></p>
+								</div>
+								<a href="<?php echo esc_url( cvc_slot_cta_url( (string) $cvc_course_slot['kind'] ) ); ?>" class="text-xs font-bold text-amber-400 hover:underline"><?php echo esc_html( (string) ( $cvc_course_slot['cta']['label'] ?? '' ) ); ?> &rarr;</a>
+							</div>
+							<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+								<?php foreach ( (array) $cvc_course_slot['items'] as $cvc_item ) : ?>
+									<?php cvc_render_slot_card( (array) $cvc_item ); ?>
+								<?php endforeach; ?>
+							</div>
+						</section>
+					<?php endif; ?>
+					<?php if ( $cvc_all_soon ) : ?>
+						<h2 class="text-base font-black text-white pt-2">Khóa học sắp mở</h2>
+					<?php endif; ?>
+				<?php endif; ?>
+
 				<!-- COURSES GRID -->
 				<?php if ( ! $ok ) : ?>
 					<?php cvc_render_error_state( 'Không tải được danh sách khóa học, vui lòng thử lại sau.' ); ?>
 				<?php elseif ( empty( $courses ) ) : ?>
-					<?php cvc_render_empty_state( 'Chưa có khóa học nào.' ); ?>
+					<?php if ( ! $cvc_no_courses ) : ?>
+						<?php cvc_render_empty_state( 'Không tìm thấy khóa học phù hợp.' ); ?>
+					<?php endif; ?>
 				<?php else : ?>
 					<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 						<?php foreach ( $courses as $course ) : ?>
@@ -146,7 +191,7 @@ get_header();
 
 			<!-- RIGHT SIDEBAR (3 COLS — STICKY STORE & AI DIAGNOSIS) -->
 			<aside class="lg:col-span-3 space-y-4 sticky top-[80px]">
-				<?php cvc_render_study_sidebar(); ?>
+				<?php cvc_render_study_sidebar( array( 'exams' ) ); ?>
 			</aside>
 
 		</div>

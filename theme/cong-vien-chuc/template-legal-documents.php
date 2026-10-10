@@ -191,7 +191,7 @@ get_header();
 
 			<!-- RIGHT SIDEBAR (3 COLS — MONETIZATION STORE & HIGH CONVERSION CTAS) -->
 			<aside class="lg:col-span-3 space-y-5 sticky top-[80px]">
-				<?php cvc_render_study_sidebar(); ?>
+				<?php cvc_render_study_sidebar( array( 'legal' ) ); ?>
 			</aside>
 
 		</div>

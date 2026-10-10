@@ -112,8 +112,19 @@ function cvc_format_vnd( float $amount ): string {
 	return number_format( $amount, 0, ',', '.' ) . 'đ';
 }
 
-function cvc_render_study_sidebar(): void {
-	$courses = cvc_featured_courses();
+/**
+ * @param array<int, string> $exclude Loai noi dung trang hien tai da hien (khong lap o cot ben).
+ */
+function cvc_render_study_sidebar( array $exclude = array() ): void {
+	// Chi khoa hoc ban duoc; neu khong co -> khung tu lap day (de thi -> van ban -> chu de).
+	$courses = array_values( array_filter( cvc_featured_courses(), fn ( $c ) => empty( $c['coming_soon'] ) ) );
+	$slot    = null;
+	if ( empty( $courses ) ) {
+		$slot = cvc_content_slot( 'sidebar', $exclude, array(), 3 );
+		if ( null !== $slot ) {
+			cvc_render_content_slot_compact( $slot );
+		}
+	}
 	?>
 	<?php if ( ! empty( $courses ) ) : ?>
 		<section class="bg-navy-950 border border-slate-800 p-5 rounded-3xl space-y-3 shadow-xl text-xs" aria-labelledby="cvc-sidebar-courses">
@@ -148,11 +159,13 @@ function cvc_render_study_sidebar(): void {
 		</section>
 	<?php endif; ?>
 
+	<?php if ( 'exams' !== ( $slot['kind'] ?? '' ) ) : ?>
 	<section class="bg-gradient-to-br from-amber-500/10 to-slate-900 border border-amber-500/30 p-5 rounded-3xl space-y-3 shadow-xl text-xs" aria-labelledby="cvc-sidebar-practice">
 		<h2 id="cvc-sidebar-practice" class="font-extrabold text-xs text-amber-400 uppercase tracking-wider">Luyện đề miễn phí</h2>
 		<p class="text-slate-300">Làm đề thi thử có chấm điểm ngay và xem giải thích từng câu sau khi nộp.</p>
 		<a href="<?php echo esc_url( cvc_exams_url() ); ?>" class="block w-full py-2.5 bg-amber-500 hover:bg-amber-400 text-navy-950 font-black rounded-xl text-center">Vào danh sách đề thi</a>
 	</section>
+	<?php endif; ?>
 	<?php
 }
 

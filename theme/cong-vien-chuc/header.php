@@ -218,14 +218,22 @@ if ( $cvc_header_logged_in && cvc_auth_token() ) {
 	$cvc_unread_result = ( new CVC_Notification_Service() )->unreadCount( (string) cvc_auth_token() );
 	$cvc_header_unread = ! empty( $cvc_unread_result['ok'] ) ? (int) ( $cvc_unread_result['data']['data']['unread_count'] ?? 0 ) : 0;
 }
-$cvc_nav_items = array(
-	array( 'label' => 'Khóa học', 'url' => cvc_courses_url() ),
-	array( 'label' => 'Chủ đề ôn thi', 'url' => cvc_topics_url() ),
+// Menu "On thi" gom de thi, chu de, kien thuc, khoa hoc (khoa hoc chua mo -> nhan "Sap mo").
+$cvc_has_courses = function_exists( 'cvc_has_sellable_courses' ) && cvc_has_sellable_courses();
+$cvc_nav_items   = array(
+	array(
+		'label'    => 'Ôn thi',
+		'url'      => cvc_exams_url(),
+		'children' => array(
+			array( 'label' => 'Đề thi thử miễn phí', 'url' => cvc_exams_url(), 'icon' => 'fa-pen-to-square' ),
+			array( 'label' => 'Chủ đề ôn thi', 'url' => cvc_topics_url(), 'icon' => 'fa-layer-group' ),
+			array( 'label' => 'Kiến thức trọng tâm', 'url' => cvc_knowledge_url(), 'icon' => 'fa-lightbulb' ),
+			array( 'label' => 'Khóa học', 'url' => cvc_courses_url(), 'icon' => 'fa-graduation-cap', 'badge' => $cvc_has_courses ? '' : 'Sắp mở' ),
+		),
+	),
 	array( 'label' => 'Tuyển dụng', 'url' => cvc_recruitments_url() ),
-	array( 'label' => 'Thi thử', 'url' => cvc_exams_url() ),
-	array( 'label' => 'Tài liệu', 'url' => cvc_documents_url() ),
 	array( 'label' => 'Văn bản pháp luật', 'url' => cvc_legal_documents_url() ),
-	array( 'label' => 'Kiến thức', 'url' => cvc_knowledge_url() ),
+	array( 'label' => 'Tài liệu', 'url' => cvc_documents_url() ),
 );
 $cvc_current_url = home_url( add_query_arg( null, null ) );
 ?>
@@ -253,8 +261,25 @@ $cvc_current_url = home_url( add_query_arg( null, null ) );
 </a>
 <nav class="hidden xl:flex items-center gap-0.5 text-[13px] font-bold text-slate-700" aria-label="Menu chính">
 <?php foreach ( $cvc_nav_items as $cvc_nav ) : ?>
-<?php $cvc_active = 0 === strpos( $cvc_current_url, $cvc_nav['url'] ); ?>
-<a href="<?php echo esc_url( $cvc_nav['url'] ); ?>" class="px-2.5 py-2 rounded-xl whitespace-nowrap transition-colors <?php echo $cvc_active ? 'text-navy-900 bg-slate-100 border-b-2 border-gold-500' : 'hover:text-azure-600 hover:bg-slate-100'; ?>" <?php echo $cvc_active ? 'aria-current="page"' : ''; ?>><?php echo esc_html( $cvc_nav['label'] ); ?></a>
+<?php
+$cvc_urls   = array_merge( array( $cvc_nav['url'] ), array_column( (array) ( $cvc_nav['children'] ?? array() ), 'url' ) );
+$cvc_active = (bool) array_filter( $cvc_urls, fn ( $u ) => 0 === strpos( $cvc_current_url, $u ) );
+$cvc_cls    = 'px-2.5 py-2 rounded-xl whitespace-nowrap transition-colors ' . ( $cvc_active ? 'text-navy-900 bg-slate-100 border-b-2 border-gold-500' : 'hover:text-azure-600 hover:bg-slate-100' );
+?>
+<?php if ( ! empty( $cvc_nav['children'] ) ) : ?>
+<div class="relative group">
+<a href="<?php echo esc_url( $cvc_nav['url'] ); ?>" class="<?php echo esc_attr( $cvc_cls ); ?> inline-flex items-center gap-1" aria-haspopup="true" <?php echo $cvc_active ? 'aria-current="page"' : ''; ?>><?php echo esc_html( $cvc_nav['label'] ); ?><i class="fa-solid fa-chevron-down text-[9px] opacity-60" aria-hidden="true"></i></a>
+<div class="absolute left-0 top-full pt-2 hidden group-hover:block group-focus-within:block z-50">
+<ul class="min-w-[220px] bg-white border border-slate-200 rounded-2xl shadow-xl p-2 space-y-0.5">
+<?php foreach ( $cvc_nav['children'] as $cvc_child ) : ?>
+<li><a href="<?php echo esc_url( $cvc_child['url'] ); ?>" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-azure-600"><i class="fa-solid <?php echo esc_attr( $cvc_child['icon'] ?? 'fa-angle-right' ); ?> w-4 text-slate-400" aria-hidden="true"></i><span class="flex-1"><?php echo esc_html( $cvc_child['label'] ); ?></span><?php if ( ! empty( $cvc_child['badge'] ) ) : ?><span class="text-[10px] font-black px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700"><?php echo esc_html( $cvc_child['badge'] ); ?></span><?php endif; ?></a></li>
+<?php endforeach; ?>
+</ul>
+</div>
+</div>
+<?php else : ?>
+<a href="<?php echo esc_url( $cvc_nav['url'] ); ?>" class="<?php echo esc_attr( $cvc_cls ); ?>" <?php echo $cvc_active ? 'aria-current="page"' : ''; ?>><?php echo esc_html( $cvc_nav['label'] ); ?></a>
+<?php endif; ?>
 <?php endforeach; ?>
 </nav>
 <div class="flex items-center gap-2 shrink-0">
@@ -286,7 +311,14 @@ $cvc_current_url = home_url( add_query_arg( null, null ) );
 </div>
 <div id="mobile-menu" class="hidden xl:hidden bg-white border-b border-slate-200 px-4 py-5 space-y-2 shadow-xl">
 <?php foreach ( $cvc_nav_items as $cvc_nav ) : ?>
+<?php if ( ! empty( $cvc_nav['children'] ) ) : ?>
+<p class="px-4 pt-1 text-[11px] font-black uppercase tracking-wider text-slate-400"><?php echo esc_html( $cvc_nav['label'] ); ?></p>
+<?php foreach ( $cvc_nav['children'] as $cvc_child ) : ?>
+<a href="<?php echo esc_url( $cvc_child['url'] ); ?>" class="flex items-center gap-2 px-4 py-2.5 text-slate-700 hover:bg-slate-50 font-semibold rounded-xl text-sm"><span class="flex-1"><?php echo esc_html( $cvc_child['label'] ); ?></span><?php if ( ! empty( $cvc_child['badge'] ) ) : ?><span class="text-[10px] font-black px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700"><?php echo esc_html( $cvc_child['badge'] ); ?></span><?php endif; ?></a>
+<?php endforeach; ?>
+<?php else : ?>
 <a href="<?php echo esc_url( $cvc_nav['url'] ); ?>" class="block px-4 py-2.5 text-slate-700 hover:bg-slate-50 font-semibold rounded-xl text-sm"><?php echo esc_html( $cvc_nav['label'] ); ?></a>
+<?php endif; ?>
 <?php endforeach; ?>
 <div class="pt-3 border-t border-slate-100 flex gap-2">
 <?php if ( $cvc_header_logged_in ) : ?>

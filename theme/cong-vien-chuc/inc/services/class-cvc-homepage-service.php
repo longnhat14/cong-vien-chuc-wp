@@ -22,6 +22,27 @@ final class CVC_Homepage_Service extends CVC_Api_Service {
 		return $this->client->get( $this->endpoint() . '/career-roadmap' );
 	}
 
+	/**
+	 * Khung noi dung tu lap day (GET /api/content-slot).
+	 *
+	 * @param array<int, string> $exclude        Loai noi dung da co khu rieng tren trang.
+	 * @param array<int, int>    $exclude_exams  De thi da hien o khu khac.
+	 */
+	public function contentSlot( string $slot, array $exclude = array(), array $exclude_exams = array(), int $limit = 4 ): array {
+		return $this->client->get(
+			'/api/content-slot',
+			array_filter(
+				array(
+					'slot'             => $slot,
+					'exclude'          => implode( ',', $exclude ),
+					'exclude_exam_ids' => implode( ',', array_map( 'intval', $exclude_exams ) ),
+					'limit'            => $limit,
+				),
+				fn ( $v ) => '' !== $v
+			)
+		);
+	}
+
 	public function miniQuiz( int $count = 5 ): array {
 		return $this->client->get( '/api/mini-quiz', array( 'count' => $count ) );
 	}

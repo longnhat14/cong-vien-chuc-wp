@@ -435,7 +435,7 @@ function cvc_handle_newsletter_subscribe(): void {
 	$result = ( new CVC_Newsletter_Service() )->subscribe(
 		array(
 			'email'  => $email,
-			'source' => 'homepage_footer',
+			'source' => in_array( sanitize_key( wp_unslash( $_POST['source'] ?? '' ) ), array( 'courses_coming_soon' ), true ) ? 'courses_coming_soon' : 'homepage_footer',
 		)
 	);
 

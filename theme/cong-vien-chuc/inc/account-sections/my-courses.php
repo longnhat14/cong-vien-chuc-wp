@@ -33,11 +33,30 @@ $enrollments = is_array( $pagination['data'] ?? null ) ? $pagination['data'] : a
 	<?php if ( ! $result['ok'] ) : ?>
 		<?php cvc_render_error_state( 'Không tải được danh sách khóa học của bạn, vui lòng thử lại sau.' ); ?>
 	<?php elseif ( empty( $enrollments ) ) : ?>
+		<?php if ( function_exists( 'cvc_has_sellable_courses' ) && ! cvc_has_sellable_courses() ) : ?>
+			<?php // Chua co khoa hoc nao mo: goi y on mien phi (khung tu lap day: de thi -> chu de). ?>
+			<?php $cvc_acc_slot = cvc_content_slot( 'account', array(), array(), 4 ); ?>
+			<div class="p-6 bg-slate-900 rounded-2xl border border-slate-800 space-y-2">
+				<h3 class="text-base font-bold text-white">Khóa học đang được biên soạn</h3>
+				<p class="text-xs text-slate-400">Khóa học sẽ mở khi có đủ bài giảng. Trong lúc chờ, bạn có thể luyện đề và ôn theo chủ đề miễn phí.</p>
+			</div>
+			<?php if ( null !== $cvc_acc_slot ) : ?>
+				<section class="space-y-3" aria-labelledby="cvc-acc-slot">
+					<h3 id="cvc-acc-slot" class="text-sm font-black text-white"><?php echo esc_html( (string) $cvc_acc_slot['title'] ); ?></h3>
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<?php foreach ( (array) $cvc_acc_slot['items'] as $cvc_item ) : ?>
+							<?php cvc_render_slot_card( (array) $cvc_item ); ?>
+						<?php endforeach; ?>
+					</div>
+				</section>
+			<?php endif; ?>
+		<?php else : ?>
 		<div class="p-8 text-center bg-slate-900 rounded-2xl border border-slate-800 space-y-3">
 			<h3 class="text-base font-bold text-white">Bạn chưa ghi danh khóa học nào</h3>
 			<p class="text-xs text-slate-400">Khóa miễn phí ghi danh ngay; khóa trả phí ghi danh sau khi thanh toán.</p>
 			<a href="<?php echo esc_url( cvc_courses_url() ); ?>" class="inline-block px-5 py-2.5 bg-amber-500 text-navy-950 font-black text-xs rounded-xl shadow">Xem danh sách khóa học &rarr;</a>
 		</div>
+		<?php endif; ?>
 	<?php else : ?>
 		<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 			<?php foreach ( $enrollments as $enrollment ) : ?>
