@@ -78,7 +78,15 @@ $breadcrumb_items = array(
 );
 
 cvc_seo_set_title( $title );
-cvc_seo_set_description( wp_trim_words( '' !== $summary ? $summary : $title, 28 ) );
+// GD6 SEO: mo ta noi giai doan dot tuyen + lo trinh on (neu co) - noi dung that cua trang.
+$seo_desc = wp_trim_words( '' !== $summary ? $summary : $title, 24 );
+if ( '' !== $stage_label && 'accepting' !== $stage ) {
+	$seo_desc = $stage_label . ' - ' . $seo_desc;
+}
+if ( ! empty( $study_plan['round_1']['exams'] ) ) {
+	$seo_desc .= ' Lộ trình ôn theo danh mục tài liệu của Hội đồng và đề thi thử theo đợt.';
+}
+cvc_seo_set_description( $seo_desc );
 cvc_seo_set_canonical( cvc_recruitment_url( $slug ) );
 cvc_seo_set_og( array( 'type' => 'website' ) );
 cvc_seo_add_breadcrumb_jsonld( $breadcrumb_items );

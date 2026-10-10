@@ -928,6 +928,32 @@ function cvc_build_recruitment_job_posting_jsonld( array $recruitment ): ?array 
 		$schema['employmentType'] = 1 === count( $employment_types ) ? $employment_types[0] : $employment_types;
 	}
 
+	// GD6: yeu cau trinh do (muc thap nhat trong cac vi tri) theo gia tri schema.org credentialCategory.
+	$edu_rank = null;
+	foreach ( (array) ( $recruitment['positions'] ?? array() ) as $position ) {
+		$lv = mb_strtolower( (string) ( $position['education_level'] ?? '' ) );
+		$r  = null;
+		if ( preg_match( '/thạc sĩ|tiến sĩ/u', $lv ) ) {
+			$r = 4;
+		} elseif ( preg_match( '/đại học|cử nhân|kỹ sư|bác sĩ|dược sĩ/u', $lv ) ) {
+			$r = 3;
+		} elseif ( str_contains( $lv, 'cao đẳng' ) ) {
+			$r = 2;
+		} elseif ( str_contains( $lv, 'trung cấp' ) ) {
+			$r = 1;
+		}
+		if ( null !== $r ) {
+			$edu_rank = null === $edu_rank ? $r : min( $edu_rank, $r );
+		}
+	}
+	$edu_map = array( 1 => 'professional certificate', 2 => 'associate degree', 3 => 'bachelor degree', 4 => 'postgraduate degree' );
+	if ( null !== $edu_rank ) {
+		$schema['educationRequirements'] = array(
+			'@type'              => 'EducationalOccupationalCredential',
+			'credentialCategory' => $edu_map[ $edu_rank ],
+		);
+	}
+
 	$total_openings = (int) ( $recruitment['total_positions'] ?? 0 );
 	if ( $total_openings > 0 ) {
 		$schema['totalJobOpenings'] = $total_openings;
