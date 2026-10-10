@@ -53,6 +53,12 @@ $source_url  = (string) ( $recruitment['source_url'] ?? '' );
 $source_info = is_array( $recruitment['source'] ?? null ) ? $recruitment['source'] : array();
 $attachments = is_array( $recruitment['attachments'] ?? null ) ? $recruitment['attachments'] : array();
 $total       = (int) ( $recruitment['total_positions'] ?? 0 );
+$stage       = (string) ( $recruitment['stage'] ?? '' );
+$stage_label = (string) ( $recruitment['stage_label'] ?? '' );
+$doc_number  = (string) ( $recruitment['doc_number'] ?? '' );
+$round_docs  = is_array( $recruitment['round_documents'] ?? null ) ? $recruitment['round_documents'] : array();
+$changes     = is_array( $recruitment['changes'] ?? null ) ? $recruitment['changes'] : array();
+$in_progress = ! $is_open && in_array( $stage, array( 'examining', 'result' ), true );
 if ( 0 === $total ) {
 	$total = array_sum( array_map( fn ( $p ) => (int) ( $p['quantity'] ?? 0 ), $positions ) );
 }
@@ -90,8 +96,14 @@ get_header();
 		<div class="flex flex-wrap items-center gap-2">
 			<?php if ( $is_open ) : ?>
 				<span class="bg-emerald-500 text-navy-950 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider">Đang nhận hồ sơ</span>
+			<?php elseif ( $in_progress ) : ?>
+				<span class="bg-amber-400 text-navy-950 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider"><?php echo esc_html( $stage_label ); ?></span>
+				<span class="bg-slate-700 text-slate-200 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider">Đã hết hạn nhận hồ sơ</span>
 			<?php else : ?>
 				<span class="bg-slate-700 text-slate-200 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider">Đã hết hạn nhận hồ sơ</span>
+			<?php endif; ?>
+			<?php if ( '' !== $doc_number ) : ?>
+				<span class="text-[10px] font-mono text-slate-300 border border-slate-700 px-2 py-0.5 rounded-full">Số <?php echo esc_html( $doc_number ); ?></span>
 			<?php endif; ?>
 			<?php if ( ! empty( $recruitment['recruitment_type'] ) ) : ?>
 				<span class="bg-azure-500/20 text-azure-300 border border-azure-400/40 text-[10px] font-black px-3 py-1 rounded-full uppercase"><?php echo esc_html( cvc_recruitment_type_label( (string) $recruitment['recruitment_type'] ) ); ?></span>
@@ -135,7 +147,12 @@ get_header();
 		</div>
 	</header>
 
-	<?php if ( ! $is_open ) : ?>
+	<?php if ( $in_progress ) : ?>
+		<div class="bg-amber-500/10 border border-amber-500/40 rounded-2xl p-4 text-sm text-amber-100 space-y-1">
+			<p class="font-extrabold"><i class="fa-solid fa-hourglass-half mr-1.5" aria-hidden="true"></i><?php echo esc_html( 'result' === $stage ? 'Đợt tuyển dụng đã có kết quả.' : 'Đã hết hạn nhận phiếu đăng ký - đợt tuyển dụng đang được tổ chức.' ); ?></p>
+			<p class="text-xs text-amber-100/80">Thí sinh đã nộp phiếu theo dõi các văn bản mới của đợt (danh sách, triệu tập, tài liệu ôn tập, lịch thi, kết quả) ở mục <a href="#van-ban-dot" class="underline font-bold">Văn bản của đợt tuyển</a>.</p>
+		</div>
+	<?php elseif ( ! $is_open ) : ?>
 		<?php cvc_render_expired_state( 'expired' === $status ? 'Đợt tuyển dụng này đã hết hạn. Trang được giữ lại để tham khảo - vui lòng xem các tin đang nhận hồ sơ.' : 'Đã quá hạn nộp hồ sơ của đợt tuyển dụng này.' ); ?>
 	<?php endif; ?>
 
@@ -162,6 +179,9 @@ get_header();
 				<h2 class="font-extrabold text-xs text-azure-400 uppercase tracking-wider border-b border-slate-800 pb-3 mb-2">Mục lục</h2>
 				<a href="#noi-dung" class="block p-2 rounded-xl hover:bg-slate-900 hover:text-emerald-400">Nội dung thông báo</a>
 				<a href="#vi-tri" class="block p-2 rounded-xl hover:bg-slate-900 hover:text-emerald-400">Vị trí &amp; chỉ tiêu (<?php echo count( $positions ); ?>)</a>
+				<?php if ( ! empty( $round_docs ) ) : ?>
+					<a href="#van-ban-dot" class="block p-2 rounded-xl hover:bg-slate-900 hover:text-emerald-400">Văn bản của đợt tuyển (<?php echo count( $round_docs ); ?>)</a>
+				<?php endif; ?>
 				<a href="#ho-so-on-thi" class="block p-2 rounded-xl hover:bg-slate-900 hover:text-emerald-400">Hồ sơ ôn thi</a>
 				<a href="#mau-ho-so" class="block p-2 rounded-xl hover:bg-slate-900 hover:text-emerald-400">Mẫu phiếu đăng ký</a>
 			</nav>
@@ -239,10 +259,111 @@ get_header();
 				<?php endif; ?>
 			</section>
 
+			<?php if ( ! empty( $changes ) ) : ?>
+				<section id="thay-doi" class="bg-rose-500/5 p-6 rounded-3xl border border-rose-500/30 space-y-3 shadow-xl">
+					<h2 class="text-base font-extrabold text-rose-200"><i class="fa-solid fa-code-compare mr-1.5" aria-hidden="true"></i>Đã điều chỉnh so với thông báo ban đầu</h2>
+					<ul class="space-y-2 text-sm text-slate-200">
+						<?php foreach ( $changes as $ch ) : ?>
+							<li>
+								<strong><?php echo esc_html( (string) ( $ch['field_label'] ?? '' ) ); ?>:</strong>
+								<?php if ( null !== ( $ch['old_value'] ?? null ) && '' !== (string) $ch['old_value'] ) : ?>
+									<span class="line-through text-slate-400"><?php echo esc_html( preg_match( '/^\d{4}-\d{2}-\d{2}$/', (string) $ch['old_value'] ) ? cvc_format_date_vn( (string) $ch['old_value'] ) : (string) $ch['old_value'] ); ?></span> &rarr;
+								<?php endif; ?>
+								<strong class="text-emerald-300"><?php echo esc_html( preg_match( '/^\d{4}-\d{2}-\d{2}$/', (string) ( $ch['new_value'] ?? '' ) ) ? cvc_format_date_vn( (string) $ch['new_value'] ) : (string) ( $ch['new_value'] ?? '' ) ); ?></strong>
+								<?php if ( ! empty( $ch['source_doc_number'] ) ) : ?>
+									<span class="text-xs text-slate-400">(theo văn bản số <?php echo esc_html( (string) $ch['source_doc_number'] ); ?>)</span>
+								<?php endif; ?>
+							</li>
+						<?php endforeach; ?>
+					</ul>
+					<p class="text-xs text-slate-400">Số liệu trên trang đã được cập nhật theo văn bản điều chỉnh mới nhất của cơ quan tuyển dụng.</p>
+				</section>
+			<?php endif; ?>
+
+			<?php if ( ! empty( $round_docs ) ) : ?>
+				<section id="van-ban-dot" class="bg-navy-950 p-6 sm:p-8 rounded-3xl border border-slate-800 space-y-4 shadow-xl">
+					<h2 class="text-lg font-extrabold text-azure-400 border-b border-slate-800 pb-3">Văn bản của đợt tuyển</h2>
+					<ol class="relative pl-5 border-l border-slate-800 space-y-5">
+						<?php foreach ( $round_docs as $rd ) : ?>
+							<li class="relative">
+								<span class="absolute -left-[27px] top-1 w-3 h-3 rounded-full <?php echo in_array( $rd['role'] ?? '', array( 'amendment', 'cancel' ), true ) ? 'bg-rose-400' : ( in_array( $rd['role'] ?? '', array( 'notice', 'plan' ), true ) ? 'bg-emerald-400' : 'bg-azure-400' ); ?>"></span>
+								<div class="flex flex-wrap items-center gap-2 text-[11px]">
+									<span class="font-black uppercase tracking-wider text-slate-300"><?php echo esc_html( (string) ( $rd['role_label'] ?? '' ) ); ?></span>
+									<?php if ( ! empty( $rd['doc_number'] ) ) : ?><span class="font-mono text-amber-300"><?php echo esc_html( (string) $rd['doc_number'] ); ?></span><?php endif; ?>
+									<?php if ( ! empty( $rd['issued_date'] ) ) : ?><span class="text-slate-500"><?php echo esc_html( cvc_format_date_vn( (string) $rd['issued_date'] ) ); ?></span><?php endif; ?>
+								</div>
+								<p class="text-sm text-white font-semibold leading-snug mt-0.5"><?php echo esc_html( (string) ( $rd['title'] ?? '' ) ); ?></p>
+								<div class="flex flex-wrap gap-2 mt-1.5 text-xs">
+									<?php foreach ( (array) ( $rd['files'] ?? array() ) as $f ) : ?>
+										<a href="<?php echo esc_url( (string) ( $f['download_url'] ?? '#' ) ); ?>" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 hover:border-amber-400/60 text-slate-200"><i class="fa-solid fa-file-arrow-down text-amber-300" aria-hidden="true"></i><?php echo esc_html( wp_trim_words( (string) ( $f['filename'] ?? $f['title'] ?? 'Tệp' ), 8 ) ); ?> <span class="uppercase text-[10px] text-slate-400"><?php echo esc_html( (string) ( $f['extension'] ?? '' ) ); ?></span></a>
+									<?php endforeach; ?>
+									<?php if ( ! empty( $rd['source_url'] ) ) : ?>
+										<a href="<?php echo esc_url( (string) $rd['source_url'] ); ?>" target="_blank" rel="noopener nofollow" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-azure-300 hover:underline"><i class="fa-solid fa-up-right-from-square" aria-hidden="true"></i>Trang gốc</a>
+									<?php endif; ?>
+								</div>
+							</li>
+						<?php endforeach; ?>
+					</ol>
+				</section>
+			<?php endif; ?>
+
 			<section id="vi-tri" class="bg-navy-950 p-6 sm:p-8 rounded-3xl border border-slate-800 space-y-4 shadow-xl">
 				<h2 class="text-lg font-extrabold text-emerald-400 border-b border-slate-800 pb-3">Vị trí &amp; chỉ tiêu</h2>
 				<?php if ( empty( $positions ) ) : ?>
 					<p class="text-sm text-slate-400">Chưa có danh sách vị trí chi tiết cho đợt này - xem thông báo gốc.</p>
+				<?php elseif ( ! empty( array_filter( array_column( $positions, 'level' ) ) ) ) : ?>
+					<?php
+					// Bieu vi tri x co quan (doc tu bieu chi tieu Excel): nhom theo cap -> tuyen chung / rieng.
+					$groups = array();
+					foreach ( $positions as $pos ) {
+						$lv = (string) ( $pos['level'] ?? 'Khác' );
+						$sc = (string) ( $pos['hiring_scope'] ?? '' );
+						$groups[ $lv ][ $sc ][] = $pos;
+					}
+					$scope_labels = array( 'chung' => 'Vị trí tuyển dụng chung (nhiều cơ quan - thí sinh xếp thứ tự nguyện vọng)', 'rieng' => 'Vị trí tuyển dụng riêng', '' => 'Vị trí' );
+					?>
+					<p class="text-xs text-slate-400">Theo biểu chi tiết kèm văn bản của cơ quan tuyển dụng. Bấm vào vị trí để xem từng cơ quan và chỉ tiêu.</p>
+					<div class="space-y-6">
+						<?php foreach ( $groups as $lv => $by_scope ) : ?>
+							<?php $lv_total = array_sum( array_map( fn ( $p ) => (int) ( $p['quantity'] ?? 0 ), array_merge( ...array_values( $by_scope ) ) ) ); ?>
+							<div class="space-y-3">
+								<h3 class="text-sm font-black text-white uppercase tracking-wider"><?php echo esc_html( $lv ); ?> <span class="text-emerald-300 normal-case font-bold">· <?php echo esc_html( (string) count( array_merge( ...array_values( $by_scope ) ) ) ); ?> vị trí, <?php echo esc_html( (string) $lv_total ); ?> chỉ tiêu</span></h3>
+								<?php foreach ( $by_scope as $sc => $list ) : ?>
+									<p class="text-[11px] font-bold text-slate-400"><?php echo esc_html( $scope_labels[ $sc ] ?? $sc ); ?></p>
+									<div class="space-y-2">
+										<?php foreach ( $list as $pos ) : ?>
+											<?php $units = (array) ( $pos['units'] ?? array() ); ?>
+											<details class="group bg-slate-900 rounded-2xl border border-slate-800 text-xs text-slate-300">
+												<summary class="cursor-pointer list-none p-4 flex flex-wrap items-start justify-between gap-2">
+													<span class="font-extrabold text-sm text-white leading-snug flex-1 min-w-0"><?php echo esc_html( (string) ( $pos['name'] ?? '' ) ); ?>
+														<?php if ( ! empty( $pos['is_sensitive'] ) ) : ?><span class="ml-1 align-middle text-[10px] font-black px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-200 border border-rose-400/40">Cơ mật, trọng yếu</span><?php endif; ?>
+													</span>
+													<span class="flex items-center gap-2 shrink-0">
+														<?php if ( count( $units ) > 1 ) : ?><span class="text-[10px] text-slate-400"><?php echo esc_html( (string) count( $units ) ); ?> cơ quan</span><?php endif; ?>
+														<span class="bg-amber-500/20 text-amber-300 font-extrabold px-2.5 py-0.5 rounded-full border border-amber-400/30"><?php echo (int) ( $pos['quantity'] ?? 0 ); ?> chỉ tiêu</span>
+													</span>
+												</summary>
+												<div class="px-4 pb-4 space-y-2">
+													<?php if ( ! empty( $pos['education_level'] ) ) : ?><p><strong class="text-slate-200">Trình độ:</strong> <?php echo esc_html( (string) $pos['education_level'] ); ?></p><?php endif; ?>
+													<?php if ( ! empty( $pos['major_requirements'] ) ) : ?><p><strong class="text-slate-200">Ngành, chuyên ngành:</strong> <?php echo esc_html( (string) $pos['major_requirements'] ); ?></p><?php endif; ?>
+													<?php if ( ! empty( $units ) ) : ?>
+														<ul class="divide-y divide-slate-800 border border-slate-800 rounded-xl">
+															<?php foreach ( $units as $u ) : ?>
+																<li class="flex items-start justify-between gap-3 px-3 py-2">
+																	<span><?php echo esc_html( (string) ( $u['agency_name'] ?? '' ) ); ?><?php if ( ! empty( $u['note'] ) ) : ?> <span class="text-rose-300">(<?php echo esc_html( (string) $u['note'] ); ?>)</span><?php endif; ?></span>
+																	<strong class="text-amber-300 shrink-0"><?php echo (int) ( $u['quota'] ?? 0 ); ?></strong>
+																</li>
+															<?php endforeach; ?>
+														</ul>
+													<?php endif; ?>
+												</div>
+											</details>
+										<?php endforeach; ?>
+									</div>
+								<?php endforeach; ?>
+							</div>
+						<?php endforeach; ?>
+					</div>
 				<?php else : ?>
 					<div class="space-y-4">
 						<?php foreach ( $positions as $pos ) : ?>

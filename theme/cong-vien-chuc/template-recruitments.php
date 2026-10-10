@@ -29,6 +29,13 @@ $lastPg       = (int) ( $pagination['last_page'] ?? 1 );
 
 // Không còn fallback dữ liệu mẫu (fixture) khi API lỗi/trống - hiện đúng trạng thái.
 
+// Dot da het han nop nhung dang to chuc thi / vua co ket qua - thi sinh theo doi (chi trang 1, khong tim kiem).
+$cvc_examining = array();
+if ( 1 === $paged && '' === $q ) {
+	$cvc_ex_res    = $service->list( array( 'stage' => 'examining', 'per_page' => 10 ) );
+	$cvc_examining = ! empty( $cvc_ex_res['ok'] ) ? (array) ( $cvc_ex_res['data']['data']['data'] ?? array() ) : array();
+}
+
 cvc_seo_set_title( 'Tin tuyển dụng công chức, viên chức' );
 cvc_seo_set_description( 'Tin tuyển dụng công chức, viên chức kèm vị trí, chỉ tiêu, hạn nộp hồ sơ và tài liệu ôn thi theo từng đợt.' );
 cvc_seo_set_listing_pagination_state( $currentPg, 'cvc_recruitments_url' );
@@ -79,7 +86,7 @@ get_header();
 				<?php if ( ! $ok ) : ?>
 					<?php cvc_render_error_state( 'Không tải được danh sách tin tuyển dụng, vui lòng thử lại sau.' ); ?>
 				<?php elseif ( empty( $recruitments ) ) : ?>
-					<?php cvc_render_empty_state( 'Chưa có tin tuyển dụng nào.' ); ?>
+					<?php cvc_render_empty_state( empty( $cvc_examining ) ? 'Chưa có tin tuyển dụng nào.' : 'Hiện chưa có đợt tuyển dụng nào đang nhận hồ sơ. Các đợt đang tổ chức thi ở bên dưới.' ); ?>
 				<?php endif; ?>
 				<div id="recruitmentListContainer" class="space-y-4">
 					<?php foreach ( $recruitments as $rec ) : ?>
@@ -151,6 +158,24 @@ get_header();
 				</div>
 
 				<?php cvc_render_pagination( $currentPg, $lastPg, cvc_listing_page_url_builder( 'cvc_recruitments_url', $q ) ); ?>
+
+				<?php if ( ! empty( $cvc_examining ) ) : ?>
+					<section class="space-y-3 pt-2" aria-labelledby="cvc-examining">
+						<h2 id="cvc-examining" class="text-sm font-black text-amber-300 uppercase tracking-wider"><i class="fa-solid fa-hourglass-half mr-1.5" aria-hidden="true"></i>Đợt tuyển dụng đang tổ chức thi</h2>
+						<p class="text-xs text-slate-400">Đã hết hạn nhận phiếu - dành cho thí sinh đã nộp theo dõi danh sách, triệu tập, tài liệu ôn tập, lịch thi và kết quả.</p>
+						<?php foreach ( $cvc_examining as $rec ) : ?>
+							<a href="<?php echo esc_url( cvc_recruitment_url( (string) ( $rec['slug'] ?? '' ) ) ); ?>" class="block bg-navy-950 border border-slate-800 hover:border-amber-400/50 p-4 rounded-2xl space-y-1.5">
+								<span class="flex flex-wrap items-center gap-2 text-[10px]">
+									<span class="font-black px-2 py-0.5 rounded-full bg-amber-400 text-navy-950 uppercase"><?php echo esc_html( (string) ( $rec['stage_label'] ?? 'Đang tổ chức thi' ) ); ?></span>
+									<?php if ( ! empty( $rec['doc_number'] ) ) : ?><span class="font-mono text-slate-400"><?php echo esc_html( (string) $rec['doc_number'] ); ?></span><?php endif; ?>
+									<span class="text-slate-400"><?php echo esc_html( (string) ( $rec['agency']['name'] ?? '' ) ); ?></span>
+								</span>
+								<span class="block text-sm font-extrabold text-white leading-snug"><?php echo esc_html( (string) ( $rec['title'] ?? '' ) ); ?></span>
+								<span class="block text-[11px] text-slate-400"><?php echo ! empty( $rec['total_positions'] ) ? esc_html( (int) $rec['total_positions'] . ' chỉ tiêu · ' ) : ''; ?>Hết hạn nộp <?php echo esc_html( ! empty( $rec['dates']['application_deadline'] ) ? cvc_format_date_vn( (string) $rec['dates']['application_deadline'] ) : '—' ); ?></span>
+							</a>
+						<?php endforeach; ?>
+					</section>
+				<?php endif; ?>
 
 			</div>
 
