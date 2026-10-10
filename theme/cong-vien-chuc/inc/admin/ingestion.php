@@ -158,6 +158,24 @@ function cvc_admin_render_ingestion_index(): void {
 		</dl>
 	</section>
 
+	<?php $cvc_open = (array) ( $ov['open_unpublished'] ?? array() ); ?>
+	<?php if ( ! empty( $cvc_open ) ) : ?>
+		<section class="bg-rose-500/10 border border-rose-500/40 rounded-2xl p-5 space-y-3" aria-labelledby="cvc-open-unpub">
+			<h2 id="cvc-open-unpub" class="text-sm font-black text-rose-200"><i class="fa-solid fa-triangle-exclamation mr-1.5" aria-hidden="true"></i>Tin còn hạn nộp hồ sơ nhưng chưa đăng (<?php echo esc_html( (string) count( $cvc_open ) ); ?>)</h2>
+			<p class="text-xs text-rose-100/80">Duyệt hoặc sửa sớm để không lỡ đợt tuyển. Sắp xếp theo hạn nộp gần nhất.</p>
+			<ul class="space-y-2">
+				<?php foreach ( $cvc_open as $o ) : ?>
+					<li class="flex flex-wrap items-center gap-2 text-xs">
+						<span class="px-2 py-0.5 rounded-full font-black <?php echo (int) $o['days_left'] <= 3 ? 'bg-rose-500 text-white' : 'bg-amber-500/20 text-amber-200'; ?>"><?php echo esc_html( 0 === (int) $o['days_left'] ? 'Hết hạn hôm nay' : 'Còn ' . (int) $o['days_left'] . ' ngày' ); ?></span>
+						<a class="font-bold text-white hover:underline" href="<?php echo esc_url( cvc_admin_url( 'thu-thap', (int) $o['id'] ) ); ?>">#<?php echo esc_html( (string) $o['id'] ); ?> <?php echo esc_html( (string) $o['title'] ); ?></a>
+						<span class="text-slate-400">hạn <?php echo esc_html( cvc_admin_format( $o['deadline'] ?? null, 'date' ) ); ?></span>
+						<?php if ( ! empty( $o['reason'] ) ) : ?><span class="text-amber-300/90">· <?php echo esc_html( (string) $o['reason'] ); ?></span><?php endif; ?>
+					</li>
+				<?php endforeach; ?>
+			</ul>
+		</section>
+	<?php endif; ?>
+
 	<?php cvc_admin_render_prefilter_panel( (array) ( $ov['prefilter'] ?? array() ), $can_pub ); ?>
 
 	<?php if ( cvc_admin_can( 'recruitment.create' ) ) : ?>
