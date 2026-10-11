@@ -152,6 +152,17 @@ get_header();
 
 		<?php cvc_render_notice(); ?>
 
+		<?php $halts = (array) ( $ov['halts'] ?? array() ); ?>
+		<?php if ( ! empty( $halts ) ) : ?>
+			<div class="rounded-2xl border border-rose-500/50 bg-rose-500/10 p-4 text-sm text-rose-100 space-y-2" role="alert">
+				<p class="font-bold text-rose-200"><i class="fa-solid fa-circle-exclamation"></i> AI đang tạm dừng: nhà cung cấp từ chối yêu cầu (hết số dư / hết hạn mức / key không hợp lệ)</p>
+				<?php foreach ( $halts as $hp => $h ) : ?>
+					<p><strong><?php echo esc_html( $providers[ $hp ]['label'] ?? $hp ); ?></strong> · từ <?php echo esc_html( $fmt_time( $h['at'] ?? null ) ); ?><br><span class="font-mono text-[11px] text-rose-200/80 break-all"><?php echo esc_html( (string) ( $h['reason'] ?? '' ) ); ?></span></p>
+				<?php endforeach; ?>
+				<p class="text-xs text-rose-200/90">Sinh câu hỏi, OCR, kiểm tra lại câu hỏi đang <strong>chờ</strong> (không bị đánh dấu xong). Nạp tiền hoặc sửa key, rồi bấm "Kiểm tra kết nối" để chạy lại ngay; nếu không, hệ thống tự thử lại sau 30 phút.</p>
+			</div>
+		<?php endif; ?>
+
 		<header class="flex flex-wrap items-end justify-between gap-4">
 			<div class="space-y-1">
 				<h1 class="text-2xl font-black text-white flex items-center gap-2"><i class="fa-solid fa-robot text-amber-400"></i> Cấu hình AI</h1>
