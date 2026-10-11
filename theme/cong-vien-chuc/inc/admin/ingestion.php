@@ -89,6 +89,86 @@ function cvc_ingestion_reject_form( int $id, string $class ): string {
 }
 
 /**
+ * Sức khỏe thu thập: cảnh báo sự cố + tỷ lệ bắt tin + phễu lọc + chi phí AI + trạm VN + cron.
+ */
+function cvc_ingestion_render_health(): void {
+	$res = cvc_admin_api_get( '/api/admin/ingestion/health' );
+	if ( ! $res['ok'] ) {
+		return;
+	}
+	$h      = (array) ( $res['data']['data'] ?? array() );
+	$alerts = (array) ( $h['alerts'] ?? array() );
+	$f      = (array) ( $h['funnel'] ?? array() );
+	$ai     = (array) ( $h['ai'] ?? array() );
+	$relay  = (array) ( $h['relay'] ?? array() );
+	$cron   = (array) ( $h['cron'] ?? array() );
+	$src    = (array) ( $h['sources'] ?? array() );
+	$tot    = 0;
+	$had    = 0;
+	$now    = 0;
+	foreach ( array_slice( (array) ( $h['recall'] ?? array() ), -7 ) as $d ) {
+		$tot += (int) $d['total'];
+		$had += (int) $d['matched'];
+		$now += (int) $d['matched'] + (int) $d['referred'] + (int) $d['secondary'];
+	}
+	$pct    = static fn( int $a, int $b ): string => $b > 0 ? round( 100 * $a / $b ) . '%' : '—';
+	$ago    = static function ( $iso ): string {
+		if ( empty( $iso ) ) {
+			return '—';
+		}
+		$m = (int) floor( ( time() - strtotime( (string) $iso ) ) / 60 );
+		return $m < 60 ? max( 0, $m ) . ' phút trước' : ( $m < 2880 ? round( $m / 60 ) . ' giờ trước' : round( $m / 1440 ) . ' ngày trước' );
+	};
+	$tone   = array( 'critical' => 'border-rose-500/50 bg-rose-500/10 text-rose-100', 'warning' => 'border-amber-500/50 bg-amber-500/10 text-amber-100', 'info' => 'border-slate-600 bg-slate-800/60 text-slate-200' );
+	?>
+	<section class="space-y-3" aria-label="Sức khỏe thu thập">
+		<?php foreach ( $alerts as $a ) : ?>
+			<div class="rounded-2xl border p-3 text-sm <?php echo esc_attr( $tone[ $a['level'] ] ?? $tone['info'] ); ?>" role="alert">
+				<i class="fa-solid <?php echo 'info' === ( $a['level'] ?? '' ) ? 'fa-circle-info' : 'fa-triangle-exclamation'; ?> mr-1" aria-hidden="true"></i><?php echo esc_html( (string) $a['message'] ); ?>
+			</div>
+		<?php endforeach; ?>
+		<div class="grid grid-cols-2 lg:grid-cols-5 gap-3">
+			<div class="rounded-2xl border border-slate-800 bg-slate-900/60 p-3">
+				<p class="text-[11px] uppercase tracking-wider text-slate-400">Bắt tin 7 ngày</p>
+				<p class="text-xl font-black text-white tabular-nums"><?php echo esc_html( $pct( $now, $tot ) ); ?></p>
+				<p class="text-[11px] text-slate-400"><?php echo esc_html( "{$now}/{$tot} tin trên trang tổng hợp · tự thấy trước: " . $pct( $had, $tot ) ); ?></p>
+			</div>
+			<div class="rounded-2xl border border-slate-800 bg-slate-900/60 p-3">
+				<p class="text-[11px] uppercase tracking-wider text-slate-400">Phễu 7 ngày</p>
+				<p class="text-xl font-black text-white tabular-nums"><?php echo esc_html( (int) ( $f['published'] ?? 0 ) . ' tin đăng' ); ?></p>
+				<p class="text-[11px] text-slate-400"><?php echo esc_html( (int) ( $f['links'] ?? 0 ) . ' link · loại: luật ' . (int) ( $f['filtered_rules'] ?? 0 ) . ', AI ' . (int) ( $f['filtered_ai'] ?? 0 ) . ', đã học ' . (int) ( $f['filtered_learned'] ?? 0 ) . ' · tải ' . (int) ( $f['fetched'] ?? 0 ) ); ?></p>
+			</div>
+			<div class="rounded-2xl border border-slate-800 bg-slate-900/60 p-3">
+				<p class="text-[11px] uppercase tracking-wider text-slate-400">Chi phí AI thu thập</p>
+				<p class="text-xl font-black text-white tabular-nums"><?php echo esc_html( number_format( (int) ( $ai['ingestion_cost_7d'] ?? 0 ), 0, ',', '.' ) . ' ₫' ); ?></p>
+				<p class="text-[11px] text-slate-400"><?php echo esc_html( null !== ( $ai['cost_per_published'] ?? null ) ? '≈ ' . number_format( (int) $ai['cost_per_published'], 0, ',', '.' ) . ' ₫ / tin đăng (7 ngày)' : '7 ngày' ); ?></p>
+			</div>
+			<div class="rounded-2xl border border-slate-800 bg-slate-900/60 p-3">
+				<p class="text-[11px] uppercase tracking-wider text-slate-400">Trạm VN (pctech)</p>
+				<p class="text-xl font-black tabular-nums <?php echo ! empty( $relay['healthy'] ) ? 'text-emerald-300' : 'text-rose-300'; ?>"><?php echo esc_html( ! empty( $relay['healthy'] ) ? 'Hoạt động' : ( ! empty( $relay['configured'] ) ? 'Ngừng' : 'Chưa cấu hình' ) ); ?></p>
+				<p class="text-[11px] text-slate-400"><?php echo esc_html( 'v' . ( $relay['version'] ?? '?' ) . ' · ' . (int) ( $relay['hosts'] ?? 0 ) . ' tên miền · OK ' . $ago( $relay['last_ok'] ?? null ) ); ?></p>
+			</div>
+			<div class="rounded-2xl border border-slate-800 bg-slate-900/60 p-3">
+				<p class="text-[11px] uppercase tracking-wider text-slate-400">Cron · nguồn</p>
+				<p class="text-xl font-black text-white tabular-nums"><?php echo esc_html( $ago( $cron['last_run'] ?? null ) ); ?></p>
+				<p class="text-[11px] text-slate-400"><?php echo esc_html( 'quét tin ' . $ago( $cron['last_ingestion_tick'] ?? null ) . ' · ' . (int) ( $src['active'] ?? 0 ) . ' nguồn / ' . (int) ( $src['provinces'] ?? 0 ) . ' tỉnh' ); ?></p>
+			</div>
+		</div>
+		<?php if ( ! empty( $src['failing'] ) ) : ?>
+			<details class="rounded-2xl border border-slate-800 bg-slate-900/40 p-3 text-xs text-slate-300">
+				<summary class="cursor-pointer font-bold text-slate-200"><?php echo esc_html( count( (array) $src['failing'] ) . ' nguồn đang lỗi liên tiếp' ); ?></summary>
+				<ul class="mt-2 space-y-1">
+					<?php foreach ( (array) $src['failing'] as $fs ) : ?>
+						<li><?php echo esc_html( (string) $fs['name'] . ' (' . (string) $fs['domain'] . ') - lỗi ' . (int) $fs['failures'] . ' lần liên tiếp' ); ?></li>
+					<?php endforeach; ?>
+				</ul>
+			</details>
+		<?php endif; ?>
+	</section>
+	<?php
+}
+
+/**
  * Trang tổng quan + hàng chờ.
  */
 function cvc_admin_render_ingestion_index(): void {
@@ -126,6 +206,8 @@ function cvc_admin_render_ingestion_index(): void {
 		<?php cvc_render_error_state( cvc_admin_error_message( $overview ) ); ?>
 		<?php return; ?>
 	<?php endif; ?>
+
+	<?php cvc_ingestion_render_health(); ?>
 
 	<section class="grid grid-cols-1 xl:grid-cols-[1.2fr_1fr] gap-4">
 		<div class="bg-[#0A192F] border border-slate-800 rounded-2xl p-5 space-y-3">
