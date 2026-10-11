@@ -2,7 +2,7 @@
 /**
  * Plugin Name: CVC Fetch Relay
  * Description: Trạm tải trang cho congvienchuc.com - tải hộ trang/văn bản công khai trên cổng .gov.vn/.edu.vn mà máy chủ ở nước ngoài không kết nối được. Chỉ nhận yêu cầu có chữ ký, chỉ tên miền cho phép, chỉ đọc (GET), không lưu nội dung.
- * Version: 1.1.0
+ * Version: 1.2.0
  * Requires PHP: 7.4
  * Author: Công Viên Chức
  *
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 final class CVC_Fetch_Relay {
 
-	const VERSION       = '1.1.0';
+	const VERSION       = '1.2.0';
 	const ROUTE_NS      = 'cvc-relay/v1';
 	const MAX_BYTES     = 27262976; // 26 MB.
 	const TIMEOUT       = 45;
@@ -72,7 +72,7 @@ final class CVC_Fetch_Relay {
 	 *
 	 * @return true|WP_Error
 	 */
-	private static function verify( WP_REST_Request $req, $url, $insecure = '0' ) {
+	private static function verify( WP_REST_Request $req, $url, $insecure = '0', $extra = '' ) {
 		$secret = self::secret();
 		if ( '' === $secret ) {
 			return new WP_Error( 'cvc_relay_off', 'Trạm chưa cấu hình khóa.', array( 'status' => 503 ) );
@@ -83,7 +83,7 @@ final class CVC_Fetch_Relay {
 		if ( ! $ts || abs( time() - $ts ) > self::MAX_SKEW || ! preg_match( '/^[a-f0-9]{32}$/', $nonce ) || ! preg_match( '/^[a-f0-9]{64}$/', $sig ) ) {
 			return new WP_Error( 'cvc_relay_auth', 'Chữ ký không hợp lệ.', array( 'status' => 401 ) );
 		}
-		$expected = hash_hmac( 'sha256', $ts . "\n" . $nonce . "\n" . $url . "\n" . $insecure, $secret );
+		$expected = hash_hmac( 'sha256', $ts . "\n" . $nonce . "\n" . $url . "\n" . $insecure . $extra, $secret );
 		if ( ! hash_equals( $expected, $sig ) ) {
 			self::bump( 'auth_failed' );
 			return new WP_Error( 'cvc_relay_auth', 'Chữ ký không hợp lệ.', array( 'status' => 401 ) );
@@ -108,7 +108,11 @@ final class CVC_Fetch_Relay {
 	public static function handle_fetch( WP_REST_Request $req ) {
 		$url      = (string) $req->get_param( 'url' );
 		$insecure = $req->get_param( 'insecure' ) ? '1' : '0';
-		$ok       = self::verify( $req, $url, $insecure );
+		$method   = 'POST' === strtoupper( (string) $req->get_param( 'method' ) ) ? 'POST' : 'GET';
+		$form     = $req->get_param( 'form' );
+		$form     = is_array( $form ) ? $form : array();
+		$extra    = 'POST' === $method ? "\nPOST\n" . hash( 'sha256', (string) wp_json_encode( $form ) ) : '';
+		$ok       = self::verify( $req, $url, $insecure, $extra );
 		if ( is_wp_error( $ok ) ) {
 			return $ok;
 		}
@@ -117,6 +121,17 @@ final class CVC_Fetch_Relay {
 		if ( is_wp_error( $check ) ) {
 			self::log_error( $url, $check->get_error_message() );
 			return $check;
+		}
+
+		// POST chi cho API doc danh sach tin (VD cong VNPT /api/NewsZone/NewsZone): duong dan co /api/,
+		// form nho, gia tri don.
+		if ( 'POST' === $method ) {
+			$path = (string) wp_parse_url( $url, PHP_URL_PATH );
+			$size = strlen( (string) wp_json_encode( $form ) );
+			$flat = count( array_filter( $form, 'is_scalar' ) ) === count( $form );
+			if ( false === stripos( $path, '/api/' ) || $size > 4096 || ! $flat ) {
+				return new WP_Error( 'cvc_relay_post', 'POST không được phép cho đường dẫn này.', array( 'status' => 403 ) );
+			}
 		}
 
 		// Gioi han tan suat (toan tram).
@@ -130,9 +145,11 @@ final class CVC_Fetch_Relay {
 		$accept = (string) $req->get_param( 'accept' );
 		$tmp    = wp_tempnam( 'cvc-relay' );
 		$start  = microtime( true );
-		$resp   = wp_remote_get(
+		$resp   = wp_remote_request(
 			$url,
 			array(
+				'method'              => $method,
+				'body'                => 'POST' === $method ? $form : null,
 				'timeout'             => self::TIMEOUT,
 				'redirection'         => 0, // Backend tu theo redirect (moi buoc lai qua tram + kiem tra).
 				'reject_unsafe_urls'  => true,
@@ -167,6 +184,7 @@ final class CVC_Fetch_Relay {
 		header( 'Content-Length: ' . $size );
 		header( 'Cache-Control: no-store' );
 		header( 'X-Relay-Status: ' . $status );
+		header( 'X-Relay-Version: ' . self::VERSION );
 		header( 'X-Relay-Ms: ' . (int) round( ( microtime( true ) - $start ) * 1000 ) );
 		foreach ( array( 'content-type' => 'X-Relay-Content-Type', 'location' => 'X-Relay-Location', 'content-disposition' => 'X-Relay-Content-Disposition' ) as $h => $out ) {
 			$v = wp_remote_retrieve_header( $resp, $h );
