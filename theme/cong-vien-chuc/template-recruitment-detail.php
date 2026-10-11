@@ -257,6 +257,15 @@ get_header();
 				<?php if ( ! empty( $attachments ) || '' !== $source_url ) : ?>
 					<div class="border-t border-slate-800 pt-4 space-y-3" id="van-ban-goc">
 						<h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-400">Nguồn trích dẫn &amp; văn bản gốc</h3>
+						<?php if ( ! empty( $source_info['secondary'] ) ) : ?>
+							<p class="text-xs text-amber-200 bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 leading-relaxed">
+								<i class="fa-solid fa-circle-info mr-1" aria-hidden="true"></i>
+								Tin này <strong>chưa có văn bản trên cổng thông tin chính thức</strong> (.gov.vn/.edu.vn); được thu thập từ nguồn bên dưới và đã qua biên tập viên kiểm tra. Hãy đối chiếu với đơn vị tuyển dụng trước khi nộp hồ sơ.
+								<?php if ( ! empty( $source_info['origin_url'] ) ) : ?>
+									<br>Bài đăng gốc: <a class="underline break-all" href="<?php echo esc_url( (string) $source_info['origin_url'] ); ?>" target="_blank" rel="noopener nofollow"><?php echo esc_html( (string) ( wp_parse_url( (string) $source_info['origin_url'], PHP_URL_HOST ) ?: $source_info['origin_url'] ) ); ?></a>
+								<?php endif; ?>
+							</p>
+						<?php endif; ?>
 						<?php if ( '' !== $source_url ) : ?>
 							<p class="text-xs text-slate-400 break-all">
 								Nguồn: <?php echo esc_html( (string) ( $source_info['name'] ?? ( wp_parse_url( $source_url, PHP_URL_HOST ) ?: '' ) ) ); ?> —
