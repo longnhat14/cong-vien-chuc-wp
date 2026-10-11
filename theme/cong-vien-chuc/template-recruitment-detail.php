@@ -51,6 +51,8 @@ $is_open     = ! empty( $recruitment['is_open'] );
 $status      = (string) ( $recruitment['status'] ?? '' );
 $source_url  = (string) ( $recruitment['source_url'] ?? '' );
 $source_info = is_array( $recruitment['source'] ?? null ) ? $recruitment['source'] : array();
+// "Nguon suu tam": nguon ngoai .gov.vn/.edu.vn/ten mien nha nuoc da xac minh - API khong tra link goc.
+$collected   = array_key_exists( 'official', $source_info ) && false === $source_info['official'];
 $attachments = is_array( $recruitment['attachments'] ?? null ) ? $recruitment['attachments'] : array();
 $total       = (int) ( $recruitment['total_positions'] ?? 0 );
 $stage       = (string) ( $recruitment['stage'] ?? '' );
@@ -254,16 +256,14 @@ get_header();
 						<i class="fa-solid fa-up-right-from-square"></i> Đọc toàn văn thông báo trên cổng thông tin của cơ quan
 					</a>
 				<?php endif; ?>
-				<?php if ( ! empty( $attachments ) || '' !== $source_url ) : ?>
+				<?php if ( ! empty( $attachments ) || '' !== $source_url || $collected ) : ?>
 					<div class="border-t border-slate-800 pt-4 space-y-3" id="van-ban-goc">
 						<h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-400">Nguồn trích dẫn &amp; văn bản gốc</h3>
-						<?php if ( ! empty( $source_info['secondary'] ) ) : ?>
+						<?php if ( $collected ) : ?>
+							<p class="text-xs text-slate-400">Nguồn: <strong class="text-slate-200"><?php echo esc_html( (string) ( $source_info['label'] ?? 'Nguồn sưu tầm' ) ); ?></strong></p>
 							<p class="text-xs text-amber-200 bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 leading-relaxed">
 								<i class="fa-solid fa-circle-info mr-1" aria-hidden="true"></i>
-								Tin này <strong>chưa có văn bản trên cổng thông tin chính thức</strong> (.gov.vn/.edu.vn); được thu thập từ nguồn bên dưới và đã qua biên tập viên kiểm tra. Hãy đối chiếu với đơn vị tuyển dụng trước khi nộp hồ sơ.
-								<?php if ( ! empty( $source_info['origin_url'] ) ) : ?>
-									<br>Bài đăng gốc: <a class="underline break-all" href="<?php echo esc_url( (string) $source_info['origin_url'] ); ?>" target="_blank" rel="noopener nofollow"><?php echo esc_html( (string) ( wp_parse_url( (string) $source_info['origin_url'], PHP_URL_HOST ) ?: $source_info['origin_url'] ) ); ?></a>
-								<?php endif; ?>
+								Thông tin sưu tầm, đã được biên tập viên kiểm tra; <strong>chưa có văn bản trên cổng thông tin chính thức</strong>. Vui lòng liên hệ trực tiếp đơn vị tuyển dụng để xác nhận trước khi nộp hồ sơ.
 							</p>
 						<?php endif; ?>
 						<?php if ( '' !== $source_url ) : ?>

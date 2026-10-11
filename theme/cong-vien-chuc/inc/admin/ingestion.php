@@ -43,6 +43,7 @@ function cvc_ingestion_tabs( string $active ): void {
 		'nguon'  => array( 'Nguồn & chỉ số', cvc_admin_url( 'thu-thap', null, array( 'xem' => 'nguon' ) ) ),
 		'kiem-tra' => array( 'Kiểm tra mẫu', cvc_admin_url( 'thu-thap', null, array( 'xem' => 'kiem-tra' ) ) ),
 		'on-tap'   => array( 'Ôn tập & văn bản', cvc_admin_url( 'thu-thap', null, array( 'xem' => 'on-tap' ) ) ),
+		'ten-mien' => array( 'Nguồn chính thức', cvc_admin_url( 'thu-thap', null, array( 'xem' => 'ten-mien' ) ) ),
 	);
 	echo '<nav class="flex flex-wrap gap-1 border-b border-slate-800" aria-label="Thu thập tin">';
 	foreach ( $tabs as $key => $tab ) {
@@ -358,6 +359,9 @@ function cvc_admin_render_ingestion_index(): void {
 											<?php $rec = (array) $row['source_record']; ?>
 											· <span class="<?php echo (int) $rec['rejected'] > (int) $rec['approved'] ? 'text-rose-300' : 'text-emerald-300'; ?>" title="Quyết định của biên tập viên với nguồn này (180 ngày)">nguồn: duyệt <?php echo (int) $rec['approved']; ?> / loại <?php echo (int) $rec['rejected']; ?></span>
 										<?php endif; ?>
+										<?php if ( isset( $row['source_check']['official'] ) && ! $row['source_check']['official'] ) : ?>
+											· <span class="px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-300 font-bold" title="<?php echo esc_attr( (string) ( $row['source_check']['host'] ?? '' ) . ' — ' . (string) ( $row['source_check']['reason'] ?? '' ) ); ?>">Nguồn sưu tầm</span>
+										<?php endif; ?>
 									</div>
 									<?php if ( ! empty( $row['publish_block_reason'] ) && 'published' !== $row['state'] ) : ?>
 										<div class="text-xs text-amber-300/90 mt-1">Chưa tự đăng: <?php echo esc_html( (string) $row['publish_block_reason'] ); ?></div>
@@ -454,6 +458,10 @@ function cvc_admin_render_ingestion_detail( int $id ): void {
 		<p class="text-xs text-slate-400 break-all">
 			Nguồn: <?php echo esc_html( (string) ( $it['source']['name'] ?? '' ) ); ?> ·
 			<a class="text-cyan-300 underline" href="<?php echo esc_url( (string) $it['source_url'] ); ?>" target="_blank" rel="noopener nofollow">Mở trang gốc</a>
+			<?php if ( isset( $it['source_check']['official'] ) && ! $it['source_check']['official'] ) : ?>
+				· <span class="px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-300 font-bold">Nguồn sưu tầm</span>
+				<span class="text-slate-500">(<?php echo esc_html( (string) ( $it['source_check']['reason'] ?? '' ) ); ?> — trang công khai không hiện link/tên miền; <a class="underline" href="<?php echo esc_url( cvc_admin_url( 'thu-thap', null, array( 'xem' => 'ten-mien' ) ) ); ?>">xác minh tên miền</a>)</span>
+			<?php endif; ?>
 			<?php if ( ! empty( $it['recruitment']['slug'] ) ) : ?>
 				· <a class="text-emerald-300 font-bold" href="<?php echo esc_url( cvc_recruitment_url( (string) $it['recruitment']['slug'] ) ); ?>" target="_blank" rel="noopener">Xem tin đã đăng</a>
 				· <a class="text-cyan-300" href="<?php echo esc_url( cvc_admin_url( 'recruitments', (int) $it['recruitment']['id'] ) ); ?>">Sửa tin</a>

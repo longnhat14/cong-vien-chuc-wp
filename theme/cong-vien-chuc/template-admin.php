@@ -231,6 +231,8 @@ get_header();
 				cvc_admin_render_ingestion_sources();
 			} elseif ( 'kiem-tra' === $cvc_ing_view ) {
 				cvc_admin_render_ingestion_review();
+			} elseif ( 'ten-mien' === $cvc_ing_view ) {
+				cvc_admin_render_official_domains();
 			} elseif ( 'on-tap' === $cvc_ing_view ) {
 				$cvc_syl_id = absint( $_GET['id'] ?? 0 ); // phpcs:ignore WordPress.Security.NonceVerification
 				$cvc_syl_id ? cvc_admin_render_syllabus_detail( $cvc_syl_id ) : cvc_admin_render_syllabus_index();
