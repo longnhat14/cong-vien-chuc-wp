@@ -40,3 +40,6 @@ npm-debug.log*
 # subset actually copied into theme/cong-vien-chuc/assets/images/
 # homepage-v2/. Kept on disk for reference, never committed.
 /design-assets/
+
+# Goi plugin dung de cai tay
+plugins/*.zip
