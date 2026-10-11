@@ -65,6 +65,30 @@ function cvc_ingestion_op_form( string $op, int $id, string $label, string $clas
 }
 
 /**
+ * Nút "Loại" kèm lý do (bước 4: hệ thống học từ lý do - chỉ "Không phải tin tuyển dụng" dùng để
+ * tự bỏ cả chuyên mục ở lần sau).
+ */
+function cvc_ingestion_reject_form( int $id, string $class ): string {
+	$reasons = array(
+		'not_recruitment' => 'Không phải tin tuyển dụng',
+		'duplicate'       => 'Trùng tin đã có',
+		'expired'         => 'Hết hạn / tin cũ',
+		'wrong_info'      => 'Sai / thiếu thông tin',
+		'other'           => 'Lý do khác',
+	);
+	$html  = '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" class="inline-flex items-center gap-1" data-cvc-confirm="' . esc_attr( 'Loại tin này khỏi hàng chờ?' ) . '">';
+	$html .= wp_nonce_field( 'cvc_admin_ingestion', '_wpnonce', true, false );
+	$html .= '<input type="hidden" name="action" value="cvc_admin_ingestion"><input type="hidden" name="op" value="reject"><input type="hidden" name="id" value="' . esc_attr( (string) $id ) . '">';
+	$html .= '<select name="reason" required aria-label="Lý do loại" class="bg-slate-900 border border-slate-700 rounded-lg text-[11px] text-slate-300 py-1 px-1.5"><option value="">Lý do loại…</option>';
+	foreach ( $reasons as $k => $label ) {
+		$html .= '<option value="' . esc_attr( $k ) . '">' . esc_html( $label ) . '</option>';
+	}
+	$html .= '</select><button type="submit" class="' . esc_attr( $class ) . '">Loại</button></form>';
+
+	return $html;
+}
+
+/**
  * Trang tổng quan + hàng chờ.
  */
 function cvc_admin_render_ingestion_index(): void {
@@ -248,6 +272,10 @@ function cvc_admin_render_ingestion_index(): void {
 										<?php if ( ! empty( $row['attachments_count'] ) ) : ?>
 											· <i class="fa-solid fa-paperclip" aria-hidden="true"></i> <?php echo esc_html( (string) $row['attachments_count'] ); ?> công văn
 										<?php endif; ?>
+										<?php if ( ! empty( $row['source_record'] ) ) : ?>
+											<?php $rec = (array) $row['source_record']; ?>
+											· <span class="<?php echo (int) $rec['rejected'] > (int) $rec['approved'] ? 'text-rose-300' : 'text-emerald-300'; ?>" title="Quyết định của biên tập viên với nguồn này (180 ngày)">nguồn: duyệt <?php echo (int) $rec['approved']; ?> / loại <?php echo (int) $rec['rejected']; ?></span>
+										<?php endif; ?>
 									</div>
 									<?php if ( ! empty( $row['publish_block_reason'] ) && 'published' !== $row['state'] ) : ?>
 										<div class="text-xs text-amber-300/90 mt-1">Chưa tự đăng: <?php echo esc_html( (string) $row['publish_block_reason'] ); ?></div>
@@ -267,7 +295,7 @@ function cvc_admin_render_ingestion_index(): void {
 									<?php elseif ( $can_pub && in_array( $row['state'], array( 'qa_pending', 'validation_failed', 'duplicate', 'ignored' ), true ) ) : ?>
 										<?php echo cvc_ingestion_op_form( 'approve', (int) $row['id'], 'Duyệt & đăng', $btn . ' bg-emerald-500 text-slate-950 hover:bg-emerald-400' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 										<?php if ( 'qa_pending' === $row['state'] ) : ?>
-											<?php echo cvc_ingestion_op_form( 'reject', (int) $row['id'], 'Loại', $btn . ' bg-slate-800 text-slate-300 hover:bg-slate-700', 'Loại tin này khỏi hàng chờ?' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+											<?php echo cvc_ingestion_reject_form( (int) $row['id'], $btn . ' bg-slate-800 text-slate-300 hover:bg-slate-700' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 										<?php endif; ?>
 									<?php endif; ?>
 									<a class="text-xs font-bold text-cyan-300 ml-1" href="<?php echo esc_url( cvc_admin_url( 'thu-thap', (int) $row['id'] ) ); ?>">Chi tiết</a>
@@ -372,7 +400,7 @@ function cvc_admin_render_ingestion_detail( int $id ): void {
 				<div class="flex gap-2">
 					<?php if ( $can_pub ) : ?>
 						<?php echo cvc_ingestion_op_form( 'approve', $id, 'Duyệt & đăng', $btn . ' bg-emerald-500 text-slate-950 hover:bg-emerald-400' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
-						<?php echo cvc_ingestion_op_form( 'reject', $id, 'Loại', $btn . ' bg-slate-800 text-slate-300 hover:bg-slate-700', 'Loại tin này khỏi hàng chờ?' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+						<?php echo cvc_ingestion_reject_form( $id, $btn . ' bg-slate-800 text-slate-300 hover:bg-slate-700' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 					<?php endif; ?>
 					<?php if ( $can_upd ) : ?>
 						<?php echo cvc_ingestion_op_form( 'reprocess', $id, 'Phân tích lại', $btn . ' bg-slate-800 text-slate-300 hover:bg-slate-700' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
@@ -638,7 +666,14 @@ function cvc_admin_handle_ingestion(): void {
 			return;
 
 		case 'reject':
-			$result = $client->post( '/api/admin/ingestion/items/' . $id . '/reject', array( 'notes' => sanitize_text_field( wp_unslash( $_POST['notes'] ?? '' ) ) ), $token );
+			$result = $client->post(
+				'/api/admin/ingestion/items/' . $id . '/reject',
+				array(
+					'notes'  => sanitize_text_field( wp_unslash( $_POST['notes'] ?? '' ) ),
+					'reason' => sanitize_key( wp_unslash( $_POST['reason'] ?? '' ) ) ?: null,
+				),
+				$token
+			);
 			cvc_admin_redirect( $id && false !== strpos( $back, '/thu-thap/' . $id ) ? $index : $back, $result['ok'] ? 'success' : 'error', $result['ok'] ? 'Đã loại tin.' : cvc_admin_error_message( $result ) );
 			return;
 
