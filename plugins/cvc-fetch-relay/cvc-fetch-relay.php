@@ -2,7 +2,7 @@
 /**
  * Plugin Name: CVC Fetch Relay
  * Description: Trạm tải trang cho congvienchuc.com - tải hộ trang/văn bản công khai trên cổng .gov.vn/.edu.vn mà máy chủ ở nước ngoài không kết nối được. Chỉ nhận yêu cầu có chữ ký, chỉ tên miền cho phép, chỉ đọc (GET), không lưu nội dung.
- * Version: 1.0.0
+ * Version: 1.1.0
  * Requires PHP: 7.4
  * Author: Công Viên Chức
  *
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 final class CVC_Fetch_Relay {
 
-	const VERSION       = '1.0.0';
+	const VERSION       = '1.1.0';
 	const ROUTE_NS      = 'cvc-relay/v1';
 	const MAX_BYTES     = 27262976; // 26 MB.
 	const TIMEOUT       = 45;
@@ -68,11 +68,11 @@ final class CVC_Fetch_Relay {
 	}
 
 	/**
-	 * Chu ky: hex(HMAC-SHA256(secret, ts \n nonce \n url)).
+	 * Chu ky: hex(HMAC-SHA256(secret, ts \n nonce \n url \n insecure)).
 	 *
 	 * @return true|WP_Error
 	 */
-	private static function verify( WP_REST_Request $req, $url ) {
+	private static function verify( WP_REST_Request $req, $url, $insecure = '0' ) {
 		$secret = self::secret();
 		if ( '' === $secret ) {
 			return new WP_Error( 'cvc_relay_off', 'Trạm chưa cấu hình khóa.', array( 'status' => 503 ) );
@@ -83,7 +83,7 @@ final class CVC_Fetch_Relay {
 		if ( ! $ts || abs( time() - $ts ) > self::MAX_SKEW || ! preg_match( '/^[a-f0-9]{32}$/', $nonce ) || ! preg_match( '/^[a-f0-9]{64}$/', $sig ) ) {
 			return new WP_Error( 'cvc_relay_auth', 'Chữ ký không hợp lệ.', array( 'status' => 401 ) );
 		}
-		$expected = hash_hmac( 'sha256', $ts . "\n" . $nonce . "\n" . $url, $secret );
+		$expected = hash_hmac( 'sha256', $ts . "\n" . $nonce . "\n" . $url . "\n" . $insecure, $secret );
 		if ( ! hash_equals( $expected, $sig ) ) {
 			self::bump( 'auth_failed' );
 			return new WP_Error( 'cvc_relay_auth', 'Chữ ký không hợp lệ.', array( 'status' => 401 ) );
@@ -98,7 +98,7 @@ final class CVC_Fetch_Relay {
 	}
 
 	public static function handle_ping( WP_REST_Request $req ) {
-		$ok = self::verify( $req, 'ping' );
+		$ok = self::verify( $req, 'ping', '0' );
 		if ( is_wp_error( $ok ) ) {
 			return $ok;
 		}
@@ -106,8 +106,9 @@ final class CVC_Fetch_Relay {
 	}
 
 	public static function handle_fetch( WP_REST_Request $req ) {
-		$url = (string) $req->get_param( 'url' );
-		$ok  = self::verify( $req, $url );
+		$url      = (string) $req->get_param( 'url' );
+		$insecure = $req->get_param( 'insecure' ) ? '1' : '0';
+		$ok       = self::verify( $req, $url, $insecure );
 		if ( is_wp_error( $ok ) ) {
 			return $ok;
 		}
@@ -135,6 +136,8 @@ final class CVC_Fetch_Relay {
 				'timeout'             => self::TIMEOUT,
 				'redirection'         => 0, // Backend tu theo redirect (moi buoc lai qua tram + kiem tra).
 				'reject_unsafe_urls'  => true,
+				// Nhieu cong .gov.vn thieu chung chi trung gian: backend chi xin bo kiem tra SSL khi da loi SSL.
+				'sslverify'           => '1' !== $insecure,
 				'user-agent'          => self::USER_AGENT,
 				'headers'             => array( 'Accept' => '' !== $accept ? substr( $accept, 0, 200 ) : '*/*' ),
 				'stream'              => true,
