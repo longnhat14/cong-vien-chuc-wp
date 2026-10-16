@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Tăng số này khi thêm/sửa rewrite rule để buộc flush lại đúng 1 lần.
-const CVC_REWRITE_VERSION = '10';
+const CVC_REWRITE_VERSION = '11';
 
 /**
  * Section hợp lệ của /tai-khoan/{section}/ (Phase 10) - map slug tiếng
@@ -153,6 +153,13 @@ function cvc_register_rewrite_rules(): void {
 	 * có sẵn trong $_GET dù path đã bị rewrite, không cần capture group
 	 * hay đăng ký thêm query var.
 	 */
+	// Công cụ ước tính lương & lương hưu (trước nằm trên trang chủ, 16/10/2026).
+	add_rewrite_rule(
+		'^tinh-luong/?$',
+		'index.php?cvc_page=salary',
+		'top'
+	);
+
 	add_rewrite_rule(
 		'^tim-kiem/?$',
 		'index.php?cvc_page=search',
@@ -406,6 +413,7 @@ function cvc_template_include( string $template ): string {
 		'certificate-verify'    => 'template-certificate-verify.php',
 		'admin-ai-settings'     => 'template-admin-ai-settings.php',
 		'admin'                 => 'template-admin.php',
+		'salary'                => 'template-salary.php',
 	);
 
 	if ( isset( $map[ $page ] ) ) {

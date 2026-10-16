@@ -62,3 +62,11 @@ Trước khi code:
 - Danh sách dùng chung (`inc/listing-components.php`): `cvc_render_listing_hero/search/explore_nav/study_sidebar` đã viết lại theo dz-*. `cvc_render_slot_card()` in ra `<li>` - nơi gọi phải bọc `<ul class="dz-list">`.
 - Không còn hiệu ứng scroll-reveal (bỏ enqueue). `style.css` được nạp với version = filemtime.
 - Văn bản pháp luật / tài liệu hiển thị dạng bảng tra cứu; tuyển dụng, đề thi, kiến thức, chủ đề, khóa học dạng mục lục (dz-list). Không hiển thị số liệu bịa (đã bỏ "MÃ ĐỀ: KTC-2026", "60 câu · 60 phút", "18 nhánh kiến thức" gắn cứng).
+
+## Trang chủ v17 (16/10/2026)
+- Dựng theo file thiết kế `congvienchuc-homepage-redesign-v17` — giữ nguyên bố cục, hiệu ứng, tông màu (navy #102846 + cam). `index.php` là trang ĐỘC LẬP: tự in `<head>`/header/footer của thiết kế, không gọi `get_header()`/`get_footer()`.
+- Tài nguyên: `assets/css/home-v17.css` (CSS thiết kế + phần thêm: khu khóa học, sidebar tin, link AI), `assets/js/home-v17.js`, ảnh `assets/images/home-v17/`. `inc/home-v17.php` nạp chúng và dequeue `cvc-style`, `cvc-nav`, `cvc-homepage-nextgen` CHỈ trên trang chủ.
+- **Bẫy**: các route `cvc_page` không gắn post nên WP coi là "home" → `is_front_page()` trả true trên MỌI trang domain. Luôn dùng `cvc_is_home17()` để nhận đúng trang chủ.
+- Dữ liệu: `cvc_home17_data()` ← `GET /api/homepage/overview` (cache 5 phút ở backend). AJAX `cvc_home_jobs` (tin còn hạn theo tỉnh, transient 10 phút) và `cvc_ai_coach` (→ `POST /api/ai/coach`, backend giới hạn 10/phút + 40/ngày theo IP thật). Cấu hình JS `window.CVC_HOME` đặt qua `$GLOBALS['cvc_home17_cfg']` (in trong wp_head, không gọi wp_add_inline_script trước khi script được enqueue).
+- Khu `#khoa-hoc`: có khóa bán được → thẻ khóa học; chưa có → form "Báo tôi khi mở" (newsletter `source=courses_coming_soon`) + danh sách khóa "Sắp mở".
+- Liên quan: `/tinh-luong/` (`template-salary.php`, công cụ lương chuyển từ trang chủ cũ), `/tuyen-dung/?tinh=<province_id>`, `/tai-lieu/?dinh-dang=word|pdf|excel|ppt`. SEO: Rank Math bị ghi đè title/description/canonical bằng giá trị `cvc_seo_set_*()` (inc/seo.php).

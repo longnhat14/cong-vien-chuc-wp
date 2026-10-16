@@ -48,7 +48,8 @@ function cvc_salary_params(): array {
 add_action( 'wp_enqueue_scripts', 'cvc_enqueue_homepage_nextgen' );
 
 function cvc_enqueue_homepage_nextgen(): void {
-	if ( ! is_front_page() ) {
+	// 16/10/2026: trang chủ v17 không dùng JS này; còn dùng cho /tinh-luong/.
+	if ( 'salary' !== get_query_var( 'cvc_page' ) ) {
 		return;
 	}
 
@@ -156,7 +157,7 @@ function cvc_render_hero_tools(): void {
 	$tools = array(
 		array( 'label' => 'Hạn nộp hồ sơ sắp tới', 'url' => '#live-pulse' ),
 		array( 'label' => 'Mẫu hồ sơ dự tuyển', 'url' => '#legal-matrix' ),
-		array( 'label' => 'Tính lương & lương hưu', 'url' => '#tinh-luong' ),
+		array( 'label' => 'Tính lương & lương hưu', 'url' => home_url( '/tinh-luong/' ) ),
 		array( 'label' => 'Lộ trình thăng tiến', 'url' => '#lo-trinh-su-nghiep' ),
 	);
 	?>

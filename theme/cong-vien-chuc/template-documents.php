@@ -20,6 +20,25 @@ $query_args = array(
 if ( '1' === $filter || '0' === $filter ) {
 	$query_args['is_free'] = $filter;
 }
+// Lọc theo định dạng tệp (trang chủ v17: thẻ Word/PDF/Excel/PowerPoint).
+$cvc_formats = array( 'word' => 'Word', 'pdf' => 'PDF', 'excel' => 'Excel', 'ppt' => 'PowerPoint' );
+$format      = isset( $_GET['dinh-dang'] ) ? sanitize_key( wp_unslash( $_GET['dinh-dang'] ) ) : '';
+$format      = isset( $cvc_formats[ $format ] ) ? $format : '';
+if ( '' !== $format ) {
+	$query_args['format'] = $format;
+}
+$cvc_doc_url = static function ( int $n = 1, ?string $free = null, ?string $fmt = null ) use ( $filter, $format ): string {
+	$u    = cvc_documents_url( $n );
+	$free = null === $free ? $filter : $free;
+	$fmt  = null === $fmt ? $format : $fmt;
+	if ( '' !== $free ) {
+		$u = add_query_arg( 'is_free', $free, $u );
+	}
+	if ( '' !== $fmt ) {
+		$u = add_query_arg( 'dinh-dang', $fmt, $u );
+	}
+	return $u;
+};
 
 $service    = new CVC_Document_Service();
 $token      = cvc_auth_token();
@@ -76,9 +95,20 @@ function cvc_document_price_badge( array $doc ): string {
 				<div class="dz-box-body">
 					<ul class="dz-toc">
 						<?php foreach ( $filters as $value => $label ) :
-							$url = '' === $value ? cvc_documents_url() : add_query_arg( 'is_free', $value, cvc_documents_url() );
+							$url = $cvc_doc_url( 1, (string) $value );
 						?>
 							<li><a href="<?php echo esc_url( $url ); ?>" class="<?php echo $filter === $value ? 'is-active' : ''; ?>"><?php echo esc_html( $label ); ?></a></li>
+						<?php endforeach; ?>
+					</ul>
+				</div>
+			</nav>
+			<nav class="dz-box" aria-label="Lọc theo định dạng">
+				<h2 class="dz-box-head">Lọc theo định dạng</h2>
+				<div class="dz-box-body">
+					<ul class="dz-toc">
+						<li><a href="<?php echo esc_url( $cvc_doc_url( 1, null, '' ) ); ?>" class="<?php echo '' === $format ? 'is-active' : ''; ?>">Mọi định dạng</a></li>
+						<?php foreach ( $cvc_formats as $fkey => $flabel ) : ?>
+							<li><a href="<?php echo esc_url( $cvc_doc_url( 1, null, $fkey ) ); ?>" class="<?php echo $format === $fkey ? 'is-active' : ''; ?>"><?php echo esc_html( $flabel ); ?></a></li>
 						<?php endforeach; ?>
 					</ul>
 				</div>
@@ -86,7 +116,7 @@ function cvc_document_price_badge( array $doc ): string {
 			<?php cvc_render_listing_explore_nav( 'documents' ); ?>
 		</aside>
 		<div class="dz-colmain">
-			<div class="dz-h2"><h2>Danh mục tài liệu</h2><span class="dz-muted" style="font-size:15px">Trang <?php echo (int) $currentPg; ?>/<?php echo (int) max( 1, $lastPg ); ?></span></div>
+			<div class="dz-h2"><h2>Danh mục tài liệu<?php echo '' !== $format ? ' · ' . esc_html( $cvc_formats[ $format ] ) : ''; ?></h2><span class="dz-muted" style="font-size:15px">Trang <?php echo (int) $currentPg; ?>/<?php echo (int) max( 1, $lastPg ); ?></span></div>
 			<?php if ( ! $ok ) : ?>
 				<?php cvc_render_error_state( 'Không thể tải danh sách tài liệu lúc này.' ); ?>
 			<?php elseif ( empty( $documents ) ) : ?>
@@ -111,9 +141,8 @@ function cvc_document_price_badge( array $doc ): string {
 				cvc_render_pagination(
 					$currentPg,
 					$lastPg,
-					static function ( int $n ) use ( $filter ): string {
-						$u = cvc_documents_url( $n );
-						return '' !== $filter ? add_query_arg( 'is_free', $filter, $u ) : $u;
+					static function ( int $n ) use ( $cvc_doc_url ): string {
+						return $cvc_doc_url( $n );
 					}
 				);
 				?>

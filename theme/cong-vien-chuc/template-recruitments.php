@@ -12,13 +12,28 @@ $paged = absint( get_query_var( 'cvc_paged' ) );
 $paged = $paged > 0 ? $paged : 1;
 $q     = cvc_listing_query();
 
+// Lọc theo tỉnh/thành (?tinh=<id>) - từ khu "Việc làm quanh bạn" trên trang chủ.
+$cvc_province_id   = isset( $_GET['tinh'] ) ? absint( $_GET['tinh'] ) : 0;
+$cvc_province_name = '';
+if ( $cvc_province_id > 0 && function_exists( 'cvc_home17_data' ) ) {
+	foreach ( (array) ( cvc_home17_data()['provinces'] ?? array() ) as $cvc_p ) {
+		if ( (int) ( $cvc_p['id'] ?? 0 ) === $cvc_province_id ) {
+			$cvc_province_name = (string) ( $cvc_p['name'] ?? '' );
+			break;
+		}
+	}
+	if ( '' === $cvc_province_name ) {
+		$cvc_province_id = 0; // id không hợp lệ -> bỏ lọc.
+	}
+}
+
 $service = new CVC_Recruitment_Service();
 $result  = $service->list(
 	array(
 		'per_page' => 12,
 		'page'     => $paged,
 		'search'   => $q,
-	)
+	) + ( $cvc_province_id > 0 ? array( 'province_id' => $cvc_province_id ) : array() )
 );
 
 $ok           = (bool) $result['ok'];
@@ -31,7 +46,7 @@ $lastPg       = (int) ( $pagination['last_page'] ?? 1 );
 
 // Dot da het han nop nhung dang to chuc thi / vua co ket qua - thi sinh theo doi (chi trang 1, khong tim kiem).
 $cvc_examining = array();
-if ( 1 === $paged && '' === $q ) {
+if ( 1 === $paged && '' === $q && 0 === $cvc_province_id ) {
 	$cvc_ex_res    = $service->list( array( 'stage' => 'examining', 'per_page' => 10 ) );
 	$cvc_examining = ! empty( $cvc_ex_res['ok'] ) ? (array) ( $cvc_ex_res['data']['data']['data'] ?? array() ) : array();
 }
@@ -67,7 +82,7 @@ get_header();
 		</aside>
 
 		<div class="dz-colmain">
-			<div class="dz-h2"><h2><?php echo '' !== $q ? 'Kết quả cho “' . esc_html( $q ) . '”' : 'Đang nhận hồ sơ'; ?></h2><span class="dz-muted" style="font-size:15px">Hiển thị <?php echo count( $recruitments ); ?><?php echo isset( $pagination['total'] ) ? ' / ' . esc_html( number_format_i18n( (int) $pagination['total'] ) ) : ''; ?> tin</span></div>
+			<div class="dz-h2"><h2><?php echo '' !== $q ? 'Kết quả cho “' . esc_html( $q ) . '”' : 'Đang nhận hồ sơ'; ?><?php echo '' !== $cvc_province_name ? ' · ' . esc_html( $cvc_province_name ) : ''; ?></h2><span class="dz-muted" style="font-size:15px">Hiển thị <?php echo count( $recruitments ); ?><?php echo isset( $pagination['total'] ) ? ' / ' . esc_html( number_format_i18n( (int) $pagination['total'] ) ) : ''; ?> tin</span></div>
 
 			<?php if ( ! $ok ) : ?>
 				<?php cvc_render_error_state( 'Không tải được danh sách tin tuyển dụng, vui lòng thử lại sau.' ); ?>
@@ -107,7 +122,7 @@ get_header();
 				<?php endforeach; ?>
 			</ol>
 
-			<?php cvc_render_pagination( $currentPg, $lastPg, cvc_listing_page_url_builder( 'cvc_recruitments_url', $q ) ); ?>
+			<?php cvc_render_pagination( $currentPg, $lastPg, ( $cvc_province_id > 0 ? static fn( int $n ): string => add_query_arg( 'tinh', $cvc_province_id, cvc_listing_page_url_builder( 'cvc_recruitments_url', $q )( $n ) ) : cvc_listing_page_url_builder( 'cvc_recruitments_url', $q ) ) ); ?>
 
 			<?php cvc_render_suggest_widget(); ?>
 

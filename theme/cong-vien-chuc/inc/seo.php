@@ -113,6 +113,34 @@ function cvc_seo_trim( string $text, int $length = 160 ): string {
 
 add_filter( 'pre_get_document_title', 'cvc_seo_filter_title' );
 
+/*
+ * Rank Math (16/10/2026): plugin in thẻ <title>, description, canonical
+ * riêng và ghi đè giá trị theme đã đặt (trang chủ hiện "congvienchuc.com -").
+ * Trang nào đã gọi cvc_seo_set_*() thì dùng giá trị của theme.
+ */
+add_filter(
+	'rank_math/frontend/title',
+	static function ( $title ) {
+		if ( empty( $GLOBALS['cvc_seo']['title'] ) ) {
+			return $title;
+		}
+		// Trang chủ: tiêu đề đã có tên thương hiệu, không nối thêm tên site.
+		return ( function_exists( 'cvc_is_home17' ) && cvc_is_home17() ) ? $GLOBALS['cvc_seo']['title'] : cvc_seo_filter_title( (string) $title );
+	}
+);
+add_filter(
+	'rank_math/frontend/description',
+	static function ( $desc ) {
+		return ! empty( $GLOBALS['cvc_seo']['description'] ) ? cvc_seo_trim( (string) $GLOBALS['cvc_seo']['description'] ) : $desc;
+	}
+);
+add_filter(
+	'rank_math/frontend/canonical',
+	static function ( $url ) {
+		return ! empty( $GLOBALS['cvc_seo']['canonical'] ) ? $GLOBALS['cvc_seo']['canonical'] : $url;
+	}
+);
+
 function cvc_seo_filter_title( string $title ): string {
 	if ( ! empty( $GLOBALS['cvc_seo']['title'] ) ) {
 		return $GLOBALS['cvc_seo']['title'] . ' - ' . get_bloginfo( 'name' );

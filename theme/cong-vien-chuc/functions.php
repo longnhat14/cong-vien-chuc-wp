@@ -54,6 +54,7 @@ require_once __DIR__ . '/inc/combo.php';
 require_once __DIR__ . '/inc/course-purchase.php';
 require_once __DIR__ . '/inc/engagement.php';
 require_once __DIR__ . '/inc/homepage-nextgen.php';
+require_once __DIR__ . '/inc/home-v17.php';
 require_once __DIR__ . '/inc/routes.php';
 require_once __DIR__ . '/inc/dev-tools.php';
 
@@ -115,10 +116,10 @@ add_action( 'wp_head', 'cvc_homepage_hero_preload', 2 );
  * trình duyệt hỗ trợ webp không dùng tới file đó.
  */
 function cvc_homepage_hero_preload(): void {
-	if ( ! is_front_page() ) {
+	if ( ! function_exists( 'cvc_is_home17' ) || ! cvc_is_home17() ) {
 		return;
 	}
-	$hero = get_theme_file_uri( '/assets/images/homepage-v2/HERO/hero-main.webp' );
+	$hero = get_theme_file_uri( '/assets/images/home-v17/lo-trinh-cong-vien-chuc.webp' ); // trang chủ v17
 	printf( '<link rel="preload" as="image" href="%s" type="image/webp" fetchpriority="high">' . "\n", esc_url( $hero ) );
 }
 
