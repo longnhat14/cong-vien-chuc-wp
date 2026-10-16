@@ -24,17 +24,19 @@ function cvc_admin_render_official_domains(): void {
 	$groups  = array(
 		'suggested' => array_values( array_filter( $rows, static fn ( $r ) => 'suggested' === ( $r['status'] ?? '' ) ) ),
 		'allow'     => array_values( array_filter( $rows, static fn ( $r ) => 'verified' === ( $r['status'] ?? '' ) && 'allow' === ( $r['kind'] ?? '' ) ) ),
-		'deny'      => array_values( array_filter( $rows, static fn ( $r ) => 'verified' === ( $r['status'] ?? '' ) && 'deny' === ( $r['kind'] ?? '' ) ) ),
+		'deny'       => array_values( array_filter( $rows, static fn ( $r ) => 'verified' === ( $r['status'] ?? '' ) && 'deny' === ( $r['kind'] ?? '' ) ) ),
+		'competitor' => array_values( array_filter( $rows, static fn ( $r ) => 'competitor' === ( $r['kind'] ?? '' ) ) ),
 	);
 	$titles  = array(
 		'suggested' => 'Gợi ý chờ xác nhận',
 		'allow'     => 'Tên miền nhà nước đã xác minh',
-		'deny'      => 'Tên miền loại trừ (không phải cơ quan nhà nước)',
+		'deny'       => 'Tên miền loại trừ (báo chí, không phải cơ quan nhà nước)',
+		'competitor' => 'Trang đối thủ / tổng hợp việc làm (không thu thập)',
 	);
 	?>
 	<header class="space-y-1">
 		<h1 class="text-2xl font-black text-white">Nguồn chính thức &amp; nguồn sưu tầm</h1>
-		<p class="text-sm text-slate-400 max-w-3xl">Tin có văn bản trên <strong class="text-slate-200">.gov.vn / .edu.vn</strong> hoặc tên miền nhà nước đã xác minh hiển thị nguồn và link gốc. Tin còn lại hiển thị công khai là <strong class="text-amber-300">"Nguồn sưu tầm"</strong> — không link, không tên miền; nguồn thật chỉ xem được ở trang quản trị.</p>
+		<p class="text-sm text-slate-400 max-w-3xl">Chính sách nguồn (16/10/2026): hệ thống <strong class="text-slate-200">chỉ quét, xử lý và đăng</strong> tin từ <strong class="text-slate-200">.gov.vn / .edu.vn</strong> và tên miền nhà nước / trường uy tín đã xác minh. Trang đối thủ, báo chí, mạng xã hội và tên miền chưa xác minh bị chặn; nguồn của tên miền chưa xác minh tạm dừng cho đến khi anh xác nhận.</p>
 	</header>
 	<?php cvc_ingestion_tabs( 'ten-mien' ); ?>
 
@@ -49,7 +51,7 @@ function cvc_admin_render_official_domains(): void {
 			array( 'Đã xác minh', (int) ( $stats['verified_allow'] ?? 0 ), 'text-emerald-300' ),
 			array( 'Loại trừ', (int) ( $stats['verified_deny'] ?? 0 ), 'text-rose-300' ),
 			array( 'Gợi ý chờ xác nhận', (int) ( $stats['suggested'] ?? 0 ), 'text-amber-300' ),
-			array( 'Tin đang là nguồn sưu tầm', (int) ( $stats['collected_recruitments'] ?? 0 ), 'text-cyan-300' ),
+			array( 'Nguồn đang tạm dừng vì chính sách', (int) ( $stats['blocked_sources'] ?? 0 ), 'text-cyan-300' ),
 		) as $s ) :
 			?>
 			<div class="bg-[#0A192F] border border-slate-800 rounded-xl p-3">
@@ -85,6 +87,7 @@ function cvc_admin_render_official_domains(): void {
 					<select name="kind" class="<?php echo esc_attr( $input ); ?>" aria-label="Loại">
 						<option value="allow">Nhà nước (chính thức)</option>
 						<option value="deny">Loại trừ (không phải nhà nước)</option>
+						<option value="competitor">Đối thủ / tổng hợp việc làm</option>
 					</select>
 					<input type="text" name="organization" placeholder="Tên cơ quan / đơn vị" class="<?php echo esc_attr( $input ); ?>" aria-label="Tên cơ quan">
 					<input type="url" name="evidence_url" placeholder="Link bằng chứng (VD trang đơn vị trực thuộc của Sở)" class="<?php echo esc_attr( $input ); ?>" aria-label="Link bằng chứng">
@@ -98,7 +101,7 @@ function cvc_admin_render_official_domains(): void {
 		<section class="bg-[#0A192F] border border-slate-800 rounded-xl p-4 space-y-3">
 			<h2 class="text-sm font-extrabold text-slate-200"><?php echo esc_html( $titles[ $key ] . ' (' . count( $list ) . ')' ); ?></h2>
 			<?php if ( 'suggested' === $key ) : ?>
-				<p class="text-xs text-slate-400">Tên miền của bệnh viện, trường… có trong danh sách đơn vị trực thuộc trên trang của Sở. Kiểm tra link bằng chứng rồi xác nhận nếu đúng là đơn vị công lập.</p>
+				<p class="text-xs text-slate-400">Tên miền của bệnh viện, trường… có trong danh sách đơn vị trực thuộc trên trang của Sở. Kiểm tra link bằng chứng rồi xác nhận nếu đúng là đơn vị công lập — nguồn của tên miền đó tự bật lại.</p>
 			<?php endif; ?>
 			<?php if ( empty( $list ) ) : ?>
 				<p class="text-xs text-slate-500">Chưa có.</p>
@@ -167,7 +170,7 @@ function cvc_admin_handle_official_domains(): void {
 				array_filter(
 					array(
 						'domain'       => sanitize_text_field( wp_unslash( $_POST['domain'] ?? '' ) ),
-						'kind'         => 'deny' === sanitize_key( wp_unslash( $_POST['kind'] ?? '' ) ) ? 'deny' : 'allow',
+						'kind'         => in_array( sanitize_key( wp_unslash( $_POST['kind'] ?? '' ) ), array( 'deny', 'competitor' ), true ) ? sanitize_key( wp_unslash( $_POST['kind'] ) ) : 'allow',
 						'organization' => sanitize_text_field( wp_unslash( $_POST['organization'] ?? '' ) ),
 						'evidence_url' => esc_url_raw( wp_unslash( $_POST['evidence_url'] ?? '' ) ),
 					)
@@ -195,7 +198,7 @@ function cvc_admin_handle_official_domains(): void {
 
 	if ( $result['ok'] ) {
 		$n    = (array) ( $result['data']['recomputed'] ?? array() );
-		$msg .= isset( $n['collected'] ) ? sprintf( ' Tin đang đăng: %d chính thức, %d nguồn sưu tầm.', (int) ( $n['official'] ?? 0 ), (int) $n['collected'] ) : '';
+		$msg .= isset( $n['sources'] ) ? sprintf( ' Nguồn bật lại: %d, tạm dừng: %d.', (int) ( $n['sources']['enabled'] ?? 0 ), (int) ( $n['sources']['disabled'] ?? 0 ) ) : '';
 	}
 	cvc_admin_redirect( $back, $result['ok'] ? 'success' : 'error', $result['ok'] ? $msg : cvc_admin_error_message( $result ) );
 }
