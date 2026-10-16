@@ -16,7 +16,35 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 $slug        = sanitize_text_field( (string) get_query_var( 'cvc_recruitment_slug' ) );
 $result      = ( new CVC_Recruitment_Service() )->find( $slug );
+// 16/10/2026: API chậm / lỗi tạm thời (không phải 404) -> thử lại 1 lần với thời gian chờ dài hơn;
+// vẫn lỗi thì báo "tạm thời không tải được" (503, không lưu đệm) thay vì "không tìm thấy".
+if ( ! $result['ok'] && 404 !== (int) ( $result['status'] ?? 0 ) ) {
+	$result = ( new CVC_Api_Client( null, 20 ) )->get( '/api/recruitments/' . rawurlencode( $slug ) );
+}
 $recruitment = $result['ok'] && is_array( $result['data']['data'] ?? null ) ? $result['data']['data'] : null;
+
+if ( null === $recruitment && 404 !== (int) ( $result['status'] ?? 0 ) ) {
+	status_header( 503 );
+	header( 'Retry-After: 60' );
+	nocache_headers();
+	do_action( 'litespeed_control_set_nocache', 'cvc: API tạm thời lỗi' );
+	if ( ! defined( 'DONOTCACHEPAGE' ) ) {
+		define( 'DONOTCACHEPAGE', true );
+	}
+	cvc_seo_set_noindex();
+	cvc_seo_set_title( 'Tạm thời chưa tải được tin tuyển dụng' );
+	get_header();
+	?>
+	<main id="main" class="cvc-page bg-slate-900 text-slate-100 min-h-screen py-12">
+		<div class="max-w-3xl mx-auto px-4 space-y-4">
+			<?php cvc_render_notfound_state( 'Hệ thống đang bận, chưa tải được tin tuyển dụng này. Vui lòng tải lại trang sau ít phút.' ); ?>
+			<p><a class="text-amber-300 font-bold" href="<?php echo esc_url( (string) home_url( add_query_arg( array() ) ) ); ?>">Tải lại trang</a> · <a class="text-amber-300 font-bold" href="<?php echo esc_url( cvc_recruitments_url() ); ?>">Xem tất cả tin tuyển dụng</a></p>
+		</div>
+	</main>
+	<?php
+	get_footer();
+	return;
+}
 
 if ( null === $recruitment ) {
 	status_header( 404 );
@@ -195,6 +223,12 @@ get_header();
 			<nav class="bg-navy-950 p-5 rounded-3xl border border-slate-800 space-y-1.5 shadow-xl text-xs font-semibold text-slate-300" aria-label="Mục lục">
 				<h2 class="font-extrabold text-xs text-azure-400 uppercase tracking-wider border-b border-slate-800 pb-3 mb-2">Mục lục</h2>
 				<a href="#noi-dung" class="block p-2 rounded-xl hover:bg-slate-900 hover:text-emerald-400">Nội dung thông báo</a>
+				<?php if ( ! empty( $recruitment['details'] ) ) : ?>
+					<a href="#chi-tiet" class="block p-2 rounded-xl hover:bg-slate-900 hover:text-emerald-400">Chi tiết: điều kiện, hồ sơ, lịch trình</a>
+				<?php endif; ?>
+				<?php if ( ! empty( $recruitment['full_text']['html'] ) || ! empty( $recruitment['full_text']['documents'] ) ) : ?>
+					<a href="#toan-van" class="block p-2 rounded-xl hover:bg-slate-900 hover:text-emerald-400">Toàn văn thông báo</a>
+				<?php endif; ?>
 				<a href="#vi-tri" class="block p-2 rounded-xl hover:bg-slate-900 hover:text-emerald-400">Vị trí &amp; chỉ tiêu (<?php echo count( $positions ); ?>)</a>
 				<?php if ( ! empty( $round_docs ) ) : ?>
 					<a href="#van-ban-dot" class="block p-2 rounded-xl hover:bg-slate-900 hover:text-emerald-400">Văn bản của đợt tuyển (<?php echo count( $round_docs ); ?>)</a>
@@ -247,7 +281,7 @@ get_header();
 			<section id="noi-dung" class="bg-navy-950 p-6 sm:p-8 rounded-3xl border border-slate-800 space-y-4 shadow-xl">
 				<h2 class="text-lg font-extrabold text-amber-400 border-b border-slate-800 pb-3">Nội dung thông báo</h2>
 				<?php if ( '' !== $summary ) : ?>
-					<div class="text-sm text-slate-300 leading-relaxed"><?php echo nl2br( esc_html( $summary ) ); ?></div>
+					<div class="text-sm text-slate-300 leading-relaxed"><?php echo cvc_notice_text( $summary ); // phpcs:ignore WordPress.Security.EscapeOutput ?></div>
 				<?php else : ?>
 					<p class="text-sm text-slate-400">Tin này chưa có phần tóm tắt nội dung. Điều kiện dự tuyển, hồ sơ và hình thức thi được quy định trong thông báo gốc của cơ quan tuyển dụng.</p>
 				<?php endif; ?>
@@ -292,6 +326,16 @@ get_header();
 					</div>
 				<?php endif; ?>
 			</section>
+
+			<?php
+			// 16/10/2026: chi tiết theo mục + toàn văn thông báo.
+			if ( is_array( $recruitment['details'] ?? null ) ) {
+				cvc_render_notice_details( $recruitment['details'] );
+			}
+			if ( is_array( $recruitment['full_text'] ?? null ) ) {
+				cvc_render_notice_fulltext( $recruitment['full_text'], $source_url, (string) ( $source_info['name'] ?? '' ) );
+			}
+			?>
 
 			<?php if ( ! empty( $changes ) ) : ?>
 				<section id="thay-doi" class="bg-rose-500/5 p-6 rounded-3xl border border-rose-500/30 space-y-3 shadow-xl">
