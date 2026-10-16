@@ -919,3 +919,7 @@ a:focus-visible,button:focus-visible{
 /* Tin tuyển dụng: thẻ dữ liệu thật dùng chung kiểu .job-card */
 .job-card h3 a{color:inherit}
 .job-card .job-meta{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:15px;color:#42566d;margin:-4px 0 12px}
+
+/* AI Coach: giu xuong dong trong cau tra loi (ý gạch đầu dòng, trích dẫn) */
+.ai-msg.bot{white-space:pre-line}
+.ai-chat-link{white-space:normal}

@@ -242,7 +242,7 @@ function cvc_home17_ajax_coach(): void {
 				continue;
 			}
 			$links[] = array(
-				'label' => cvc_home17_trim( (string) $link['label'], 90 ),
+				'label' => cvc_home17_trim( (string) $link['label'], 130 ),
 				'url'   => home_url( $url ),
 			);
 		}
