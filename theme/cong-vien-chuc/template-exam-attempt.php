@@ -1,7 +1,7 @@
 <?php
 /**
- * CÔNG VIÊN CHỨC — EXAM OS X (Smart Exam Intelligence Platform)
- * Executive 3-Column Shell Architecture & High-Conversion Exam Engine
+ * CÔNG VIÊN CHỨC — Trang làm bài (giao diện văn bản, 16/10/2026)
+ * Sidebar trái: liên kết tài khoản · giữa: nội dung thi · phải: thời gian, bản đồ câu, thông tin đề, phân tích.
  * URL: /thi-trac-nghiem/{slug}/lam-bai/ hoặc /lam-bai/{id}/
  */
 
@@ -46,6 +46,12 @@ $attempt_status  = '';
 
 if ( $attempt_id > 0 && $token ) {
 	$attempt_res = ( new CVC_Exam_Attempt_Service() )->show( $attempt_id, $token );
+
+	// Lần gọi đầu có thể chậm (cache nguội) - thử lại 1 lần với timeout dài hơn,
+	// trừ khi API trả lời dứt khoát 401/403/404.
+	if ( ! $attempt_res['ok'] && ! in_array( (int) ( $attempt_res['status'] ?? 0 ), array( 401, 403, 404 ), true ) ) {
+		$attempt_res = ( new CVC_Api_Client( null, 20 ) )->get( '/api/exam-attempts/' . $attempt_id, array(), $token );
+	}
 
 	if ( $attempt_res['ok'] && ! empty( $attempt_res['data']['data']['answers'] ) ) {
 		$attempt_data    = $attempt_res['data']['data'];
@@ -155,766 +161,255 @@ if ( 'countdown' === $timer_mode ) {
 	$timer_seconds = max( 0, time() - (int) $started_ts );
 }
 
+/*
+ * 16/10/2026 - giao diện "Văn bản" cho trang làm bài: nền trắng, chữ đen, toàn bộ Times New Roman;
+ * cấu trúc nội dung thi + sidebar phải theo bản thiết kế congvienchuc-smart-exam (Thi tập trung /
+ * Danh sách câu / Bản đồ đề; Thời gian & nộp bài; Bản đồ câu hỏi; Thông tin đề thi; Phân tích năng lực).
+ * Sidebar trái (liên kết tài khoản) giữ nguyên nội dung. Câu hỏi dựng từ dữ liệu lượt thi thật;
+ * đáp án đúng chỉ có sau khi nộp bài (API che đáp án khi đang làm).
+ */
+$smart_questions = array();
+foreach ( (array) ( $attempt_data['answers'] ?? array() ) as $answer ) {
+	$question = $answer['question'] ?? null;
+	if ( ! is_array( $question ) || empty( $question['id'] ) ) {
+		continue;
+	}
+	$opts = array();
+	foreach ( (array) ( $question['options'] ?? array() ) as $i => $opt ) {
+		$row = array(
+			'key'  => chr( 65 + (int) $i ),
+			'id'   => (int) ( $opt['id'] ?? 0 ),
+			'text' => (string) ( $opt['option_text'] ?? '' ),
+		);
+		if ( $is_submitted && array_key_exists( 'is_correct', $opt ) && null !== $opt['is_correct'] ) {
+			$row['correct'] = (bool) $opt['is_correct'];
+		}
+		$opts[] = $row;
+	}
+	$qid     = (int) $question['id'];
+	$state   = $existing_state[ $qid ] ?? array();
+	$entry   = array(
+		'id'         => $qid,
+		'text'       => (string) ( $question['question_text'] ?? '' ),
+		'topic'      => (string) ( $question['topic']['name'] ?? '' ),
+		'difficulty' => (string) ( $question['difficulty'] ?? '' ),
+		'options'    => $opts,
+		'selected'   => $state['selected'] ?? null,
+		'flagged'    => ! empty( $state['is_flagged'] ),
+	);
+	if ( $is_submitted && array_key_exists( 'is_correct', $answer ) ) {
+		// Câu bỏ trống: không tính là "sai" trên bản đồ câu hỏi.
+		$entry['is_correct'] = ( null === $answer['is_correct'] || empty( $entry['selected'] ) ) ? null : (bool) $answer['is_correct'];
+	}
+	$smart_questions[] = $entry;
+}
+
+$exam_total_score   = isset( $exam_info['total_score'] ) ? (float) $exam_info['total_score'] : null;
+$exam_passing_score = isset( $exam_info['passing_score'] ) ? (float) $exam_info['passing_score'] : null;
+$exam_type_labels   = array( 'practice' => 'Luyện tập', 'mock' => 'Thi thử', 'official' => 'Đề chính thức' );
+$exam_type_label    = $exam_type_labels[ (string) ( $exam_info['exam_type'] ?? '' ) ] ?? 'Thi thử';
+
+$smart_payload = array(
+	'ajax_url'   => admin_url( 'admin-ajax.php' ),
+	'nonce'      => wp_create_nonce( 'cvc_exam_attempt' ),
+	'attempt_id' => (int) $real_attempt_id,
+	'home_url'   => home_url( '/' ),
+	'submitted'  => (bool) $is_submitted,
+	'timer'      => array( 'mode' => $timer_mode, 'seconds' => (int) $timer_seconds, 'duration' => $exam_duration * 60 ),
+	'exam'       => array(
+		'title'         => $exam_title,
+		'code'          => $exam_code,
+		'duration'      => $exam_duration,
+		'total_score'   => $exam_total_score,
+		'passing_score' => $exam_passing_score,
+		'type_label'    => $exam_type_label,
+	),
+	'result'     => $is_submitted ? array(
+		'score'         => $attempt_data['score'] ?? null,
+		'percentage'    => $attempt_data['percentage'] ?? null,
+		'passed'        => $attempt_data['passed'] ?? null,
+		'correct_count' => $attempt_data['correct_count'] ?? null,
+	) : null,
+	'questions'  => $smart_questions,
+);
+
+add_filter( 'body_class', static fn ( $c ) => array_merge( $c, array( 'cvc-exam-legal' ) ) );
 cvc_seo_set_title( 'Làm bài: ' . $exam_title );
 cvc_seo_set_noindex();
 
 get_header();
+$total_q = count( $smart_questions );
+$doc_icon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v5h4M9 12h7M9 16h7"/></svg>';
 ?>
+<link rel="stylesheet" href="<?php echo esc_url( get_template_directory_uri() . '/assets/css/exam-smart.css?ver=' . (string) filemtime( get_theme_file_path( '/assets/css/exam-smart.css' ) ) ); ?>">
 
-<!-- Pass Backend AJAX & Nonce Variables to Client JS -->
-<script>
-window.cvc_vars = {
-	ajax_url: '<?php echo esc_js( admin_url( 'admin-ajax.php' ) ); ?>',
-	nonce: '<?php echo esc_js( wp_create_nonce( 'cvc_exam_attempt' ) ); ?>',
-	attempt_id: <?php echo (int) $real_attempt_id; ?>,
-	home_url: '<?php echo esc_js( home_url( '/' ) ); ?>',
-	is_demo: <?php echo $is_demo_mode ? 'true' : 'false'; ?>,
-	submitted: <?php echo ( ! $is_demo_mode && '' !== $attempt_status && 'in_progress' !== $attempt_status ) ? 'true' : 'false'; ?>,
-	option_ids: <?php echo wp_json_encode( $option_ids_map ); ?>,
-	existing_state: <?php echo wp_json_encode( $existing_state ); ?>
-};
-</script>
+<div class="cvc-smart-exam" id="cvc-smart-exam" data-total="<?php echo (int) $total_q; ?>">
 
-<?php if ( $is_demo_mode ) : ?>
-<div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 pt-4">
-	<div class="flex items-center gap-2 bg-amber-500/10 border border-amber-500/40 text-amber-300 text-xs font-bold rounded-xl px-4 py-3">
-		<span>⚠ CHẾ ĐỘ DEMO</span>
-		<span class="font-normal text-amber-200/90">Đây là bộ câu hỏi minh họa, không lưu kết quả thật. Hãy vào từ trang đề thi thật (/thi-trac-nghiem/) để làm bài và nhận điểm chính xác.</span>
-	</div>
-</div>
-<?php endif; ?>
-
-<!-- Load EXAM OS X Design System -->
-<link rel="stylesheet" href="<?php echo esc_url( get_template_directory_uri() . '/assets/css/exam-os.css' ); ?>">
-
-<div class="cvc-exam-os-workspace text-slate-100">
-
-	<!-- 1. TOP STICKY HEADER & COMMAND BAR (TREO NGAY DƯỚI MENU CHÍNH) -->
-	<div class="exam-top-sticky shadow-xl border-b border-cyan-500/30">
-		
-		<!-- Main Exam Command Bar & Profile Navbar -->
-		<div class="max-w-[1440px] mx-auto px-4 py-2.5 flex flex-col md:flex-row items-center justify-between gap-3 text-xs">
-			
-			<!-- Left: Brand Logo, Search Bar & Title -->
-			<div class="flex items-center gap-3 overflow-hidden">
-				<a href="<?php echo esc_url( home_url('/') ); ?>" class="flex items-center gap-2 shrink-0 group pr-3 border-r border-slate-800">
-					<div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-600 text-navy-950 flex items-center justify-center font-black text-sm shadow">
-						♜
-					</div>
-					<span class="font-black text-sm text-white tracking-normal hidden lg:inline">CÔNG VIÊN CHỨC</span>
-				</a>
-				
-				<?php if ( '' !== $exam_code ) : ?>
-					<span class="bg-amber-500 text-navy-950 text-[10px] font-black px-2 py-0.5 rounded border border-amber-400 shrink-0 uppercase"><?php echo esc_html( $exam_code ); ?></span>
-				<?php endif; ?>
-				<h1 class="font-extrabold text-sm text-white truncate max-w-[220px] sm:max-w-[420px]" title="<?php echo esc_attr( $exam_title ); ?>"><?php echo esc_html( $exam_title ); ?></h1>
-			</div>
-
-			<!-- Right: Headtools, Timer, Profile Avatar & Submit Button -->
-			<div class="flex items-center gap-3 shrink-0">
-				<!-- Headtools -->
-				<div class="hidden xl:flex items-center gap-1.5">
-					<button type="button" onclick="ExamOS.toggleFontSize()" title="A+ Cỡ chữ" class="px-2 py-1 bg-[#0A192F] border border-[#1D3557] hover:border-cyan-400 text-slate-300 rounded-lg text-[11px] font-bold cursor-pointer">A+</button>
-					<button type="button" onclick="ExamOS.toggleFocusMode()" title="Focus Mode" class="px-2 py-1 bg-[#0A192F] border border-[#1D3557] hover:border-cyan-400 text-slate-300 rounded-lg text-[11px] font-bold cursor-pointer">⤢</button>
-				</div>
-
-				<!-- Clock & Pause Button -->
-				<div class="bg-[#0A192F] border border-amber-500/40 px-3 py-1 rounded-xl flex items-center gap-2 shadow">
-					<span id="quiz-timer" class="text-sm font-black text-amber-400 font-mono" title="<?php echo esc_attr( 'countdown' === $timer_mode ? 'Thời gian còn lại' : ( 'elapsed' === $timer_mode ? 'Thời gian đã làm' : 'Đã nộp bài' ) ); ?>"><?php echo 'done' === $timer_mode ? 'Đã nộp' : '--:--'; ?></span>
-				</div>
-
-				<?php if ( ! $is_submitted ) : ?>
-				<button onclick="submitQuizSimulation()" class="px-4 py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-navy-950 font-black text-xs rounded-xl shadow cursor-pointer">
-					Nộp bài
-				</button>
-				<?php endif; ?>
-			</div>
-
+	<header class="sx-top">
+		<div class="sx-examtitle"><?php echo $doc_icon; // phpcs:ignore WordPress.Security.EscapeOutput ?><span>Đề thi: <?php echo esc_html( $exam_title ); ?></span></div>
+		<div class="sx-stats">
+			<div class="sx-stat"><small>Đã trả lời</small><strong><span id="sx-answered">0</span>/<?php echo (int) $total_q; ?></strong></div>
+			<div class="sx-stat sx-progressstat"><small>Tiến độ</small><div class="sx-statbar"><div class="sx-bar"><span id="sx-progress"></span></div><strong id="sx-percent">0%</strong></div></div>
 		</div>
-	</div>
+	</header>
 
-	<!-- 2. 3-COLUMN SHELL WORKSPACE (205px LEFT | 1FR MAIN | 260px RIGHT) -->
-	<div class="exam-shell-grid">
+	<nav class="sx-toolbar" aria-label="Chế độ làm bài">
+		<div class="sx-meta">
+			<?php if ( '' !== $exam_code ) : ?><span>Mã đề: <?php echo esc_html( $exam_code ); ?></span><?php endif; ?>
+			<span>☷ <?php echo (int) $total_q; ?> câu</span>
+			<span>◷ <?php echo $exam_duration > 0 ? (int) $exam_duration . ' phút' : 'Không giới hạn'; ?></span>
+		</div>
+		<div class="sx-switch">
+			<button type="button" class="sx-mode active" data-mode="focus"><span class="sx-ic" aria-hidden="true">▣</span> Thi tập trung</button>
+			<button type="button" class="sx-mode" data-mode="list"><span class="sx-ic" aria-hidden="true">☷</span> Danh sách câu</button>
+			<button type="button" class="sx-mode" data-mode="map"><span class="sx-ic" aria-hidden="true">▦</span> Bản đồ đề</button>
+			<button type="button" class="sx-mode sx-fontbtn" id="sx-font" title="Đổi cỡ chữ (A / A+ / A++)" aria-label="Đổi cỡ chữ">A<sup>+</sup></button>
+		</div>
+	</nav>
 
-		<!-- ==================== LEFT COLUMN (205px) ==================== -->
-		<aside class="exam-left-column space-y-4">
+	<div class="sx-page" id="sx-page">
 
-			<nav class="exam-card space-y-1" aria-label="Liên kết nhanh">
-				<span class="left-menu-item active"><span aria-hidden="true">📝</span> Làm bài thi</span>
-				<a href="<?php echo esc_url( cvc_account_url( 'exam-history' ) ); ?>" class="left-menu-item"><span aria-hidden="true">📜</span> Lịch sử làm bài</a>
-				<a href="<?php echo esc_url( cvc_account_url( 'recommendations' ) ); ?>" class="left-menu-item"><span aria-hidden="true">💡</span> Gợi ý ôn tập</a>
-				<a href="<?php echo esc_url( cvc_account_url( 'my-courses' ) ); ?>" class="left-menu-item"><span aria-hidden="true">🎓</span> Khóa học của tôi</a>
-				<a href="<?php echo esc_url( cvc_exams_url() ); ?>" class="left-menu-item"><span aria-hidden="true">📚</span> Danh sách đề thi</a>
+		<!-- Sidebar trái: liên kết tài khoản (giữ nguyên nội dung) -->
+		<aside class="sx-left" aria-label="Liên kết nhanh">
+			<nav class="sx-panel sx-leftnav">
+				<span class="sx-leftitem active"><span aria-hidden="true">📝</span> Làm bài thi</span>
+				<a href="<?php echo esc_url( cvc_account_url( 'exam-history' ) ); ?>" class="sx-leftitem"><span aria-hidden="true">📜</span> Lịch sử làm bài</a>
+				<a href="<?php echo esc_url( cvc_account_url( 'recommendations' ) ); ?>" class="sx-leftitem"><span aria-hidden="true">💡</span> Gợi ý ôn tập</a>
+				<a href="<?php echo esc_url( cvc_account_url( 'my-courses' ) ); ?>" class="sx-leftitem"><span aria-hidden="true">🎓</span> Khóa học của tôi</a>
+				<a href="<?php echo esc_url( cvc_exams_url() ); ?>" class="sx-leftitem"><span aria-hidden="true">📚</span> Danh sách đề thi</a>
 			</nav>
-
 		</aside>
 
-		<!-- ==================== CENTER MAIN COLUMN (1FR) ==================== -->
-		<main class="space-y-6">
-
-			<!-- Mode Description Banner & Progress Row -->
-			<div class="exam-card space-y-3">
-				<div class="flex items-center justify-between text-xs">
-					<div id="exam-mode-description" class="text-cyan-300 font-semibold flex items-center gap-2">
-						<?php echo $is_submitted ? 'Bài đã nộp - xem đáp án và giải thích từng câu bên dưới.' : 'Bài làm được lưu tự động. Nộp bài để xem điểm, đáp án và giải thích.'; ?>
-					</div>
-					<div class="flex items-center gap-2 font-mono text-xs">
-						<span class="text-slate-400">Tiến độ:</span>
-						<span id="answered-progress-text-main" class="text-amber-400 font-bold">0/<?php echo $total_q; ?> câu</span>
-						<span id="command-progress-pct-main" class="text-cyan-400 font-bold">(0%)</span>
-					</div>
-				</div>
-
-				<div class="w-full h-2 bg-[#112240] rounded-full overflow-hidden border border-[#1D3557]">
-					<div id="command-progress-bar-main" class="h-full bg-gradient-to-r from-cyan-500 via-blue-500 to-amber-400 w-0 transition-all duration-300"></div>
-				</div>
-
-				<!-- Actionbar Filter Pills -->
-				<div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-800/80 text-xs">
-					<div class="flex items-center gap-1.5">
-						<button type="button" onclick="ExamOS.filterNavigator('all')" data-filter="all" class="nav-filter-btn active">Tất cả (<?php echo $total_q; ?>)</button>
-						<button type="button" onclick="ExamOS.filterNavigator('unanswered')" data-filter="unanswered" class="nav-filter-btn">Chưa làm (<?php echo $total_q; ?>)</button>
-						<button type="button" onclick="ExamOS.filterNavigator('flagged')" data-filter="flagged" class="nav-filter-btn">Đánh dấu (0)</button>
-					</div>
-					<span id="autosave-status-text-main" class="text-emerald-400 font-mono text-[10px]">✓ Auto-saved ON</span>
-				</div>
+		<main class="sx-panel sx-mainpanel" id="sx-mainpanel">
+			<!-- Đầu văn bản -->
+			<div class="sx-dochead">
+				<p class="sx-dockind"><?php echo esc_html( mb_strtoupper( $exam_type_label, 'UTF-8' ) ); ?> TRẮC NGHIỆM</p>
+				<h1 class="sx-doctitle"><?php echo esc_html( $exam_title ); ?></h1>
+				<p class="sx-docsub"><em>Thời gian làm bài: <?php echo $exam_duration > 0 ? (int) $exam_duration . ' phút' : 'không giới hạn'; ?> · <?php echo (int) $total_q; ?> câu hỏi<?php echo null !== $exam_passing_score && $exam_total_score ? ' · Điểm đạt: ' . esc_html( rtrim( rtrim( number_format( $exam_passing_score, 2, ',', '' ), '0' ), ',' ) ) . '/' . esc_html( rtrim( rtrim( number_format( $exam_total_score, 2, ',', '' ), '0' ), ',' ) ) : ''; ?></em></p>
+				<span class="sx-docrule" aria-hidden="true"></span>
 			</div>
 
-			<!-- RESULTS BANNER (Hidden until submitted) -->
-			<div id="quiz-results-banner" class="hidden bg-white text-navy-950 p-8 rounded-3xl shadow-2xl border-2 border-amber-400 space-y-6">
-				<div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
-					<div class="space-y-1">
-						<span id="quiz-result-badge" class="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300">
-							✓ ĐẠT KẾT QUẢ VÒNG 1
-						</span>
-						<h2 class="text-2xl font-extrabold text-navy-950">Báo Cáo Đánh Giá Năng Lực Sát Hạch</h2>
-					</div>
-					<div class="text-right">
-						<span class="text-xs text-slate-400 uppercase font-bold block">Tổng Điểm KTC</span>
-						<span id="quiz-final-score" class="text-4xl font-black text-amber-600">100/100</span>
+			<section class="sx-main sx-single-only" id="sx-single">
+				<div class="sx-qtop">
+					<span class="sx-qbadge" id="sx-counter">Câu 1/<?php echo (int) $total_q; ?></span>
+					<div class="sx-tools">
+						<span class="sx-muted" id="sx-topic"></span>
+						<label class="sx-check"><input id="sx-flag" type="checkbox"> Đánh dấu xem lại</label>
 					</div>
 				</div>
+				<h2 class="sx-qtext" id="sx-qtext"></h2>
+				<p class="sx-hintline" id="sx-hintline">Chọn một đáp án đúng nhất.</p>
+				<div class="sx-answers" id="sx-answers"></div>
 
-				<div id="quiz-topic-stats-grid" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-					<!-- Điền động từ topic_stats thật sau khi nộp bài (xem submitExam() trong script) -->
-				</div>
+				<div class="sx-feedback" id="sx-feedback" aria-live="polite"></div>
 
-				<div id="quiz-recommendations-block" class="hidden p-6 rounded-2xl bg-gradient-to-r from-navy-950 via-slate-900 to-indigo-950 text-white border border-amber-500/30 space-y-3">
-					<span class="bg-amber-400 text-navy-950 text-[10px] font-black uppercase px-2.5 py-0.5 rounded">GỢI Ý ÔN TẬP THEO ĐIỂM YẾU</span>
-					<div id="quiz-recommendations-list" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
-				</div>
-			</div>
-
-			<!-- QUESTIONS LOOP -->
-			<?php foreach ( $questions as $idx => $q ) : 
-				$q_text = $q['question_text'] ?? ( $q['question'] ?? ( $q['content'] ?? 'Nội dung câu hỏi trắc nghiệm.' ) );
-				$raw_opts = $q['options'] ?? array();
-				$normalized_opts = array();
-				if ( is_array( $raw_opts ) ) {
-					foreach ( $raw_opts as $k => $v ) {
-						if ( is_array( $v ) ) {
-							$key = $v['option_key'] ?? ( is_string($k) ? $k : chr(65 + (int)$k) );
-							$text = $v['option_text'] ?? ( $v['text'] ?? '' );
-							$normalized_opts[$key] = $text;
-						} else {
-							$key = is_string($k) ? $k : chr(65 + (int)$k);
-							$normalized_opts[$key] = (string)$v;
-						}
-					}
-				}
-			?>
-			<article id="question-card-<?php echo $q['id']; ?>" class="exam-card space-y-6">
-				
-				<!-- Question Header Badges -->
-				<div class="flex items-center justify-between border-b border-slate-800/80 pb-4">
-					<div class="flex items-center gap-2 flex-wrap">
-						<span class="text-xs font-black text-navy-950 bg-amber-500 px-3 py-1 rounded-md uppercase">
-							CÂU <?php echo $idx + 1; ?> / <?php echo $total_q; ?>
-						</span>
-						<?php
-						$difficulty_labels = array( 'easy' => 'DỄ', 'medium' => 'TRUNG BÌNH', 'hard' => 'KHÓ' );
-						$difficulty_key    = strtolower( (string) ( $q['difficulty'] ?? '' ) );
-						?>
-						<?php if ( isset( $difficulty_labels[ $difficulty_key ] ) ) : ?>
-							<span class="text-[11px] font-bold text-cyan-400 bg-cyan-500/10 border border-cyan-500/30 px-3 py-1 rounded-md uppercase">
-								ĐỘ KHÓ: <?php echo esc_html( $difficulty_labels[ $difficulty_key ] ); ?>
-							</span>
-						<?php endif; ?>
-						<span class="hidden sm:inline text-[11px] font-bold text-purple-300 bg-purple-500/10 border border-purple-500/30 px-2.5 py-1 rounded-md">
-							🎯 Đề thi chuẩn 2026
-						</span>
+				<div class="sx-actions">
+					<div class="sx-group">
+						<button type="button" class="sx-btn" data-support="explain" id="sx-explainbtn">▤ Đáp án &amp; căn cứ pháp lý</button>
+						<button type="button" class="sx-btn" id="sx-noteToggle">✎ Ghi chú</button>
 					</div>
-					<span class="text-xs text-slate-400 font-mono">● Autosave ON</span>
+					<span class="sx-muted" id="sx-saveStatus">Bài làm được lưu tự động</span>
 				</div>
-
-				<!-- Question Content -->
-				<div class="space-y-2">
-					<h2 class="text-base sm:text-xl font-extrabold text-white leading-relaxed">
-						<?php echo esc_html( $q_text ); ?>
-					</h2>
-					<p class="text-xs text-slate-400">
-						Chọn một phương án đúng nhất dưới đây. Bạn có thể sử dụng tính năng loại trừ đáp án hoặc nhờ AI giải thích.
-					</p>
+				<div class="sx-notes sx-hidden" id="sx-notes">
+					<div class="sx-notes-head"><strong>Ghi chú cá nhân</strong><span class="sx-muted">Chỉ lưu trên thiết bị này</span></div>
+					<textarea id="sx-note" placeholder="Ghi lại điều cần nhớ hoặc xem lại sau..."></textarea>
 				</div>
-
-				<!-- Answer Tiles (Bàn thi số) -->
-				<?php $selected_opt = $existing_state[ $q['id'] ]['selected'] ?? null; ?>
-				<div id="options-container-<?php echo $q['id']; ?>" class="space-y-3">
-					<?php foreach ( $normalized_opts as $opt_key => $opt_val ) : ?>
-					<div id="tile-<?php echo $q['id']; ?>-<?php echo $opt_key; ?>" onclick="ExamOS.selectAnswerTile(<?php echo $q['id']; ?>, '<?php echo $opt_key; ?>')" class="answer-tile<?php echo ( $selected_opt === $opt_key ) ? ' selected' : ''; ?>">
-						<input type="radio" name="q_<?php echo $q['id']; ?>" value="<?php echo $opt_key; ?>" class="hidden">
-						<span class="answer-letter"><?php echo esc_html($opt_key); ?></span>
-						<div class="flex-1 space-y-0.5 pt-0.5">
-							<h3 class="answer-text text-sm font-bold text-white leading-snug">
-								<?php echo esc_html( $opt_val ); ?>
-							</h3>
-							<p class="text-[11px] text-slate-400">Phương án <?php echo esc_html($opt_key); ?></p>
-						</div>
-						<div class="answer-check-mark">✓</div>
+				<div class="sx-nav">
+					<button type="button" class="sx-btn" id="sx-prev">← Câu trước</button>
+					<div class="sx-group">
+						<button type="button" class="sx-btn" id="sx-clear">× Bỏ chọn</button>
+						<button type="button" class="sx-btn" id="sx-flagBtn">⚑ Đánh dấu</button>
 					</div>
-					<?php endforeach; ?>
+					<button type="button" class="sx-btn sx-primary" id="sx-next">Câu tiếp theo →</button>
 				</div>
+			</section>
 
-				<?php if ( $is_demo_mode ) : ?>
-				<!-- TÀI LIỆU LIÊN QUAN & CĂN CỨ PHÁP LÝ (PER QUESTION DOCUMENTATION) -->
-				<div class="p-3.5 rounded-xl bg-[#112240] border border-[#1D3557] space-y-2 text-xs">
-					<div class="flex items-center justify-between border-b border-slate-700/60 pb-2">
-						<span class="font-extrabold text-amber-400 flex items-center gap-1.5">
-							📚 Tài liệu liên quan câu hỏi #<?php echo $q['id']; ?>:
-						</span>
-						<button type="button" onclick="showLawModal('<?php echo esc_js($q['explanation']); ?>')" class="text-cyan-400 hover:text-cyan-300 text-[11px] font-bold flex items-center gap-1 cursor-pointer">
-							📖 Tra cứu điều khoản gốc &rarr;
-						</button>
-					</div>
-					<div class="flex flex-wrap items-center gap-2 text-[11px]">
-						<a href="<?php echo esc_url( home_url('/tai-lieu-phap-luat/') ); ?>" target="_blank" class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 hover:border-cyan-400 text-slate-200 flex items-center gap-1.5 transition-colors">
-							<span>📄</span> <strong>Luật Cán bộ, Công chức & Viên chức (2026.pdf)</strong>
-							<span class="text-cyan-400 font-bold ml-1">Tải về ⬇</span>
-						</a>
-						<a href="<?php echo esc_url( home_url('/khoa-hoc/') ); ?>" target="_blank" class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 hover:border-amber-400 text-slate-200 flex items-center gap-1.5 transition-colors">
-							<span>🎓</span> <strong>Bài giảng video chuyên đề liên quan (18 phút)</strong>
-							<span class="text-amber-400 font-bold ml-1">Xem ngay 🎥</span>
-						</a>
-						<a href="<?php echo esc_url( home_url('/tai-lieu-phap-luat/') ); ?>" target="_blank" class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 hover:border-emerald-400 text-slate-200 flex items-center gap-1.5 transition-colors">
-							<span>⚖️</span> <strong>Nghị định 138/2020/NĐ-CP & NĐ 115/2020/NĐ-CP</strong>
-							<span class="text-emerald-400 font-bold ml-1">Đọc online 📖</span>
-						</a>
-					</div>
-				</div>
-				<?php endif; ?>
-
-				<!-- Action Bar & Confidence + Quick Note -->
-				<div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-800/80">
-					<div class="flex items-center gap-2 flex-wrap">
-						<button type="button" onclick="toggleFlagQuestion(<?php echo $q['id']; ?>)" class="px-3 py-1.5 bg-[#112240] hover:bg-slate-800 text-slate-300 rounded-xl text-xs font-bold border border-[#1D3557] transition-colors flex items-center gap-1.5 cursor-pointer">
-							<i class="fa-regular fa-star text-amber-400" id="flag-icon-<?php echo $q['id']; ?>"></i> Đánh dấu câu
-						</button>
-						<button type="button" onclick="ExamOS.toggleStrikeout(<?php echo $q['id']; ?>, 'A')" class="px-3 py-1.5 bg-[#112240] hover:bg-slate-800 text-slate-300 rounded-xl text-xs font-bold border border-[#1D3557] transition-colors flex items-center gap-1.5 cursor-pointer">
-							✕ Loại trừ A
-						</button>
-						<?php if ( $is_demo_mode ) : ?>
-						<button type="button" onclick="showLawModal('<?php echo esc_js($q['explanation']); ?>')" class="px-3 py-1.5 bg-[#112240] hover:bg-slate-800 text-cyan-400 rounded-xl text-xs font-bold border border-[#1D3557] transition-colors cursor-pointer flex items-center gap-1.5">
-							📖 Xem Giải Thích
-						</button>
-						<?php else : ?>
-						<button type="button" onclick="cvcLoadExplanation(<?php echo (int) $q['id']; ?>)" class="px-3 py-1.5 bg-[#112240] hover:bg-slate-800 text-cyan-400 rounded-xl text-xs font-bold border border-[#1D3557] transition-colors cursor-pointer flex items-center gap-1.5">
-							📖 Xem Giải Thích
-						</button>
-						<?php endif; ?>
-					</div>
-
-					<!-- Confidence Level Selector & Quick Note Input -->
-					<div class="flex flex-wrap items-center gap-2">
-						<div id="confidence-box-<?php echo $q['id']; ?>" class="hidden items-center gap-1.5 bg-[#112240] p-1 rounded-xl border border-[#1D3557]">
-							<span class="text-[10px] text-slate-400 font-bold pl-1">Độ tự tin:</span>
-							<button type="button" onclick="ExamOS.setConfidenceLevel(<?php echo $q['id']; ?>, 'low')" data-level="low" class="confidence-pill">Chưa chắc</button>
-							<button type="button" onclick="ExamOS.setConfidenceLevel(<?php echo $q['id']; ?>, 'med')" data-level="med" class="confidence-pill">Khá chắc</button>
-							<button type="button" onclick="ExamOS.setConfidenceLevel(<?php echo $q['id']; ?>, 'high')" data-level="high" class="confidence-pill">Rất chắc</button>
-						</div>
-
-						<div class="flex items-center gap-1">
-							<input type="text" id="note-input-<?php echo $q['id']; ?>" placeholder="Viết ghi nhớ..." class="bg-[#112240] border border-[#1D3557] rounded-xl px-2.5 py-1 text-[11px] text-slate-200 focus:outline-none focus:border-cyan-400 w-28">
-							<button type="button" onclick="ExamOS.saveQuestionNote(<?php echo $q['id']; ?>)" class="px-2.5 py-1 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 font-bold text-[11px] rounded-xl border border-cyan-500/40 cursor-pointer">Lưu</button>
-						</div>
-					</div>
-				</div>
-
-				<?php if ( $is_demo_mode ) : ?>
-				<!-- AI EXPLANATION BOX (WITH 3 TABS: GIẢI THÍCH AI | CĂN CỨ PHÁP LÝ | MẸO GHI NHỚ) -->
-				<div id="explanation-<?php echo $q['id']; ?>" class="hidden ai-coach-banner space-y-3 text-xs">
-					<div class="flex items-center justify-between border-b border-slate-800 pb-2">
-						<div class="flex items-center gap-2 font-bold text-[11px]">
-							<button type="button" class="px-2.5 py-1 bg-cyan-500 text-navy-950 rounded-lg">✦ Giải thích AI</button>
-							<button type="button" onclick="showLawModal('<?php echo esc_js($q['explanation']); ?>')" class="px-2.5 py-1 bg-[#112240] text-slate-300 hover:text-white rounded-lg border border-[#1D3557]">📜 Căn cứ pháp lý</button>
-							<button type="button" class="px-2.5 py-1 bg-[#112240] text-amber-300 rounded-lg border border-[#1D3557]">💡 Mẹo ghi nhớ</button>
-						</div>
-						<span class="text-cyan-300 font-bold text-xs">Đáp án chuẩn: B</span>
-					</div>
-
-					<p class="text-slate-300 leading-relaxed">
-						<?php echo esc_html( $q['explanation'] ); ?>
-					</p>
-
-					<div class="pt-2 border-t border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-[11px]">
-						<span class="text-amber-400 font-bold">⚖️ Căn cứ: Luật Viên chức 129/2025/QH15 & NĐ 259/2026/NĐ-CP</span>
-						<a href="<?php echo esc_url( home_url('/khoa-hoc/') ); ?>" class="text-cyan-400 font-extrabold hover:underline">
-							📚 Xem Bài Học Liên Quan (18 Phút) &rarr;
-						</a>
-					</div>
-				</div>
-				<?php else : ?>
-				<!-- Lượt thi thật: hộp giải thích rỗng, chỉ được lấp sau khi nộp bài
-				     bằng dữ liệu thật (đáp án đúng từ DB + giải thích AI/có sẵn). -->
-				<div id="explanation-<?php echo (int) $q['id']; ?>" class="hidden ai-coach-banner space-y-3 text-xs" data-cvc-explanation="<?php echo (int) $q['id']; ?>">
-					<p class="text-slate-400">Đáp án và giải thích sẽ hiển thị sau khi bạn nộp bài.</p>
-				</div>
-				<?php endif; ?>
-
-				<!-- Bottom Navigation Buttons -->
-				<div class="flex items-center justify-between pt-4 border-t border-slate-800">
-					<button type="button" onclick="scrollToQuestion(Math.max(1, <?php echo $idx; ?>))" class="px-5 py-2.5 bg-[#112240] hover:bg-slate-800 text-white font-extrabold text-xs rounded-xl border border-[#1D3557] shadow cursor-pointer">
-						&larr; Câu trước
-					</button>
-
-					<button type="button" onclick="submitQuizSimulation()" class="px-6 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-navy-950 font-black text-xs rounded-xl shadow cursor-pointer">
-						Nộp bài thi (<?php echo $idx + 1; ?>/<?php echo $total_q; ?>)
-					</button>
-
-					<button type="button" onclick="scrollToQuestion(Math.min(<?php echo $total_q; ?>, <?php echo $idx + 2; ?>))" class="px-5 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-navy-950 font-black text-xs rounded-xl shadow cursor-pointer">
-						Câu tiếp theo &rarr;
-					</button>
-				</div>
-
-			</article>
-			<?php endforeach; ?>
-
+			<section class="sx-all" id="sx-all" aria-label="Danh sách câu hỏi"></section>
+			<section class="sx-maponly" id="sx-maponly">
+				<h2>Bản đồ toàn đề</h2>
+				<p>Chọn số câu để đi đến câu đó. Trạng thái được cập nhật ngay khi trả lời.</p>
+				<div class="sx-grid sx-grid-large" id="sx-largeGrid"></div>
+			</section>
 		</main>
 
-		<!-- ==================== RIGHT SIDEBAR (260px STICKY) ==================== -->
-		<aside class="sticky-right-sidebar space-y-4">
-
-			<!-- PRIORITY BLOCK 1: 🎯 EXAM NAVIGATOR (BẢN ĐỒ CÂU HỎI) -->
-			<div class="exam-card border-2 border-cyan-500/40 space-y-3">
-				<div class="flex items-center justify-between border-b border-slate-800 pb-2">
-					<h3 class="font-extrabold text-xs text-cyan-400 uppercase tracking-wider flex items-center gap-1.5">
-						🎯 EXAM NAVIGATOR
-					</h3>
-					<span id="answered-progress-text" class="text-xs font-bold text-amber-400">0/<?php echo $total_q; ?></span>
+		<aside class="sx-side" id="sx-side">
+			<section class="sx-panel sx-exam-control">
+				<div class="sx-head"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><h2>Thời gian &amp; nộp bài</h2></div>
+				<div class="sx-body">
+					<div class="sx-timer-row">
+						<div><span class="sx-muted" id="sx-timerlabel"><?php echo 'countdown' === $timer_mode ? 'Thời gian còn lại' : ( 'elapsed' === $timer_mode ? 'Thời gian đã làm' : 'Trạng thái' ); ?></span><div class="sx-timer-value" id="sx-timer"><?php echo 'done' === $timer_mode ? 'Đã nộp' : '--:--'; ?></div></div>
+						<div class="sx-timer-progress"><span id="sx-sideProgress"></span></div>
+					</div>
+					<div class="sx-side-submit-meta"><span>Đã trả lời <strong><span id="sx-sideAnswered">0</span>/<?php echo (int) $total_q; ?></strong></span><span id="sx-sidePercent">0% hoàn thành</span></div>
+					<button type="button" class="sx-btn sx-danger sx-submit-wide" id="sx-submitTop"<?php echo $is_submitted ? ' disabled' : ''; ?>>▤ <?php echo $is_submitted ? 'Đã nộp bài' : 'Nộp bài'; ?></button>
+					<p class="sx-muted sx-submit-note"><?php echo $is_submitted ? 'Bài đã nộp - mở từng câu để xem đáp án và giải thích.' : 'Bạn có thể nộp bài bất cứ lúc nào, kể cả khi đang ở câu cuối.'; ?></p>
 				</div>
+			</section>
 
-				<!-- Navigator Filter Tabs -->
-				<div class="flex flex-wrap gap-1">
-					<button type="button" onclick="ExamOS.filterNavigator('all')" data-filter="all" class="nav-filter-btn active">Tất cả</button>
-					<button type="button" onclick="ExamOS.filterNavigator('unanswered')" data-filter="unanswered" class="nav-filter-btn">Chưa làm</button>
-					<button type="button" onclick="ExamOS.filterNavigator('flagged')" data-filter="flagged" class="nav-filter-btn">Đánh dấu</button>
-				</div>
-
-				<!-- Grid Map Nodes (qmap) -->
-				<div class="qmap-grid pt-1">
-					<?php for ( $i = 1; $i <= $total_q; $i++ ) : ?>
-					<button onclick="scrollToQuestion(<?php echo $i; ?>)" id="nav-btn-<?php echo $i; ?>" class="qmap-node">
-						<?php echo $i; ?>
-					</button>
-					<?php endfor; ?>
-				</div>
-
-				<!-- Legend Status Dots -->
-				<div class="flex items-center justify-between text-[10px] text-slate-400 pt-2 border-t border-slate-800">
-					<span class="flex items-center gap-1"><span class="w-2 h-2 rounded bg-emerald-500"></span> Đã làm</span>
-					<span class="flex items-center gap-1"><span class="w-2 h-2 rounded bg-cyan-400"></span> Đang làm</span>
-					<span class="flex items-center gap-1"><span class="w-2 h-2 rounded bg-slate-700"></span> Bỏ qua</span>
-				</div>
-
-				<!-- Sidebar Action & Quick Tool Icons -->
-				<div class="pt-2 space-y-2">
-					<button onclick="submitQuizSimulation()" class="w-full py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-navy-950 font-black text-xs rounded-xl shadow cursor-pointer text-center block">
-						Nộp bài thi ngay (0/<?php echo $total_q; ?>)
-					</button>
-
-					<div class="flex items-center justify-center gap-2 text-slate-400 text-xs pt-1">
-						<button type="button" title="Đánh dấu câu" class="p-1.5 bg-[#112240] rounded-lg border border-[#1D3557] hover:text-white">🔖</button>
-						<button type="button" title="Focus Mode" class="p-1.5 bg-[#112240] rounded-lg border border-[#1D3557] hover:text-white">👁️</button>
-						<button type="button" title="Cài đặt" class="p-1.5 bg-[#112240] rounded-lg border border-[#1D3557] hover:text-white">⚙️</button>
-						<button type="button" title="Trợ giúp" class="p-1.5 bg-[#112240] rounded-lg border border-[#1D3557] hover:text-white">❓</button>
+			<section class="sx-panel">
+				<div class="sx-head"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5h12M9 12h12M9 19h12M3 5h.01M3 12h.01M3 19h.01"/></svg><h2>Bản đồ câu hỏi</h2><span class="sx-muted sx-headcount" id="sx-mapcount">0/<?php echo (int) $total_q; ?></span></div>
+				<div class="sx-body">
+					<div class="sx-legend" id="sx-legend">
+						<span><i class="sx-swatch done"></i>Đã trả lời</span><span><i class="sx-swatch now"></i>Đang xem</span><span><i class="sx-swatch"></i>Chưa làm</span><span><i class="sx-swatch flag"></i>Đánh dấu</span>
+						<?php if ( $is_submitted ) : ?><span><i class="sx-swatch right"></i>Đúng</span><span><i class="sx-swatch wrong"></i>Sai</span><?php endif; ?>
+					</div>
+					<div class="sx-grid" id="sx-grid"></div>
+					<div class="sx-filters">
+						<button type="button" class="sx-btn active" data-filter="all">Tất cả</button>
+						<button type="button" class="sx-btn" data-filter="unanswered">Chưa làm</button>
+						<button type="button" class="sx-btn" data-filter="answered">Đã làm</button>
+						<button type="button" class="sx-btn" data-filter="flagged">Xem lại</button>
+						<?php if ( $is_submitted ) : ?><button type="button" class="sx-btn" data-filter="wrong">Làm sai</button><?php endif; ?>
 					</div>
 				</div>
-			</div>
+			</section>
 
-			<!-- BLOCK 4: TIẾN ĐỘ (GỌN, KHÔNG TRÙNG VỚI NAVIGATOR) -->
-			<div class="exam-card space-y-2 text-xs">
-				<div class="flex items-center justify-between">
-					<span class="font-bold text-slate-300 text-[11px] uppercase tracking-wide">📊 Tiến độ nhanh</span>
+			<section class="sx-panel">
+				<div class="sx-head"><?php echo $doc_icon; // phpcs:ignore WordPress.Security.EscapeOutput ?><h2>Thông tin đề thi</h2></div>
+				<div class="sx-body sx-body-tight">
+					<table class="sx-details">
+						<tr><td>Đề thi</td><td><?php echo esc_html( $exam_title ); ?></td></tr>
+						<?php if ( '' !== $exam_code ) : ?><tr><td>Mã đề</td><td><?php echo esc_html( $exam_code ); ?></td></tr><?php endif; ?>
+						<tr><td>Số câu</td><td><?php echo (int) $total_q; ?> câu</td></tr>
+						<tr><td>Thời gian</td><td><?php echo $exam_duration > 0 ? (int) $exam_duration . ' phút' : 'Không giới hạn'; ?></td></tr>
+						<tr><td>Hình thức</td><td>Trắc nghiệm, chọn một đáp án</td></tr>
+						<tr><td>Trạng thái</td><td class="sx-status" id="sx-status"><?php echo $is_submitted ? '● Đã nộp bài' : '● Đang làm bài'; ?></td></tr>
+					</table>
+					<div class="sx-tips">
+						<h3>♧ Thao tác nhanh</h3>
+						<ul>
+							<li>Phím 1–4 hoặc A–D: chọn đáp án.</li>
+							<li>Phím ← / →: chuyển câu.</li>
+							<li>Phím F: đánh dấu xem lại.</li>
+							<li>Đáp án được lưu tự động vào tài khoản.</li>
+						</ul>
+					</div>
 				</div>
-				<div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
-					<div id="command-progress-bar-side" class="h-full bg-gradient-to-r from-amber-500 to-cyan-400 w-0 transition-all duration-300"></div>
-				</div>
-				<div class="flex items-center justify-between text-slate-400">
-					<span>Đã trả lời: <span id="sidebar-answered-count" class="font-bold text-white">0 / <?php echo $total_q; ?></span></span>
-					<span>Đánh dấu: <span id="sidebar-flagged-count" class="font-bold text-amber-400">0</span></span>
-				</div>
-			</div>
+			</section>
 
+			<section class="sx-panel sx-analysis<?php echo $is_submitted ? ' show' : ''; ?>" id="sx-analysis">
+				<div class="sx-head"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5m0 14h17M7 15l4-4 3 2 5-7"/></svg><h2>Phân tích năng lực</h2></div>
+				<div class="sx-body">
+					<div id="sx-scorebox"></div>
+					<div id="sx-weakness"><p class="sx-muted">Kết quả theo chủ đề hiển thị ngay sau khi nộp bài.</p></div>
+					<div id="sx-recs"></div>
+					<a class="sx-btn sx-wide" href="<?php echo esc_url( cvc_account_url( 'recommendations' ) ); ?>">Xem gợi ý ôn tập</a>
+				</div>
+			</section>
 		</aside>
-
 	</div>
 
+	<aside class="sx-support" id="sx-support" role="dialog" aria-modal="true" aria-labelledby="sx-supportTitle">
+		<div class="sx-supporthead"><div><span class="sx-kicker" id="sx-kicker">ĐÁP ÁN VÀ CĂN CỨ</span><h2 id="sx-supportTitle">Giải thích đáp án</h2></div><button type="button" class="sx-btn" id="sx-closeSupport" aria-label="Đóng">✕</button></div>
+		<div class="sx-supportcontent" id="sx-supportContent"></div>
+	</aside>
+
+	<div class="sx-overlay" id="sx-submitDialog"><div class="sx-dialog" role="alertdialog" aria-labelledby="sx-submitTitle"><h2 id="sx-submitTitle">Xác nhận nộp bài</h2><p id="sx-submitMessage"></p><div class="sx-dialogactions"><button type="button" class="sx-btn" id="sx-cancel">Tiếp tục làm bài</button><button type="button" class="sx-btn sx-danger" id="sx-confirm">Nộp bài</button></div></div></div>
+	<div class="sx-overlay" id="sx-resultDialog"><div class="sx-dialog" role="dialog" aria-labelledby="sx-resultTitle"><h2 id="sx-resultTitle">Kết quả bài thi</h2><div id="sx-resultBody"></div><div class="sx-dialogactions"><button type="button" class="sx-btn" id="sx-closeResult">Xem lại bài làm</button><button type="button" class="sx-btn sx-primary" id="sx-showAnalysis">Xem phân tích</button></div></div></div>
+	<div class="sx-toast" id="sx-toast" role="status" aria-live="polite"></div>
 </div>
 
-<!-- RESUME EXAM MODAL -->
-<div id="resume-exam-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden items-center justify-center p-4">
-	<div class="bg-[#0A192F] border-2 border-amber-400 rounded-3xl max-w-md w-full p-6 text-center text-white space-y-4 shadow-2xl">
-		<div class="w-16 h-16 rounded-full bg-amber-500/20 text-amber-400 text-2xl flex items-center justify-center mx-auto border border-amber-400/40">
-			👋
-		</div>
-		<h3 class="text-xl font-black">Chào Mừng Cán Bộ Trở Lại!</h3>
-		<p class="text-xs text-slate-300">Hệ thống phát hiện bạn đang có một bài thi chưa hoàn thành được lưu tự động trên thiết bị.</p>
-		<div class="flex items-center justify-center gap-3 pt-2">
-			<button onclick="ExamOS.dismissResumePrompt()" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl">
-				Làm Bài Mới
-			</button>
-			<button onclick="ExamOS.dismissResumePrompt()" class="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-navy-950 font-black text-xs rounded-xl shadow">
-				TIẾP TỤC BÀI THI &rarr;
-			</button>
-		</div>
-	</div>
-</div>
-
-<!-- LAW ARTICLE POPUP MODAL -->
-<div id="lawArticleModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
-  <div class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-5 shadow-2xl border border-slate-200 text-navy-950">
-    <div class="flex items-center justify-between border-b border-slate-100 pb-4">
-      <h3 class="text-base font-extrabold flex items-center gap-2">
-        Tra Cứu Căn Cứ Điều Khoản Luật Gốc
-      </h3>
-      <button onclick="closeLawModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold flex items-center justify-center">
-        ✕
-      </button>
-    </div>
-    <div id="lawArticleModalBody" class="text-sm text-slate-700 leading-relaxed max-h-[60vh] overflow-y-auto space-y-3 p-4 bg-slate-50 rounded-2xl border border-slate-200 font-sans">
-      <!-- Content populated dynamically -->
-    </div>
-    <div class="flex justify-end pt-2">
-      <button onclick="closeLawModal()" class="px-5 py-2.5 bg-navy-950 text-white font-bold text-xs rounded-xl shadow">
-        Đóng Cửa Sổ
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- Load EXAM OS X Client-side Engine -->
-<script src="<?php echo esc_url( get_template_directory_uri() . '/assets/js/exam-os.js?ver=' . (string) filemtime( get_theme_file_path( '/assets/js/exam-os.js' ) ) ); ?>"></script>
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-	ExamOS.init({
-		examId: 'attempt_<?php echo (int) $real_attempt_id; ?>',
-		totalQuestions: <?php echo $total_q; ?>
-	});
-});
-
-let userAnswers = {};
-let flaggedQuestions = {};
-// Đồng hồ thật: đếm ngược theo thời lượng đề tính từ lúc bắt đầu lượt thi
-// (không reset khi tải lại trang); đề không giới hạn thời gian thì đếm xuôi.
-const timerMode = <?php echo wp_json_encode( $timer_mode ); ?>;
-let remainingSeconds = <?php echo (int) $timer_seconds; ?>;
-
-function cvcFormatClock(total) {
-  total = Math.max(0, total);
-  let h = Math.floor(total / 3600);
-  let m = Math.floor((total % 3600) / 60);
-  let sec = total % 60;
-  let mm = (m < 10 ? '0' : '') + m;
-  let ss = (sec < 10 ? '0' : '') + sec;
-  return h > 0 ? h + ':' + mm + ':' + ss : mm + ':' + ss;
-}
-
-let timerInterval = null;
-if (timerMode !== 'done') {
-  let timerEl = document.getElementById('quiz-timer');
-  if (timerEl) { timerEl.innerText = cvcFormatClock(remainingSeconds); }
-  timerInterval = setInterval(() => {
-    remainingSeconds += (timerMode === 'countdown' ? -1 : 1);
-    let el = document.getElementById('quiz-timer');
-    if (el) { el.innerText = cvcFormatClock(remainingSeconds); }
-    if (timerMode === 'countdown' && remainingSeconds <= 0) {
-      clearInterval(timerInterval);
-      submitQuizSimulation();
-    }
-  }, 1000);
-}
-
-function toggleFlagQuestion(qId) {
-  // Đồng bộ thật với backend (exam_attempt_answers.is_flagged) qua
-  // ExamOS.toggleFlag - trước đây chỉ lưu vào biến JS tạm, mất khi
-  // refresh/resume. Giữ tên hàm cũ để không phải sửa mọi onclick.
-  ExamOS.toggleFlag(qId);
-}
-
-function scrollToQuestion(qId) {
-  let el = document.getElementById('question-card-' + qId);
-  if (el) {
-    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }
-}
-
-function submitQuizSimulation() {
-  // Chế độ demo (không có attempt_id thật trong DB): chỉ hiện banner
-  // minh họa, không có gì để nộp lên backend - tránh gọi AJAX vô nghĩa.
-  if (window.cvc_vars && window.cvc_vars.is_demo) {
-    clearInterval(timerInterval);
-    let demoBanner = document.getElementById('quiz-results-banner');
-    if (demoBanner) {
-      demoBanner.classList.remove('hidden');
-      demoBanner.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-    return;
-  }
-
-  if (!window.cvc_vars || !window.cvc_vars.attempt_id) {
-    alert('Không tìm thấy lượt thi hợp lệ để nộp bài.');
-    return;
-  }
-
-  clearInterval(timerInterval);
-  setSubmitButtonsDisabled(true);
-
-  let formData = new FormData();
-  formData.append('action', 'cvc_exam_submit');
-  formData.append('nonce', window.cvc_vars.nonce);
-  formData.append('attempt_id', window.cvc_vars.attempt_id);
-
-  fetch(window.cvc_vars.ajax_url, { method: 'POST', body: formData })
-    .then(function (res) { return res.json(); })
-    .then(function (res) {
-      if (!res.success) {
-        if (res.data && res.data.already_submitted) {
-          alert('Bài thi này đã được nộp trước đó. Vui lòng vào Lịch sử làm bài để xem kết quả.');
-        } else {
-          alert((res.data && res.data.message) || 'Nộp bài thất bại, vui lòng thử lại.');
-          setSubmitButtonsDisabled(false);
-        }
-        return;
-      }
-
-      renderExamResult(res.data);
-    })
-    .catch(function (err) {
-      console.error('Submit exam error:', err);
-      alert('Có lỗi kết nối khi nộp bài. Vui lòng kiểm tra mạng và thử lại.');
-      setSubmitButtonsDisabled(false);
-    });
-}
-
-function setSubmitButtonsDisabled(disabled) {
-  document.querySelectorAll('button[onclick="submitQuizSimulation()"]').forEach(function (btn) {
-    btn.disabled = disabled;
-    btn.classList.toggle('opacity-50', disabled);
-    btn.classList.toggle('pointer-events-none', disabled);
-  });
-}
-
-/**
- * Vẽ kết quả thật nhận từ POST /api/exam-attempts/{id}/submit (qua AJAX
- * cvc_exam_submit) - payload = toàn bộ JSON gốc của Laravel
- * ({success, message, data: attempt, recommendations, topic_stats}),
- * KHÔNG phải banner tĩnh/số liệu giả như bản cũ.
- */
-/**
- * Giải thích cho 1 câu (chỉ sau khi nộp bài): đáp án đúng lấy từ DB, phần
- * diễn giải do AI viết nếu admin đã cấu hình AI, ngược lại là giải thích
- * có sẵn - nhãn nguồn hiển thị đúng sự thật.
- */
-// Lượt thi đã nộp/hết giờ mở lại để xem: cho phép xem giải thích ngay.
-window.cvcExamSubmitted = <?php echo ( ! $is_demo_mode && '' !== $attempt_status && 'in_progress' !== $attempt_status ) ? 'true' : 'false'; ?>;
-
-function cvcLoadExplanation(qId) {
-  let box = document.getElementById('explanation-' + qId);
-  if (!box) return;
-
-  if (!window.cvcExamSubmitted) {
-    box.classList.remove('hidden');
-    box.innerHTML = '<p class="text-slate-400">Đáp án và giải thích sẽ hiển thị sau khi bạn nộp bài.</p>';
-    return;
-  }
-
-  box.classList.remove('hidden');
-  box.innerHTML = '<p class="text-slate-400">Đang tải giải thích…</p>';
-
-  let formData = new FormData();
-  formData.append('action', 'cvc_exam_ai_explain');
-  formData.append('nonce', window.cvc_vars.nonce);
-  formData.append('attempt_id', window.cvc_vars.attempt_id);
-  formData.append('question_id', qId);
-
-  fetch(window.cvc_vars.ajax_url, { method: 'POST', body: formData })
-    .then(function (res) { return res.json(); })
-    .then(function (res) {
-      if (!res.success) {
-        box.innerHTML = '<p class="text-rose-300">' + escapeExamHtml((res.data && res.data.message) || 'Không tải được giải thích.') + '</p>';
-        return;
-      }
-
-      let d = (res.data && res.data.data) || {};
-      let base = (window.cvc_vars && window.cvc_vars.home_url) || '/';
-      let sourceBadge = d.source === 'ai'
-        ? '<span class="px-2.5 py-1 bg-cyan-500 text-navy-950 rounded-lg font-bold">✦ Giải thích bởi AI</span>'
-        : '<span class="px-2.5 py-1 bg-slate-800 text-slate-200 rounded-lg font-bold border border-slate-700">Giải thích có sẵn</span>';
-      let verdict = d.is_correct === true
-        ? '<span class="text-emerald-300 font-bold">✓ Bạn trả lời đúng</span>'
-        : (d.is_correct === false ? '<span class="text-rose-300 font-bold">✗ Bạn trả lời sai</span>' : '<span class="text-slate-400">Bạn chưa trả lời câu này</span>');
-      let text = d.explanation ? escapeExamHtml(d.explanation).replace(/\n/g, '<br>') : '<span class="text-slate-400">Câu hỏi này chưa có giải thích.</span>';
-      let links = [];
-
-      if (d.legal_reference && d.legal_reference.slug) {
-        links.push('<a class="text-amber-300 font-bold hover:underline" href="' + base + 'van-ban-phap-luat/' + encodeURIComponent(d.legal_reference.slug) + '/">⚖️ ' + escapeExamHtml((d.legal_reference.document_number ? d.legal_reference.document_number + ' - ' : '') + d.legal_reference.title) + '</a>');
-      }
-      if (d.knowledge_item && d.knowledge_item.slug) {
-        links.push('<a class="text-cyan-300 font-bold hover:underline" href="' + base + 'kien-thuc/' + encodeURIComponent(d.knowledge_item.slug) + '/">📚 ' + escapeExamHtml(d.knowledge_item.title) + '</a>');
-      }
-      if (d.topic && d.topic.slug) {
-        links.push('<a class="text-cyan-300 font-bold hover:underline" href="' + base + 'chu-de/' + encodeURIComponent(d.topic.slug) + '/">🎯 Ôn chủ đề: ' + escapeExamHtml(d.topic.name) + '</a>');
-      }
-
-      box.innerHTML =
-        '<div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2">' +
-          '<div class="flex items-center gap-2 text-[11px]">' + sourceBadge + verdict + '</div>' +
-          (d.correct_option_key ? '<span class="text-cyan-300 font-bold text-xs">Đáp án đúng: ' + escapeExamHtml(d.correct_option_key) + '</span>' : '') +
-        '</div>' +
-        '<p class="text-slate-300 leading-relaxed">' + text + '</p>' +
-        (links.length ? '<div class="pt-2 border-t border-slate-800 flex flex-wrap gap-3 text-[11px]">' + links.join('') + '</div>' : '');
-
-      if (d.correct_option_key) {
-        let tile = document.getElementById('tile-' + qId + '-' + d.correct_option_key);
-        if (tile) tile.classList.add('is-correct-answer');
-      }
-    })
-    .catch(function () {
-      box.innerHTML = '<p class="text-rose-300">Lỗi kết nối, vui lòng thử lại.</p>';
-    });
-}
-
-function renderExamResult(payload) {
-  window.cvcExamSubmitted = true;
-  let attempt = (payload && payload.data) || {};
-  let recommendations = (payload && payload.recommendations) || [];
-  let topicStats = (payload && payload.topic_stats) || [];
-
-  let badge = document.getElementById('quiz-result-badge');
-  if (badge) {
-    if (attempt.passed === true) {
-      badge.className = 'px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300';
-      badge.innerText = '✓ ĐẠT YÊU CẦU';
-    } else if (attempt.passed === false) {
-      badge.className = 'px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-rose-100 text-rose-800 border border-rose-300';
-      badge.innerText = '✗ CHƯA ĐẠT';
-    } else {
-      badge.className = 'px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-300';
-      badge.innerText = 'ĐÃ HOÀN THÀNH BÀI THI';
-    }
-  }
-
-  let scoreEl = document.getElementById('quiz-final-score');
-  if (scoreEl) {
-    let totalScore = attempt.exam && attempt.exam.total_score ? attempt.exam.total_score : null;
-    let scoreText = (typeof attempt.score !== 'undefined' && attempt.score !== null) ? attempt.score : '--';
-    scoreEl.innerText = totalScore ? (scoreText + '/' + totalScore) : (scoreText + ' điểm');
-    if (typeof attempt.percentage !== 'undefined') {
-      scoreEl.title = attempt.percentage + '%';
-    }
-  }
-
-  let grid = document.getElementById('quiz-topic-stats-grid');
-  if (grid) {
-    if (topicStats.length > 0) {
-      grid.innerHTML = topicStats.map(function (stat) {
-        let colors = 'bg-rose-50 border-rose-200 text-rose-900';
-        if (stat.label === 'Vững vàng') colors = 'bg-emerald-50 border-emerald-200 text-emerald-900';
-        else if (stat.label === 'Khá') colors = 'bg-amber-50 border-amber-200 text-amber-900';
-
-        return '<div class="p-4 rounded-2xl border text-center space-y-1 ' + colors + '">' +
-          '<span class="text-[10px] font-bold uppercase block opacity-80">' + escapeExamHtml(stat.topic) + '</span>' +
-          '<span class="text-xs font-black block mt-1">' + stat.accuracy + '% · ' + escapeExamHtml(stat.label) + '</span>' +
-          '</div>';
-      }).join('');
-    } else {
-      grid.innerHTML = '<p class="col-span-full text-xs text-slate-400 italic">Chưa đủ dữ liệu để phân tích theo chủ đề.</p>';
-    }
-  }
-
-  let recBlock = document.getElementById('quiz-recommendations-block');
-  let recList = document.getElementById('quiz-recommendations-list');
-  if (recBlock && recList) {
-    if (recommendations.length > 0) {
-      let baseUrl = (window.cvc_vars && window.cvc_vars.home_url) || '/';
-
-      recList.innerHTML = recommendations.map(function (item) {
-        // Khung tu lap day: chua co khoa hoc -> goi y van ban / chu de / de khac (mien phi).
-        let paths = { course: 'khoa-hoc/', document: 'tai-lieu/', legal_document: 'van-ban-phap-luat/', topic: 'chu-de/', exam: 'thi-trac-nghiem/' };
-        let labels = { course: 'Khóa học', document: 'Tài liệu', legal_document: 'Văn bản', topic: 'Chủ đề ôn tập', exam: 'Đề thi' };
-        let href = baseUrl + (paths[item.type] || 'tai-lieu/') + encodeURIComponent(item.slug) + '/';
-        let priceLabel = '';
-
-        if (item.type === 'document') {
-          priceLabel = item.is_free ? 'Miễn phí' : (formatVnd(item.effective_price) + 'đ');
-        } else if (item.type !== 'course') {
-          priceLabel = '';
-        } else if (item.sale_price) {
-          priceLabel = formatVnd(item.sale_price) + 'đ';
-        } else if (item.price) {
-          priceLabel = formatVnd(item.price) + 'đ';
-        }
-
-        return '<a href="' + href + '" class="block p-4 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 transition-colors space-y-1">' +
-          '<span class="text-[10px] uppercase font-bold text-amber-300">' + (labels[item.type] || 'Gợi ý') + '</span>' +
-          '<h4 class="text-sm font-bold text-white leading-snug">' + escapeExamHtml(item.title) + '</h4>' +
-          '<p class="text-[11px] text-slate-300">' + escapeExamHtml(item.reason || '') + '</p>' +
-          (priceLabel ? '<span class="inline-block text-[11px] font-black text-amber-300">' + priceLabel + '</span>' : '') +
-          '</a>';
-      }).join('');
-
-      recBlock.classList.remove('hidden');
-    } else {
-      recBlock.classList.add('hidden');
-    }
-  }
-
-  let banner = document.getElementById('quiz-results-banner');
-  if (banner) {
-    banner.classList.remove('hidden');
-    banner.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-}
-
-function formatVnd(value) {
-  let num = Number(value);
-  if (isNaN(num)) return '0';
-  return num.toLocaleString('vi-VN');
-}
-
-function escapeExamHtml(str) {
-  if (typeof str !== 'string') return '';
-  return str.replace(/[&<>"']/g, function (c) {
-    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-  });
-}
-
-function showLawModal(content) {
-  let modal = document.getElementById('lawArticleModal');
-  let body = document.getElementById('lawArticleModalBody');
-  if (modal && body) {
-    body.innerHTML = content;
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-  }
-}
-
-function closeLawModal() {
-  let modal = document.getElementById('lawArticleModal');
-  if (modal) {
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
-  }
-}
-</script>
+<script>window.CVC_SMART_EXAM = <?php echo wp_json_encode( $smart_payload, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP ); ?>;</script>
+<script src="<?php echo esc_url( get_template_directory_uri() . '/assets/js/exam-smart.js?ver=' . (string) filemtime( get_theme_file_path( '/assets/js/exam-smart.js' ) ) ); ?>"></script>
 
 <?php get_footer(); ?>
