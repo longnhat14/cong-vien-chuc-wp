@@ -148,7 +148,7 @@ $total_q = count( $questions );
  * phút đếm lại từ đầu mỗi lần tải trang).
  */
 $exam_info      = is_array( $attempt_data['exam'] ?? null ) ? $attempt_data['exam'] : array();
-$exam_title     = (string) ( $exam_info['title'] ?? 'Bài thi trắc nghiệm' );
+$exam_title     = trim( (string) ( $exam_info['title'] ?? '' ) ) ?: 'Bài thi trắc nghiệm';
 $exam_code      = (string) ( $exam_info['code'] ?? '' );
 $exam_duration  = (int) ( $exam_info['duration_minutes'] ?? 0 );
 $started_ts     = ! empty( $attempt_data['started_at'] ) ? strtotime( (string) $attempt_data['started_at'] ) : false;
@@ -245,19 +245,13 @@ $doc_icon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H
 
 <div class="cvc-smart-exam" id="cvc-smart-exam" data-total="<?php echo (int) $total_q; ?>">
 
-	<header class="sx-top">
-		<div class="sx-examtitle"><?php echo $doc_icon; // phpcs:ignore WordPress.Security.EscapeOutput ?><span title="<?php echo esc_attr( $exam_title ); ?>">Đề thi: <?php echo esc_html( $exam_title ); ?></span></div>
-		<div class="sx-stats">
-			<div class="sx-stat"><small>Đã trả lời</small><strong><span id="sx-answered">0</span>/<?php echo (int) $total_q; ?></strong></div>
-			<div class="sx-stat sx-progressstat"><small>Tiến độ</small><div class="sx-statbar"><div class="sx-bar"><span id="sx-progress"></span></div><strong id="sx-percent">0%</strong></div></div>
-		</div>
-	</header>
-
-	<nav class="sx-toolbar" aria-label="Chế độ làm bài">
+	<nav class="sx-toolbar" aria-label="Đề thi và chế độ làm bài">
+		<div class="sx-examtitle" title="<?php echo esc_attr( $exam_title ); ?>"><?php echo $doc_icon; // phpcs:ignore WordPress.Security.EscapeOutput ?><span>Đề thi: <?php echo esc_html( $exam_title ); ?></span></div>
 		<div class="sx-meta">
-			<?php if ( '' !== $exam_code ) : ?><span>Mã đề: <?php echo esc_html( $exam_code ); ?></span><?php endif; ?>
+			<?php if ( '' !== $exam_code ) : ?><span><?php echo esc_html( $exam_code ); ?></span><?php endif; ?>
 			<span>☷ <?php echo (int) $total_q; ?> câu</span>
 			<span>◷ <?php echo $exam_duration > 0 ? (int) $exam_duration . ' phút' : 'Không giới hạn'; ?></span>
+			<span class="sx-meta-ans">✓ <strong><span id="sx-answered">0</span>/<?php echo (int) $total_q; ?></strong> <span class="sx-bar" aria-hidden="true"><span id="sx-progress"></span></span> <span id="sx-percent">0%</span></span>
 		</div>
 		<div class="sx-switch">
 			<button type="button" class="sx-mode active" data-mode="focus"><span class="sx-ic" aria-hidden="true">▣</span> Thi tập trung</button>
@@ -282,12 +276,6 @@ $doc_icon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H
 
 		<main class="sx-panel sx-mainpanel" id="sx-mainpanel">
 			<!-- Đầu văn bản -->
-			<div class="sx-dochead">
-				<p class="sx-dockind"><?php echo esc_html( mb_strtoupper( $exam_type_label, 'UTF-8' ) ); ?> TRẮC NGHIỆM</p>
-				<h1 class="sx-doctitle"><?php echo esc_html( $exam_title ); ?></h1>
-				<p class="sx-docsub"><em>Thời gian làm bài: <?php echo $exam_duration > 0 ? (int) $exam_duration . ' phút' : 'không giới hạn'; ?> · <?php echo (int) $total_q; ?> câu hỏi<?php echo null !== $exam_passing_score && $exam_total_score ? ' · Điểm đạt: ' . esc_html( rtrim( rtrim( number_format( $exam_passing_score, 2, ',', '' ), '0' ), ',' ) ) . '/' . esc_html( rtrim( rtrim( number_format( $exam_total_score, 2, ',', '' ), '0' ), ',' ) ) : ''; ?></em></p>
-				<span class="sx-docrule" aria-hidden="true"></span>
-			</div>
 
 			<section class="sx-main sx-single-only" id="sx-single">
 				<div class="sx-qtop">
@@ -368,11 +356,11 @@ $doc_icon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H
 				<div class="sx-head"><?php echo $doc_icon; // phpcs:ignore WordPress.Security.EscapeOutput ?><h2>Thông tin đề thi</h2></div>
 				<div class="sx-body sx-body-tight">
 					<table class="sx-details">
-						<tr><td>Đề thi</td><td><?php echo esc_html( $exam_title ); ?></td></tr>
 						<?php if ( '' !== $exam_code ) : ?><tr><td>Mã đề</td><td><?php echo esc_html( $exam_code ); ?></td></tr><?php endif; ?>
 						<tr><td>Số câu</td><td><?php echo (int) $total_q; ?> câu</td></tr>
 						<tr><td>Thời gian</td><td><?php echo $exam_duration > 0 ? (int) $exam_duration . ' phút' : 'Không giới hạn'; ?></td></tr>
 						<tr><td>Hình thức</td><td>Trắc nghiệm, chọn một đáp án</td></tr>
+						<?php if ( null !== $exam_passing_score && $exam_total_score ) : ?><tr><td>Điểm đạt</td><td><?php echo esc_html( rtrim( rtrim( number_format( $exam_passing_score, 2, ',', '' ), '0' ), ',' ) . '/' . rtrim( rtrim( number_format( $exam_total_score, 2, ',', '' ), '0' ), ',' ) ); ?></td></tr><?php endif; ?>
 						<tr><td>Trạng thái</td><td class="sx-status" id="sx-status"><?php echo $is_submitted ? '● Đã nộp bài' : '● Đang làm bài'; ?></td></tr>
 					</table>
 					<div class="sx-tips">

@@ -154,11 +154,21 @@
     fb.querySelector('[data-act="explain"]').onclick = function () { openExplain(current); };
   }
 
+  /* Chủ đề câu hỏi: ẩn khi chỉ lặp lại tên đề (đề luyện tập theo 1 văn bản). */
+  function norm(t) { return String(t || '').toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim(); }
+  var examNorm = norm(D.exam && D.exam.title);
+  function topicLabel(t) {
+    var n = norm(t);
+    if (!n) return '';
+    var head = n.slice(0, 40);
+    if (examNorm.indexOf(head) > -1 || n.indexOf(examNorm.slice(0, 40)) > -1) return '';
+    return t;
+  }
   function render() {
     if (!TOTAL) return;
     var q = Q[current];
     $('#sx-counter').textContent = 'Câu ' + (current + 1) + '/' + TOTAL;
-    $('#sx-topic').textContent = q.topic ? q.topic : '';
+    $('#sx-topic').textContent = topicLabel(q.topic);
     $('#sx-qtext').textContent = q.text;
     $('#sx-hintline').textContent = submitted ? 'Bài đã nộp - chọn một phương án để xem giải thích.' : 'Chọn một đáp án đúng nhất.';
     $('#sx-flag').checked = !!q.flagged;
