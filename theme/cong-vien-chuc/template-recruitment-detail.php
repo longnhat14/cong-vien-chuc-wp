@@ -23,6 +23,12 @@ if ( ! $result['ok'] && 404 !== (int) ( $result['status'] ?? 0 ) ) {
 }
 $recruitment = $result['ok'] && is_array( $result['data']['data'] ?? null ) ? $result['data']['data'] : null;
 
+// Đường dẫn cũ (tin đã sửa tiêu đề / đường dẫn) -> chuyển hướng 301 sang đường dẫn mới.
+if ( null === $recruitment && ! empty( $result['data']['redirect_slug'] ) && is_string( $result['data']['redirect_slug'] ) ) {
+	wp_safe_redirect( cvc_recruitment_url( sanitize_title( $result['data']['redirect_slug'] ) ), 301 );
+	exit;
+}
+
 if ( null === $recruitment && 404 !== (int) ( $result['status'] ?? 0 ) ) {
 	status_header( 503 );
 	header( 'Retry-After: 60' );
