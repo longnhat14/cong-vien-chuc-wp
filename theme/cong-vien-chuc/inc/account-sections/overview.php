@@ -46,14 +46,14 @@ $tiles = array(
 <div class="space-y-6">
 
 	<!-- CHUỖI NGÀY HỌC (dữ liệu thật) -->
-	<section class="bg-gradient-to-r from-navy-950 via-slate-900 to-indigo-950 p-6 rounded-3xl border border-amber-500/30 shadow-xl space-y-4 text-white" aria-labelledby="cvc-streak-title">
-		<div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-800 pb-3">
+	<section class="dz-panel" aria-labelledby="cvc-streak-title">
+		<div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-300 pb-3">
 			<div class="flex items-center gap-3">
-				<div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-xl shrink-0 border border-amber-500/30" aria-hidden="true">
+				<div class="w-12 h-12 rounded-2xl bg-acc-soft text-acc flex items-center justify-center text-xl shrink-0 border border-acc-line" aria-hidden="true">
 					<i class="fa-solid fa-fire"></i>
 				</div>
 				<div>
-					<h3 id="cvc-streak-title" class="text-base font-extrabold text-white">
+					<h3 id="cvc-streak-title" class="text-base font-extrabold text-ink">
 						<?php if ( null === $streak ) : ?>
 							Chuỗi ngày học
 						<?php elseif ( (int) $streak['current_streak'] > 0 ) : ?>
@@ -62,7 +62,7 @@ $tiles = array(
 							Bắt đầu chuỗi ngày học hôm nay
 						<?php endif; ?>
 					</h3>
-					<p class="text-xs text-slate-300">
+					<p class="text-xs text-ink-2">
 						Một ngày được tính khi bạn làm bài thi, học bài, cập nhật lộ trình hoặc xem nội dung ôn thi.
 						<?php if ( null !== $streak && ! $streak['active_today'] && (int) $streak['current_streak'] > 0 ) : ?>
 							Học một chút hôm nay để giữ chuỗi.
@@ -73,20 +73,20 @@ $tiles = array(
 
 			<?php if ( null !== $streak ) : ?>
 				<dl class="flex gap-3 shrink-0 text-center">
-					<div class="bg-slate-900/80 px-4 py-2 rounded-2xl border border-slate-700">
-						<dt class="text-[10px] text-slate-400 font-bold uppercase">Dài nhất</dt>
-						<dd class="text-base font-black text-amber-400"><?php echo esc_html( (int) $streak['longest_streak'] ); ?> ngày</dd>
+					<div class="bg-white px-4 py-2 rounded-2xl border border-slate-300">
+						<dt class="text-[10px] text-ink-muted font-bold uppercase">Dài nhất</dt>
+						<dd class="text-base font-black text-acc"><?php echo esc_html( (int) $streak['longest_streak'] ); ?> ngày</dd>
 					</div>
-					<div class="bg-slate-900/80 px-4 py-2 rounded-2xl border border-slate-700">
-						<dt class="text-[10px] text-slate-400 font-bold uppercase">30 ngày qua</dt>
-						<dd class="text-base font-black text-cyan-400"><?php echo esc_html( (int) $streak['active_days_last_30'] ); ?> ngày</dd>
+					<div class="bg-white px-4 py-2 rounded-2xl border border-slate-300">
+						<dt class="text-[10px] text-ink-muted font-bold uppercase">30 ngày qua</dt>
+						<dd class="text-base font-black text-acc"><?php echo esc_html( (int) $streak['active_days_last_30'] ); ?> ngày</dd>
 					</div>
 				</dl>
 			<?php endif; ?>
 		</div>
 
 		<?php if ( null === $streak ) : ?>
-			<p class="text-xs text-slate-400">Chưa tải được dữ liệu chuỗi ngày học. Vui lòng tải lại trang sau.</p>
+			<p class="text-xs text-ink-muted">Chưa tải được dữ liệu chuỗi ngày học. Vui lòng tải lại trang sau.</p>
 		<?php else : ?>
 			<ol class="grid grid-cols-7 gap-2 text-center text-xs pt-1" aria-label="Hoạt động 7 ngày gần nhất">
 				<?php foreach ( (array) $streak['weekly_activity'] as $day ) : ?>
@@ -99,9 +99,9 @@ $tiles = array(
 						$active ? sprintf( '%d hoạt động', (int) ( $day['activities'] ?? 0 ) ) : 'chưa học'
 					);
 					?>
-					<li class="p-2.5 rounded-2xl flex flex-col items-center gap-1 <?php echo $active ? 'bg-amber-500/20 border border-amber-400/50 text-amber-300' : 'bg-slate-900 border border-slate-800 text-slate-500'; ?> <?php echo ! empty( $day['is_today'] ) ? 'ring-1 ring-cyan-400/60' : ''; ?>" title="<?php echo esc_attr( $label ); ?>">
+					<li class="p-2.5 rounded-2xl flex flex-col items-center gap-1 <?php echo $active ? 'bg-acc-soft border border-acc-line text-acc' : 'bg-white border border-slate-300 text-ink-muted'; ?> <?php echo ! empty( $day['is_today'] ) ? 'ring-1 ring-cyan-400/60' : ''; ?>" title="<?php echo esc_attr( $label ); ?>">
 						<span class="font-extrabold text-[11px]"><?php echo esc_html( ! empty( $day['is_today'] ) ? 'Nay' : ( $day['day'] ?? '' ) ); ?></span>
-						<i class="fa-solid <?php echo $active ? 'fa-fire text-amber-400' : 'fa-circle text-slate-700 text-[8px] my-1'; ?>" aria-hidden="true"></i>
+						<i class="fa-solid <?php echo $active ? 'fa-fire text-acc' : 'fa-circle text-slate-700 text-[8px] my-1'; ?>" aria-hidden="true"></i>
 						<span class="sr-only"><?php echo esc_html( $label ); ?></span>
 					</li>
 				<?php endforeach; ?>
@@ -110,17 +110,17 @@ $tiles = array(
 	</section>
 
 	<!-- SỐ LIỆU NHANH -->
-	<dl class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-white">
-		<div class="p-4 bg-slate-900 rounded-2xl border border-slate-800">
-			<dt class="text-[10px] text-slate-400 font-bold uppercase">Lượt làm bài</dt>
+	<dl class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-ink">
+		<div class="dz-card">
+			<dt class="text-[10px] text-ink-muted font-bold uppercase">Lượt làm bài</dt>
 			<dd class="text-2xl font-black"><?php echo null === $attempt_total ? '—' : esc_html( number_format_i18n( $attempt_total ) ); ?></dd>
 		</div>
-		<div class="p-4 bg-slate-900 rounded-2xl border border-slate-800">
-			<dt class="text-[10px] text-slate-400 font-bold uppercase">Khóa học đã ghi danh</dt>
+		<div class="dz-card">
+			<dt class="text-[10px] text-ink-muted font-bold uppercase">Khóa học đã ghi danh</dt>
 			<dd class="text-2xl font-black"><?php echo null === $course_total ? '—' : esc_html( number_format_i18n( $course_total ) ); ?></dd>
 		</div>
-		<div class="p-4 bg-slate-900 rounded-2xl border border-slate-800">
-			<dt class="text-[10px] text-slate-400 font-bold uppercase">Thông báo chưa đọc</dt>
+		<div class="dz-card">
+			<dt class="text-[10px] text-ink-muted font-bold uppercase">Thông báo chưa đọc</dt>
 			<dd class="text-2xl font-black"><?php echo null === $unread_count ? '—' : esc_html( number_format_i18n( $unread_count ) ); ?></dd>
 		</div>
 	</dl>

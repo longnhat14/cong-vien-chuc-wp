@@ -11,14 +11,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 function cvc_ingestion_state_class( string $state ): string {
 	return array(
-		'qa_pending'        => 'bg-amber-500/15 text-amber-300 border-amber-500/30',
-		'published'         => 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
-		'validation_failed' => 'bg-rose-500/15 text-rose-300 border-rose-500/30',
-		'failed'            => 'bg-rose-500/15 text-rose-300 border-rose-500/30',
-		'duplicate'         => 'bg-slate-500/20 text-slate-300 border-slate-500/30',
-		'qa_rejected'       => 'bg-slate-500/20 text-slate-400 border-slate-500/30',
-		'ignored'           => 'bg-slate-500/20 text-slate-400 border-slate-500/30',
-	)[ $state ] ?? 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30';
+		'qa_pending'        => 'bg-acc-soft text-acc border-acc-line',
+		'published'         => 'bg-acc-soft text-emerald-800 border-acc-line',
+		'validation_failed' => 'bg-acc-soft text-red-700 border-acc-line',
+		'failed'            => 'bg-acc-soft text-red-700 border-acc-line',
+		'duplicate'         => 'bg-acc-soft text-ink-2 border-slate-500/30',
+		'qa_rejected'       => 'bg-acc-soft text-ink-muted border-slate-500/30',
+		'ignored'           => 'bg-acc-soft text-ink-muted border-slate-500/30',
+	)[ $state ] ?? 'bg-acc-soft text-acc border-acc-line';
 }
 
 function cvc_ingestion_badge( string $state, string $label ): string {
@@ -45,10 +45,10 @@ function cvc_ingestion_tabs( string $active ): void {
 		'on-tap'   => array( 'Ôn tập & văn bản', cvc_admin_url( 'thu-thap', null, array( 'xem' => 'on-tap' ) ) ),
 		'ten-mien' => array( 'Nguồn chính thức', cvc_admin_url( 'thu-thap', null, array( 'xem' => 'ten-mien' ) ) ),
 	);
-	echo '<nav class="flex flex-wrap gap-1 border-b border-slate-800" aria-label="Thu thập tin">';
+	echo '<nav class="flex flex-wrap gap-1 border-b border-slate-300" aria-label="Thu thập tin">';
 	foreach ( $tabs as $key => $tab ) {
 		$is = $key === $active;
-		echo '<a href="' . esc_url( $tab[1] ) . '" class="px-3 py-2 text-sm font-bold border-b-2 -mb-px ' . ( $is ? 'border-cyan-400 text-cyan-200' : 'border-transparent text-slate-400 hover:text-slate-200' ) . '"' . ( $is ? ' aria-current="page"' : '' ) . '>' . esc_html( $tab[0] ) . '</a>';
+		echo '<a href="' . esc_url( $tab[1] ) . '" class="px-3 py-2 text-sm font-bold border-b-2 -mb-px ' . ( $is ? 'border-acc-line text-acc' : 'border-transparent text-ink-muted hover:text-acc-2' ) . '"' . ( $is ? ' aria-current="page"' : '' ) . '>' . esc_html( $tab[0] ) . '</a>';
 	}
 	echo '</nav>';
 }
@@ -80,7 +80,7 @@ function cvc_ingestion_reject_form( int $id, string $class ): string {
 	$html  = '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" class="inline-flex items-center gap-1" data-cvc-confirm="' . esc_attr( 'Loại tin này khỏi hàng chờ?' ) . '">';
 	$html .= wp_nonce_field( 'cvc_admin_ingestion', '_wpnonce', true, false );
 	$html .= '<input type="hidden" name="action" value="cvc_admin_ingestion"><input type="hidden" name="op" value="reject"><input type="hidden" name="id" value="' . esc_attr( (string) $id ) . '">';
-	$html .= '<select name="reason" required aria-label="Lý do loại" class="bg-slate-900 border border-slate-700 rounded-lg text-[11px] text-slate-300 py-1 px-1.5"><option value="">Lý do loại…</option>';
+	$html .= '<select name="reason" required aria-label="Lý do loại" class="border border-slate-300 rounded-lg text-[11px] text-ink-2 py-1 px-1.5 text-ink border-slate-400 bg-white"><option value="">Lý do loại…</option>';
 	foreach ( $reasons as $k => $label ) {
 		$html .= '<option value="' . esc_attr( $k ) . '">' . esc_html( $label ) . '</option>';
 	}
@@ -120,7 +120,7 @@ function cvc_ingestion_render_health(): void {
 		$m = (int) floor( ( time() - strtotime( (string) $iso ) ) / 60 );
 		return $m < 60 ? max( 0, $m ) . ' phút trước' : ( $m < 2880 ? round( $m / 60 ) . ' giờ trước' : round( $m / 1440 ) . ' ngày trước' );
 	};
-	$tone   = array( 'critical' => 'border-rose-500/50 bg-rose-500/10 text-rose-100', 'warning' => 'border-amber-500/50 bg-amber-500/10 text-amber-100', 'info' => 'border-slate-600 bg-slate-800/60 text-slate-200' );
+	$tone   = array( 'critical' => 'border-acc-line bg-acc-soft text-red-700', 'warning' => 'border-acc-line bg-acc-soft text-acc', 'info' => 'border-slate-300 bg-white text-ink' );
 	?>
 	<section class="space-y-3" aria-label="Sức khỏe thu thập">
 		<?php foreach ( $alerts as $a ) : ?>
@@ -129,35 +129,35 @@ function cvc_ingestion_render_health(): void {
 			</div>
 		<?php endforeach; ?>
 		<div class="grid grid-cols-2 lg:grid-cols-5 gap-3">
-			<div class="rounded-2xl border border-slate-800 bg-slate-900/60 p-3">
-				<p class="text-[11px] uppercase tracking-wider text-slate-400">Bắt tin 7 ngày</p>
-				<p class="text-xl font-black text-white tabular-nums"><?php echo esc_html( $pct( $now, $tot ) ); ?></p>
-				<p class="text-[11px] text-slate-400"><?php echo esc_html( "{$now}/{$tot} tin trên trang tổng hợp · tự thấy trước: " . $pct( $had, $tot ) ); ?></p>
+			<div class="rounded-2xl border border-slate-300 bg-white p-3">
+				<p class="text-[11px] uppercase tracking-wider text-ink-muted">Bắt tin 7 ngày</p>
+				<p class="text-xl font-black text-ink tabular-nums"><?php echo esc_html( $pct( $now, $tot ) ); ?></p>
+				<p class="text-[11px] text-ink-muted"><?php echo esc_html( "{$now}/{$tot} tin trên trang tổng hợp · tự thấy trước: " . $pct( $had, $tot ) ); ?></p>
 			</div>
-			<div class="rounded-2xl border border-slate-800 bg-slate-900/60 p-3">
-				<p class="text-[11px] uppercase tracking-wider text-slate-400">Phễu 7 ngày</p>
-				<p class="text-xl font-black text-white tabular-nums"><?php echo esc_html( (int) ( $f['published'] ?? 0 ) . ' tin đăng' ); ?></p>
-				<p class="text-[11px] text-slate-400"><?php echo esc_html( (int) ( $f['links'] ?? 0 ) . ' link · loại: luật ' . (int) ( $f['filtered_rules'] ?? 0 ) . ', AI ' . (int) ( $f['filtered_ai'] ?? 0 ) . ', đã học ' . (int) ( $f['filtered_learned'] ?? 0 ) . ' · tải ' . (int) ( $f['fetched'] ?? 0 ) ); ?></p>
+			<div class="rounded-2xl border border-slate-300 bg-white p-3">
+				<p class="text-[11px] uppercase tracking-wider text-ink-muted">Phễu 7 ngày</p>
+				<p class="text-xl font-black text-ink tabular-nums"><?php echo esc_html( (int) ( $f['published'] ?? 0 ) . ' tin đăng' ); ?></p>
+				<p class="text-[11px] text-ink-muted"><?php echo esc_html( (int) ( $f['links'] ?? 0 ) . ' link · loại: luật ' . (int) ( $f['filtered_rules'] ?? 0 ) . ', AI ' . (int) ( $f['filtered_ai'] ?? 0 ) . ', đã học ' . (int) ( $f['filtered_learned'] ?? 0 ) . ' · tải ' . (int) ( $f['fetched'] ?? 0 ) ); ?></p>
 			</div>
-			<div class="rounded-2xl border border-slate-800 bg-slate-900/60 p-3">
-				<p class="text-[11px] uppercase tracking-wider text-slate-400">Chi phí AI thu thập</p>
-				<p class="text-xl font-black text-white tabular-nums"><?php echo esc_html( number_format( (int) ( $ai['ingestion_cost_7d'] ?? 0 ), 0, ',', '.' ) . ' ₫' ); ?></p>
-				<p class="text-[11px] text-slate-400"><?php echo esc_html( null !== ( $ai['cost_per_published'] ?? null ) ? '≈ ' . number_format( (int) $ai['cost_per_published'], 0, ',', '.' ) . ' ₫ / tin đăng (7 ngày)' : '7 ngày' ); ?></p>
+			<div class="rounded-2xl border border-slate-300 bg-white p-3">
+				<p class="text-[11px] uppercase tracking-wider text-ink-muted">Chi phí AI thu thập</p>
+				<p class="text-xl font-black text-ink tabular-nums"><?php echo esc_html( number_format( (int) ( $ai['ingestion_cost_7d'] ?? 0 ), 0, ',', '.' ) . ' ₫' ); ?></p>
+				<p class="text-[11px] text-ink-muted"><?php echo esc_html( null !== ( $ai['cost_per_published'] ?? null ) ? '≈ ' . number_format( (int) $ai['cost_per_published'], 0, ',', '.' ) . ' ₫ / tin đăng (7 ngày)' : '7 ngày' ); ?></p>
 			</div>
-			<div class="rounded-2xl border border-slate-800 bg-slate-900/60 p-3">
-				<p class="text-[11px] uppercase tracking-wider text-slate-400">Trạm VN (pctech)</p>
-				<p class="text-xl font-black tabular-nums <?php echo ! empty( $relay['healthy'] ) ? 'text-emerald-300' : 'text-rose-300'; ?>"><?php echo esc_html( ! empty( $relay['healthy'] ) ? 'Hoạt động' : ( ! empty( $relay['configured'] ) ? 'Ngừng' : 'Chưa cấu hình' ) ); ?></p>
-				<p class="text-[11px] text-slate-400"><?php echo esc_html( 'v' . ( $relay['version'] ?? '?' ) . ' · ' . (int) ( $relay['hosts'] ?? 0 ) . ' tên miền · OK ' . $ago( $relay['last_ok'] ?? null ) ); ?></p>
+			<div class="rounded-2xl border border-slate-300 bg-white p-3">
+				<p class="text-[11px] uppercase tracking-wider text-ink-muted">Trạm VN (pctech)</p>
+				<p class="text-xl font-black tabular-nums <?php echo ! empty( $relay['healthy'] ) ? 'text-emerald-800' : 'text-red-700'; ?>"><?php echo esc_html( ! empty( $relay['healthy'] ) ? 'Hoạt động' : ( ! empty( $relay['configured'] ) ? 'Ngừng' : 'Chưa cấu hình' ) ); ?></p>
+				<p class="text-[11px] text-ink-muted"><?php echo esc_html( 'v' . ( $relay['version'] ?? '?' ) . ' · ' . (int) ( $relay['hosts'] ?? 0 ) . ' tên miền · OK ' . $ago( $relay['last_ok'] ?? null ) ); ?></p>
 			</div>
-			<div class="rounded-2xl border border-slate-800 bg-slate-900/60 p-3">
-				<p class="text-[11px] uppercase tracking-wider text-slate-400">Cron · nguồn</p>
-				<p class="text-xl font-black text-white tabular-nums"><?php echo esc_html( $ago( $cron['last_run'] ?? null ) ); ?></p>
-				<p class="text-[11px] text-slate-400"><?php echo esc_html( 'quét tin ' . $ago( $cron['last_ingestion_tick'] ?? null ) . ' · ' . (int) ( $src['active'] ?? 0 ) . ' nguồn / ' . (int) ( $src['provinces'] ?? 0 ) . ' tỉnh' ); ?></p>
+			<div class="rounded-2xl border border-slate-300 bg-white p-3">
+				<p class="text-[11px] uppercase tracking-wider text-ink-muted">Cron · nguồn</p>
+				<p class="text-xl font-black text-ink tabular-nums"><?php echo esc_html( $ago( $cron['last_run'] ?? null ) ); ?></p>
+				<p class="text-[11px] text-ink-muted"><?php echo esc_html( 'quét tin ' . $ago( $cron['last_ingestion_tick'] ?? null ) . ' · ' . (int) ( $src['active'] ?? 0 ) . ' nguồn / ' . (int) ( $src['provinces'] ?? 0 ) . ' tỉnh' ); ?></p>
 			</div>
 		</div>
 		<?php if ( ! empty( $src['failing'] ) ) : ?>
-			<details class="rounded-2xl border border-slate-800 bg-slate-900/40 p-3 text-xs text-slate-300">
-				<summary class="cursor-pointer font-bold text-slate-200"><?php echo esc_html( count( (array) $src['failing'] ) . ' nguồn đang lỗi liên tiếp' ); ?></summary>
+			<details class="rounded-2xl border border-slate-300 bg-acc-soft p-3 text-xs text-ink-2">
+				<summary class="cursor-pointer font-bold text-ink"><?php echo esc_html( count( (array) $src['failing'] ) . ' nguồn đang lỗi liên tiếp' ); ?></summary>
 				<ul class="mt-2 space-y-1">
 					<?php foreach ( (array) $src['failing'] as $fs ) : ?>
 						<li><?php echo esc_html( (string) $fs['name'] . ' (' . (string) $fs['domain'] . ') - lỗi ' . (int) $fs['failures'] . ' lần liên tiếp' ); ?></li>
@@ -189,15 +189,15 @@ function cvc_admin_render_ingestion_index(): void {
 	?>
 	<header class="flex flex-wrap items-end justify-between gap-3">
 		<div>
-			<h1 class="text-2xl font-black text-white">Thu thập tin tuyển dụng</h1>
-			<p class="text-sm text-slate-400">Tự động quét cổng thông tin nhà nước, tải công văn gốc, phân tích và đăng tin kèm nguồn trích dẫn.</p>
+			<h1 class="text-2xl font-black text-ink">Thu thập tin tuyển dụng</h1>
+			<p class="text-sm text-ink-muted">Tự động quét cổng thông tin nhà nước, tải công văn gốc, phân tích và đăng tin kèm nguồn trích dẫn.</p>
 		</div>
 		<div class="flex flex-wrap gap-2">
 			<?php if ( cvc_admin_can( 'recruitment.view' ) ) : ?>
-				<a class="<?php echo esc_attr( $btn ); ?> bg-slate-800 text-slate-200 hover:bg-slate-700" href="<?php echo esc_url( cvc_admin_url( 'sources' ) ); ?>"><i class="fa-solid fa-satellite-dish mr-1" aria-hidden="true"></i>Nguồn tin</a>
+				<a class="<?php echo esc_attr( $btn ); ?> bg-white text-ink hover:bg-acc-soft" href="<?php echo esc_url( cvc_admin_url( 'sources' ) ); ?>"><i class="fa-solid fa-satellite-dish mr-1" aria-hidden="true"></i>Nguồn tin</a>
 			<?php endif; ?>
 			<?php if ( $can_upd ) : ?>
-				<?php echo cvc_ingestion_op_form( 'run', 0, 'Chạy 1 lượt ngay', $btn . ' bg-cyan-500 text-slate-950 hover:bg-cyan-400' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+				<?php echo cvc_ingestion_op_form( 'run', 0, 'Chạy 1 lượt ngay', $btn . 'bg-acc text-slate-950 hover:bg-acc-deep text-white' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 			<?php endif; ?>
 		</div>
 	</header>
@@ -211,12 +211,12 @@ function cvc_admin_render_ingestion_index(): void {
 	<?php cvc_ingestion_render_health(); ?>
 
 	<section class="grid grid-cols-1 xl:grid-cols-[1.2fr_1fr] gap-4">
-		<div class="bg-[#0A192F] border border-slate-800 rounded-2xl p-5 space-y-3">
+		<div class="dz-card space-y-3">
 			<div class="flex items-center justify-between gap-3">
-				<h2 class="text-sm font-black text-white">Chế độ đăng tin</h2>
-				<?php echo $auto ? '<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">Đang tự động đăng</span>' : '<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">Đang duyệt 1 click</span>'; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+				<h2 class="text-sm font-black text-ink">Chế độ đăng tin</h2>
+				<?php echo $auto ? '<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-acc-soft text-emerald-800 border border-acc-line">Đang tự động đăng</span>' : '<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-acc-soft text-acc border border-acc-line">Đang duyệt 1 click</span>'; // phpcs:ignore WordPress.Security.EscapeOutput ?>
 			</div>
-			<p class="text-sm text-slate-300">
+			<p class="text-sm text-ink-2">
 				<?php if ( $auto ) : ?>
 					Tin đạt đủ điều kiện được <strong>đăng ngay</strong>: đúng là thông báo tuyển dụng, nguồn tin cậy, còn hạn nộp, xác định được tỉnh, cơ quan và chỉ tiêu, không trùng tin cũ. Tin chưa đạt nằm ở hàng chờ kèm lý do để bạn duyệt 1 click.
 				<?php else : ?>
@@ -229,12 +229,12 @@ function cvc_admin_render_ingestion_index(): void {
 					<input type="hidden" name="action" value="cvc_admin_ingestion">
 					<input type="hidden" name="op" value="settings">
 					<input type="hidden" name="auto_publish" value="<?php echo $auto ? '0' : '1'; ?>">
-					<button type="submit" class="<?php echo esc_attr( $btn ); ?> <?php echo $auto ? 'bg-slate-800 text-slate-200 hover:bg-slate-700' : 'bg-emerald-500 text-slate-950 hover:bg-emerald-400'; ?>">
+					<button type="submit" class="<?php echo esc_attr( $btn ); ?> <?php echo $auto ? 'bg-white text-ink hover:bg-acc-soft' : 'bg-acc text-slate-950 hover:bg-acc-deep text-white'; ?>">
 						<?php echo $auto ? 'Chuyển sang duyệt 1 click' : 'Bật tự động đăng'; ?>
 					</button>
 				</form>
 			<?php endif; ?>
-			<p class="text-xs <?php echo $ai_ok ? 'text-slate-400' : 'text-amber-300'; ?>">
+			<p class="text-xs <?php echo $ai_ok ? 'text-slate-400' : 'text-acc'; ?>">
 				<?php if ( $ai_ok ) : ?>
 					<i class="fa-solid fa-robot mr-1" aria-hidden="true"></i>AI phân tích: <?php echo esc_html( (string) ( $ov['ai']['provider'] ?? '' ) . ' · ' . (string) ( $ov['ai']['model'] ?? '' ) ); ?> — đọc cả công văn scan (PDF).
 				<?php else : ?>
@@ -250,12 +250,12 @@ function cvc_admin_render_ingestion_index(): void {
 			foreach ( $tiles as $t ) :
 				$info = $ov['states'][ $t ] ?? array( 'label' => $t, 'total' => 0 );
 				?>
-				<a href="<?php echo esc_url( cvc_admin_url( 'thu-thap', null, array( 'state' => $t ) ) ); ?>" class="block bg-[#0A192F] border <?php echo $state === $t ? 'border-cyan-500/60' : 'border-slate-800'; ?> rounded-xl p-3 hover:border-slate-600">
-					<dt class="text-[11px] font-bold text-slate-400"><?php echo esc_html( (string) $info['label'] ); ?></dt>
-					<dd class="text-xl font-black text-white tabular-nums"><?php echo esc_html( number_format_i18n( (int) $info['total'] ) ); ?></dd>
+				<a href="<?php echo esc_url( cvc_admin_url( 'thu-thap', null, array( 'state' => $t ) ) ); ?>" class="block bg-white border <?php echo $state === $t ? 'border-acc-line' : 'border-slate-300'; ?> rounded-xl p-3 hover:border-acc-line">
+					<dt class="text-[11px] font-bold text-ink-muted"><?php echo esc_html( (string) $info['label'] ); ?></dt>
+					<dd class="text-xl font-black text-ink tabular-nums"><?php echo esc_html( number_format_i18n( (int) $info['total'] ) ); ?></dd>
 				</a>
 			<?php endforeach; ?>
-			<div class="col-span-2 sm:col-span-3 text-xs text-slate-400 flex flex-wrap gap-x-4 gap-y-1 px-1">
+			<div class="col-span-2 sm:col-span-3 text-xs text-ink-muted flex flex-wrap gap-x-4 gap-y-1 px-1">
 				<span><?php echo esc_html( (int) ( $ov['sources']['active'] ?? 0 ) ); ?> nguồn đang chạy</span>
 				<span><?php echo esc_html( (int) ( $ov['links_waiting'] ?? 0 ) ); ?> link chờ tải</span>
 				<span><?php echo esc_html( (int) ( $ov['attachments'] ?? 0 ) ); ?> công văn đã lưu</span>
@@ -267,16 +267,16 @@ function cvc_admin_render_ingestion_index(): void {
 
 	<?php $cvc_open = (array) ( $ov['open_unpublished'] ?? array() ); ?>
 	<?php if ( ! empty( $cvc_open ) ) : ?>
-		<section class="bg-rose-500/10 border border-rose-500/40 rounded-2xl p-5 space-y-3" aria-labelledby="cvc-open-unpub">
-			<h2 id="cvc-open-unpub" class="text-sm font-black text-rose-200"><i class="fa-solid fa-triangle-exclamation mr-1.5" aria-hidden="true"></i>Tin còn hạn nộp hồ sơ nhưng chưa đăng (<?php echo esc_html( (string) count( $cvc_open ) ); ?>)</h2>
-			<p class="text-xs text-rose-100/80">Duyệt hoặc sửa sớm để không lỡ đợt tuyển. Sắp xếp theo hạn nộp gần nhất.</p>
+		<section class="bg-acc-soft border border-acc-line rounded-2xl p-5 space-y-3" aria-labelledby="cvc-open-unpub">
+			<h2 id="cvc-open-unpub" class="text-sm font-black text-red-700"><i class="fa-solid fa-triangle-exclamation mr-1.5" aria-hidden="true"></i>Tin còn hạn nộp hồ sơ nhưng chưa đăng (<?php echo esc_html( (string) count( $cvc_open ) ); ?>)</h2>
+			<p class="text-xs text-red-700">Duyệt hoặc sửa sớm để không lỡ đợt tuyển. Sắp xếp theo hạn nộp gần nhất.</p>
 			<ul class="space-y-2">
 				<?php foreach ( $cvc_open as $o ) : ?>
 					<li class="flex flex-wrap items-center gap-2 text-xs">
-						<span class="px-2 py-0.5 rounded-full font-black <?php echo (int) $o['days_left'] <= 3 ? 'bg-rose-500 text-white' : 'bg-amber-500/20 text-amber-200'; ?>"><?php echo esc_html( 0 === (int) $o['days_left'] ? 'Hết hạn hôm nay' : 'Còn ' . (int) $o['days_left'] . ' ngày' ); ?></span>
-						<a class="font-bold text-white hover:underline" href="<?php echo esc_url( cvc_admin_url( 'thu-thap', (int) $o['id'] ) ); ?>">#<?php echo esc_html( (string) $o['id'] ); ?> <?php echo esc_html( (string) $o['title'] ); ?></a>
-						<span class="text-slate-400">hạn <?php echo esc_html( cvc_admin_format( $o['deadline'] ?? null, 'date' ) ); ?></span>
-						<?php if ( ! empty( $o['reason'] ) ) : ?><span class="text-amber-300/90">· <?php echo esc_html( (string) $o['reason'] ); ?></span><?php endif; ?>
+						<span class="px-2 py-0.5 rounded-full font-black <?php echo (int) $o['days_left'] <= 3 ? 'bg-acc-soft text-acc border-acc-line' : 'bg-acc-soft text-acc'; ?>"><?php echo esc_html( 0 === (int) $o['days_left'] ? 'Hết hạn hôm nay' : 'Còn ' . (int) $o['days_left'] . ' ngày' ); ?></span>
+						<a class="font-bold text-ink hover:underline" href="<?php echo esc_url( cvc_admin_url( 'thu-thap', (int) $o['id'] ) ); ?>">#<?php echo esc_html( (string) $o['id'] ); ?> <?php echo esc_html( (string) $o['title'] ); ?></a>
+						<span class="text-ink-muted">hạn <?php echo esc_html( cvc_admin_format( $o['deadline'] ?? null, 'date' ) ); ?></span>
+						<?php if ( ! empty( $o['reason'] ) ) : ?><span class="text-acc">· <?php echo esc_html( (string) $o['reason'] ); ?></span><?php endif; ?>
 					</li>
 				<?php endforeach; ?>
 			</ul>
@@ -286,57 +286,57 @@ function cvc_admin_render_ingestion_index(): void {
 	<?php cvc_admin_render_prefilter_panel( (array) ( $ov['prefilter'] ?? array() ), $can_pub ); ?>
 
 	<?php if ( cvc_admin_can( 'recruitment.create' ) ) : ?>
-		<details class="bg-[#0A192F] border border-slate-800 rounded-2xl p-5">
-			<summary class="cursor-pointer text-sm font-black text-white"><i class="fa-solid fa-file-arrow-up mr-1.5 text-cyan-300" aria-hidden="true"></i>Nhập tin từ file công văn (PDF/DOCX)</summary>
+		<details class="dz-card">
+			<summary class="cursor-pointer text-sm font-black text-ink"><i class="fa-solid fa-file-arrow-up mr-1.5 text-acc" aria-hidden="true"></i>Nhập tin từ file công văn (PDF/DOCX)</summary>
 			<form method="post" enctype="multipart/form-data" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
 				<?php wp_nonce_field( 'cvc_admin_ingestion' ); ?>
 				<input type="hidden" name="action" value="cvc_admin_ingestion">
 				<input type="hidden" name="op" value="import">
-				<label class="block text-sm"><span class="text-slate-300 font-bold">File công văn <span class="text-rose-400">*</span></span>
-					<input type="file" name="file" accept=".pdf,.doc,.docx" required class="mt-1 block w-full text-sm text-slate-300 file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-slate-700 file:text-slate-100">
+				<label class="block text-sm"><span class="text-ink-2 font-bold">File công văn <span class="text-red-700">*</span></span>
+					<input type="file" name="file" accept=".pdf,.doc,.docx" required class="mt-1 block w-full text-sm text-ink-2 file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-white file:text-acc-2 text-ink border-slate-400 bg-white">
 				</label>
-				<label class="block text-sm"><span class="text-slate-300 font-bold">Link nguồn chính thức <span class="text-rose-400">*</span></span>
-					<input type="url" name="source_url" required placeholder="https://sonoivu....gov.vn/..." class="<?php echo esc_attr( cvc_admin_input_class() ); ?>">
-					<span class="text-xs text-slate-500">Trang đăng công văn gốc — dùng làm trích dẫn trên tin.</span>
+				<label class="block text-sm"><span class="text-ink-2 font-bold">Link nguồn chính thức <span class="text-red-700">*</span></span>
+					<input type="url" name="source_url" required placeholder="https://sonoivu....gov.vn/..." class="text-ink border-slate-400 bg-white <?php echo esc_attr( cvc_admin_input_class() ); ?> text-ink border-slate-400 bg-white">
+					<span class="text-xs text-ink-muted">Trang đăng công văn gốc — dùng làm trích dẫn trên tin.</span>
 				</label>
-				<label class="block text-sm"><span class="text-slate-300 font-bold">Tỉnh/thành</span>
-					<select name="province_id" class="<?php echo esc_attr( cvc_admin_input_class() ); ?>">
+				<label class="block text-sm"><span class="text-ink-2 font-bold">Tỉnh/thành</span>
+					<select name="province_id" class="text-ink border-slate-400 bg-white <?php echo esc_attr( cvc_admin_input_class() ); ?> text-ink border-slate-400 bg-white">
 						<option value="">— Để hệ thống tự nhận diện —</option>
 						<?php foreach ( cvc_admin_provinces() as $pid => $pname ) : ?>
 							<option value="<?php echo esc_attr( (string) $pid ); ?>"><?php echo esc_html( (string) $pname ); ?></option>
 						<?php endforeach; ?>
 					</select>
 				</label>
-				<label class="block text-sm"><span class="text-slate-300 font-bold">Tiêu đề (không bắt buộc)</span>
-					<input type="text" name="title" maxlength="500" class="<?php echo esc_attr( cvc_admin_input_class() ); ?>">
+				<label class="block text-sm"><span class="text-ink-2 font-bold">Tiêu đề (không bắt buộc)</span>
+					<input type="text" name="title" maxlength="500" class="text-ink border-slate-400 bg-white <?php echo esc_attr( cvc_admin_input_class() ); ?> text-ink border-slate-400 bg-white">
 				</label>
-				<div class="md:col-span-2"><button type="submit" class="<?php echo esc_attr( $btn ); ?> bg-cyan-500 text-slate-950 hover:bg-cyan-400">Tải lên &amp; phân tích</button></div>
+				<div class="md:col-span-2"><button type="submit" class="<?php echo esc_attr( $btn ); ?> bg-acc text-slate-950 hover:bg-acc-deep text-white">Tải lên &amp; phân tích</button></div>
 			</form>
 		</details>
 	<?php endif; ?>
 
-	<section class="bg-[#0A192F] border border-slate-800 rounded-2xl p-5 space-y-4" aria-labelledby="cvc-ing-queue">
+	<section class="dz-card space-y-4" aria-labelledby="cvc-ing-queue">
 		<div class="flex flex-wrap items-center justify-between gap-3">
-			<h2 id="cvc-ing-queue" class="text-sm font-black text-white">
+			<h2 id="cvc-ing-queue" class="text-sm font-black text-ink">
 				<?php echo esc_html( 'all' === $state ? 'Tất cả tin thu thập' : ( (string) ( $ov['states'][ $state ]['label'] ?? 'Hàng chờ' ) ) ); ?>
-				<span class="text-slate-500 font-bold">(<?php echo esc_html( (string) ( $meta['total'] ?? 0 ) ); ?>)</span>
+				<span class="text-ink-muted font-bold">(<?php echo esc_html( (string) ( $meta['total'] ?? 0 ) ); ?>)</span>
 			</h2>
 			<form method="get" action="<?php echo esc_url( cvc_admin_url( 'thu-thap' ) ); ?>" class="flex gap-2">
 				<input type="hidden" name="state" value="<?php echo esc_attr( $state ); ?>">
 				<input type="search" name="q" value="<?php echo esc_attr( $q ); ?>" placeholder="Tìm tiêu đề, cơ quan, link…" class="<?php echo esc_attr( cvc_admin_input_class() ); ?> !mt-0 w-64">
-				<button class="<?php echo esc_attr( $btn ); ?> bg-slate-800 text-slate-200">Tìm</button>
-				<a class="<?php echo esc_attr( $btn ); ?> bg-slate-800 text-slate-300" href="<?php echo esc_url( cvc_admin_url( 'thu-thap', null, array( 'state' => 'all' ) ) ); ?>">Tất cả</a>
+				<button class="<?php echo esc_attr( $btn ); ?> bg-white text-ink">Tìm</button>
+				<a class="<?php echo esc_attr( $btn ); ?> bg-white text-ink-2" href="<?php echo esc_url( cvc_admin_url( 'thu-thap', null, array( 'state' => 'all' ) ) ); ?>">Tất cả</a>
 			</form>
 		</div>
 
 		<?php if ( ! $list['ok'] ) : ?>
 			<?php cvc_render_error_state( cvc_admin_error_message( $list ) ); ?>
 		<?php elseif ( empty( $rows ) ) : ?>
-			<p class="text-sm text-slate-400">Không có tin nào ở mục này.</p>
+			<p class="text-sm text-ink-muted">Không có tin nào ở mục này.</p>
 		<?php else : ?>
 			<div class="overflow-x-auto">
 				<table class="w-full text-sm">
-					<thead class="text-[11px] uppercase tracking-wider text-slate-400 text-left">
+					<thead class="text-[11px] uppercase tracking-wider text-ink-muted text-left">
 						<tr>
 							<th class="py-2 pr-3">Tin</th>
 							<th class="py-2 pr-3">Tỉnh · Hạn nộp</th>
@@ -344,12 +344,12 @@ function cvc_admin_render_ingestion_index(): void {
 							<th class="py-2 text-right">Thao tác</th>
 						</tr>
 					</thead>
-					<tbody class="divide-y divide-slate-800">
+					<tbody class="divide-y divide-slate-200">
 						<?php foreach ( $rows as $row ) : ?>
 							<tr class="align-top">
 								<td class="py-3 pr-3 min-w-[320px]">
-									<a class="font-bold text-slate-100 hover:text-cyan-300" href="<?php echo esc_url( cvc_admin_url( 'thu-thap', (int) $row['id'] ) ); ?>"><?php echo esc_html( (string) ( $row['title'] ?? '(chưa có tiêu đề)' ) ); ?></a>
-									<div class="text-xs text-slate-400 mt-0.5">
+									<a class="font-bold text-ink hover:text-acc-2" href="<?php echo esc_url( cvc_admin_url( 'thu-thap', (int) $row['id'] ) ); ?>"><?php echo esc_html( (string) ( $row['title'] ?? '(chưa có tiêu đề)' ) ); ?></a>
+									<div class="text-xs text-ink-muted mt-0.5">
 										<?php echo esc_html( (string) ( $row['agency_name'] ?? '' ) ); ?>
 										<?php echo esc_html( ( ! empty( $row['agency_name'] ) ? ' · ' : '' ) . (string) ( $row['source']['name'] ?? '' ) ); ?>
 										<?php if ( ! empty( $row['attachments_count'] ) ) : ?>
@@ -357,34 +357,34 @@ function cvc_admin_render_ingestion_index(): void {
 										<?php endif; ?>
 										<?php if ( ! empty( $row['source_record'] ) ) : ?>
 											<?php $rec = (array) $row['source_record']; ?>
-											· <span class="<?php echo (int) $rec['rejected'] > (int) $rec['approved'] ? 'text-rose-300' : 'text-emerald-300'; ?>" title="Quyết định của biên tập viên với nguồn này (180 ngày)">nguồn: duyệt <?php echo (int) $rec['approved']; ?> / loại <?php echo (int) $rec['rejected']; ?></span>
+											· <span class="<?php echo (int) $rec['rejected'] > (int) $rec['approved'] ? 'text-red-700' : 'text-emerald-800'; ?>" title="Quyết định của biên tập viên với nguồn này (180 ngày)">nguồn: duyệt <?php echo (int) $rec['approved']; ?> / loại <?php echo (int) $rec['rejected']; ?></span>
 										<?php endif; ?>
 										<?php if ( isset( $row['source_check']['official'] ) && ! $row['source_check']['official'] ) : ?>
-											· <span class="px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-300 font-bold" title="<?php echo esc_attr( (string) ( $row['source_check']['host'] ?? '' ) . ' — ' . (string) ( $row['source_check']['reason'] ?? '' ) ); ?>">Nguồn sưu tầm</span>
+											· <span class="px-1.5 py-0.5 rounded bg-acc-soft text-acc font-bold" title="<?php echo esc_attr( (string) ( $row['source_check']['host'] ?? '' ) . ' — ' . (string) ( $row['source_check']['reason'] ?? '' ) ); ?>">Nguồn sưu tầm</span>
 										<?php endif; ?>
 									</div>
 									<?php if ( ! empty( $row['publish_block_reason'] ) && 'published' !== $row['state'] ) : ?>
-										<div class="text-xs text-amber-300/90 mt-1">Chưa tự đăng: <?php echo esc_html( (string) $row['publish_block_reason'] ); ?></div>
+										<div class="text-xs text-acc mt-1">Chưa tự đăng: <?php echo esc_html( (string) $row['publish_block_reason'] ); ?></div>
 									<?php endif; ?>
 								</td>
-								<td class="py-3 pr-3 text-xs text-slate-300 whitespace-nowrap">
+								<td class="py-3 pr-3 text-xs text-ink-2 whitespace-nowrap">
 									<?php echo esc_html( (string) ( $row['province_name'] ?? '—' ) ); ?><br>
-									<span class="text-slate-400">Hạn: <?php echo esc_html( cvc_ingestion_date( $row['application_deadline'] ?? null ) ); ?></span>
+									<span class="text-ink-muted">Hạn: <?php echo esc_html( cvc_ingestion_date( $row['application_deadline'] ?? null ) ); ?></span>
 									<?php if ( ! empty( $row['total_positions'] ) ) : ?>
-										<br><span class="text-slate-400"><?php echo esc_html( (string) $row['total_positions'] ); ?> chỉ tiêu</span>
+										<br><span class="text-ink-muted"><?php echo esc_html( (string) $row['total_positions'] ); ?> chỉ tiêu</span>
 									<?php endif; ?>
 								</td>
 								<td class="py-3 pr-3"><?php echo cvc_ingestion_badge( (string) $row['state'], (string) $row['state_label'] ); // phpcs:ignore WordPress.Security.EscapeOutput ?></td>
 								<td class="py-3 text-right whitespace-nowrap space-x-1">
 									<?php if ( 'published' === $row['state'] && ! empty( $row['recruitment']['slug'] ) ) : ?>
-										<a class="text-xs font-bold text-emerald-300" href="<?php echo esc_url( cvc_recruitment_url( (string) $row['recruitment']['slug'] ) ); ?>" target="_blank" rel="noopener">Xem tin</a>
+										<a class="text-xs font-bold text-emerald-800" href="<?php echo esc_url( cvc_recruitment_url( (string) $row['recruitment']['slug'] ) ); ?>" target="_blank" rel="noopener">Xem tin</a>
 									<?php elseif ( $can_pub && in_array( $row['state'], array( 'qa_pending', 'validation_failed', 'duplicate', 'ignored' ), true ) ) : ?>
-										<?php echo cvc_ingestion_op_form( 'approve', (int) $row['id'], 'Duyệt & đăng', $btn . ' bg-emerald-500 text-slate-950 hover:bg-emerald-400' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+										<?php echo cvc_ingestion_op_form( 'approve', (int) $row['id'], 'Duyệt & đăng', $btn . 'bg-acc text-slate-950 hover:bg-acc-deep text-white' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 										<?php if ( 'qa_pending' === $row['state'] ) : ?>
-											<?php echo cvc_ingestion_reject_form( (int) $row['id'], $btn . ' bg-slate-800 text-slate-300 hover:bg-slate-700' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+											<?php echo cvc_ingestion_reject_form( (int) $row['id'], $btn . 'bg-white text-ink-2 hover:bg-acc-soft' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 										<?php endif; ?>
 									<?php endif; ?>
-									<a class="text-xs font-bold text-cyan-300 ml-1" href="<?php echo esc_url( cvc_admin_url( 'thu-thap', (int) $row['id'] ) ); ?>">Chi tiết</a>
+									<a class="text-xs font-bold text-acc ml-1" href="<?php echo esc_url( cvc_admin_url( 'thu-thap', (int) $row['id'] ) ); ?>">Chi tiết</a>
 								</td>
 							</tr>
 						<?php endforeach; ?>
@@ -394,7 +394,7 @@ function cvc_admin_render_ingestion_index(): void {
 			<?php if ( (int) ( $meta['last_page'] ?? 1 ) > 1 ) : ?>
 				<nav class="flex gap-2 text-sm" aria-label="Phân trang">
 					<?php for ( $p = 1; $p <= min( 30, (int) $meta['last_page'] ); $p++ ) : ?>
-						<a class="px-2.5 py-1 rounded-lg <?php echo $p === $page ? 'bg-cyan-500 text-slate-950 font-bold' : 'bg-slate-800 text-slate-300'; ?>" href="<?php echo esc_url( cvc_admin_url( 'thu-thap', null, array_filter( array( 'state' => $state, 'q' => $q, 'trang' => $p ) ) ) ); ?>"><?php echo esc_html( (string) $p ); ?></a>
+						<a class="px-2.5 py-1 rounded-lg <?php echo $p === $page ? 'bg-acc text-slate-950 font-bold text-white' : 'bg-white text-ink-2'; ?>" href="<?php echo esc_url( cvc_admin_url( 'thu-thap', null, array_filter( array( 'state' => $state, 'q' => $q, 'trang' => $p ) ) ) ); ?>"><?php echo esc_html( (string) $p ); ?></a>
 					<?php endfor; ?>
 				</nav>
 			<?php endif; ?>
@@ -402,13 +402,13 @@ function cvc_admin_render_ingestion_index(): void {
 	</section>
 
 	<?php if ( ! empty( $ov['last_runs'] ) ) : ?>
-		<section class="bg-[#0A192F] border border-slate-800 rounded-2xl p-5" aria-labelledby="cvc-ing-runs">
-			<h2 id="cvc-ing-runs" class="text-sm font-black text-white mb-3">Lượt thu thập gần đây</h2>
-			<ul class="text-xs text-slate-300 space-y-1.5">
+		<section class="dz-card" aria-labelledby="cvc-ing-runs">
+			<h2 id="cvc-ing-runs" class="text-sm font-black text-ink mb-3">Lượt thu thập gần đây</h2>
+			<ul class="text-xs text-ink-2 space-y-1.5">
 				<?php foreach ( (array) $ov['last_runs'] as $run ) : ?>
 					<li class="flex flex-wrap justify-between gap-2">
-						<span><strong class="text-slate-100"><?php echo esc_html( (string) ( $run['source'] ?? '' ) ); ?></strong> · <?php echo esc_html( sprintf( '%d trang, %d lỗi, %d tin đăng', (int) $run['items_processed'], (int) $run['items_failed'], (int) $run['items_published'] ) ); ?></span>
-						<span class="text-slate-500"><?php echo esc_html( cvc_admin_format( $run['started_at'] ?? null, 'datetime' ) ); ?></span>
+						<span><strong class="text-ink"><?php echo esc_html( (string) ( $run['source'] ?? '' ) ); ?></strong> · <?php echo esc_html( sprintf( '%d trang, %d lỗi, %d tin đăng', (int) $run['items_processed'], (int) $run['items_failed'], (int) $run['items_published'] ) ); ?></span>
+						<span class="text-ink-muted"><?php echo esc_html( cvc_admin_format( $run['started_at'] ?? null, 'datetime' ) ); ?></span>
 					</li>
 				<?php endforeach; ?>
 			</ul>
@@ -423,7 +423,7 @@ function cvc_admin_render_ingestion_index(): void {
 function cvc_admin_render_ingestion_detail( int $id ): void {
 	$result = cvc_admin_api_get( '/api/admin/ingestion/items/' . $id );
 	$back   = cvc_admin_url( 'thu-thap' );
-	echo '<p><a class="text-sm text-cyan-300 font-bold" href="' . esc_url( $back ) . '">&larr; Hàng chờ thu thập</a></p>';
+	echo '<p><a class="text-sm text-acc font-bold" href="' . esc_url( $back ) . '">&larr; Hàng chờ thu thập</a></p>';
 
 	if ( ! $result['ok'] ) {
 		cvc_render_error_state( 404 === (int) $result['status'] ? 'Không tìm thấy tin này.' : cvc_admin_error_message( $result ) );
@@ -448,52 +448,52 @@ function cvc_admin_render_ingestion_detail( int $id ): void {
 		<div class="flex flex-wrap items-center gap-2">
 			<?php echo cvc_ingestion_badge( (string) $it['state'], (string) $it['state_label'] ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 			<?php if ( ! empty( $it['notice_type_label'] ) ) : ?>
-				<span class="text-xs text-slate-400"><?php echo esc_html( (string) $it['notice_type_label'] ); ?></span>
+				<span class="text-xs text-ink-muted"><?php echo esc_html( (string) $it['notice_type_label'] ); ?></span>
 			<?php endif; ?>
 			<?php if ( 'done' === ( $it['analysis_status'] ?? '' ) ) : ?>
-				<span class="text-xs text-slate-400"><i class="fa-solid fa-robot" aria-hidden="true"></i> AI <?php echo isset( $it['confidence'] ) ? esc_html( round( (float) $it['confidence'] * 100 ) . '%' ) : ''; ?></span>
+				<span class="text-xs text-ink-muted"><i class="fa-solid fa-robot" aria-hidden="true"></i> AI <?php echo isset( $it['confidence'] ) ? esc_html( round( (float) $it['confidence'] * 100 ) . '%' ) : ''; ?></span>
 			<?php endif; ?>
 		</div>
-		<h1 class="text-xl font-black text-white"><?php echo esc_html( (string) ( $it['title'] ?? '(chưa có tiêu đề)' ) ); ?></h1>
-		<p class="text-xs text-slate-400 break-all">
+		<h1 class="text-xl font-black text-ink"><?php echo esc_html( (string) ( $it['title'] ?? '(chưa có tiêu đề)' ) ); ?></h1>
+		<p class="text-xs text-ink-muted break-all">
 			Nguồn: <?php echo esc_html( (string) ( $it['source']['name'] ?? '' ) ); ?> ·
-			<a class="text-cyan-300 underline" href="<?php echo esc_url( (string) $it['source_url'] ); ?>" target="_blank" rel="noopener nofollow">Mở trang gốc</a>
+			<a class="text-acc underline" href="<?php echo esc_url( (string) $it['source_url'] ); ?>" target="_blank" rel="noopener nofollow">Mở trang gốc</a>
 			<?php if ( isset( $it['source_check']['official'] ) && ! $it['source_check']['official'] ) : ?>
-				· <span class="px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-300 font-bold">Nguồn sưu tầm</span>
-				<span class="text-slate-500">(<?php echo esc_html( (string) ( $it['source_check']['reason'] ?? '' ) ); ?> — trang công khai không hiện link/tên miền; <a class="underline" href="<?php echo esc_url( cvc_admin_url( 'thu-thap', null, array( 'xem' => 'ten-mien' ) ) ); ?>">xác minh tên miền</a>)</span>
+				· <span class="px-1.5 py-0.5 rounded bg-acc-soft text-acc font-bold">Nguồn sưu tầm</span>
+				<span class="text-ink-muted">(<?php echo esc_html( (string) ( $it['source_check']['reason'] ?? '' ) ); ?> — trang công khai không hiện link/tên miền; <a class="underline" href="<?php echo esc_url( cvc_admin_url( 'thu-thap', null, array( 'xem' => 'ten-mien' ) ) ); ?>">xác minh tên miền</a>)</span>
 			<?php endif; ?>
 			<?php if ( ! empty( $it['recruitment']['slug'] ) ) : ?>
-				· <a class="text-emerald-300 font-bold" href="<?php echo esc_url( cvc_recruitment_url( (string) $it['recruitment']['slug'] ) ); ?>" target="_blank" rel="noopener">Xem tin đã đăng</a>
-				· <a class="text-cyan-300" href="<?php echo esc_url( cvc_admin_url( 'recruitments', (int) $it['recruitment']['id'] ) ); ?>">Sửa tin</a>
+				· <a class="text-emerald-800 font-bold" href="<?php echo esc_url( cvc_recruitment_url( (string) $it['recruitment']['slug'] ) ); ?>" target="_blank" rel="noopener">Xem tin đã đăng</a>
+				· <a class="text-acc" href="<?php echo esc_url( cvc_admin_url( 'recruitments', (int) $it['recruitment']['id'] ) ); ?>">Sửa tin</a>
 			<?php endif; ?>
 		</p>
 	</header>
 
 	<?php if ( $editable && ! empty( $ready ) ) : ?>
-		<section class="rounded-2xl p-4 border <?php echo ! empty( $ready['ready'] ) ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-amber-500/30 bg-amber-500/5'; ?>">
+		<section class="rounded-2xl p-4 border <?php echo ! empty( $ready['ready'] ) ? 'border-acc-line bg-acc-soft' : 'border-acc-line bg-acc-soft'; ?>">
 			<div class="flex flex-wrap items-center justify-between gap-3">
 				<div class="text-sm">
 					<?php if ( ! empty( $ready['ready'] ) ) : ?>
-						<p class="font-bold text-emerald-300">Đủ điều kiện đăng.</p>
+						<p class="font-bold text-emerald-800">Đủ điều kiện đăng.</p>
 					<?php else : ?>
-						<p class="font-bold text-amber-300">Chưa đăng được: <?php echo esc_html( implode( '; ', (array) $ready['errors'] ) ); ?>.</p>
+						<p class="font-bold text-acc">Chưa đăng được: <?php echo esc_html( implode( '; ', (array) $ready['errors'] ) ); ?>.</p>
 					<?php endif; ?>
-					<p class="text-xs text-slate-400 mt-1">
+					<p class="text-xs text-ink-muted mt-1">
 						Tỉnh: <?php echo esc_html( (string) ( $ready['province'] ?? '—' ) ); ?> ·
 						Cơ quan: <?php echo esc_html( (string) ( $ready['agency'] ?? '—' ) ); ?><?php echo ! empty( $ready['agency'] ) && empty( $ready['agency_exists'] ) ? esc_html( ' (sẽ tạo mới)' ) : ''; ?> ·
 						<?php echo esc_html( count( (array) ( $ready['positions'] ?? array() ) ) . ' vị trí' ); ?>
 					</p>
 					<?php if ( ! empty( $ready['auto_gate_failures'] ) ) : ?>
-						<p class="text-xs text-slate-400 mt-1">Không tự đăng vì: <?php echo esc_html( implode( '; ', (array) $ready['auto_gate_failures'] ) ); ?>.</p>
+						<p class="text-xs text-ink-muted mt-1">Không tự đăng vì: <?php echo esc_html( implode( '; ', (array) $ready['auto_gate_failures'] ) ); ?>.</p>
 					<?php endif; ?>
 				</div>
 				<div class="flex gap-2">
 					<?php if ( $can_pub ) : ?>
-						<?php echo cvc_ingestion_op_form( 'approve', $id, 'Duyệt & đăng', $btn . ' bg-emerald-500 text-slate-950 hover:bg-emerald-400' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
-						<?php echo cvc_ingestion_reject_form( $id, $btn . ' bg-slate-800 text-slate-300 hover:bg-slate-700' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+						<?php echo cvc_ingestion_op_form( 'approve', $id, 'Duyệt & đăng', $btn . 'bg-acc text-slate-950 hover:bg-acc-deep text-white' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+						<?php echo cvc_ingestion_reject_form( $id, $btn . 'bg-white text-ink-2 hover:bg-acc-soft' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 					<?php endif; ?>
 					<?php if ( $can_upd ) : ?>
-						<?php echo cvc_ingestion_op_form( 'reprocess', $id, 'Phân tích lại', $btn . ' bg-slate-800 text-slate-300 hover:bg-slate-700' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+						<?php echo cvc_ingestion_op_form( 'reprocess', $id, 'Phân tích lại', $btn . 'bg-white text-ink-2 hover:bg-acc-soft' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 					<?php endif; ?>
 				</div>
 			</div>
@@ -501,8 +501,8 @@ function cvc_admin_render_ingestion_detail( int $id ): void {
 	<?php endif; ?>
 
 	<div class="grid grid-cols-1 xl:grid-cols-[1.3fr_1fr] gap-4 items-start">
-		<section class="bg-[#0A192F] border border-slate-800 rounded-2xl p-5" aria-labelledby="cvc-ing-edit">
-			<h2 id="cvc-ing-edit" class="text-sm font-black text-white mb-3"><?php echo $editable ? 'Thông tin trích xuất (sửa được trước khi đăng)' : 'Thông tin đã đăng'; ?></h2>
+		<section class="dz-card" aria-labelledby="cvc-ing-edit">
+			<h2 id="cvc-ing-edit" class="text-sm font-black text-ink mb-3"><?php echo $editable ? 'Thông tin trích xuất (sửa được trước khi đăng)' : 'Thông tin đã đăng'; ?></h2>
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="grid grid-cols-1 md:grid-cols-2 gap-3">
 				<?php wp_nonce_field( 'cvc_admin_ingestion' ); ?>
 				<input type="hidden" name="action" value="cvc_admin_ingestion">
@@ -515,14 +515,14 @@ function cvc_admin_render_ingestion_detail( int $id ): void {
 				$ev_all    = is_array( $r['_evidence'] ?? null ) ? $r['_evidence'] : array();
 				?>
 				<?php if ( ! empty( $ev_all ) ) : ?>
-					<div class="md:col-span-2 rounded-xl border border-slate-700 bg-slate-900/60 p-3 space-y-1.5 text-xs">
-						<p class="font-bold text-slate-200">Đối chiếu văn bản gốc</p>
+					<div class="md:col-span-2 rounded-xl border border-slate-300 bg-white p-3 space-y-1.5 text-xs">
+						<p class="font-bold text-ink">Đối chiếu văn bản gốc</p>
 						<?php foreach ( $ev_labels as $ek => $el ) : ?>
 							<?php if ( ! array_key_exists( $ek, $ev_all ) ) { continue; } $ev = $ev_all[ $ek ]; ?>
-							<p class="<?php echo $ev ? 'text-slate-300' : 'text-amber-300'; ?>">
+							<p class="<?php echo $ev ? 'text-slate-300' : 'text-acc'; ?>">
 								<strong><?php echo esc_html( $el ); ?>:</strong>
 								<?php if ( $ev ) : ?>
-									“<?php echo esc_html( (string) ( $ev['snippet'] ?? '' ) ); ?>” <span class="text-slate-500">- <?php echo esc_html( (string) ( $ev['source'] ?? '' ) ); ?></span>
+									“<?php echo esc_html( (string) ( $ev['snippet'] ?? '' ) ); ?>” <span class="text-ink-muted">- <?php echo esc_html( (string) ( $ev['source'] ?? '' ) ); ?></span>
 								<?php else : ?>
 									chưa tìm thấy trong trang tin / file - kiểm tra lại trước khi đăng
 								<?php endif; ?>
@@ -530,63 +530,63 @@ function cvc_admin_render_ingestion_detail( int $id ): void {
 						<?php endforeach; ?>
 					</div>
 				<?php endif; ?>
-				<label class="md:col-span-2 text-sm"><span class="font-bold text-slate-300">Tiêu đề</span><input name="title" class="<?php echo esc_attr( $input ); ?>" value="<?php echo esc_attr( (string) ( $r['title'] ?? '' ) ); ?>"<?php echo $dis; // phpcs:ignore ?>></label>
-				<label class="md:col-span-2 text-sm"><span class="font-bold text-slate-300">Cơ quan tuyển dụng</span><input name="agency_name" class="<?php echo esc_attr( $input ); ?>" value="<?php echo esc_attr( (string) ( $r['agency_name'] ?? '' ) ); ?>"<?php echo $dis; // phpcs:ignore ?>><span class="text-xs text-slate-500">Ghi đúng tên đầy đủ; chưa có trong hệ thống sẽ được tạo mới theo tỉnh.</span></label>
-				<label class="text-sm"><span class="font-bold text-slate-300">Tỉnh/thành</span>
-					<select name="province_name" class="<?php echo esc_attr( $input ); ?>"<?php echo $dis; // phpcs:ignore ?>>
+				<label class="md:col-span-2 text-sm"><span class="font-bold text-ink-2">Tiêu đề</span><input name="title" class="text-ink border-slate-400 bg-white <?php echo esc_attr( $input ); ?> text-ink border-slate-400 bg-white" value="<?php echo esc_attr( (string) ( $r['title'] ?? '' ) ); ?>"<?php echo $dis; // phpcs:ignore ?>></label>
+				<label class="md:col-span-2 text-sm"><span class="font-bold text-ink-2">Cơ quan tuyển dụng</span><input name="agency_name" class="text-ink border-slate-400 bg-white <?php echo esc_attr( $input ); ?> text-ink border-slate-400 bg-white" value="<?php echo esc_attr( (string) ( $r['agency_name'] ?? '' ) ); ?>"<?php echo $dis; // phpcs:ignore ?>><span class="text-xs text-ink-muted">Ghi đúng tên đầy đủ; chưa có trong hệ thống sẽ được tạo mới theo tỉnh.</span></label>
+				<label class="text-sm"><span class="font-bold text-ink-2">Tỉnh/thành</span>
+					<select name="province_name" class="text-ink border-slate-400 bg-white <?php echo esc_attr( $input ); ?> text-ink border-slate-400 bg-white"<?php echo $dis; // phpcs:ignore ?>>
 						<option value="">— Chưa xác định —</option>
 						<?php foreach ( cvc_admin_provinces() as $pname ) : ?>
 							<option value="<?php echo esc_attr( (string) $pname ); ?>" <?php selected( (string) ( $r['province_name'] ?? '' ), (string) $pname ); ?>><?php echo esc_html( (string) $pname ); ?></option>
 						<?php endforeach; ?>
 					</select>
 				</label>
-				<label class="text-sm"><span class="font-bold text-slate-300">Loại</span>
-					<select name="recruitment_type" class="<?php echo esc_attr( $input ); ?>"<?php echo $dis; // phpcs:ignore ?>>
+				<label class="text-sm"><span class="font-bold text-ink-2">Loại</span>
+					<select name="recruitment_type" class="text-ink border-slate-400 bg-white <?php echo esc_attr( $input ); ?> text-ink border-slate-400 bg-white"<?php echo $dis; // phpcs:ignore ?>>
 						<?php foreach ( array( '' => '— Chưa rõ —', 'civil_servant' => 'Công chức', 'public_employee' => 'Viên chức', 'other' => 'Khác' ) as $k => $v ) : ?>
 							<option value="<?php echo esc_attr( $k ); ?>" <?php selected( (string) ( $r['recruitment_type'] ?? '' ), $k ); ?>><?php echo esc_html( $v ); ?></option>
 						<?php endforeach; ?>
 					</select>
 				</label>
-				<label class="text-sm"><span class="font-bold text-slate-300">Ngày thông báo</span><input type="date" name="announcement_date" class="<?php echo esc_attr( $input ); ?>" value="<?php echo esc_attr( $date_val( $r['announcement_date'] ?? '' ) ); ?>"<?php echo $dis; // phpcs:ignore ?>></label>
-				<label class="text-sm"><span class="font-bold text-slate-300">Bắt đầu nhận hồ sơ</span><input type="date" name="application_start_date" class="<?php echo esc_attr( $input ); ?>" value="<?php echo esc_attr( $date_val( $r['application_start_date'] ?? '' ) ); ?>"<?php echo $dis; // phpcs:ignore ?>></label>
-				<label class="text-sm"><span class="font-bold text-slate-300">Hạn nộp hồ sơ</span><input type="date" name="application_deadline" class="<?php echo esc_attr( $input ); ?>" value="<?php echo esc_attr( $date_val( $r['application_deadline'] ?? '' ) ); ?>"<?php echo $dis; // phpcs:ignore ?>></label>
-				<label class="text-sm"><span class="font-bold text-slate-300">Tổng chỉ tiêu</span><input type="number" min="1" name="total_positions" class="<?php echo esc_attr( $input ); ?>" value="<?php echo esc_attr( (string) ( $r['total_positions'] ?? '' ) ); ?>"<?php echo $dis; // phpcs:ignore ?>></label>
-				<label class="md:col-span-2 text-sm"><span class="font-bold text-slate-300">Địa điểm / nơi nộp hồ sơ</span><input name="location" class="<?php echo esc_attr( $input ); ?>" value="<?php echo esc_attr( (string) ( $r['location'] ?? '' ) ); ?>"<?php echo $dis; // phpcs:ignore ?>></label>
-				<label class="md:col-span-2 text-sm"><span class="font-bold text-slate-300">Vị trí tuyển dụng</span>
-					<textarea name="positions" rows="5" class="<?php echo esc_attr( $input ); ?> font-mono text-xs" placeholder="Mỗi dòng: Tên vị trí | số chỉ tiêu | trình độ"<?php echo $dis; // phpcs:ignore ?>><?php echo esc_textarea( $pos_text ); ?></textarea>
-					<span class="text-xs text-slate-500">Mỗi dòng 1 vị trí: <code>Tên vị trí | số chỉ tiêu | trình độ</code>. Để trống sẽ dùng 1 dòng "Các vị trí theo thông báo" với tổng chỉ tiêu.</span>
+				<label class="text-sm"><span class="font-bold text-ink-2">Ngày thông báo</span><input type="date" name="announcement_date" class="text-ink border-slate-400 bg-white <?php echo esc_attr( $input ); ?> text-ink border-slate-400 bg-white" value="<?php echo esc_attr( $date_val( $r['announcement_date'] ?? '' ) ); ?>"<?php echo $dis; // phpcs:ignore ?>></label>
+				<label class="text-sm"><span class="font-bold text-ink-2">Bắt đầu nhận hồ sơ</span><input type="date" name="application_start_date" class="text-ink border-slate-400 bg-white <?php echo esc_attr( $input ); ?> text-ink border-slate-400 bg-white" value="<?php echo esc_attr( $date_val( $r['application_start_date'] ?? '' ) ); ?>"<?php echo $dis; // phpcs:ignore ?>></label>
+				<label class="text-sm"><span class="font-bold text-ink-2">Hạn nộp hồ sơ</span><input type="date" name="application_deadline" class="text-ink border-slate-400 bg-white <?php echo esc_attr( $input ); ?> text-ink border-slate-400 bg-white" value="<?php echo esc_attr( $date_val( $r['application_deadline'] ?? '' ) ); ?>"<?php echo $dis; // phpcs:ignore ?>></label>
+				<label class="text-sm"><span class="font-bold text-ink-2">Tổng chỉ tiêu</span><input type="number" min="1" name="total_positions" class="text-ink border-slate-400 bg-white <?php echo esc_attr( $input ); ?> text-ink border-slate-400 bg-white" value="<?php echo esc_attr( (string) ( $r['total_positions'] ?? '' ) ); ?>"<?php echo $dis; // phpcs:ignore ?>></label>
+				<label class="md:col-span-2 text-sm"><span class="font-bold text-ink-2">Địa điểm / nơi nộp hồ sơ</span><input name="location" class="text-ink border-slate-400 bg-white <?php echo esc_attr( $input ); ?> text-ink border-slate-400 bg-white" value="<?php echo esc_attr( (string) ( $r['location'] ?? '' ) ); ?>"<?php echo $dis; // phpcs:ignore ?>></label>
+				<label class="md:col-span-2 text-sm"><span class="font-bold text-ink-2">Vị trí tuyển dụng</span>
+					<textarea name="positions" rows="5" class="text-ink border-slate-400 bg-white <?php echo esc_attr( $input ); ?> text-xs text-ink border-slate-400 bg-white" placeholder="Mỗi dòng: Tên vị trí | số chỉ tiêu | trình độ"<?php echo $dis; // phpcs:ignore ?>><?php echo esc_textarea( $pos_text ); ?></textarea>
+					<span class="text-xs text-ink-muted">Mỗi dòng 1 vị trí: <code>Tên vị trí | số chỉ tiêu | trình độ</code>. Để trống sẽ dùng 1 dòng "Các vị trí theo thông báo" với tổng chỉ tiêu.</span>
 				</label>
-				<label class="md:col-span-2 text-sm"><span class="font-bold text-slate-300">Tóm tắt</span><textarea name="summary" rows="4" class="<?php echo esc_attr( $input ); ?>"<?php echo $dis; // phpcs:ignore ?>><?php echo esc_textarea( (string) ( $r['summary'] ?? '' ) ); ?></textarea></label>
+				<label class="md:col-span-2 text-sm"><span class="font-bold text-ink-2">Tóm tắt</span><textarea name="summary" rows="4" class="text-ink border-slate-400 bg-white <?php echo esc_attr( $input ); ?> text-ink border-slate-400 bg-white"<?php echo $dis; // phpcs:ignore ?>><?php echo esc_textarea( (string) ( $r['summary'] ?? '' ) ); ?></textarea></label>
 				<?php if ( '' === $dis ) : ?>
-					<div class="md:col-span-2"><button type="submit" class="<?php echo esc_attr( $btn ); ?> bg-cyan-500 text-slate-950 hover:bg-cyan-400">Lưu chỉnh sửa</button></div>
+					<div class="md:col-span-2"><button type="submit" class="<?php echo esc_attr( $btn ); ?> bg-acc text-slate-950 hover:bg-acc-deep text-white">Lưu chỉnh sửa</button></div>
 				<?php endif; ?>
 			</form>
 		</section>
 
 		<div class="space-y-4">
-			<section class="bg-[#0A192F] border border-slate-800 rounded-2xl p-5" aria-labelledby="cvc-ing-files">
-				<h2 id="cvc-ing-files" class="text-sm font-black text-white mb-3">Công văn đính kèm</h2>
+			<section class="dz-card" aria-labelledby="cvc-ing-files">
+				<h2 id="cvc-ing-files" class="text-sm font-black text-ink mb-3">Công văn đính kèm</h2>
 				<?php if ( empty( $it['attachments'] ) ) : ?>
-					<p class="text-sm text-slate-400">Trang gốc không có file đính kèm.</p>
+					<p class="text-sm text-ink-muted">Trang gốc không có file đính kèm.</p>
 				<?php else : ?>
 					<ul class="space-y-2 text-sm">
 						<?php foreach ( (array) $it['attachments'] as $a ) : ?>
-							<li class="border border-slate-800 rounded-xl p-3">
-								<div class="font-bold text-slate-100 break-all"><?php echo esc_html( (string) ( $a['title'] ?: $a['filename'] ) ); ?></div>
-								<div class="text-xs text-slate-400 mt-0.5">
+							<li class="border border-slate-300 rounded-xl p-3">
+								<div class="font-bold text-ink break-all"><?php echo esc_html( (string) ( $a['title'] ?: $a['filename'] ) ); ?></div>
+								<div class="text-xs text-ink-muted mt-0.5">
 									<?php echo esc_html( strtoupper( (string) $a['extension'] ) . ' · ' . size_format( (int) $a['size'] ) ); ?>
 									<?php if ( 'downloaded' === $a['status'] ) : ?>
 										· <?php echo (int) $a['text_length'] > 0 ? esc_html( number_format_i18n( (int) $a['text_length'] ) . ' ký tự chữ' ) : esc_html( 'bản scan (không có lớp chữ)' ); ?>
 									<?php else : ?>
-										· <span class="text-rose-300">Không tải được: <?php echo esc_html( (string) $a['error'] ); ?></span>
+										· <span class="text-red-700">Không tải được: <?php echo esc_html( (string) $a['error'] ); ?></span>
 									<?php endif; ?>
 								</div>
 								<div class="flex gap-3 mt-1 text-xs">
 									<?php if ( 'downloaded' === $a['status'] ) : ?>
-										<a class="text-cyan-300 font-bold" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=cvc_admin_ingestion_file&id=' . (int) $a['id'] ), 'cvc_admin_ingestion_file' ) ); ?>">Tải bản lưu</a>
+										<a class="text-acc font-bold" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=cvc_admin_ingestion_file&id=' . (int) $a['id'] ), 'cvc_admin_ingestion_file' ) ); ?>">Tải bản lưu</a>
 									<?php endif; ?>
 									<?php if ( ! empty( $a['url'] ) ) : ?>
-										<a class="text-slate-300 underline" href="<?php echo esc_url( (string) $a['url'] ); ?>" target="_blank" rel="noopener nofollow">Link gốc</a>
+										<a class="text-ink-2 underline" href="<?php echo esc_url( (string) $a['url'] ); ?>" target="_blank" rel="noopener nofollow">Link gốc</a>
 									<?php endif; ?>
 								</div>
 							</li>
@@ -596,19 +596,19 @@ function cvc_admin_render_ingestion_detail( int $id ): void {
 			</section>
 
 			<?php if ( ! empty( $it['content_excerpt'] ) ) : ?>
-				<details class="bg-[#0A192F] border border-slate-800 rounded-2xl p-5">
-					<summary class="cursor-pointer text-sm font-black text-white">Nội dung trang gốc</summary>
-					<div class="mt-3 max-h-96 overflow-y-auto whitespace-pre-line text-xs text-slate-300 leading-relaxed"><?php echo esc_html( (string) $it['content_excerpt'] ); ?></div>
+				<details class="dz-card">
+					<summary class="cursor-pointer text-sm font-black text-ink">Nội dung trang gốc</summary>
+					<div class="mt-3 max-h-96 overflow-y-auto whitespace-pre-line text-xs text-ink-2 leading-relaxed"><?php echo esc_html( (string) $it['content_excerpt'] ); ?></div>
 				</details>
 			<?php endif; ?>
 
-			<details class="bg-[#0A192F] border border-slate-800 rounded-2xl p-5">
-				<summary class="cursor-pointer text-sm font-black text-white">Nhật ký xử lý</summary>
-				<ul class="mt-3 space-y-1.5 text-xs text-slate-300">
+			<details class="dz-card">
+				<summary class="cursor-pointer text-sm font-black text-ink">Nhật ký xử lý</summary>
+				<ul class="mt-3 space-y-1.5 text-xs text-ink-2">
 					<?php foreach ( (array) ( $it['logs'] ?? array() ) as $log ) : ?>
 						<li class="flex justify-between gap-3">
-							<span><strong class="text-slate-100"><?php echo esc_html( (string) $log['event'] ); ?></strong> <?php echo esc_html( (string) ( $log['message'] ?? '' ) ); ?> <span class="text-slate-500"><?php echo esc_html( (string) ( $log['actor'] ?? '' ) ); ?></span></span>
-							<span class="text-slate-500 shrink-0"><?php echo esc_html( cvc_admin_format( $log['created_at'] ?? null, 'datetime' ) ); ?></span>
+							<span><strong class="text-ink"><?php echo esc_html( (string) $log['event'] ); ?></strong> <?php echo esc_html( (string) ( $log['message'] ?? '' ) ); ?> <span class="text-ink-muted"><?php echo esc_html( (string) ( $log['actor'] ?? '' ) ); ?></span></span>
+							<span class="text-ink-muted shrink-0"><?php echo esc_html( cvc_admin_format( $log['created_at'] ?? null, 'datetime' ) ); ?></span>
 						</li>
 					<?php endforeach; ?>
 				</ul>
@@ -634,9 +634,9 @@ function cvc_admin_render_prefilter_panel( array $pf, bool $can_edit ): void {
 	);
 	$mode   = (string) ( $pf['mode'] ?? 'shadow' );
 	$badge  = array(
-		'off'     => 'bg-slate-700/40 text-slate-300 border-slate-600',
-		'shadow'  => 'bg-amber-500/15 text-amber-300 border-amber-500/30',
-		'enforce' => 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
+		'off'     => 'bg-acc-soft text-ink-2 border-slate-300',
+		'shadow'  => 'bg-acc-soft text-acc border-acc-line',
+		'enforce' => 'bg-acc-soft text-emerald-800 border-acc-line',
 	);
 	$stages = array(
 		'listing'      => 'Trang danh sách',
@@ -651,20 +651,20 @@ function cvc_admin_render_prefilter_panel( array $pf, bool $can_edit ): void {
 	}
 	$btn = 'px-3 py-1.5 rounded-lg text-xs font-bold';
 	?>
-	<details class="bg-[#0A192F] border border-slate-800 rounded-2xl p-5" <?php echo 'shadow' === $mode ? 'open' : ''; ?>>
-		<summary class="cursor-pointer text-sm font-black text-white flex flex-wrap items-center gap-2">
-			<i class="fa-solid fa-filter text-cyan-300" aria-hidden="true"></i>Bộ lọc trước khi tải
+	<details class="dz-card" <?php echo 'shadow' === $mode ? 'open' : ''; ?>>
+		<summary class="cursor-pointer text-sm font-black text-ink flex flex-wrap items-center gap-2">
+			<i class="fa-solid fa-filter text-acc" aria-hidden="true"></i>Bộ lọc trước khi tải
 			<span class="px-2 py-0.5 rounded-full text-[11px] font-bold border <?php echo esc_attr( $badge[ $mode ] ?? $badge['shadow'] ); ?>"><?php echo esc_html( $modes[ $mode ] ?? $mode ); ?></span>
 		</summary>
-		<p class="text-sm text-slate-400 mt-3">Tin hết hạn nộp / quá cũ, văn bản hết hiệu lực và file trùng văn bản đã có sẽ không tải đính kèm, không OCR, không gọi AI. Nên để <strong>Chạy thử</strong> 1–2 tuần, xem bảng dưới (cột “Bỏ qua”) rồi mới bật <strong>Áp dụng</strong>.</p>
+		<p class="text-sm text-ink-muted mt-3">Tin hết hạn nộp / quá cũ, văn bản hết hiệu lực và file trùng văn bản đã có sẽ không tải đính kèm, không OCR, không gọi AI. Nên để <strong>Chạy thử</strong> 1–2 tuần, xem bảng dưới (cột “Bỏ qua”) rồi mới bật <strong>Áp dụng</strong>.</p>
 		<div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
 			<div class="overflow-x-auto">
-				<table class="w-full text-xs text-slate-300">
-					<caption class="text-left text-[11px] font-bold text-slate-400 mb-1">Quyết định 14 ngày qua</caption>
-					<thead><tr class="text-slate-500"><th class="text-left py-1">Tầng</th><th class="text-right">Bỏ qua</th><th class="text-right">Tải</th><th class="text-right">Chưa rõ</th></tr></thead>
+				<table class="w-full text-xs text-ink-2">
+					<caption class="text-left text-[11px] font-bold text-ink-muted mb-1">Quyết định 14 ngày qua</caption>
+					<thead><tr class="text-ink-muted"><th class="text-left py-1">Tầng</th><th class="text-right">Bỏ qua</th><th class="text-right">Tải</th><th class="text-right">Chưa rõ</th></tr></thead>
 					<tbody>
 					<?php foreach ( $stages as $k => $label ) : ?>
-						<tr class="border-t border-slate-800">
+						<tr class="border-t border-slate-300">
 							<td class="py-1"><?php echo esc_html( $label ); ?></td>
 							<td class="text-right tabular-nums"><?php echo esc_html( (string) ( $counts[ $k ]['skip'] ?? 0 ) ); ?></td>
 							<td class="text-right tabular-nums"><?php echo esc_html( (string) ( $counts[ $k ]['fetch'] ?? 0 ) ); ?></td>
@@ -673,7 +673,7 @@ function cvc_admin_render_prefilter_panel( array $pf, bool $can_edit ): void {
 					<?php endforeach; ?>
 					</tbody>
 				</table>
-				<p class="text-[11px] text-slate-500 mt-2">
+				<p class="text-[11px] text-ink-muted mt-2">
 					Tin hết hạn không tải: <?php echo esc_html( (string) (int) ( $pf['expired_items'] ?? 0 ) ); ?> ·
 					Đính kèm dùng văn bản có sẵn: <?php echo esc_html( (string) (int) ( $pf['linked_attachments'] ?? 0 ) ); ?> ·
 					File dùng lại (không tải lại): <?php echo esc_html( (string) (int) ( $pf['reused_attachments'] ?? 0 ) ); ?>
@@ -684,26 +684,26 @@ function cvc_admin_render_prefilter_panel( array $pf, bool $can_edit ): void {
 					<?php wp_nonce_field( 'cvc_admin_ingestion' ); ?>
 					<input type="hidden" name="action" value="cvc_admin_ingestion">
 					<input type="hidden" name="op" value="prefilter">
-					<label class="col-span-2 block text-xs font-bold text-slate-300" for="cvc-pf-mode">Chế độ
-						<select id="cvc-pf-mode" name="prefilter_mode" class="<?php echo esc_attr( cvc_admin_input_class() ); ?>">
+					<label class="col-span-2 block text-xs font-bold text-ink-2" for="cvc-pf-mode">Chế độ
+						<select id="cvc-pf-mode" name="prefilter_mode" class="text-ink border-slate-400 bg-white <?php echo esc_attr( cvc_admin_input_class() ); ?> text-ink border-slate-400 bg-white">
 							<?php foreach ( $modes as $mv => $ml ) : ?>
 								<option value="<?php echo esc_attr( $mv ); ?>" <?php selected( $mode, $mv ); ?>><?php echo esc_html( $ml ); ?></option>
 							<?php endforeach; ?>
 						</select>
 					</label>
-					<label class="block text-xs font-bold text-slate-300" for="cvc-pf-age">Tin quá (tháng)
+					<label class="block text-xs font-bold text-ink-2" for="cvc-pf-age">Tin quá (tháng)
 						<input id="cvc-pf-age" type="number" min="1" max="60" name="max_age_months" value="<?php echo esc_attr( (string) (int) ( $pf['max_age_months'] ?? 6 ) ); ?>" class="<?php echo esc_attr( cvc_admin_input_class() ); ?>">
 					</label>
-					<label class="block text-xs font-bold text-slate-300" for="cvc-pf-event">Lịch thi/kết quả quá (tháng)
+					<label class="block text-xs font-bold text-ink-2" for="cvc-pf-event">Lịch thi/kết quả quá (tháng)
 						<input id="cvc-pf-event" type="number" min="1" max="60" name="event_max_age_months" value="<?php echo esc_attr( (string) (int) ( $pf['event_max_age_months'] ?? 12 ) ); ?>" class="<?php echo esc_attr( cvc_admin_input_class() ); ?>">
 					</label>
-					<label class="block text-xs font-bold text-slate-300" for="cvc-pf-grace">Dự phòng sau hạn nộp (ngày)
+					<label class="block text-xs font-bold text-ink-2" for="cvc-pf-grace">Dự phòng sau hạn nộp (ngày)
 						<input id="cvc-pf-grace" type="number" min="0" max="60" name="grace_days" value="<?php echo esc_attr( (string) (int) ( $pf['grace_days'] ?? 3 ) ); ?>" class="<?php echo esc_attr( cvc_admin_input_class() ); ?>">
 					</label>
-					<label class="block text-xs font-bold text-slate-300" for="cvc-pf-ocr">Ngân sách OCR / văn bản (trang)
+					<label class="block text-xs font-bold text-ink-2" for="cvc-pf-ocr">Ngân sách OCR / văn bản (trang)
 						<input id="cvc-pf-ocr" type="number" min="5" max="2000" name="ocr_max_pages" value="<?php echo esc_attr( (string) (int) ( $pf['ocr_max_pages'] ?? 80 ) ); ?>" class="<?php echo esc_attr( cvc_admin_input_class() ); ?>">
 					</label>
-					<div class="col-span-2"><button type="submit" class="<?php echo esc_attr( $btn ); ?> bg-cyan-500 text-slate-950 hover:bg-cyan-400">Lưu bộ lọc</button></div>
+					<div class="col-span-2"><button type="submit" class="<?php echo esc_attr( $btn ); ?> bg-acc text-slate-950 hover:bg-acc-deep text-white">Lưu bộ lọc</button></div>
 				</form>
 			<?php endif; ?>
 		</div>
@@ -918,13 +918,13 @@ function cvc_admin_handle_ingestion_file(): void {
 
 function cvc_ingestion_cell( string $status ): array {
 	return array(
-		'ok'         => array( 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40', 'Đang chạy' ),
-		'no_listing' => array( 'bg-amber-500/20 text-amber-300 border-amber-500/40', 'Thiếu trang danh mục' ),
-		'inactive'   => array( 'bg-slate-600/30 text-slate-300 border-slate-500/40', 'Tạm dừng' ),
-		'down'       => array( 'bg-rose-500/20 text-rose-300 border-rose-500/40', 'Không truy cập được' ),
-		'not_found'  => array( 'bg-rose-500/20 text-rose-300 border-rose-500/40', 'Chưa xác minh được' ),
-		'pending'    => array( 'bg-slate-800 text-slate-500 border-slate-700', 'Chưa dò' ),
-	)[ $status ] ?? array( 'bg-slate-800 text-slate-500 border-slate-700', $status );
+		'ok'         => array( 'bg-acc-soft text-emerald-800 border-acc-line', 'Đang chạy' ),
+		'no_listing' => array( 'bg-acc-soft text-acc border-acc-line', 'Thiếu trang danh mục' ),
+		'inactive'   => array( 'bg-acc-soft text-ink-2 border-slate-500/40', 'Tạm dừng' ),
+		'down'       => array( 'bg-acc-soft text-red-700 border-acc-line', 'Không truy cập được' ),
+		'not_found'  => array( 'bg-acc-soft text-red-700 border-acc-line', 'Chưa xác minh được' ),
+		'pending'    => array( 'bg-white text-ink-muted border-slate-300', 'Chưa dò' ),
+	)[ $status ] ?? array( 'bg-white text-ink-muted border-slate-300', $status );
 }
 
 function cvc_admin_render_ingestion_sources(): void {
@@ -934,15 +934,15 @@ function cvc_admin_render_ingestion_sources(): void {
 	?>
 	<header class="flex flex-wrap items-end justify-between gap-3">
 		<div>
-			<h1 class="text-2xl font-black text-white">Nguồn & chỉ số thu thập</h1>
-			<p class="text-sm text-slate-400">Danh bạ nguồn đã xác minh, độ phủ 34 tỉnh và 7 chỉ số đo chất lượng.</p>
+			<h1 class="text-2xl font-black text-ink">Nguồn & chỉ số thu thập</h1>
+			<p class="text-sm text-ink-muted">Danh bạ nguồn đã xác minh, độ phủ 34 tỉnh và 7 chỉ số đo chất lượng.</p>
 		</div>
 		<div class="flex flex-wrap gap-2 items-center">
 			<?php foreach ( array( 7, 30, 90 ) as $d ) : ?>
-				<a class="<?php echo esc_attr( $btn ); ?> <?php echo $d === $days ? 'bg-cyan-500 text-slate-950' : 'bg-slate-800 text-slate-300'; ?>" href="<?php echo esc_url( cvc_admin_url( 'thu-thap', null, array( 'xem' => 'nguon', 'ngay' => $d ) ) ); ?>"><?php echo esc_html( $d . ' ngày' ); ?></a>
+				<a class="<?php echo esc_attr( $btn ); ?> <?php echo $d === $days ? 'bg-acc text-slate-950 text-white' : 'bg-white text-ink-2'; ?>" href="<?php echo esc_url( cvc_admin_url( 'thu-thap', null, array( 'xem' => 'nguon', 'ngay' => $d ) ) ); ?>"><?php echo esc_html( $d . ' ngày' ); ?></a>
 			<?php endforeach; ?>
-			<a class="<?php echo esc_attr( $btn ); ?> bg-slate-800 text-slate-200" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=cvc_admin_ingestion_csv&days=' . $days ), 'cvc_admin_ingestion_csv' ) ); ?>"><i class="fa-solid fa-file-csv mr-1" aria-hidden="true"></i>Xuất CSV</a>
-			<a class="<?php echo esc_attr( $btn ); ?> bg-slate-800 text-slate-200" href="<?php echo esc_url( cvc_admin_url( 'sources', 'new' ) ); ?>">+ Thêm nguồn</a>
+			<a class="<?php echo esc_attr( $btn ); ?> bg-white text-ink" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=cvc_admin_ingestion_csv&days=' . $days ), 'cvc_admin_ingestion_csv' ) ); ?>"><i class="fa-solid fa-file-csv mr-1" aria-hidden="true"></i>Xuất CSV</a>
+			<a class="<?php echo esc_attr( $btn ); ?> bg-white text-ink" href="<?php echo esc_url( cvc_admin_url( 'sources', 'new' ) ); ?>">+ Thêm nguồn</a>
 		</div>
 	</header>
 	<?php cvc_ingestion_tabs( 'nguon' ); ?>
@@ -975,17 +975,17 @@ function cvc_admin_render_ingestion_sources(): void {
 	?>
 	<dl class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
 		<?php foreach ( $kpis as $kpi ) : ?>
-			<div class="bg-[#0A192F] border border-slate-800 rounded-2xl p-4">
-				<dt class="text-[11px] font-bold uppercase tracking-wider text-slate-400"><?php echo esc_html( $kpi[0] ); ?></dt>
-				<dd class="text-2xl font-black text-white tabular-nums mt-1"><?php echo esc_html( (string) $kpi[1] ); ?></dd>
-				<dd class="text-xs text-slate-400 mt-0.5"><?php echo esc_html( $kpi[2] ); ?></dd>
+			<div class="dz-card">
+				<dt class="text-[11px] font-bold uppercase tracking-wider text-ink-muted"><?php echo esc_html( $kpi[0] ); ?></dt>
+				<dd class="text-2xl font-black text-ink tabular-nums mt-1"><?php echo esc_html( (string) $kpi[1] ); ?></dd>
+				<dd class="text-xs text-ink-muted mt-0.5"><?php echo esc_html( $kpi[2] ); ?></dd>
 			</div>
 		<?php endforeach; ?>
 	</dl>
 
-	<section class="bg-[#0A192F] border border-slate-800 rounded-2xl p-5 space-y-3" aria-labelledby="cvc-cov">
+	<section class="dz-card space-y-3" aria-labelledby="cvc-cov">
 		<div class="flex flex-wrap items-center justify-between gap-2">
-			<h2 id="cvc-cov" class="text-sm font-black text-white">Độ phủ nhóm A — 34 tỉnh/thành</h2>
+			<h2 id="cvc-cov" class="text-sm font-black text-ink">Độ phủ nhóm A — 34 tỉnh/thành</h2>
 			<div class="flex flex-wrap gap-2 text-[11px]">
 				<?php foreach ( array( 'ok', 'no_listing', 'down', 'not_found', 'inactive', 'pending' ) as $st ) : ?>
 					<?php $c = cvc_ingestion_cell( $st ); ?>
@@ -995,13 +995,13 @@ function cvc_admin_render_ingestion_sources(): void {
 		</div>
 		<div class="overflow-x-auto">
 			<table class="w-full text-xs">
-				<thead class="text-[11px] uppercase tracking-wider text-slate-400 text-left">
+				<thead class="text-[11px] uppercase tracking-wider text-ink-muted text-left">
 					<tr><th class="py-2 pr-3">Tỉnh/thành</th><th class="py-2 pr-3">Sở Nội vụ</th><th class="py-2 pr-3">Sở GD&amp;ĐT</th><th class="py-2">Sở Y tế</th></tr>
 				</thead>
-				<tbody class="divide-y divide-slate-800">
+				<tbody class="divide-y divide-slate-200">
 					<?php foreach ( (array) ( $d['coverage'] ?? array() ) as $row ) : ?>
 						<tr>
-							<td class="py-1.5 pr-3 text-slate-200 whitespace-nowrap"><?php echo esc_html( (string) $row['province'] ); ?></td>
+							<td class="py-1.5 pr-3 text-ink whitespace-nowrap"><?php echo esc_html( (string) $row['province'] ); ?></td>
 							<?php foreach ( array( 'snv', 'sgddt', 'syt' ) as $cat ) : ?>
 								<?php
 								$cell = (array) ( $row['cells'][ $cat ] ?? array( 'status' => 'pending' ) );
@@ -1020,38 +1020,38 @@ function cvc_admin_render_ingestion_sources(): void {
 				</tbody>
 			</table>
 		</div>
-		<p class="text-xs text-slate-500">Hệ thống tự dò mỗi lượt thu thập (Sở Nội vụ trước, rồi Sở GD&amp;ĐT, Sở Y tế, Bộ/ngành). Nguồn xác minh được (HTTP 200 + tiêu đề khớp cơ quan và tỉnh) tự bật thu thập. Ô đỏ: đã thử các địa chỉ ứng viên nhưng không khớp — khai báo tay qua "Thêm nguồn".</p>
+		<p class="text-xs text-ink-muted">Hệ thống tự dò mỗi lượt thu thập (Sở Nội vụ trước, rồi Sở GD&amp;ĐT, Sở Y tế, Bộ/ngành). Nguồn xác minh được (HTTP 200 + tiêu đề khớp cơ quan và tỉnh) tự bật thu thập. Ô đỏ: đã thử các địa chỉ ứng viên nhưng không khớp — khai báo tay qua "Thêm nguồn".</p>
 	</section>
 
-	<section class="bg-[#0A192F] border border-slate-800 rounded-2xl p-5 space-y-3" aria-labelledby="cvc-src">
-		<h2 id="cvc-src" class="text-sm font-black text-white">Từng nguồn (<?php echo esc_html( (string) $days ); ?> ngày)</h2>
+	<section class="dz-card space-y-3" aria-labelledby="cvc-src">
+		<h2 id="cvc-src" class="text-sm font-black text-ink">Từng nguồn (<?php echo esc_html( (string) $days ); ?> ngày)</h2>
 		<div class="overflow-x-auto">
 			<table class="w-full text-xs">
-				<thead class="text-[11px] uppercase tracking-wider text-slate-400 text-left">
+				<thead class="text-[11px] uppercase tracking-wider text-ink-muted text-left">
 					<tr>
 						<th class="py-2 pr-3">Nguồn</th><th class="py-2 pr-3">Nhóm</th><th class="py-2 pr-3">Kiểm tra gần nhất</th>
 						<th class="py-2 pr-3 text-right">Tin</th><th class="py-2 pr-3 text-right">Đã đăng</th><th class="py-2 pr-3 text-right">Đầy đủ</th>
 						<th class="py-2 pr-3 text-right">Tin cậy</th><th class="py-2 text-right">Thao tác</th>
 					</tr>
 				</thead>
-				<tbody class="divide-y divide-slate-800">
+				<tbody class="divide-y divide-slate-200">
 					<?php foreach ( (array) ( $d['sources'] ?? array() ) as $src ) : ?>
 						<?php if ( 'manual_upload' === ( $src['category'] ?? '' ) ) { continue; } ?>
 						<tr class="align-top <?php echo empty( $src['is_active'] ) ? 'opacity-60' : ''; ?>">
 							<td class="py-2 pr-3 min-w-[220px]">
-								<a class="font-bold text-slate-100 hover:text-cyan-300" href="<?php echo esc_url( cvc_admin_url( 'sources', (int) $src['id'] ) ); ?>"><?php echo esc_html( (string) $src['name'] ); ?></a>
-								<div class="text-slate-500 break-all"><?php echo esc_html( (string) $src['url'] ); ?></div>
-								<div class="text-slate-500">
+								<a class="font-bold text-ink hover:text-acc-2" href="<?php echo esc_url( cvc_admin_url( 'sources', (int) $src['id'] ) ); ?>"><?php echo esc_html( (string) $src['name'] ); ?></a>
+								<div class="text-ink-muted break-all"><?php echo esc_html( (string) $src['url'] ); ?></div>
+								<div class="text-ink-muted">
 									<?php echo esc_html( (string) ( $src['province'] ?? '' ) ); ?>
-									<?php echo empty( $src['has_listing'] ) ? '<span class="text-amber-300"> · chưa có trang danh mục</span>' : ''; ?>
-									<?php echo ! empty( $src['wildcard_dns'] ) ? '<span class="text-slate-400"> · wildcard DNS</span>' : ''; ?>
-									<?php echo empty( $src['is_active'] ) ? '<span class="text-slate-400"> · tạm dừng</span>' : ''; ?>
+									<?php echo empty( $src['has_listing'] ) ? '<span class="text-acc"> · chưa có trang danh mục</span>' : ''; ?>
+									<?php echo ! empty( $src['wildcard_dns'] ) ? '<span class="text-ink-muted"> · wildcard DNS</span>' : ''; ?>
+									<?php echo empty( $src['is_active'] ) ? '<span class="text-ink-muted"> · tạm dừng</span>' : ''; ?>
 								</div>
 							</td>
-							<td class="py-2 pr-3 text-slate-300"><?php echo esc_html( (string) $src['category_label'] ); ?></td>
+							<td class="py-2 pr-3 text-ink-2"><?php echo esc_html( (string) $src['category_label'] ); ?></td>
 							<td class="py-2 pr-3 whitespace-nowrap">
-								<span class="<?php echo ! empty( $src['active_7d'] ) ? 'text-emerald-300' : 'text-rose-300'; ?>"><?php echo esc_html( null === $src['last_http_status'] ? '—' : 'HTTP ' . $src['last_http_status'] ); ?></span><br>
-								<span class="text-slate-500"><?php echo esc_html( cvc_admin_format( $src['last_checked_at'] ?? null, 'datetime' ) ); ?></span>
+								<span class="<?php echo ! empty( $src['active_7d'] ) ? 'text-emerald-800' : 'text-red-700'; ?>"><?php echo esc_html( null === $src['last_http_status'] ? '—' : 'HTTP ' . $src['last_http_status'] ); ?></span><br>
+								<span class="text-ink-muted"><?php echo esc_html( cvc_admin_format( $src['last_checked_at'] ?? null, 'datetime' ) ); ?></span>
 							</td>
 							<td class="py-2 pr-3 text-right tabular-nums"><?php echo esc_html( (string) (int) $src['notices'] ); ?></td>
 							<td class="py-2 pr-3 text-right tabular-nums"><?php echo esc_html( (string) (int) $src['published'] ); ?></td>
@@ -1059,7 +1059,7 @@ function cvc_admin_render_ingestion_sources(): void {
 							<td class="py-2 pr-3 text-right tabular-nums"><?php echo esc_html( null === $src['reliability_score'] ? '—' : (string) round( (float) $src['reliability_score'] ) ); ?></td>
 							<td class="py-2 text-right whitespace-nowrap">
 								<?php if ( cvc_admin_can( 'recruitment.update' ) ) : ?>
-									<?php echo cvc_ingestion_op_form( 'recheck', (int) $src['id'], 'Kiểm tra lại', $btn . ' bg-slate-800 text-slate-300 hover:bg-slate-700' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+									<?php echo cvc_ingestion_op_form( 'recheck', (int) $src['id'], 'Kiểm tra lại', $btn . 'bg-white text-ink-2 hover:bg-acc-soft' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 								<?php endif; ?>
 							</td>
 						</tr>
@@ -1070,17 +1070,17 @@ function cvc_admin_render_ingestion_sources(): void {
 	</section>
 
 	<?php if ( ! empty( $d['probes'] ) ) : ?>
-		<details class="bg-[#0A192F] border border-slate-800 rounded-2xl p-5">
-			<summary class="cursor-pointer text-sm font-black text-white">Lượt dò nguồn gần đây</summary>
+		<details class="dz-card">
+			<summary class="cursor-pointer text-sm font-black text-ink">Lượt dò nguồn gần đây</summary>
 			<ul class="mt-3 space-y-2 text-xs">
 				<?php foreach ( (array) $d['probes'] as $probe ) : ?>
-					<li class="border border-slate-800 rounded-xl p-3">
+					<li class="border border-slate-300 rounded-xl p-3">
 						<div class="flex flex-wrap justify-between gap-2">
-							<span class="text-slate-100 font-bold"><?php echo esc_html( (string) $probe['province'] . ' · ' . (string) $probe['category'] ); ?></span>
-							<span class="<?php echo in_array( $probe['result'], array( 'found', 'exists' ), true ) ? 'text-emerald-300' : 'text-rose-300'; ?>"><?php echo esc_html( array( 'found' => 'Tìm thấy', 'exists' => 'Đã có', 'not_found' => 'Không xác minh được', 'error' => 'Lỗi' )[ $probe['result'] ] ?? (string) $probe['result'] ); ?> · <?php echo esc_html( cvc_admin_format( $probe['probed_at'] ?? null, 'datetime' ) ); ?></span>
+							<span class="text-ink font-bold"><?php echo esc_html( (string) $probe['province'] . ' · ' . (string) $probe['category'] ); ?></span>
+							<span class="<?php echo in_array( $probe['result'], array( 'found', 'exists' ), true ) ? 'text-emerald-800' : 'text-red-700'; ?>"><?php echo esc_html( array( 'found' => 'Tìm thấy', 'exists' => 'Đã có', 'not_found' => 'Không xác minh được', 'error' => 'Lỗi' )[ $probe['result'] ] ?? (string) $probe['result'] ); ?> · <?php echo esc_html( cvc_admin_format( $probe['probed_at'] ?? null, 'datetime' ) ); ?></span>
 						</div>
 						<?php if ( ! empty( $probe['notes'] ) ) : ?>
-							<pre class="mt-1 whitespace-pre-wrap text-slate-400 font-sans"><?php echo esc_html( (string) $probe['notes'] ); ?></pre>
+							<pre class="mt-1 whitespace-pre-wrap text-ink-muted font-sans"><?php echo esc_html( (string) $probe['notes'] ); ?></pre>
 						<?php endif; ?>
 					</li>
 				<?php endforeach; ?>
@@ -1101,8 +1101,8 @@ function cvc_admin_render_ingestion_review(): void {
 	$labels  = array( 'pending' => 'Chờ kiểm', 'correct' => 'Đúng', 'minor_error' => 'Lỗi nhỏ', 'major_error' => 'Lỗi nặng' );
 	?>
 	<header>
-		<h1 class="text-2xl font-black text-white">Kiểm tra mẫu tin tự đăng</h1>
-		<p class="text-sm text-slate-400">Mỗi tuần hệ thống chọn tối đa 20 tin tự đăng trong 7 ngày. Đối chiếu từng tin với công văn gốc: cơ quan, tỉnh, hạn nộp, vị trí, chỉ tiêu. Nếu tỷ lệ lỗi nặng vượt 5% (khi đã kiểm từ 10 tin), hệ thống tự chuyển về duyệt 1 click.</p>
+		<h1 class="text-2xl font-black text-ink">Kiểm tra mẫu tin tự đăng</h1>
+		<p class="text-sm text-ink-muted">Mỗi tuần hệ thống chọn tối đa 20 tin tự đăng trong 7 ngày. Đối chiếu từng tin với công văn gốc: cơ quan, tỉnh, hạn nộp, vị trí, chỉ tiêu. Nếu tỷ lệ lỗi nặng vượt 5% (khi đã kiểm từ 10 tin), hệ thống tự chuyển về duyệt 1 click.</p>
 	</header>
 	<?php cvc_ingestion_tabs( 'kiem-tra' ); ?>
 	<?php
@@ -1115,32 +1115,32 @@ function cvc_admin_render_ingestion_review(): void {
 	?>
 	<dl class="grid grid-cols-2 sm:grid-cols-5 gap-2 text-sm">
 		<?php foreach ( array( 'pending' => 'Chờ kiểm', 'correct' => 'Đúng', 'minor_error' => 'Lỗi nhỏ', 'major_error' => 'Lỗi nặng' ) as $key => $label ) : ?>
-			<div class="bg-[#0A192F] border border-slate-800 rounded-xl p-3"><dt class="text-[11px] font-bold text-slate-400"><?php echo esc_html( $label ); ?></dt><dd class="text-xl font-black text-white tabular-nums"><?php echo esc_html( (string) (int) ( $stats[ $key ] ?? 0 ) ); ?></dd></div>
+			<div class="bg-white border border-slate-300 rounded-xl p-3"><dt class="text-[11px] font-bold text-ink-muted"><?php echo esc_html( $label ); ?></dt><dd class="text-xl font-black text-ink tabular-nums"><?php echo esc_html( (string) (int) ( $stats[ $key ] ?? 0 ) ); ?></dd></div>
 		<?php endforeach; ?>
-		<div class="bg-[#0A192F] border border-slate-800 rounded-xl p-3"><dt class="text-[11px] font-bold text-slate-400">Tỷ lệ lỗi nặng</dt><dd class="text-xl font-black <?php echo (float) ( $stats['major_rate'] ?? 0 ) > 0.05 ? 'text-rose-300' : 'text-white'; ?> tabular-nums"><?php echo esc_html( round( (float) ( $stats['major_rate'] ?? 0 ) * 100, 1 ) . '%' ); ?></dd></div>
+		<div class="bg-white border border-slate-300 rounded-xl p-3"><dt class="text-[11px] font-bold text-ink-muted">Tỷ lệ lỗi nặng</dt><dd class="text-xl font-black <?php echo (float) ( $stats['major_rate'] ?? 0 ) > 0.05 ? 'text-red-700' : 'text-ink'; ?> tabular-nums"><?php echo esc_html( round( (float) ( $stats['major_rate'] ?? 0 ) * 100, 1 ) . '%' ); ?></dd></div>
 	</dl>
 
 	<?php if ( empty( $d['items'] ) ) : ?>
-		<p class="text-sm text-slate-400">Chưa có tin nào trong mẫu kiểm tra. Mẫu được chọn mỗi thứ Hai từ các tin tự đăng của tuần trước.</p>
+		<p class="text-sm text-ink-muted">Chưa có tin nào trong mẫu kiểm tra. Mẫu được chọn mỗi thứ Hai từ các tin tự đăng của tuần trước.</p>
 		<?php return; ?>
 	<?php endif; ?>
 
 	<ul class="space-y-3">
 		<?php foreach ( (array) $d['items'] as $it ) : ?>
-			<li class="bg-[#0A192F] border <?php echo 'pending' === $it['review_sample'] ? 'border-amber-500/40' : 'border-slate-800'; ?> rounded-2xl p-4 space-y-2">
+			<li class="bg-white border <?php echo 'pending' === $it['review_sample'] ? 'border-acc-line' : 'border-slate-300'; ?> rounded-2xl p-4 space-y-2">
 				<div class="flex flex-wrap justify-between gap-2">
-					<a class="font-bold text-slate-100 hover:text-cyan-300" href="<?php echo esc_url( cvc_admin_url( 'thu-thap', (int) $it['id'] ) ); ?>"><?php echo esc_html( (string) ( $it['title'] ?? '(chưa có tiêu đề)' ) ); ?></a>
-					<span class="text-xs font-bold <?php echo 'major_error' === $it['review_sample'] ? 'text-rose-300' : ( 'correct' === $it['review_sample'] ? 'text-emerald-300' : 'text-amber-300' ); ?>"><?php echo esc_html( $labels[ $it['review_sample'] ] ?? (string) $it['review_sample'] ); ?></span>
+					<a class="font-bold text-ink hover:text-acc-2" href="<?php echo esc_url( cvc_admin_url( 'thu-thap', (int) $it['id'] ) ); ?>"><?php echo esc_html( (string) ( $it['title'] ?? '(chưa có tiêu đề)' ) ); ?></a>
+					<span class="text-xs font-bold <?php echo 'major_error' === $it['review_sample'] ? 'text-red-700' : ( 'correct' === $it['review_sample'] ? 'text-emerald-800' : 'text-acc' ); ?>"><?php echo esc_html( $labels[ $it['review_sample'] ] ?? (string) $it['review_sample'] ); ?></span>
 				</div>
-				<p class="text-xs text-slate-400">
+				<p class="text-xs text-ink-muted">
 					<?php echo esc_html( (string) ( $it['source'] ?? '' ) ); ?> · đăng <?php echo esc_html( cvc_admin_format( $it['published_at'] ?? null, 'datetime' ) ); ?> · điểm đầy đủ <?php echo esc_html( null === $it['completeness_score'] ? '—' : (string) $it['completeness_score'] ); ?>
-					· <a class="text-cyan-300 underline" href="<?php echo esc_url( (string) $it['source_url'] ); ?>" target="_blank" rel="noopener nofollow">Trang gốc</a>
+					· <a class="text-acc underline" href="<?php echo esc_url( (string) $it['source_url'] ); ?>" target="_blank" rel="noopener nofollow">Trang gốc</a>
 					<?php if ( ! empty( $it['recruitment']['slug'] ) ) : ?>
-						· <a class="text-emerald-300 underline" href="<?php echo esc_url( cvc_recruitment_url( (string) $it['recruitment']['slug'] ) ); ?>" target="_blank" rel="noopener">Tin đã đăng</a>
+						· <a class="text-emerald-800 underline" href="<?php echo esc_url( cvc_recruitment_url( (string) $it['recruitment']['slug'] ) ); ?>" target="_blank" rel="noopener">Tin đã đăng</a>
 					<?php endif; ?>
 				</p>
 				<?php if ( ! empty( $it['review_notes'] ) ) : ?>
-					<p class="text-xs text-slate-300">Ghi chú: <?php echo esc_html( (string) $it['review_notes'] ); ?> <span class="text-slate-500">— <?php echo esc_html( (string) $it['reviewed_by'] ); ?></span></p>
+					<p class="text-xs text-ink-2">Ghi chú: <?php echo esc_html( (string) $it['review_notes'] ); ?> <span class="text-ink-muted">— <?php echo esc_html( (string) $it['reviewed_by'] ); ?></span></p>
 				<?php endif; ?>
 				<?php if ( $can_pub ) : ?>
 					<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="flex flex-wrap items-center gap-2">
@@ -1148,16 +1148,16 @@ function cvc_admin_render_ingestion_review(): void {
 						<input type="hidden" name="action" value="cvc_admin_ingestion">
 						<input type="hidden" name="op" value="review">
 						<input type="hidden" name="id" value="<?php echo esc_attr( (string) $it['id'] ); ?>">
-						<input type="text" name="notes" maxlength="1000" placeholder="Ghi chú (sai trường nào…)" class="<?php echo esc_attr( cvc_admin_input_class() ); ?> !mt-0 w-72">
-						<button name="result" value="correct" class="<?php echo esc_attr( $btn ); ?> bg-emerald-500 text-slate-950">Đúng</button>
-						<button name="result" value="minor_error" class="<?php echo esc_attr( $btn ); ?> bg-amber-500 text-slate-950">Lỗi nhỏ</button>
-						<button name="result" value="major_error" class="<?php echo esc_attr( $btn ); ?> bg-rose-500 text-white">Lỗi nặng</button>
+						<input type="text" name="notes" maxlength="1000" placeholder="Ghi chú (sai trường nào…)" class="text-ink border-slate-400 bg-white <?php echo esc_attr( cvc_admin_input_class() ); ?> !mt-0 w-72 text-ink border-slate-400 bg-white">
+						<button name="result" value="correct" class="<?php echo esc_attr( $btn ); ?> bg-acc text-slate-950 text-white">Đúng</button>
+						<button name="result" value="minor_error" class="<?php echo esc_attr( $btn ); ?> bg-acc text-slate-950 text-white">Lỗi nhỏ</button>
+						<button name="result" value="major_error" class="<?php echo esc_attr( $btn ); ?> bg-acc-soft text-acc border-acc-line">Lỗi nặng</button>
 					</form>
 				<?php endif; ?>
 			</li>
 		<?php endforeach; ?>
 	</ul>
-	<p class="text-xs text-slate-500">Lỗi nặng: sai cơ quan, sai tỉnh, sai hạn nộp, sai chỉ tiêu, hoặc không phải tin tuyển dụng. Lỗi nhỏ: sai chính tả, tóm tắt thiếu, vị trí gộp chưa tách.</p>
+	<p class="text-xs text-ink-muted">Lỗi nặng: sai cơ quan, sai tỉnh, sai hạn nộp, sai chỉ tiêu, hoặc không phải tin tuyển dụng. Lỗi nhỏ: sai chính tả, tóm tắt thiếu, vị trí gộp chưa tách.</p>
 	<?php
 }
 

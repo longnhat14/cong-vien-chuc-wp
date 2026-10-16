@@ -45,9 +45,9 @@ if ( $has_query ) {
 get_header();
 ?>
 
-<main id="main" class="min-h-screen bg-slate-900 text-slate-100 py-6">
+<main id="main" class="dz-main">
 
-	<div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+	<div class="dz-wrap space-y-6">
 
 		<!-- Breadcrumbs -->
 		<?php
@@ -60,12 +60,12 @@ get_header();
 		?>
 
 		<!-- SEARCH HEADER HERO BOX -->
-		<section class="bg-gradient-to-r from-navy-950 via-slate-900 to-indigo-950 p-6 sm:p-8 rounded-3xl border border-cyan-500/40 shadow-2xl space-y-4">
+		<section class="dz-herohead">
 			<div class="max-w-3xl space-y-3">
-				<span class="bg-cyan-500 text-navy-950 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider">
+				<span class="bg-acc text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider">
 					Tìm kiếm
 				</span>
-				<h1 class="text-2xl sm:text-3xl font-black text-white">
+				<h1 class="text-2xl sm:text-3xl font-black text-ink">
 					<?php echo $has_query ? esc_html( sprintf( 'Kết quả cho: "%s"', $q ) ) : 'Tìm Kiếm Toàn Bộ Dữ Liệu Công Vụ'; ?>
 				</h1>
 				
@@ -78,22 +78,22 @@ get_header();
 							name="q" 
 							value="<?php echo esc_attr($q); ?>" 
 							placeholder="Nhập số hiệu văn bản, từ khóa tuyển dụng, chủ đề thi tuyển..." 
-							class="w-full bg-slate-950 border-2 border-cyan-500/50 focus:border-cyan-400 text-white rounded-2xl px-4 py-3 text-xs sm:text-sm font-semibold focus:outline-none shadow-inner"
+							class="w-full border-2 border-acc-line focus:border-acc-2 text-ink rounded-2xl px-4 py-3 text-xs sm:text-sm font-semibold focus:outline-none border-slate-400 bg-white"
 						>
 					</div>
-					<button type="submit" class="px-6 py-3 bg-amber-500 hover:bg-amber-600 text-navy-950 font-black text-xs sm:text-sm rounded-2xl shadow transition-transform hover:scale-105 shrink-0 flex items-center gap-2">
+					<button type="submit" class="px-6 py-3 bg-acc hover:bg-acc-deep text-white font-black text-xs sm:text-sm rounded-2xl transition-transform hover:scale-105 shrink-0 flex items-center gap-2">
 						<i class="fa-solid fa-magnifying-glass"></i> Tìm Kiếm
 					</button>
 				</form>
 			</div>
 
 			<!-- SEARCH DOMAIN FILTER TABS -->
-			<div class="flex items-center gap-2 overflow-x-auto pt-3 border-t border-slate-800/80 text-xs">
-				<a href="<?php echo esc_url( cvc_search_url( $q, 'all' ) ); ?>" class="px-3.5 py-1.5 rounded-xl font-bold transition-all shrink-0 <?php echo 'all' === $type ? 'bg-cyan-500 text-navy-950 shadow' : 'bg-slate-900 text-slate-300 hover:bg-slate-800'; ?>">
+			<div class="flex items-center gap-2 overflow-x-auto pt-3 border-t border-slate-300 text-xs">
+				<a href="<?php echo esc_url( cvc_search_url( $q, 'all' ) ); ?>" class="px-3.5 py-1.5 rounded-xl font-bold transition-all shrink-0 <?php echo 'all' === $type ? 'bg-acc-soft text-acc font-bold border-acc-line' : 'bg-white text-ink-2 hover:bg-acc-soft'; ?>">
 					Tất Cả
 				</a>
 				<?php foreach ( cvc_search_domains() as $domain_key => $domain ) : ?>
-					<a href="<?php echo esc_url( cvc_search_url( $q, $domain_key ) ); ?>" class="px-3.5 py-1.5 rounded-xl font-bold transition-all shrink-0 <?php echo $type === $domain_key ? 'bg-cyan-500 text-navy-950 shadow' : 'bg-slate-900 text-slate-300 hover:bg-slate-800'; ?>">
+					<a href="<?php echo esc_url( cvc_search_url( $q, $domain_key ) ); ?>" class="px-3.5 py-1.5 rounded-xl font-bold transition-all shrink-0 <?php echo $type === $domain_key ? 'bg-acc-soft text-acc font-bold border-acc-line' : 'bg-white text-ink-2 hover:bg-acc-soft'; ?>">
 						<?php echo esc_html( $domain['label'] ); ?>
 					</a>
 				<?php endforeach; ?>
@@ -106,11 +106,11 @@ get_header();
 			<!-- LEFT COLUMN (3 COLS — SEARCH FILTERS & TIPS) -->
 			<aside class="lg:col-span-3 space-y-4">
 				
-				<div class="bg-[#0A192F] border border-slate-800 p-5 rounded-2xl space-y-3 shadow-lg text-xs">
-					<h3 class="font-extrabold text-xs text-amber-400 uppercase tracking-wider border-b border-slate-800 pb-2 flex items-center gap-1.5">
+				<div class="dz-card space-y-3 text-xs">
+					<h3 class="dz-sideh2">
 						<i class="fa-solid fa-lightbulb"></i> Mẹo Tìm Kiếm Chuẩn
 					</h3>
-					<div class="space-y-2 text-slate-300 leading-relaxed text-[11px]">
+					<div class="space-y-2 text-ink-2 leading-relaxed text-[11px]">
 						<p>• Nhập chính xác <strong>Số hiệu văn bản</strong> (Ví dụ: <em>170/2025/NĐ-CP</em>) để trích xuất toàn văn nhanh nhất.</p>
 						<p>• Nhập tên <strong>Đơn vị tuyển dụng</strong> (Ví dụ: <em>UBND TP.HCM</em>) để xem chỉ tiêu mới nhất.</p>
 						<p>• Chọn từng Tab chuyên biệt để thu hẹp phạm vi kết quả.</p>
@@ -124,33 +124,33 @@ get_header();
 
 				<?php if ( ! $has_query ) : ?>
 					
-					<div class="bg-[#0A192F] border border-slate-800 p-8 rounded-3xl text-center space-y-4 shadow-xl">
-						<div class="w-16 h-16 mx-auto rounded-full bg-cyan-500/20 text-cyan-300 flex items-center justify-center font-black text-2xl border border-cyan-500/30">
+					<div class="dz-panel text-center space-y-4">
+						<div class="w-16 h-16 mx-auto rounded-full bg-acc-soft text-acc flex items-center justify-center font-black text-2xl border border-acc-line">
 							🔍
 						</div>
-						<h2 class="text-xl font-black text-white">Bắt Đầu Tìm Kiếm Dữ Liệu Công Vụ</h2>
-						<p class="text-xs text-slate-400 max-w-md mx-auto">
+						<h2 class="text-xl font-black text-ink">Bắt Đầu Tìm Kiếm Dữ Liệu Công Vụ</h2>
+						<p class="text-xs text-ink-muted max-w-md mx-auto">
 							Vui lòng nhập từ khóa tìm kiếm ở khung trên để tìm đề thi, khóa học, văn bản pháp luật, kiến thức và tin tuyển dụng.
 						</p>
 					</div>
 
 				<?php elseif ( empty( $items ) ) : ?>
 
-					<div class="bg-[#0A192F] border border-slate-800 p-8 rounded-3xl text-center space-y-4 shadow-xl">
-						<div class="w-16 h-16 mx-auto rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center font-black text-2xl border border-amber-500/30">
+					<div class="dz-panel text-center space-y-4">
+						<div class="w-16 h-16 mx-auto rounded-full bg-acc-soft text-acc flex items-center justify-center font-black text-2xl border border-acc-line">
 							⚠️
 						</div>
-						<h2 class="text-xl font-black text-white">Không Tìm Thấy Kết Quả Quá Trình Tìm Kiếm</h2>
-						<p class="text-xs text-slate-400 max-w-md mx-auto">
-							Không tìm thấy dữ liệu phù hợp cho từ khóa "<strong class="text-amber-300"><?php echo esc_html($q); ?></strong>". Thử tìm kiếm với từ khóa ngắn hơn hoặc kiểm tra lỗi chính tả.
+						<h2 class="text-xl font-black text-ink">Không Tìm Thấy Kết Quả Quá Trình Tìm Kiếm</h2>
+						<p class="text-xs text-ink-muted max-w-md mx-auto">
+							Không tìm thấy dữ liệu phù hợp cho từ khóa "<strong class="text-acc"><?php echo esc_html($q); ?></strong>". Thử tìm kiếm với từ khóa ngắn hơn hoặc kiểm tra lỗi chính tả.
 						</p>
 					</div>
 
 				<?php else : ?>
 
-					<div class="bg-[#0A192F] p-4 rounded-2xl border border-slate-800 flex items-center justify-between text-xs">
-						<span class="text-slate-300">Tìm thấy <strong class="text-cyan-400"><?php echo $total_items; ?></strong> kết quả phù hợp</span>
-						<span class="text-slate-400">Trang <?php echo $currentPg; ?> / <?php echo $lastPg; ?></span>
+					<div class="dz-card flex items-center justify-between text-xs">
+						<span class="text-ink-2">Tìm thấy <strong class="text-acc"><?php echo $total_items; ?></strong> kết quả phù hợp</span>
+						<span class="text-ink-muted">Trang <?php echo $currentPg; ?> / <?php echo $lastPg; ?></span>
 					</div>
 
 					<div class="space-y-3">
@@ -161,28 +161,28 @@ get_header();
 							$s_type  = $s_item['type_label'] ?? 'Dữ liệu';
 							$s_desc  = $s_item['summary'] ?? ($s_item['description'] ?? '');
 							?>
-							<article class="bg-[#0A192F] hover:bg-[#112338] border border-slate-800 hover:border-cyan-500/40 p-5 rounded-2xl space-y-2 shadow-lg transition-all group">
+							<article class="dz-card hover:bg-acc-soft hover:border-acc-2 space-y-2 transition-all group">
 								<div class="flex items-center justify-between text-[10px]">
-									<span class="bg-cyan-500/20 text-cyan-300 font-extrabold px-2.5 py-0.5 rounded-full border border-cyan-500/30">
+									<span class="bg-acc-soft text-acc font-extrabold px-2.5 py-0.5 rounded-full border border-acc-line">
 										📌 <?php echo esc_html($s_type); ?>
 									</span>
-									<span class="text-slate-500">Cập nhật 2026</span>
+									<span class="text-ink-muted">Cập nhật 2026</span>
 								</div>
 
-								<h3 class="font-extrabold text-sm text-white group-hover:text-cyan-300 leading-snug">
+								<h3 class="font-extrabold text-sm text-ink group-hover:text-cyan-300 leading-snug">
 									<a href="<?php echo esc_url($s_url); ?>">
 										<?php echo esc_html($s_title); ?>
 									</a>
 								</h3>
 
 								<?php if ( ! empty($s_desc) ) : ?>
-									<p class="text-xs text-slate-400 leading-relaxed line-clamp-2">
+									<p class="text-xs text-ink-muted leading-relaxed line-clamp-2">
 										<?php echo esc_html($s_desc); ?>
 									</p>
 								<?php endif; ?>
 
 								<div class="pt-2 flex items-center justify-end text-xs">
-									<a href="<?php echo esc_url($s_url); ?>" class="text-amber-400 font-bold text-[11px] flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+									<a href="<?php echo esc_url($s_url); ?>" class="text-acc font-bold text-[11px] flex items-center gap-1 group-hover:translate-x-1 transition-transform">
 										Xem chi tiết &rarr;
 									</a>
 								</div>
@@ -197,15 +197,15 @@ get_header();
 			<!-- RIGHT COLUMN (3 COLS — HOT SEARCHES & RECOMMENDATIONS) -->
 			<aside class="lg:col-span-3 space-y-4">
 
-				<div class="bg-[#0A192F] border border-slate-800 p-5 rounded-2xl space-y-3 shadow-xl text-xs">
-					<h3 class="font-extrabold text-xs text-cyan-400 uppercase tracking-wider border-b border-slate-800 pb-2 flex items-center gap-1.5">
+				<div class="dz-card space-y-3 text-xs">
+					<h3 class="dz-sideh2">
 						🔥 Từ Khóa Hot Nhất
 					</h3>
 					<div class="flex flex-wrap gap-1.5">
-						<a href="<?php echo esc_url( cvc_search_url('Nghị định 170') ); ?>" class="px-2.5 py-1 bg-slate-900 hover:bg-cyan-500/20 text-slate-300 hover:text-cyan-300 rounded-lg border border-slate-800">Nghị định 170</a>
-						<a href="<?php echo esc_url( cvc_search_url('Luật Cán bộ công chức') ); ?>" class="px-2.5 py-1 bg-slate-900 hover:bg-cyan-500/20 text-slate-300 hover:text-cyan-300 rounded-lg border border-slate-800">Luật CBCC</a>
-						<a href="<?php echo esc_url( cvc_search_url('Đề thi Kiến thức chung') ); ?>" class="px-2.5 py-1 bg-slate-900 hover:bg-cyan-500/20 text-slate-300 hover:text-cyan-300 rounded-lg border border-slate-800">Đề thi KTC</a>
-						<a href="<?php echo esc_url( cvc_search_url('Tuyển dụng UBND') ); ?>" class="px-2.5 py-1 bg-slate-900 hover:bg-cyan-500/20 text-slate-300 hover:text-cyan-300 rounded-lg border border-slate-800">Tuyển dụng 2026</a>
+						<a href="<?php echo esc_url( cvc_search_url('Nghị định 170') ); ?>" class="px-2.5 py-1 bg-white hover:bg-acc-soft text-ink-2 hover:text-acc-2 rounded-lg border border-slate-300">Nghị định 170</a>
+						<a href="<?php echo esc_url( cvc_search_url('Luật Cán bộ công chức') ); ?>" class="px-2.5 py-1 bg-white hover:bg-acc-soft text-ink-2 hover:text-acc-2 rounded-lg border border-slate-300">Luật CBCC</a>
+						<a href="<?php echo esc_url( cvc_search_url('Đề thi Kiến thức chung') ); ?>" class="px-2.5 py-1 bg-white hover:bg-acc-soft text-ink-2 hover:text-acc-2 rounded-lg border border-slate-300">Đề thi KTC</a>
+						<a href="<?php echo esc_url( cvc_search_url('Tuyển dụng UBND') ); ?>" class="px-2.5 py-1 bg-white hover:bg-acc-soft text-ink-2 hover:text-acc-2 rounded-lg border border-slate-300">Tuyển dụng 2026</a>
 					</div>
 				</div>
 

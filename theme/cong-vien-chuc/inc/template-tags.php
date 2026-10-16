@@ -551,8 +551,8 @@ function cvc_render_recruitment_list_item( array $recruitment ): void {
 	$url         = $isDemo ? cvc_recruitments_url() : cvc_recruitment_url( $slug );
 	$initial     = $agencyName ? mb_substr( $agencyName, 0, 1 ) : 'C';
 	?>
-	<article class="cvc-recruitment-row<?php echo $isDemo ? ' cvc-recruitment-row--demo' : ''; ?><?php echo $isExpired ? ' cvc-recruitment-row--expired' : ''; ?>">
-		<span class="cvc-recruitment-row__avatar cvc-recruitment-row__avatar--<?php echo esc_attr( $emblemStyle ); ?>" aria-hidden="true">
+	<article class="cvc-recruitment-row <?php echo $isDemo ? ' cvc-recruitment-row--demo' : ''; ?> <?php echo $isExpired ? ' cvc-recruitment-row--expired' : ''; ?>">
+		<span class="cvc-recruitment-row__avatar cvc-recruitment-row__avatar-- <?php echo esc_attr( $emblemStyle ); ?>" aria-hidden="true">
 			<?php cvc_render_recruitment_emblem_icon( $emblemStyle, $initial ); ?>
 		</span>
 		<div class="cvc-recruitment-row__body">
@@ -1337,7 +1337,7 @@ function cvc_render_course_thumbnail_svg_fallback( ?string $course_type = null, 
 
 	$scene = $scenes[ $course_type ?? '' ] ?? $scenes['default'];
 	?>
-	<div class="cvc-card__media cvc-card__media--placeholder cvc-card__media--<?php echo esc_attr( $color ); ?>" aria-hidden="true">
+	<div class="cvc-card__media cvc-card__media--placeholder cvc-card__media-- <?php echo esc_attr( $color ); ?>" aria-hidden="true">
 		<svg width="100%" height="100%" viewBox="0 0 60 60" preserveAspectRatio="xMidYMid meet" fill="none" style="color:rgba(0,0,0,0.35)">
 			<?php echo $scene; // phpcs:ignore -- SVG tĩnh, hardcode trong theme, không phải input người dùng. ?>
 		</svg>
@@ -1382,7 +1382,7 @@ function cvc_render_course_card( array $course, int $heading_level = 2 ): void {
 	$url = $isDemo ? cvc_courses_url() : cvc_course_url( $slug );
 	$tag = 'h' . max( 2, min( 4, $heading_level ) );
 	?>
-	<article class="cvc-card cvc-card--course<?php echo $isDemo ? ' cvc-card--demo' : ''; ?>">
+	<article class="cvc-card cvc-card--course <?php echo $isDemo ? ' cvc-card--demo' : ''; ?>">
 		<a class="cvc-card__media-link" href="<?php echo esc_url( $url ); ?>" tabindex="-1" aria-hidden="true">
 			<?php if ( $thumbnail ) : ?>
 				<div class="cvc-card__media">
@@ -1401,7 +1401,7 @@ function cvc_render_course_card( array $course, int $heading_level = 2 ): void {
 				<?php endif; ?>
 			</span>
 			<?php if ( $typeLabel ) : ?>
-				<span class="cvc-badge cvc-badge--category cvc-badge--category-<?php echo esc_attr( $typeColor ); ?> cvc-card__media-badge"><?php echo esc_html( $typeLabel ); ?></span>
+				<span class="cvc-badge cvc-badge--category cvc-badge--category- <?php echo esc_attr( $typeColor ); ?> cvc-card__media-badge"><?php echo esc_html( $typeLabel ); ?></span>
 			<?php endif; ?>
 		</a>
 		<div class="cvc-card__body">
@@ -1464,7 +1464,7 @@ function cvc_render_course_card_featured( array $course ): void {
 				<?php cvc_render_course_thumbnail_placeholder( $course['course_type'] ?? null, $typeColor ); ?>
 			<?php endif; ?>
 			<?php if ( $typeLabel ) : ?>
-				<span class="cvc-badge cvc-badge--category cvc-badge--category-<?php echo esc_attr( $typeColor ); ?> cvc-card__media-badge"><?php echo esc_html( $typeLabel ); ?></span>
+				<span class="cvc-badge cvc-badge--category cvc-badge--category- <?php echo esc_attr( $typeColor ); ?> cvc-card__media-badge"><?php echo esc_html( $typeLabel ); ?></span>
 			<?php endif; ?>
 		</a>
 		<div class="cvc-card__body">
@@ -2119,7 +2119,7 @@ function cvc_render_hero_feature_card(): void {
 	<div class="cvc-hero-feature-card">
 		<?php foreach ( $items as $item ) : ?>
 			<div class="cvc-hero-feature-card__row">
-				<span class="cvc-hero-feature-card__icon cvc-hero-feature-card__icon--<?php echo esc_attr( $item['color'] ); ?>"><?php cvc_render_icon( $item['icon'], 18 ); ?></span>
+				<span class="cvc-hero-feature-card__icon cvc-hero-feature-card__icon-- <?php echo esc_attr( $item['color'] ); ?>"><?php cvc_render_icon( $item['icon'], 18 ); ?></span>
 				<span>
 					<strong><?php echo esc_html( $item['title'] ); ?></strong>
 					<small><?php echo esc_html( $item['desc'] ); ?></small>
@@ -2183,7 +2183,7 @@ function cvc_render_value_strip(): void {
 	<ul class="cvc-value-strip">
 		<?php foreach ( $items as $item ) : ?>
 			<li class="cvc-value-strip__item">
-				<span class="cvc-value-strip__icon cvc-value-strip__icon--<?php echo esc_attr( $item['color'] ); ?> cvc-value-strip__icon--asset">
+				<span class="cvc-value-strip__icon cvc-value-strip__icon-- <?php echo esc_attr( $item['color'] ); ?> cvc-value-strip__icon--asset">
 					<?php
 					/*
 					 * Phase 10A.16: ưu tiên asset PNG thật (Homepage V2 cut
@@ -2408,7 +2408,7 @@ function cvc_render_goal_direction_section(): void {
 function cvc_render_resource_hub_card( string $icon, string $title, string $description, string $url, ?int $count = null, string $count_label = '', string $color = 'blue' ): void {
 	?>
 	<a class="cvc-resource-card" href="<?php echo esc_url( $url ); ?>">
-		<span class="cvc-resource-card__icon cvc-resource-card__icon--<?php echo esc_attr( $color ); ?>"><?php cvc_render_icon( $icon, 26 ); ?></span>
+		<span class="cvc-resource-card__icon cvc-resource-card__icon-- <?php echo esc_attr( $color ); ?>"><?php cvc_render_icon( $icon, 26 ); ?></span>
 		<span class="cvc-resource-card__title"><?php echo esc_html( $title ); ?></span>
 		<span class="cvc-resource-card__desc"><?php echo esc_html( $description ); ?></span>
 		<?php if ( null !== $count && $count > 0 ) : ?>

@@ -25,17 +25,17 @@ $labels   = array(
 	'USER'        => 'Học viên.',
 );
 ?>
-<section class="bg-[#0A192F] border border-slate-800 rounded-2xl p-5 space-y-4" aria-labelledby="cvc-user-info">
-	<h2 id="cvc-user-info" class="text-base font-black text-white">Thông tin tài khoản</h2>
+<section class="dz-card space-y-4" aria-labelledby="cvc-user-info">
+	<h2 id="cvc-user-info" class="text-base font-black text-ink">Thông tin tài khoản</h2>
 	<dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm">
-		<div class="flex justify-between gap-3 border-b border-slate-800 py-1"><dt class="text-slate-400">Email</dt><dd class="text-white"><?php echo esc_html( (string) ( $item['email'] ?? '' ) ); ?></dd></div>
-		<div class="flex justify-between gap-3 border-b border-slate-800 py-1"><dt class="text-slate-400">Ngày tạo</dt><dd class="text-white"><?php echo esc_html( cvc_admin_format( $item['created_at'] ?? null, 'datetime' ) ); ?></dd></div>
-		<div class="flex justify-between gap-3 border-b border-slate-800 py-1"><dt class="text-slate-400">Lượt làm bài</dt><dd class="text-white tabular-nums"><?php echo esc_html( number_format_i18n( (int) ( $stats['exam_attempts'] ?? 0 ) ) ); ?></dd></div>
-		<div class="flex justify-between gap-3 border-b border-slate-800 py-1"><dt class="text-slate-400">Khóa học đã ghi danh</dt><dd class="text-white tabular-nums"><?php echo esc_html( number_format_i18n( (int) ( $stats['course_enrollments'] ?? 0 ) ) ); ?></dd></div>
-		<div class="flex justify-between gap-3 border-b border-slate-800 py-1"><dt class="text-slate-400">Đơn đã thanh toán</dt><dd class="text-white tabular-nums"><?php echo esc_html( number_format_i18n( (int) ( $stats['orders_paid'] ?? 0 ) ) ); ?></dd></div>
+		<div class="flex justify-between gap-3 border-b border-slate-300 py-1"><dt class="text-ink-muted">Email</dt><dd class="text-ink"><?php echo esc_html( (string) ( $item['email'] ?? '' ) ); ?></dd></div>
+		<div class="flex justify-between gap-3 border-b border-slate-300 py-1"><dt class="text-ink-muted">Ngày tạo</dt><dd class="text-ink"><?php echo esc_html( cvc_admin_format( $item['created_at'] ?? null, 'datetime' ) ); ?></dd></div>
+		<div class="flex justify-between gap-3 border-b border-slate-300 py-1"><dt class="text-ink-muted">Lượt làm bài</dt><dd class="text-ink tabular-nums"><?php echo esc_html( number_format_i18n( (int) ( $stats['exam_attempts'] ?? 0 ) ) ); ?></dd></div>
+		<div class="flex justify-between gap-3 border-b border-slate-300 py-1"><dt class="text-ink-muted">Khóa học đã ghi danh</dt><dd class="text-ink tabular-nums"><?php echo esc_html( number_format_i18n( (int) ( $stats['course_enrollments'] ?? 0 ) ) ); ?></dd></div>
+		<div class="flex justify-between gap-3 border-b border-slate-300 py-1"><dt class="text-ink-muted">Đơn đã thanh toán</dt><dd class="text-ink tabular-nums"><?php echo esc_html( number_format_i18n( (int) ( $stats['orders_paid'] ?? 0 ) ) ); ?></dd></div>
 	</dl>
 
-	<h2 class="text-base font-black text-white pt-2">Vai trò</h2>
+	<h2 class="text-base font-black text-ink pt-2">Vai trò</h2>
 	<?php if ( ! $roles['ok'] ) : ?>
 		<?php cvc_render_error_state( cvc_admin_error_message( $roles ) ); ?>
 	<?php else : ?>
@@ -50,22 +50,22 @@ $labels   = array(
 					$name     = (string) $role['name'];
 					$locked   = 'SUPER_ADMIN' === $name && ! $is_super;
 					?>
-					<label class="flex items-start gap-2 p-3 rounded-xl bg-slate-950 border border-slate-700 text-sm <?php echo $locked ? 'opacity-60' : ''; ?>">
-						<input type="checkbox" name="roles[]" value="<?php echo esc_attr( $name ); ?>" class="mt-1 accent-amber-500" <?php checked( in_array( $name, $current, true ) ); ?> <?php disabled( $locked ); ?>>
+					<label class="flex items-start gap-2 p-3 rounded-xl bg-white border border-slate-300 text-sm <?php echo $locked ? 'opacity-60' : ''; ?>">
+						<input type="checkbox" name="roles[]" value="<?php echo esc_attr( $name ); ?>" class="mt-1 accent-acc-2" <?php checked( in_array( $name, $current, true ) ); ?> <?php disabled( $locked ); ?>>
 						<?php if ( $locked && in_array( $name, $current, true ) ) : ?>
 							<input type="hidden" name="roles[]" value="<?php echo esc_attr( $name ); ?>">
 						<?php endif; ?>
 						<span>
-							<strong class="text-white"><?php echo esc_html( (string) ( $role['display_name'] ?? $name ) ); ?></strong>
-							<span class="block text-xs text-slate-400"><?php echo esc_html( $labels[ $name ] ?? (string) ( $role['description'] ?? '' ) ); ?> · <?php echo esc_html( (int) ( $role['permissions_count'] ?? 0 ) ); ?> quyền</span>
+							<strong class="text-ink"><?php echo esc_html( (string) ( $role['display_name'] ?? $name ) ); ?></strong>
+							<span class="block text-xs text-ink-muted"><?php echo esc_html( $labels[ $name ] ?? (string) ( $role['description'] ?? '' ) ); ?> · <?php echo esc_html( (int) ( $role['permissions_count'] ?? 0 ) ); ?> quyền</span>
 						</span>
 					</label>
 				<?php endforeach; ?>
 			</fieldset>
 			<?php if ( $can_edit ) : ?>
-				<button type="submit" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-navy-950 font-black text-sm rounded-xl">Lưu vai trò</button>
+				<button type="submit" class="px-4 py-2 bg-acc hover:bg-acc-deep text-white font-black text-sm rounded-xl">Lưu vai trò</button>
 			<?php else : ?>
-				<p class="text-xs text-slate-400">Bạn chỉ có quyền xem.</p>
+				<p class="text-xs text-ink-muted">Bạn chỉ có quyền xem.</p>
 			<?php endif; ?>
 		</form>
 	<?php endif; ?>

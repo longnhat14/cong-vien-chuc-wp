@@ -81,7 +81,7 @@ $transitions = array(
 				?>
 				<article class="cvc-card cvc-goal-card">
 					<div class="cvc-card__body">
-						<span class="cvc-badge cvc-badge--status cvc-badge--status-<?php echo esc_attr( $status ); ?>"><?php echo esc_html( cvc_status_label( $status ) ); ?></span>
+						<span class="cvc-badge cvc-badge--status cvc-badge--status- <?php echo esc_attr( $status ); ?>"><?php echo esc_html( cvc_status_label( $status ) ); ?></span>
 						<h3 class="cvc-card__title"><?php echo esc_html( $goal['title'] ?? 'Mục tiêu chưa đặt tên' ); ?></h3>
 						<?php if ( ! empty( $goal['notes'] ) ) : ?>
 							<p class="cvc-card__excerpt"><?php echo esc_html( $goal['notes'] ); ?></p>

@@ -280,20 +280,20 @@ function cvc_admin_format( $value, string $format = '' ): string {
 function cvc_admin_status_class( $value ): string {
 	$key = is_bool( $value ) ? ( $value ? '1' : '0' ) : (string) $value;
 	$map = array(
-		'published' => 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40',
-		'active'    => 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40',
-		'paid'      => 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40',
-		'1'         => 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40',
-		'review'    => 'bg-amber-500/15 text-amber-300 border-amber-500/40',
-		'pending'   => 'bg-amber-500/15 text-amber-300 border-amber-500/40',
-		'draft'     => 'bg-slate-700/60 text-slate-300 border-slate-600',
-		'0'         => 'bg-slate-700/60 text-slate-300 border-slate-600',
-		'expired'   => 'bg-rose-500/15 text-rose-300 border-rose-500/40',
-		'failed'    => 'bg-rose-500/15 text-rose-300 border-rose-500/40',
-		'cancelled' => 'bg-rose-500/15 text-rose-300 border-rose-500/40',
+		'published' => 'bg-acc-soft text-emerald-800 border-acc-line',
+		'active'    => 'bg-acc-soft text-emerald-800 border-acc-line',
+		'paid'      => 'bg-acc-soft text-emerald-800 border-acc-line',
+		'1'         => 'bg-acc-soft text-emerald-800 border-acc-line',
+		'review'    => 'bg-acc-soft text-acc border-acc-line',
+		'pending'   => 'bg-acc-soft text-acc border-acc-line',
+		'draft'     => 'bg-white text-ink-2 border-slate-300',
+		'0'         => 'bg-white text-ink-2 border-slate-300',
+		'expired'   => 'bg-acc-soft text-red-700 border-acc-line',
+		'failed'    => 'bg-acc-soft text-red-700 border-acc-line',
+		'cancelled' => 'bg-acc-soft text-red-700 border-acc-line',
 	);
 
-	return $map[ $key ] ?? 'bg-slate-700/60 text-slate-300 border-slate-600';
+	return $map[ $key ] ?? 'bg-white text-ink-2 border-slate-300';
 }
 
 function cvc_admin_item_title( array $res, array $item ): string {
@@ -390,7 +390,7 @@ function cvc_admin_field_value( array $field, array $item ) {
 /* ------------------------------------------------------------------ */
 
 function cvc_admin_input_class(): string {
-	return 'w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white placeholder-slate-500 focus:border-cyan-400 focus:outline-none';
+	return 'w-full px-3 py-2 rounded-xl border border-slate-300 text-sm text-ink placeholder-slate-400 focus:border-acc-2 focus:outline-none border-slate-400 bg-white';
 }
 
 /**
@@ -405,8 +405,8 @@ function cvc_admin_render_field( array $field, $value, bool $is_create, array $i
 	?>
 	<div class="space-y-1.5 <?php echo $wide ? 'md:col-span-2' : ''; ?>">
 		<?php if ( 'checkbox' !== $field['type'] ) : ?>
-			<label for="<?php echo esc_attr( $id ); ?>" class="block text-xs font-bold text-slate-300">
-				<?php echo esc_html( $field['label'] ); ?><?php echo $required ? ' <span class="text-rose-400" aria-hidden="true">*</span>' : ''; ?>
+			<label for="<?php echo esc_attr( $id ); ?>" class="block text-xs font-bold text-ink-2">
+				<?php echo esc_html( $field['label'] ); ?><?php echo $required ? ' <span class="text-red-700" aria-hidden="true">*</span>' : ''; ?>
 			</label>
 		<?php endif; ?>
 		<?php
@@ -414,23 +414,23 @@ function cvc_admin_render_field( array $field, $value, bool $is_create, array $i
 			case 'textarea':
 			case 'html':
 				printf(
-					'<textarea id="%1$s" name="f[%2$s]" rows="%3$d" class="%4$s" %5$s>%6$s</textarea>',
+					'<textarea id="%1$s" name="f[%2$s]" rows="%3$d" class="%4$s text-ink border-slate-400 bg-white" %5$s>%6$s</textarea>',
 					esc_attr( $id ),
 					esc_attr( $name ),
 					'html' === $field['type'] ? 12 : 4,
-					esc_attr( $class . ( 'html' === $field['type'] ? ' font-mono text-xs' : '' ) ),
+					esc_attr( $class . ( 'html' === $field['type'] ? 'text-xs' : '' ) ),
 					$required ? 'required' : '',
 					esc_textarea( (string) $value )
 				);
 				if ( 'html' === $field['type'] ) {
-					echo '<p class="text-[11px] text-slate-500">Cho phép HTML cơ bản (đoạn văn, danh sách, in đậm, liên kết). Xuống dòng sẽ được giữ nguyên.</p>';
+					echo '<p class="text-[11px] text-ink-muted">Cho phép HTML cơ bản (đoạn văn, danh sách, in đậm, liên kết). Xuống dòng sẽ được giữ nguyên.</p>';
 				}
 				break;
 
 			case 'number':
 			case 'decimal':
 				printf(
-					'<input type="number" id="%1$s" name="f[%2$s]" value="%3$s" step="%4$s" min="0" class="%5$s" %6$s>',
+					'<input type="number" id="%1$s" name="f[%2$s]" value="%3$s" step="%4$s" min="0" class="%5$s text-ink border-slate-400 bg-white" %6$s>',
 					esc_attr( $id ),
 					esc_attr( $name ),
 					esc_attr( (string) $value ),
@@ -441,22 +441,22 @@ function cvc_admin_render_field( array $field, $value, bool $is_create, array $i
 				break;
 
 			case 'date':
-				printf( '<input type="date" id="%1$s" name="f[%2$s]" value="%3$s" class="%4$s" %5$s>', esc_attr( $id ), esc_attr( $name ), esc_attr( (string) $value ), esc_attr( $class ), $required ? 'required' : '' );
+				printf( '<input type="date" id="%1$s" name="f[%2$s]" value="%3$s" class="%4$s text-ink border-slate-400 bg-white" %5$s>', esc_attr( $id ), esc_attr( $name ), esc_attr( (string) $value ), esc_attr( $class ), $required ? 'required' : '' );
 				break;
 
 			case 'checkbox':
 				$checked = null === $value ? ! empty( $field['default'] ) || 'status' === $name : (bool) $value;
 				?>
 				<input type="hidden" name="f[<?php echo esc_attr( $name ); ?>]" value="0">
-				<label class="inline-flex items-center gap-2 text-sm text-slate-200 pt-6">
-					<input type="checkbox" id="<?php echo esc_attr( $id ); ?>" name="f[<?php echo esc_attr( $name ); ?>]" value="1" class="w-4 h-4 accent-amber-500" <?php checked( $checked ); ?>>
+				<label class="inline-flex items-center gap-2 text-sm text-ink pt-6">
+					<input type="checkbox" id="<?php echo esc_attr( $id ); ?>" name="f[<?php echo esc_attr( $name ); ?>]" value="1" class="w-4 h-4 accent-acc-2" <?php checked( $checked ); ?>>
 					<?php echo esc_html( $field['label'] ); ?>
 				</label>
 				<?php
 				break;
 
 			case 'select':
-				echo '<select id="' . esc_attr( $id ) . '" name="f[' . esc_attr( $name ) . ']" class="' . esc_attr( $class ) . '" ' . ( $required ? 'required' : '' ) . '>';
+				echo '<select id="' . esc_attr( $id ) . '" name="f[' . esc_attr( $name ) . ']" class="text-ink border-slate-400 bg-white' . esc_attr( $class ) . 'text-ink border-slate-400 bg-white" ' . ( $required ? 'required' : '' ) . '>';
 				$options = (array) $field['options'];
 				if ( ! empty( $field['nullable'] ) && ! isset( $options[''] ) ) {
 					echo '<option value="">— Không chọn —</option>';
@@ -486,7 +486,7 @@ function cvc_admin_render_field( array $field, $value, bool $is_create, array $i
 				if ( '' !== (string) $value && ! isset( $options[ (int) $value ] ) ) {
 					$options = array( (int) $value => '#' . (int) $value ) + $options;
 				}
-				echo '<select id="' . esc_attr( $id ) . '" name="f[' . esc_attr( $name ) . ']" class="' . esc_attr( $class ) . '" ' . ( $required ? 'required' : '' ) . ' ' . $extra . '>'; // phpcs:ignore WordPress.Security.EscapeOutput -- $extra là chuỗi cố định.
+				echo '<select id="' . esc_attr( $id ) . '" name="f[' . esc_attr( $name ) . ']" class="text-ink border-slate-400 bg-white' . esc_attr( $class ) . 'text-ink border-slate-400 bg-white" ' . ( $required ? 'required' : '' ) . ' ' . $extra . '>'; // phpcs:ignore WordPress.Security.EscapeOutput -- $extra là chuỗi cố định.
 				echo '<option value="">— Chọn —</option>';
 				foreach ( $options as $opt_value => $opt_label ) {
 					printf( '<option value="%1$d" %2$s>%3$s</option>', (int) $opt_value, selected( (string) $value, (string) $opt_value, false ), esc_html( $opt_label ) );
@@ -500,15 +500,15 @@ function cvc_admin_render_field( array $field, $value, bool $is_create, array $i
 				?>
 				<input type="hidden" name="f[<?php echo esc_attr( $name ); ?>][]" value="">
 				<?php if ( count( $options ) > 12 ) : ?>
-					<input type="search" placeholder="Lọc danh sách..." class="<?php echo esc_attr( $class ); ?> mb-2" data-cvc-multi-filter="<?php echo esc_attr( $id ); ?>" aria-label="<?php echo esc_attr( 'Lọc ' . $field['label'] ); ?>">
+					<input type="search" placeholder="Lọc danh sách..." class="text-ink border-slate-400 bg-white <?php echo esc_attr( $class ); ?> mb-2 text-ink border-slate-400 bg-white" data-cvc-multi-filter="<?php echo esc_attr( $id ); ?>" aria-label="<?php echo esc_attr( 'Lọc ' . $field['label'] ); ?>">
 				<?php endif; ?>
-				<div id="<?php echo esc_attr( $id ); ?>" class="max-h-56 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-1 p-2 rounded-xl bg-slate-950 border border-slate-700">
+				<div id="<?php echo esc_attr( $id ); ?>" class="max-h-56 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-1 p-2 rounded-xl bg-white border border-slate-300">
 					<?php if ( empty( $options ) ) : ?>
-						<p class="text-xs text-slate-500">Chưa có dữ liệu để chọn.</p>
+						<p class="text-xs text-ink-muted">Chưa có dữ liệu để chọn.</p>
 					<?php endif; ?>
 					<?php foreach ( $options as $opt_value => $opt_label ) : ?>
-						<label class="flex items-start gap-2 text-xs text-slate-200 px-2 py-1 rounded-lg hover:bg-slate-800" data-cvc-multi-item>
-							<input type="checkbox" name="f[<?php echo esc_attr( $name ); ?>][]" value="<?php echo (int) $opt_value; ?>" class="mt-0.5 accent-amber-500" <?php checked( in_array( (int) $opt_value, $selected, true ) ); ?>>
+						<label class="flex items-start gap-2 text-xs text-ink px-2 py-1 rounded-lg hover:bg-acc-soft" data-cvc-multi-item>
+							<input type="checkbox" name="f[<?php echo esc_attr( $name ); ?>][]" value="<?php echo (int) $opt_value; ?>" class="mt-0.5 accent-acc-2" <?php checked( in_array( (int) $opt_value, $selected, true ) ); ?>>
 							<span><?php echo esc_html( $opt_label ); ?></span>
 						</label>
 					<?php endforeach; ?>
@@ -524,33 +524,33 @@ function cvc_admin_render_field( array $field, $value, bool $is_create, array $i
 				?>
 				<div class="space-y-2" data-cvc-options>
 					<?php foreach ( array_values( $rows ) as $i => $row ) : ?>
-						<div class="grid grid-cols-[2rem_1fr_auto] gap-2 items-start p-2 rounded-xl bg-slate-950 border border-slate-700" data-cvc-option-row>
-							<span class="w-8 h-8 rounded-lg bg-slate-800 text-cyan-300 font-black flex items-center justify-center text-xs" data-cvc-option-key><?php echo esc_html( chr( 65 + $i ) ); ?></span>
+						<div class="grid grid-cols-[2rem_1fr_auto] gap-2 items-start p-2 rounded-xl bg-white border border-slate-300" data-cvc-option-row>
+							<span class="w-8 h-8 rounded-lg bg-white text-acc font-black flex items-center justify-center text-xs" data-cvc-option-key><?php echo esc_html( chr( 65 + $i ) ); ?></span>
 							<div class="space-y-1">
 								<input type="text" name="f[options][<?php echo (int) $i; ?>][option_text]" value="<?php echo esc_attr( (string) $row['option_text'] ); ?>" placeholder="Nội dung phương án" class="<?php echo esc_attr( $class ); ?>" aria-label="<?php echo esc_attr( 'Phương án ' . chr( 65 + $i ) ); ?>">
 								<input type="text" name="f[options][<?php echo (int) $i; ?>][explanation]" value="<?php echo esc_attr( (string) $row['explanation'] ); ?>" placeholder="Giải thích riêng cho phương án (không bắt buộc)" class="<?php echo esc_attr( $class ); ?> text-xs" aria-label="<?php echo esc_attr( 'Giải thích phương án ' . chr( 65 + $i ) ); ?>">
 							</div>
-							<label class="flex items-center gap-1.5 text-xs text-emerald-300 font-bold pt-2 whitespace-nowrap">
-								<input type="checkbox" name="f[options][<?php echo (int) $i; ?>][is_correct]" value="1" class="accent-emerald-500" <?php checked( ! empty( $row['is_correct'] ) ); ?>> Đúng
+							<label class="flex items-center gap-1.5 text-xs text-emerald-800 font-bold pt-2 whitespace-nowrap">
+								<input type="checkbox" name="f[options][<?php echo (int) $i; ?>][is_correct]" value="1" class="accent-acc-2" <?php checked( ! empty( $row['is_correct'] ) ); ?>> Đúng
 							</label>
 						</div>
 					<?php endforeach; ?>
 				</div>
-				<button type="button" class="text-xs font-bold text-cyan-300" data-cvc-add-option>+ Thêm phương án</button>
-				<p class="text-[11px] text-slate-500">Bỏ trống nội dung để xóa phương án. Đánh dấu ít nhất 1 phương án đúng.</p>
+				<button type="button" class="text-xs font-bold text-acc" data-cvc-add-option>+ Thêm phương án</button>
+				<p class="text-[11px] text-ink-muted">Bỏ trống nội dung để xóa phương án. Đánh dấu ít nhất 1 phương án đúng.</p>
 				<?php
 				break;
 
 			case 'file':
-				printf( '<input type="file" id="%1$s" name="cvc_file_%2$s" accept=".pdf,.doc,.docx,.xls,.xlsx" class="block text-sm text-slate-300 file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-cyan-500 file:text-navy-950 file:font-bold" %3$s>', esc_attr( $id ), esc_attr( $name ), $required ? 'required' : '' );
+				printf( '<input type="file" id="%1$s" name="cvc_file_%2$s" accept=".pdf,.doc,.docx,.xls,.xlsx" class="block text-sm text-ink-2 file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-white file:text-navy-950 file:font-bold text-ink border-slate-400 bg-white" %3$s>', esc_attr( $id ), esc_attr( $name ), $required ? 'required' : '' );
 				if ( ! $is_create && ! empty( $item['file_path'] ) ) {
-					echo '<p class="text-[11px] text-slate-400">Tệp hiện tại: ' . esc_html( basename( (string) $item['file_path'] ) ) . ( ! empty( $item['file_size'] ) ? ' (' . esc_html( size_format( (int) $item['file_size'] ) ) . ')' : '' ) . '. Chọn tệp mới để thay thế.</p>';
+					echo '<p class="text-[11px] text-ink-muted">Tệp hiện tại: ' . esc_html( basename( (string) $item['file_path'] ) ) . ( ! empty( $item['file_size'] ) ? ' (' . esc_html( size_format( (int) $item['file_size'] ) ) . ')' : '' ) . '. Chọn tệp mới để thay thế.</p>';
 				}
 				break;
 
 			case 'slug':
 				printf(
-					'<input type="text" id="%1$s" name="f[%2$s]" value="%3$s" class="%4$s font-mono text-xs" pattern="[a-z0-9\-]+" title="Chỉ chữ thường không dấu, số và dấu gạch ngang" data-cvc-slug-from="f-%5$s" %6$s>',
+					'<input type="text" id="%1$s" name="f[%2$s]" value="%3$s" class="%4$s text-xs text-ink border-slate-400 bg-white" pattern="[a-z0-9\-]+" title="Chỉ chữ thường không dấu, số và dấu gạch ngang" data-cvc-slug-from="f-%5$s" %6$s>',
 					esc_attr( $id ),
 					esc_attr( $name ),
 					esc_attr( (string) $value ),
@@ -558,15 +558,15 @@ function cvc_admin_render_field( array $field, $value, bool $is_create, array $i
 					esc_attr( (string) ( $field['from'] ?? 'title' ) ),
 					$required ? 'required' : ''
 				);
-				echo '<p class="text-[11px] text-slate-500">Tự tạo từ tiêu đề khi thêm mới; đổi slug sẽ đổi đường dẫn công khai.</p>';
+				echo '<p class="text-[11px] text-ink-muted">Tự tạo từ tiêu đề khi thêm mới; đổi slug sẽ đổi đường dẫn công khai.</p>';
 				break;
 
 			default:
-				printf( '<input type="text" id="%1$s" name="f[%2$s]" value="%3$s" class="%4$s" %5$s>', esc_attr( $id ), esc_attr( $name ), esc_attr( (string) $value ), esc_attr( $class ), $required ? 'required' : '' );
+				printf( '<input type="text" id="%1$s" name="f[%2$s]" value="%3$s" class="%4$s text-ink border-slate-400 bg-white" %5$s>', esc_attr( $id ), esc_attr( $name ), esc_attr( (string) $value ), esc_attr( $class ), $required ? 'required' : '' );
 		}
 		?>
 		<?php if ( ! empty( $field['help'] ) ) : ?>
-			<p class="text-[11px] text-slate-500"><?php echo esc_html( $field['help'] ); ?></p>
+			<p class="text-[11px] text-ink-muted"><?php echo esc_html( $field['help'] ); ?></p>
 		<?php endif; ?>
 	</div>
 	<?php

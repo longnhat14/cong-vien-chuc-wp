@@ -54,3 +54,11 @@ Trước khi code:
 - Thanh trái giữ các liên kết người dùng; cột phải: thời gian & nộp bài, bản đồ câu hỏi, thông tin đề, phân tích năng lực.
 - DEPLOY lên Hostinger bằng tar PHẢI đặt quyền khi đóng gói: `tar --mode='u=rw,go=r' -cf - <files> | ssh ... 'tar xf -'`. File tạo trên Windows mang quyền 700 → LiteSpeed trả 403 cho CSS/JS/tải về (sự cố 16/10/2026: trang làm bài mất toàn bộ giao diện). Sau deploy kiểm tra `curl -o /dev/null -w '%{http_code}'` từng file tĩnh.
 - Lượt thi đã quá giờ khi mở lại trang: không tự nộp, hiện hộp "Đã hết giờ làm bài" (nộp bài / luyện tập tiếp). Chỉ tự nộp khi đồng hồ về 0 trong lúc đang làm.
+
+## Giao diện "văn bản" toàn site (16/10/2026)
+- Nguồn chung: `assets/css/cvc-doc.css` (nạp trong `header.php`) + `tailwind.config` trong `header.php`: font sans/serif = Times New Roman; bo góc tối đa 2-4px; mọi `shadow-*` = none; bảng màu cũ `navy/gold/azure` được ánh xạ sang xanh hải quân. Màu mới: `ink` (#111, `ink-2` #333, `ink-muted` #5c5c5c), `acc` (#123a63), `acc-2` (#1767aa), `acc-soft` (#eaf3fc), `acc-line` (#8fb4da), `acc-deep` (#0b2744).
+- KHÔNG dùng lại nền tối (bg-navy-9xx/bg-slate-9xx), gradient, glass, emoji trang trí, chữ trắng trên nền tối. Đỏ chỉ cho cảnh báo/hết hạn/sai; xanh lá cho đạt/đúng/miễn phí.
+- Thành phần dz-*: `dz-wrap`, `dz-main`, `dz-pagehead` (đầu trang căn giữa; thêm `is-list` để tiêu đề in hoa), `dz-noticehead` + `dz-facts` (đầu thông báo/văn bản), `dz-cols` (`is-3`, `is-left`), `dz-colside`, `dz-h2`, `dz-section`, `dz-box`/`dz-box-head`/`dz-box-body`, `dz-panel`, `dz-card`, `dz-list` (+ `dz-item-title`, `dz-item-meta`, `dz-item-sum`, `dz-row`), `dz-table`/`dz-tablewrap`, `dz-kv`, `dz-tag` (`is-ok`, `is-warn`, `is-off`), `dz-btn` (`dz-btn-primary`, `dz-btn-sm`), `dz-toc`, `dz-chips`, `dz-notice`, `dz-empty`.
+- Danh sách dùng chung (`inc/listing-components.php`): `cvc_render_listing_hero/search/explore_nav/study_sidebar` đã viết lại theo dz-*. `cvc_render_slot_card()` in ra `<li>` - nơi gọi phải bọc `<ul class="dz-list">`.
+- Không còn hiệu ứng scroll-reveal (bỏ enqueue). `style.css` được nạp với version = filemtime.
+- Văn bản pháp luật / tài liệu hiển thị dạng bảng tra cứu; tuyển dụng, đề thi, kiến thức, chủ đề, khóa học dạng mục lục (dz-list). Không hiển thị số liệu bịa (đã bỏ "MÃ ĐỀ: KTC-2026", "60 câu · 60 phút", "18 nhánh kiến thức" gắn cứng).

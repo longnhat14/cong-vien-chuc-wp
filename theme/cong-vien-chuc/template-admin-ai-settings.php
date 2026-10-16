@@ -127,9 +127,9 @@ foreach ( $prices as $pr ) {
 	}
 }
 
-$input_cls = 'w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-sm text-white placeholder:text-slate-600 focus:border-amber-400 focus:outline-none';
-$label_cls = 'text-[11px] font-extrabold uppercase tracking-wider text-slate-400';
-$card_cls  = 'bg-[#0A192F] border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4';
+$input_cls = 'w-full px-3 py-2 rounded-xl border border-slate-300 text-sm text-ink placeholder:text-ink-muted focus:border-acc-2 focus:outline-none border-slate-400 bg-white';
+$label_cls = 'text-[11px] font-extrabold uppercase tracking-wider text-ink-muted';
+$card_cls  = 'dz-panel space-y-4';
 
 cvc_seo_set_title( 'Cấu hình AI — Quản trị' );
 cvc_seo_set_noindex();
@@ -137,7 +137,7 @@ cvc_seo_set_noindex();
 get_header();
 ?>
 
-<main id="main" class="min-h-screen bg-slate-900 text-slate-100 py-10">
+<main id="main" class="dz-main">
 	<div class="max-w-6xl mx-auto px-4 sm:px-6 space-y-6">
 
 		<?php
@@ -154,22 +154,22 @@ get_header();
 
 		<?php $halts = (array) ( $ov['halts'] ?? array() ); ?>
 		<?php if ( ! empty( $halts ) ) : ?>
-			<div class="rounded-2xl border border-rose-500/50 bg-rose-500/10 p-4 text-sm text-rose-100 space-y-2" role="alert">
-				<p class="font-bold text-rose-200"><i class="fa-solid fa-circle-exclamation"></i> AI đang tạm dừng: nhà cung cấp từ chối yêu cầu (hết số dư / hết hạn mức / key không hợp lệ)</p>
+			<div class="rounded-2xl border border-acc-line bg-acc-soft p-4 text-sm text-red-700 space-y-2" role="alert">
+				<p class="font-bold text-red-700"><i class="fa-solid fa-circle-exclamation"></i> AI đang tạm dừng: nhà cung cấp từ chối yêu cầu (hết số dư / hết hạn mức / key không hợp lệ)</p>
 				<?php foreach ( $halts as $hp => $h ) : ?>
-					<p><strong><?php echo esc_html( $providers[ $hp ]['label'] ?? $hp ); ?></strong> · từ <?php echo esc_html( $fmt_time( $h['at'] ?? null ) ); ?><br><span class="font-mono text-[11px] text-rose-200/80 break-all"><?php echo esc_html( (string) ( $h['reason'] ?? '' ) ); ?></span></p>
+					<p><strong><?php echo esc_html( $providers[ $hp ]['label'] ?? $hp ); ?></strong> · từ <?php echo esc_html( $fmt_time( $h['at'] ?? null ) ); ?><br><span class="text-[11px] text-red-700 break-all"><?php echo esc_html( (string) ( $h['reason'] ?? '' ) ); ?></span></p>
 				<?php endforeach; ?>
-				<p class="text-xs text-rose-200/90">Sinh câu hỏi, OCR, kiểm tra lại câu hỏi đang <strong>chờ</strong> (không bị đánh dấu xong). Nạp tiền hoặc sửa key, rồi bấm "Kiểm tra kết nối" để chạy lại ngay; nếu không, hệ thống tự thử lại sau 30 phút.</p>
+				<p class="text-xs text-red-700">Sinh câu hỏi, OCR, kiểm tra lại câu hỏi đang <strong>chờ</strong> (không bị đánh dấu xong). Nạp tiền hoặc sửa key, rồi bấm "Kiểm tra kết nối" để chạy lại ngay; nếu không, hệ thống tự thử lại sau 30 phút.</p>
 			</div>
 		<?php endif; ?>
 
 		<header class="flex flex-wrap items-end justify-between gap-4">
 			<div class="space-y-1">
-				<h1 class="text-2xl font-black text-white flex items-center gap-2"><i class="fa-solid fa-robot text-amber-400"></i> Cấu hình AI</h1>
-				<p class="text-xs text-slate-400 max-w-2xl">API key được <strong class="text-slate-200">mã hoá khi lưu</strong> ở backend và chỉ hiện dạng che. Không dán key vào bất kỳ đoạn chat nào khác.</p>
+				<h1 class="text-2xl font-black text-ink flex items-center gap-2"><i class="fa-solid fa-robot text-acc"></i> Cấu hình AI</h1>
+				<p class="text-xs text-ink-muted max-w-2xl">API key được <strong class="text-ink">mã hoá khi lưu</strong> ở backend và chỉ hiện dạng che. Không dán key vào bất kỳ đoạn chat nào khác.</p>
 			</div>
 			<?php if ( $overview['ok'] ) : ?>
-				<p class="text-xs font-bold <?php echo ! empty( $cfg['configured'] ) ? 'text-emerald-400' : 'text-amber-400'; ?>">
+				<p class="text-xs font-bold <?php echo ! empty( $cfg['configured'] ) ? 'text-emerald-800' : 'text-acc'; ?>">
 					<i class="fa-solid <?php echo ! empty( $cfg['configured'] ) ? 'fa-circle-check' : 'fa-triangle-exclamation'; ?>"></i>
 					<?php echo ! empty( $cfg['configured'] ) ? 'Đang dùng ' . esc_html( ( $providers[ $current_provider ]['label'] ?? $current_provider ) . ' / ' . ( $cfg['effective_model'] ?? '' ) ) : 'Chưa có key cho nhà cung cấp chính — học viên đang thấy giải thích có sẵn'; ?>
 				</p>
@@ -178,7 +178,7 @@ get_header();
 
 		<?php if ( ! $overview['ok'] ) : ?>
 			<div class="<?php echo esc_attr( $card_cls ); ?>">
-				<p class="text-sm text-rose-300">Không tải được cấu hình AI: <?php echo esc_html( cvc_api_error_message( $overview ) ); ?></p>
+				<p class="text-sm text-red-700">Không tải được cấu hình AI: <?php echo esc_html( cvc_api_error_message( $overview ) ); ?></p>
 			</div>
 		<?php else : ?>
 
@@ -186,7 +186,7 @@ get_header();
 		<section class="grid grid-cols-2 lg:grid-cols-4 gap-3" aria-label="Tổng quan chi phí">
 			<?php
 			$pct      = $budget['percent'] ?? null;
-			$bar_cls  = ! empty( $budget['exceeded'] ) ? 'bg-rose-500' : ( null !== $pct && $pct >= 80 ? 'bg-amber-400' : 'bg-emerald-400' );
+			$bar_cls  = ! empty( $budget['exceeded'] ) ? 'bg-acc text-white' : ( null !== $pct && $pct >= 80 ? 'bg-acc text-white' : 'bg-acc text-white' );
 			$tiles    = array(
 				array( 'Chi phí tháng ' . ( $budget['month'] ?? '' ), $fmt_vnd( $budget['spent'] ?? 0 ), ( $budget['budget'] ?? 0 ) > 0 ? 'Hạn mức ' . $fmt_vnd( $budget['budget'] ) : 'Chưa đặt hạn mức' ),
 				array( 'Token ' . mb_strtolower( (string) ( $usage['period_label'] ?? '' ) ), $fmt_int( $totals['total_tokens'] ?? 0 ), $fmt_int( $totals['input_tokens'] ?? 0 ) . ' vào · ' . $fmt_int( $totals['output_tokens'] ?? 0 ) . ' ra' ),
@@ -195,15 +195,15 @@ get_header();
 			);
 			foreach ( $tiles as $i => $t ) :
 				?>
-				<div class="bg-slate-800/50 border border-slate-800 rounded-2xl p-4 space-y-1">
+				<div class="dz-card space-y-1">
 					<p class="<?php echo esc_attr( $label_cls ); ?>"><?php echo esc_html( $t[0] ); ?></p>
-					<p class="text-xl font-black text-white tabular-nums"><?php echo esc_html( $t[1] ); ?></p>
-					<p class="text-[11px] text-slate-400"><?php echo esc_html( $t[2] ); ?></p>
+					<p class="text-xl font-black text-ink tabular-nums"><?php echo esc_html( $t[1] ); ?></p>
+					<p class="text-[11px] text-ink-muted"><?php echo esc_html( $t[2] ); ?></p>
 					<?php if ( 0 === $i && null !== $pct ) : ?>
-						<div class="h-1.5 rounded-full bg-slate-700 overflow-hidden mt-2" role="progressbar" aria-valuenow="<?php echo esc_attr( (string) $pct ); ?>" aria-valuemin="0" aria-valuemax="100">
+						<div class="h-1.5 rounded-full bg-white overflow-hidden mt-2" role="progressbar" aria-valuenow="<?php echo esc_attr( (string) $pct ); ?>" aria-valuemin="0" aria-valuemax="100">
 							<div class="h-full <?php echo esc_attr( $bar_cls ); ?>" style="width: <?php echo esc_attr( (string) min( 100, $pct ) ); ?>%"></div>
 						</div>
-						<p class="text-[11px] <?php echo ! empty( $budget['exceeded'] ) ? 'text-rose-300 font-bold' : 'text-slate-400'; ?>"><?php echo esc_html( ! empty( $budget['exceeded'] ) ? 'Đã vượt hạn mức — AI tạm dừng tới tháng sau hoặc khi tăng hạn mức' : $pct . '% hạn mức' ); ?></p>
+						<p class="text-[11px] <?php echo ! empty( $budget['exceeded'] ) ? 'text-red-700 font-bold' : 'text-slate-400'; ?>"><?php echo esc_html( ! empty( $budget['exceeded'] ) ? 'Đã vượt hạn mức — AI tạm dừng tới tháng sau hoặc khi tăng hạn mức' : $pct . '% hạn mức' ); ?></p>
 					<?php endif; ?>
 				</div>
 			<?php endforeach; ?>
@@ -215,12 +215,12 @@ get_header();
 
 			<!-- Key từng nhà cung cấp -->
 			<section id="khoa-api" class="<?php echo esc_attr( $card_cls ); ?>">
-				<div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
+				<div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-300 pb-3">
 					<div>
-						<h2 class="text-base font-black text-white">API key theo nhà cung cấp</h2>
-						<p class="text-[11px] text-slate-400">Có key thì danh sách model được tải trực tiếp từ nhà cung cấp; chưa có key thì hiện gợi ý từ OpenRouter. Để trống ô key = giữ nguyên key đang lưu.</p>
+						<h2 class="text-base font-black text-ink">API key theo nhà cung cấp</h2>
+						<p class="text-[11px] text-ink-muted">Có key thì danh sách model được tải trực tiếp từ nhà cung cấp; chưa có key thì hiện gợi ý từ OpenRouter. Để trống ô key = giữ nguyên key đang lưu.</p>
 					</div>
-					<button type="submit" form="cvc-ai-models-refresh" class="px-3 py-2 rounded-xl border border-slate-700 text-xs font-bold text-slate-200 hover:border-amber-400"><i class="fa-solid fa-rotate"></i> Làm mới danh sách model</button>
+					<button type="submit" form="cvc-ai-models-refresh" class="px-3 py-2 rounded-xl border border-slate-300 text-xs font-bold text-ink hover:border-acc-2"><i class="fa-solid fa-rotate"></i> Làm mới danh sách model</button>
 				</div>
 
 				<div class="grid md:grid-cols-2 gap-3">
@@ -229,41 +229,41 @@ get_header();
 						$cat     = (array) ( $p['catalog'] ?? array() );
 						$n_model = count( (array) ( $cat['models'] ?? array() ) );
 						?>
-						<div class="border border-slate-800 rounded-2xl p-4 space-y-2.5">
+						<div class="border border-slate-300 rounded-2xl p-4 space-y-2.5">
 							<div class="flex items-center justify-between gap-2">
-								<h3 class="text-sm font-black text-white"><?php echo esc_html( $p['label'] ?? $pid ); ?></h3>
+								<h3 class="text-sm font-black text-ink"><?php echo esc_html( $p['label'] ?? $pid ); ?></h3>
 								<?php if ( ! empty( $p['configured'] ) ) : ?>
-									<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300">Đã có key · <?php echo esc_html( (string) $p['masked'] ); ?></span>
+									<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-acc-soft text-emerald-800">Đã có key · <?php echo esc_html( (string) $p['masked'] ); ?></span>
 								<?php else : ?>
-									<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-700 text-slate-300">Chưa có key</span>
+									<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white text-ink-2">Chưa có key</span>
 								<?php endif; ?>
 							</div>
 							<label for="ai_key_<?php echo esc_attr( $pid ); ?>" class="sr-only">API key <?php echo esc_html( $p['label'] ?? $pid ); ?></label>
 							<input type="password" name="ai_key_<?php echo esc_attr( $pid ); ?>" id="ai_key_<?php echo esc_attr( $pid ); ?>" autocomplete="off"
 								placeholder="<?php echo esc_attr( ! empty( $p['configured'] ) ? 'Để trống nếu không đổi' : 'Dán API key ' . ( $p['label'] ?? $pid ) ); ?>"
-								class="<?php echo esc_attr( $input_cls ); ?> font-mono">
+								class="<?php echo esc_attr( $input_cls ); ?>">
 							<?php if ( 'qwen' === $pid ) : ?>
 								<label for="ai_qwen_base_url" class="<?php echo esc_attr( $label_cls ); ?> block pt-1">Endpoint Qwen (OpenAI-compatible)</label>
-								<input type="url" name="ai_qwen_base_url" id="ai_qwen_base_url" value="<?php echo esc_attr( (string) ( $cfg['qwen_base_url'] ?? '' ) ); ?>" class="<?php echo esc_attr( $input_cls ); ?> font-mono text-xs">
-								<p class="text-[10px] text-slate-500">Mặc định Model Studio quốc tế. Tài khoản Trung Quốc/Hồng Kông/workspace riêng: dán base URL trong Model Studio (…aliyuncs.com/compatible-mode/v1).</p>
+								<input type="url" name="ai_qwen_base_url" id="ai_qwen_base_url" value="<?php echo esc_attr( (string) ( $cfg['qwen_base_url'] ?? '' ) ); ?>" class="<?php echo esc_attr( $input_cls ); ?> text-xs">
+								<p class="text-[10px] text-ink-muted">Mặc định Model Studio quốc tế. Tài khoản Trung Quốc/Hồng Kông/workspace riêng: dán base URL trong Model Studio (…aliyuncs.com/compatible-mode/v1).</p>
 							<?php endif; ?>
-							<div class="flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-400">
+							<div class="flex flex-wrap items-center justify-between gap-2 text-[11px] text-ink-muted">
 								<span>
 									<?php if ( 'api' === ( $cat['source'] ?? '' ) ) : ?>
-										<i class="fa-solid fa-circle-check text-emerald-400"></i> <?php echo esc_html( $n_model ); ?> model từ API
+										<i class="fa-solid fa-circle-check text-emerald-800"></i> <?php echo esc_html( $n_model ); ?> model từ API
 									<?php elseif ( $n_model > 0 ) : ?>
-										<i class="fa-solid fa-lightbulb text-amber-300"></i> <?php echo esc_html( $n_model ); ?> model gợi ý (OpenRouter)
+										<i class="fa-solid fa-lightbulb text-acc"></i> <?php echo esc_html( $n_model ); ?> model gợi ý (OpenRouter)
 									<?php else : ?>
 										Chưa có danh sách model
 									<?php endif; ?>
 									<?php if ( ! empty( $cat['error'] ) ) : ?>
-										<span class="block text-rose-300" title="<?php echo esc_attr( (string) $cat['error'] ); ?>">Lỗi tải model: <?php echo esc_html( mb_substr( (string) $cat['error'], 0, 90 ) ); ?></span>
+										<span class="block text-red-700" title="<?php echo esc_attr( (string) $cat['error'] ); ?>">Lỗi tải model: <?php echo esc_html( mb_substr( (string) $cat['error'], 0, 90 ) ); ?></span>
 									<?php endif; ?>
 								</span>
 								<span class="flex items-center gap-3">
 									<?php if ( ! empty( $p['configured'] ) ) : ?>
 										<label class="inline-flex items-center gap-1 cursor-pointer"><input type="checkbox" name="ai_key_clear_<?php echo esc_attr( $pid ); ?>" value="1" class="accent-rose-500"> Xoá key</label>
-										<button type="submit" form="cvc-ai-test-<?php echo esc_attr( $pid ); ?>" class="px-2.5 py-1 rounded-lg border border-slate-700 font-bold text-slate-200 hover:border-cyan-400">Kiểm tra kết nối</button>
+										<button type="submit" form="cvc-ai-test-<?php echo esc_attr( $pid ); ?>" class="px-2.5 py-1 rounded-lg border border-slate-300 font-bold text-ink hover:border-acc-2">Kiểm tra kết nối</button>
 									<?php endif; ?>
 								</span>
 							</div>
@@ -275,13 +275,13 @@ get_header();
 			<div class="grid lg:grid-cols-2 gap-6">
 				<!-- AI chính -->
 				<section class="<?php echo esc_attr( $card_cls ); ?>">
-					<div class="border-b border-slate-800 pb-3">
-						<h2 class="text-base font-black text-white">AI chính</h2>
-						<p class="text-[11px] text-slate-400">Dùng để giải thích câu hỏi sau khi học viên nộp bài và phân tích tin tuyển dụng thu thập tự động.</p>
+					<div class="border-b border-slate-300 pb-3">
+						<h2 class="text-base font-black text-ink">AI chính</h2>
+						<p class="text-[11px] text-ink-muted">Dùng để giải thích câu hỏi sau khi học viên nộp bài và phân tích tin tuyển dụng thu thập tự động.</p>
 					</div>
 					<div class="space-y-1.5">
 						<label for="ai_provider" class="<?php echo esc_attr( $label_cls ); ?>">Nhà cung cấp</label>
-						<select name="ai_provider" id="ai_provider" data-model-target="ai_model" class="<?php echo esc_attr( $input_cls ); ?>">
+						<select name="ai_provider" id="ai_provider" data-model-target="ai_model" class="text-ink border-slate-400 bg-white <?php echo esc_attr( $input_cls ); ?> text-ink border-slate-400 bg-white">
 							<?php foreach ( $providers as $pid => $p ) : ?>
 								<option value="<?php echo esc_attr( $pid ); ?>" <?php selected( $current_provider, $pid ); ?>><?php echo esc_html( ( $p['label'] ?? $pid ) . ( 'deepseek' === $pid ? ' (mặc định)' : '' ) . ( empty( $p['configured'] ) ? ' — chưa có key' : '' ) ); ?></option>
 							<?php endforeach; ?>
@@ -289,20 +289,20 @@ get_header();
 					</div>
 					<div class="space-y-1.5">
 						<label for="ai_model" class="<?php echo esc_attr( $label_cls ); ?>">Model</label>
-						<select name="ai_model" id="ai_model" data-current="<?php echo esc_attr( $current_model ); ?>" data-kind="chat" class="<?php echo esc_attr( $input_cls ); ?> font-mono"></select>
-						<input type="text" name="ai_model_custom" id="ai_model_custom" value="<?php echo esc_attr( $current_model ); ?>" placeholder="Tên model, VD: deepseek-flash" class="<?php echo esc_attr( $input_cls ); ?> font-mono hidden">
+						<select name="ai_model" id="ai_model" data-current="<?php echo esc_attr( $current_model ); ?>" data-kind="chat" class="<?php echo esc_attr( $input_cls ); ?>"></select>
+						<input type="text" name="ai_model_custom" id="ai_model_custom" value="<?php echo esc_attr( $current_model ); ?>" placeholder="Tên model, VD: deepseek-flash" class="<?php echo esc_attr( $input_cls ); ?> hidden">
 					</div>
 				</section>
 
 				<!-- Đọc công văn -->
 				<section class="<?php echo esc_attr( $card_cls ); ?>">
-					<div class="border-b border-slate-800 pb-3">
-						<h2 class="text-base font-black text-white">Đọc công văn scan (PDF)</h2>
-						<p class="text-[11px] text-slate-400">DeepSeek và Qwen đọc ảnh từng trang (tối đa 6 trang đầu) — cần model đọc được ảnh (★). OpenAI, Gemini, Claude đọc thẳng file PDF.</p>
+					<div class="border-b border-slate-300 pb-3">
+						<h2 class="text-base font-black text-ink">Đọc công văn scan (PDF)</h2>
+						<p class="text-[11px] text-ink-muted">DeepSeek và Qwen đọc ảnh từng trang (tối đa 6 trang đầu) — cần model đọc được ảnh (★). OpenAI, Gemini, Claude đọc thẳng file PDF.</p>
 					</div>
 					<div class="space-y-1.5">
 						<label for="ai_doc_provider" class="<?php echo esc_attr( $label_cls ); ?>">Nhà cung cấp đọc công văn</label>
-						<select name="ai_doc_provider" id="ai_doc_provider" data-model-target="ai_doc_model" class="<?php echo esc_attr( $input_cls ); ?>">
+						<select name="ai_doc_provider" id="ai_doc_provider" data-model-target="ai_doc_model" class="text-ink border-slate-400 bg-white <?php echo esc_attr( $input_cls ); ?> text-ink border-slate-400 bg-white">
 							<option value="none" <?php selected( $doc_provider, 'none' ); ?>>Dùng AI chính</option>
 							<?php foreach ( $providers as $pid => $p ) : ?>
 								<option value="<?php echo esc_attr( $pid ); ?>" <?php selected( $doc_provider, $pid ); ?>><?php echo esc_html( ( $p['label'] ?? $pid ) . ( 'pdf' === ( $p['doc_mode'] ?? '' ) ? ' — đọc PDF' : ' — đọc ảnh' ) . ( empty( $p['configured'] ) ? ' — chưa có key' : '' ) ); ?></option>
@@ -311,10 +311,10 @@ get_header();
 					</div>
 					<div class="space-y-1.5" id="ai_doc_model_wrap">
 						<label for="ai_doc_model" class="<?php echo esc_attr( $label_cls ); ?>">Model đọc công văn</label>
-						<select name="ai_doc_model" id="ai_doc_model" data-current="<?php echo esc_attr( $doc_model ); ?>" data-kind="doc" class="<?php echo esc_attr( $input_cls ); ?> font-mono"></select>
-						<input type="text" name="ai_doc_model_custom" id="ai_doc_model_custom" value="<?php echo esc_attr( $doc_model ); ?>" placeholder="Tên model, VD: qwen-vl-max" class="<?php echo esc_attr( $input_cls ); ?> font-mono hidden">
+						<select name="ai_doc_model" id="ai_doc_model" data-current="<?php echo esc_attr( $doc_model ); ?>" data-kind="doc" class="<?php echo esc_attr( $input_cls ); ?>"></select>
+						<input type="text" name="ai_doc_model_custom" id="ai_doc_model_custom" value="<?php echo esc_attr( $doc_model ); ?>" placeholder="Tên model, VD: qwen-vl-max" class="<?php echo esc_attr( $input_cls ); ?> hidden">
 					</div>
-					<p class="text-[11px] <?php echo ! empty( $cfg['doc_effective'] ) ? 'text-emerald-300' : 'text-amber-300'; ?>">
+					<p class="text-[11px] <?php echo ! empty( $cfg['doc_effective'] ) ? 'text-emerald-800' : 'text-acc'; ?>">
 						<?php if ( ! empty( $cfg['doc_effective'] ) ) : ?>
 							<i class="fa-solid fa-file-pdf"></i> Đang đọc công văn bằng <strong><?php echo esc_html( ( $providers[ $cfg['doc_effective']['provider'] ]['label'] ?? $cfg['doc_effective']['provider'] ) . ' / ' . $cfg['doc_effective']['model'] ); ?></strong> (<?php echo 'pdf' === $cfg['doc_effective']['mode'] ? 'gửi file PDF' : 'gửi ảnh từng trang'; ?>).
 						<?php else : ?>
@@ -326,9 +326,9 @@ get_header();
 
 			<!-- Hạn mức & tỷ giá -->
 			<section class="<?php echo esc_attr( $card_cls ); ?>">
-				<div class="border-b border-slate-800 pb-3">
-					<h2 class="text-base font-black text-white">Hạn mức chi phí &amp; tỷ giá</h2>
-					<p class="text-[11px] text-slate-400">Khi chi phí trong tháng (giờ Việt Nam) chạm hạn mức, hệ thống dừng gọi AI: học viên thấy giải thích có sẵn, tin tuyển dụng phân tích bằng quy tắc và nằm ở hàng chờ.</p>
+				<div class="border-b border-slate-300 pb-3">
+					<h2 class="text-base font-black text-ink">Hạn mức chi phí &amp; tỷ giá</h2>
+					<p class="text-[11px] text-ink-muted">Khi chi phí trong tháng (giờ Việt Nam) chạm hạn mức, hệ thống dừng gọi AI: học viên thấy giải thích có sẵn, tin tuyển dụng phân tích bằng quy tắc và nằm ở hàng chờ.</p>
 				</div>
 				<div class="grid sm:grid-cols-2 gap-4">
 					<div class="space-y-1.5">
@@ -338,7 +338,7 @@ get_header();
 					<div class="space-y-1.5">
 						<label for="ai_usd_vnd_manual" class="<?php echo esc_attr( $label_cls ); ?>">Tỷ giá nhập tay (VNĐ/USD)</label>
 						<input type="text" inputmode="decimal" name="ai_usd_vnd_manual" id="ai_usd_vnd_manual" value="<?php echo esc_attr( ! empty( $rate['manual'] ) ? $fmt_int( $rate['manual'] ) : '' ); ?>" placeholder="Để trống = lấy tự động" class="<?php echo esc_attr( $input_cls ); ?> tabular-nums">
-						<p class="text-[10px] text-slate-500">
+						<p class="text-[10px] text-ink-muted">
 							Tự động: <?php echo ! empty( $rate['auto'] ) ? esc_html( $fmt_vnd( $rate['auto'] ) . ' — Vietcombank giá bán USD' ) : 'chưa lấy'; ?>
 							<?php echo ! empty( $rate['updated_at'] ) ? ' · cập nhật ' . esc_html( $fmt_time( $rate['updated_at'] ) ) : ''; ?>. Chi phí mỗi lần gọi được quy đổi theo tỷ giá tại thời điểm gọi.
 						</p>
@@ -346,7 +346,7 @@ get_header();
 				</div>
 			</section>
 
-			<button type="submit" class="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-navy-950 font-black text-sm rounded-xl shadow-lg">Lưu cấu hình AI</button>
+			<button type="submit" class="w-full py-3 text-white font-black text-sm rounded-xl bg-acc hover:bg-acc-deep">Lưu cấu hình AI</button>
 		</form>
 
 		<!-- Form phụ (nút nằm trong form chính dùng thuộc tính form=) -->
@@ -368,20 +368,20 @@ get_header();
 
 		<!-- Thống kê token & chi phí -->
 		<section id="thong-ke" class="<?php echo esc_attr( $card_cls ); ?>">
-			<div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
+			<div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-300 pb-3">
 				<div>
-					<h2 class="text-base font-black text-white">Token &amp; chi phí — <?php echo esc_html( (string) ( $usage['period_label'] ?? '' ) ); ?></h2>
-					<p class="text-[11px] text-slate-400">Token đọc từ phản hồi của nhà cung cấp; chi phí = token × giá trong bảng giá × tỷ giá. DeepSeek ngoài giờ cao điểm tính 50%.</p>
+					<h2 class="text-base font-black text-ink">Token &amp; chi phí — <?php echo esc_html( (string) ( $usage['period_label'] ?? '' ) ); ?></h2>
+					<p class="text-[11px] text-ink-muted">Token đọc từ phản hồi của nhà cung cấp; chi phí = token × giá trong bảng giá × tỷ giá. DeepSeek ngoài giờ cao điểm tính 50%.</p>
 				</div>
 				<nav class="flex flex-wrap gap-1.5" aria-label="Chọn kỳ">
 					<?php foreach ( $period_map as $slug => $pm ) : ?>
-						<a href="<?php echo esc_url( add_query_arg( 'ky', $slug, cvc_admin_ai_settings_url() ) . '#thong-ke' ); ?>" class="px-3 py-1.5 rounded-lg text-xs font-bold <?php echo $slug === $ky ? 'bg-amber-400 text-slate-900' : 'border border-slate-700 text-slate-300 hover:border-amber-400'; ?>"><?php echo esc_html( $pm[1] ); ?></a>
+						<a href="<?php echo esc_url( add_query_arg( 'ky', $slug, cvc_admin_ai_settings_url() ) . '#thong-ke' ); ?>" class="px-3 py-1.5 rounded-lg text-xs font-bold <?php echo $slug === $ky ? 'bg-acc text-slate-900 text-white' : 'border border-slate-300 text-ink-2 hover:border-acc-2'; ?>"><?php echo esc_html( $pm[1] ); ?></a>
 					<?php endforeach; ?>
 				</nav>
 			</div>
 
 			<?php if ( empty( $totals['calls'] ) ) : ?>
-				<p class="text-sm text-slate-400">Chưa có lần gọi AI nào trong kỳ này.</p>
+				<p class="text-sm text-ink-muted">Chưa có lần gọi AI nào trong kỳ này.</p>
 			<?php else : ?>
 				<div class="grid sm:grid-cols-4 gap-3 text-xs">
 					<?php
@@ -392,10 +392,10 @@ get_header();
 						array( 'Lần gọi', $fmt_int( $totals['calls'] ), ( (int) $totals['calls'] - (int) $totals['ok_calls'] ) . ' lỗi' . ( ! empty( $totals['unpriced_calls'] ) ? ' · ' . (int) $totals['unpriced_calls'] . ' chưa có giá' : '' ) ),
 					) as $t ) :
 						?>
-						<div class="bg-slate-800/40 rounded-2xl p-3">
+						<div class="bg-acc-soft rounded-2xl p-3">
 							<p class="<?php echo esc_attr( $label_cls ); ?>"><?php echo esc_html( $t[0] ); ?></p>
-							<p class="text-lg font-black text-white tabular-nums"><?php echo esc_html( $t[1] ); ?></p>
-							<p class="text-[11px] text-slate-400"><?php echo esc_html( $t[2] ); ?></p>
+							<p class="text-lg font-black text-ink tabular-nums"><?php echo esc_html( $t[1] ); ?></p>
+							<p class="text-[11px] text-ink-muted"><?php echo esc_html( $t[2] ); ?></p>
 						</div>
 					<?php endforeach; ?>
 				</div>
@@ -408,20 +408,20 @@ get_header();
 				foreach ( $tables as $title => $tb ) :
 					?>
 					<div class="space-y-2">
-						<h3 class="text-xs font-black text-slate-200"><?php echo esc_html( $title ); ?></h3>
+						<h3 class="text-xs font-black text-ink"><?php echo esc_html( $title ); ?></h3>
 						<div class="overflow-x-auto">
 							<table class="w-full text-left text-[12px] tabular-nums">
-								<thead class="text-slate-400 text-[11px]"><tr><th class="py-1.5 pr-3">Loại</th><th class="pr-3 text-right">Lần gọi</th><th class="pr-3 text-right">Token vào</th><th class="pr-3 text-right">Cache</th><th class="pr-3 text-right">Token ra</th><th class="pr-3 text-right">USD</th><th class="text-right">VNĐ</th></tr></thead>
+								<thead class="text-ink-muted text-[11px]"><tr><th class="py-1.5 pr-3">Loại</th><th class="pr-3 text-right">Lần gọi</th><th class="pr-3 text-right">Token vào</th><th class="pr-3 text-right">Cache</th><th class="pr-3 text-right">Token ra</th><th class="pr-3 text-right">USD</th><th class="text-right">VNĐ</th></tr></thead>
 								<tbody>
 									<?php foreach ( $tb['rows'] as $r ) : ?>
-										<tr class="border-t border-slate-800">
-											<td class="py-1.5 pr-3 font-mono text-slate-200"><?php echo esc_html( $tb['name']( $r ) ); ?><?php echo ! empty( $r['unpriced_calls'] ) ? ' <span class="text-amber-300 font-sans" title="Chưa có giá cho model này">⚠</span>' : ''; ?></td>
+										<tr class="border-t border-slate-300">
+											<td class="py-1.5 pr-3 text-ink"><?php echo esc_html( $tb['name']( $r ) ); ?><?php echo ! empty( $r['unpriced_calls'] ) ? ' <span class="text-acc font-sans" title="Chưa có giá cho model này">⚠</span>' : ''; ?></td>
 											<td class="pr-3 text-right"><?php echo esc_html( $fmt_int( $r['calls'] ) ); ?></td>
 											<td class="pr-3 text-right"><?php echo esc_html( $fmt_int( $r['input_tokens'] ) ); ?></td>
-											<td class="pr-3 text-right text-slate-400"><?php echo esc_html( $fmt_int( $r['cached_tokens'] ) ); ?></td>
+											<td class="pr-3 text-right text-ink-muted"><?php echo esc_html( $fmt_int( $r['cached_tokens'] ) ); ?></td>
 											<td class="pr-3 text-right"><?php echo esc_html( $fmt_int( $r['output_tokens'] ) ); ?></td>
-											<td class="pr-3 text-right text-slate-400"><?php echo esc_html( $fmt_usd( $r['cost_usd'] ) ); ?></td>
-											<td class="text-right font-bold text-white"><?php echo esc_html( $fmt_vnd( $r['cost_vnd'] ) ); ?></td>
+											<td class="pr-3 text-right text-ink-muted"><?php echo esc_html( $fmt_usd( $r['cost_usd'] ) ); ?></td>
+											<td class="text-right font-bold text-ink"><?php echo esc_html( $fmt_vnd( $r['cost_vnd'] ) ); ?></td>
 										</tr>
 									<?php endforeach; ?>
 								</tbody>
@@ -438,39 +438,39 @@ get_header();
 				?>
 				<?php if ( count( $daily ) > 1 ) : ?>
 					<div class="space-y-2">
-						<h3 class="text-xs font-black text-slate-200">Theo ngày (<?php echo $by_cost ? 'VNĐ' : 'token'; ?>)</h3>
-						<div class="flex items-end gap-1 h-28 border-b border-slate-700" role="img" aria-label="Chi phí theo ngày">
+						<h3 class="text-xs font-black text-ink">Theo ngày (<?php echo $by_cost ? 'VNĐ' : 'token'; ?>)</h3>
+						<div class="flex items-end gap-1 h-28 border-b border-slate-300" role="img" aria-label="Chi phí theo ngày">
 							<?php foreach ( $daily as $d ) : ?>
 								<?php
 								$v   = $by_cost ? (float) $d['cost_vnd'] : (float) $d['total_tokens'];
 								$h   = max( 2, round( $v / ( $by_cost ? $max_vnd : $max_tok ) * 100 ) );
 								$tip = date_i18n( 'd/m', strtotime( $d['day'] ) ) . ': ' . $fmt_vnd( $d['cost_vnd'] ) . ' · ' . $fmt_int( $d['total_tokens'] ) . ' token · ' . (int) $d['calls'] . ' lần';
 								?>
-								<div class="flex-1 min-w-[4px] bg-cyan-400/70 hover:bg-amber-400 rounded-t" style="height: <?php echo esc_attr( (string) $h ); ?>%" title="<?php echo esc_attr( $tip ); ?>"></div>
+								<div class="flex-1 min-w-[4px] bg-cyan-400/70 hover:bg-acc-soft rounded-t" style="height: <?php echo esc_attr( (string) $h ); ?>%" title="<?php echo esc_attr( $tip ); ?>"></div>
 							<?php endforeach; ?>
 						</div>
-						<div class="flex justify-between text-[10px] text-slate-500"><span><?php echo esc_html( date_i18n( 'd/m', strtotime( $daily[0]['day'] ) ) ); ?></span><span><?php echo esc_html( date_i18n( 'd/m', strtotime( end( $daily )['day'] ) ) ); ?></span></div>
+						<div class="flex justify-between text-[10px] text-ink-muted"><span><?php echo esc_html( date_i18n( 'd/m', strtotime( $daily[0]['day'] ) ) ); ?></span><span><?php echo esc_html( date_i18n( 'd/m', strtotime( end( $daily )['day'] ) ) ); ?></span></div>
 					</div>
 				<?php endif; ?>
 			<?php endif; ?>
 
 			<?php if ( ! empty( $usage['recent'] ) ) : ?>
 				<details class="text-xs">
-					<summary class="cursor-pointer font-bold text-slate-300">15 lần gọi gần nhất</summary>
+					<summary class="cursor-pointer font-bold text-ink-2">15 lần gọi gần nhất</summary>
 					<div class="overflow-x-auto mt-2">
 						<table class="w-full text-left text-[11px] tabular-nums">
-							<thead class="text-slate-400"><tr><th class="py-1 pr-2">Thời gian</th><th class="pr-2">Model</th><th class="pr-2">Mục đích</th><th class="pr-2 text-right">Vào</th><th class="pr-2 text-right">Ra</th><th class="pr-2 text-right">VNĐ</th><th class="pr-2 text-right">ms</th><th>Kết quả</th></tr></thead>
+							<thead class="text-ink-muted"><tr><th class="py-1 pr-2">Thời gian</th><th class="pr-2">Model</th><th class="pr-2">Mục đích</th><th class="pr-2 text-right">Vào</th><th class="pr-2 text-right">Ra</th><th class="pr-2 text-right">VNĐ</th><th class="pr-2 text-right">ms</th><th>Kết quả</th></tr></thead>
 							<tbody>
 								<?php foreach ( $usage['recent'] as $l ) : ?>
-									<tr class="border-t border-slate-800">
+									<tr class="border-t border-slate-300">
 										<td class="py-1 pr-2 whitespace-nowrap"><?php echo esc_html( $fmt_time( $l['created_at'] ) ); ?></td>
-										<td class="pr-2 font-mono"><?php echo esc_html( $l['provider'] . ' / ' . $l['model'] ); ?></td>
+										<td class="pr-2"><?php echo esc_html( $l['provider'] . ' / ' . $l['model'] ); ?></td>
 										<td class="pr-2"><?php echo esc_html( (string) $l['purpose'] ); ?></td>
 										<td class="pr-2 text-right"><?php echo esc_html( $fmt_int( $l['input_tokens'] ) ); ?></td>
 										<td class="pr-2 text-right"><?php echo esc_html( $fmt_int( $l['output_tokens'] ) ); ?></td>
 										<td class="pr-2 text-right"><?php echo esc_html( $fmt_vnd( $l['cost_vnd'] ) ); ?></td>
 										<td class="pr-2 text-right"><?php echo esc_html( $fmt_int( $l['duration_ms'] ) ); ?></td>
-										<td class="<?php echo ! empty( $l['success'] ) ? 'text-emerald-300' : 'text-rose-300'; ?>" title="<?php echo esc_attr( (string) ( $l['error'] ?? '' ) ); ?>"><?php echo ! empty( $l['success'] ) ? 'Thành công' : 'Lỗi'; ?></td>
+										<td class="<?php echo ! empty( $l['success'] ) ? 'text-emerald-800' : 'text-red-700'; ?>" title="<?php echo esc_attr( (string) ( $l['error'] ?? '' ) ); ?>"><?php echo ! empty( $l['success'] ) ? 'Thành công' : 'Lỗi'; ?></td>
 									</tr>
 								<?php endforeach; ?>
 							</tbody>
@@ -482,22 +482,22 @@ get_header();
 
 		<!-- Bảng giá -->
 		<section id="bang-gia" class="<?php echo esc_attr( $card_cls ); ?>">
-			<div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
+			<div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-300 pb-3">
 				<div>
-					<h2 class="text-base font-black text-white">Bảng giá model (USD / 1 triệu token)</h2>
-					<p class="text-[11px] text-slate-400">DeepSeek: trang giá chính thức (giá giờ cao điểm). Nhà cung cấp khác: bảng giá công khai OpenRouter. Giá sửa tay không bị ghi đè khi cập nhật. Tự cập nhật thứ Hai hằng tuần<?php echo ! empty( $ov['prices_updated_at'] ) ? ' · lần gần nhất ' . esc_html( $fmt_time( $ov['prices_updated_at'] ) ) : ''; ?>.</p>
+					<h2 class="text-base font-black text-ink">Bảng giá model (USD / 1 triệu token)</h2>
+					<p class="text-[11px] text-ink-muted">DeepSeek: trang giá chính thức (giá giờ cao điểm). Nhà cung cấp khác: bảng giá công khai OpenRouter. Giá sửa tay không bị ghi đè khi cập nhật. Tự cập nhật thứ Hai hằng tuần<?php echo ! empty( $ov['prices_updated_at'] ) ? ' · lần gần nhất ' . esc_html( $fmt_time( $ov['prices_updated_at'] ) ) : ''; ?>.</p>
 				</div>
 				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 					<?php wp_nonce_field( 'cvc_ai_prices_refresh' ); ?>
 					<input type="hidden" name="action" value="cvc_ai_prices_refresh">
-					<button type="submit" class="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-900 text-xs font-black"><i class="fa-solid fa-arrows-rotate"></i> Cập nhật giá &amp; tỷ giá</button>
+					<button type="submit" class="px-4 py-2 rounded-xl bg-acc hover:bg-acc-deep text-slate-900 text-xs font-black text-white"><i class="fa-solid fa-arrows-rotate"></i> Cập nhật giá &amp; tỷ giá</button>
 				</form>
 			</div>
 
 			<?php if ( ! empty( $missing_price ) ) : ?>
-				<div class="rounded-2xl border border-amber-500/40 bg-amber-500/10 p-3 text-[12px] text-amber-200 space-y-1">
+				<div class="rounded-2xl border border-acc-line bg-acc-soft p-3 text-[12px] text-acc space-y-1">
 					<p class="font-bold"><i class="fa-solid fa-triangle-exclamation"></i> Model chưa có giá — chi phí đang tính 0 ₫:</p>
-					<p class="font-mono"><?php echo esc_html( implode( ', ', array_map( static fn( $m ) => $m[0] . '/' . $m[1], $missing_price ) ) ); ?></p>
+					<p class=""><?php echo esc_html( implode( ', ', array_map( static fn( $m ) => $m[0] . '/' . $m[1], $missing_price ) ) ); ?></p>
 					<p>Bấm "Cập nhật giá" hoặc nhập giá tay ở ô bên dưới.</p>
 				</div>
 			<?php endif; ?>
@@ -507,26 +507,26 @@ get_header();
 				foreach ( $rows as $i => $pr ) :
 					$fid = 'price-' . md5( $pr['provider'] . $pr['model'] );
 					?>
-					<tr class="border-t border-slate-800 align-top">
-						<td class="py-2 pr-3"><span class="text-slate-400"><?php echo esc_html( $providers[ $pr['provider'] ]['label'] ?? $pr['provider'] ); ?></span><br><span class="font-mono text-slate-100"><?php echo esc_html( $pr['model'] ); ?></span><?php echo ! empty( $pr['supports_images'] ) ? ' <span title="Đọc được ảnh" class="text-amber-300">★</span>' : ''; ?></td>
+					<tr class="border-t border-slate-300 align-top">
+						<td class="py-2 pr-3"><span class="text-ink-muted"><?php echo esc_html( $providers[ $pr['provider'] ]['label'] ?? $pr['provider'] ); ?></span><br><span class="text-ink"><?php echo esc_html( $pr['model'] ); ?></span><?php echo ! empty( $pr['supports_images'] ) ? ' <span title="Đọc được ảnh" class="text-acc">★</span>' : ''; ?></td>
 						<td class="pr-3 text-right"><?php echo esc_html( $fmt_price( $pr['input_per_m'] ) ); ?></td>
-						<td class="pr-3 text-right text-slate-400"><?php echo esc_html( $fmt_price( $pr['cached_input_per_m'] ) ); ?></td>
+						<td class="pr-3 text-right text-ink-muted"><?php echo esc_html( $fmt_price( $pr['cached_input_per_m'] ) ); ?></td>
 						<td class="pr-3 text-right"><?php echo esc_html( $fmt_price( $pr['output_per_m'] ) ); ?></td>
-						<td class="pr-3 text-[11px] text-slate-400"><?php echo esc_html( $source_labels[ $pr['source'] ] ?? $pr['source'] ); ?><br><?php echo esc_html( $fmt_time( $pr['updated_at'] ) ); ?></td>
+						<td class="pr-3 text-[11px] text-ink-muted"><?php echo esc_html( $source_labels[ $pr['source'] ] ?? $pr['source'] ); ?><br><?php echo esc_html( $fmt_time( $pr['updated_at'] ) ); ?></td>
 						<td class="text-right">
 							<details class="inline-block text-left">
-								<summary class="cursor-pointer text-[11px] font-bold text-cyan-300">Sửa</summary>
+								<summary class="cursor-pointer text-[11px] font-bold text-acc">Sửa</summary>
 								<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="mt-2 grid grid-cols-3 gap-1.5 w-64">
 									<?php wp_nonce_field( 'cvc_ai_price_save' ); ?>
 									<input type="hidden" name="action" value="cvc_ai_price_save">
 									<input type="hidden" name="provider" value="<?php echo esc_attr( $pr['provider'] ); ?>">
 									<input type="hidden" name="model" value="<?php echo esc_attr( $pr['model'] ); ?>">
-									<label class="text-[10px] text-slate-400">Vào<input type="text" inputmode="decimal" name="input_per_m" value="<?php echo esc_attr( (string) $pr['input_per_m'] ); ?>" class="<?php echo esc_attr( $input_cls ); ?> !px-2 !py-1 text-xs"></label>
-									<label class="text-[10px] text-slate-400">Cache<input type="text" inputmode="decimal" name="cached_input_per_m" value="<?php echo esc_attr( (string) ( $pr['cached_input_per_m'] ?? '' ) ); ?>" class="<?php echo esc_attr( $input_cls ); ?> !px-2 !py-1 text-xs"></label>
-									<label class="text-[10px] text-slate-400">Ra<input type="text" inputmode="decimal" name="output_per_m" value="<?php echo esc_attr( (string) $pr['output_per_m'] ); ?>" class="<?php echo esc_attr( $input_cls ); ?> !px-2 !py-1 text-xs"></label>
-									<button type="submit" class="col-span-2 py-1.5 rounded-lg bg-amber-400 text-slate-900 text-[11px] font-black">Lưu giá</button>
+									<label class="text-[10px] text-ink-muted">Vào<input type="text" inputmode="decimal" name="input_per_m" value="<?php echo esc_attr( (string) $pr['input_per_m'] ); ?>" class="<?php echo esc_attr( $input_cls ); ?> !px-2 !py-1 text-xs"></label>
+									<label class="text-[10px] text-ink-muted">Cache<input type="text" inputmode="decimal" name="cached_input_per_m" value="<?php echo esc_attr( (string) ( $pr['cached_input_per_m'] ?? '' ) ); ?>" class="<?php echo esc_attr( $input_cls ); ?> !px-2 !py-1 text-xs"></label>
+									<label class="text-[10px] text-ink-muted">Ra<input type="text" inputmode="decimal" name="output_per_m" value="<?php echo esc_attr( (string) $pr['output_per_m'] ); ?>" class="<?php echo esc_attr( $input_cls ); ?> !px-2 !py-1 text-xs"></label>
+									<button type="submit" class="col-span-2 py-1.5 rounded-lg bg-acc text-slate-900 text-[11px] font-black text-white">Lưu giá</button>
 									<?php if ( 'manual' === $pr['source'] ) : ?>
-										<button type="submit" name="reset" value="1" class="py-1.5 rounded-lg border border-slate-600 text-[11px] font-bold text-slate-200" title="Bỏ giá sửa tay, lấy lại giá tự động">Bỏ sửa tay</button>
+										<button type="submit" name="reset" value="1" class="py-1.5 rounded-lg border border-slate-300 text-[11px] font-bold text-ink" title="Bỏ giá sửa tay, lấy lại giá tự động">Bỏ sửa tay</button>
 									<?php endif; ?>
 								</form>
 							</details>
@@ -538,10 +538,10 @@ get_header();
 			?>
 			<div class="overflow-x-auto">
 				<table class="w-full text-left text-[12px] tabular-nums">
-					<thead class="text-slate-400 text-[11px]"><tr><th class="py-1.5 pr-3">Model</th><th class="pr-3 text-right">Vào</th><th class="pr-3 text-right">Vào (cache)</th><th class="pr-3 text-right">Ra</th><th class="pr-3">Nguồn giá</th><th></th></tr></thead>
+					<thead class="text-ink-muted text-[11px]"><tr><th class="py-1.5 pr-3">Model</th><th class="pr-3 text-right">Vào</th><th class="pr-3 text-right">Vào (cache)</th><th class="pr-3 text-right">Ra</th><th class="pr-3">Nguồn giá</th><th></th></tr></thead>
 					<tbody>
 						<?php if ( empty( $prices_main ) ) : ?>
-							<tr><td colspan="6" class="py-2 text-slate-400">Chưa có giá cho model đang dùng.</td></tr>
+							<tr><td colspan="6" class="py-2 text-ink-muted">Chưa có giá cho model đang dùng.</td></tr>
 						<?php endif; ?>
 						<?php $render_rows( $prices_main ); ?>
 					</tbody>
@@ -549,7 +549,7 @@ get_header();
 			</div>
 			<?php if ( ! empty( $prices_other ) ) : ?>
 				<details>
-					<summary class="cursor-pointer text-xs font-bold text-slate-300">Xem giá <?php echo esc_html( (string) count( $prices_other ) ); ?> model khác</summary>
+					<summary class="cursor-pointer text-xs font-bold text-ink-2">Xem giá <?php echo esc_html( (string) count( $prices_other ) ); ?> model khác</summary>
 					<div class="overflow-x-auto mt-2">
 						<table class="w-full text-left text-[12px] tabular-nums">
 							<tbody><?php $render_rows( $prices_other ); ?></tbody>
@@ -558,23 +558,23 @@ get_header();
 				</details>
 			<?php endif; ?>
 
-			<details class="border-t border-slate-800 pt-3">
-				<summary class="cursor-pointer text-xs font-bold text-cyan-300">+ Thêm giá cho model khác</summary>
+			<details class="border-t border-slate-300 pt-3">
+				<summary class="cursor-pointer text-xs font-bold text-acc">+ Thêm giá cho model khác</summary>
 				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="mt-3 grid sm:grid-cols-6 gap-2 items-end">
 					<?php wp_nonce_field( 'cvc_ai_price_save' ); ?>
 					<input type="hidden" name="action" value="cvc_ai_price_save">
-					<label class="text-[10px] text-slate-400 sm:col-span-1">Nhà cung cấp
-						<select name="provider" class="<?php echo esc_attr( $input_cls ); ?> text-xs">
+					<label class="text-[10px] text-ink-muted sm:col-span-1">Nhà cung cấp
+						<select name="provider" class="text-ink border-slate-400 bg-white <?php echo esc_attr( $input_cls ); ?> text-xs text-ink border-slate-400 bg-white">
 							<?php foreach ( $providers as $pid => $p ) : ?>
 								<option value="<?php echo esc_attr( $pid ); ?>"><?php echo esc_html( $p['label'] ?? $pid ); ?></option>
 							<?php endforeach; ?>
 						</select>
 					</label>
-					<label class="text-[10px] text-slate-400 sm:col-span-2">Model<input type="text" name="model" required class="<?php echo esc_attr( $input_cls ); ?> font-mono text-xs" placeholder="VD: qwen-vl-max"></label>
-					<label class="text-[10px] text-slate-400">Vào<input type="text" inputmode="decimal" name="input_per_m" required class="<?php echo esc_attr( $input_cls ); ?> text-xs"></label>
-					<label class="text-[10px] text-slate-400">Cache<input type="text" inputmode="decimal" name="cached_input_per_m" class="<?php echo esc_attr( $input_cls ); ?> text-xs"></label>
-					<label class="text-[10px] text-slate-400">Ra<input type="text" inputmode="decimal" name="output_per_m" required class="<?php echo esc_attr( $input_cls ); ?> text-xs"></label>
-					<button type="submit" class="sm:col-span-6 py-2 rounded-xl bg-amber-400 text-slate-900 text-xs font-black">Lưu giá</button>
+					<label class="text-[10px] text-ink-muted sm:col-span-2">Model<input type="text" name="model" required class="text-ink border-slate-400 bg-white <?php echo esc_attr( $input_cls ); ?> text-xs text-ink border-slate-400 bg-white" placeholder="VD: qwen-vl-max"></label>
+					<label class="text-[10px] text-ink-muted">Vào<input type="text" inputmode="decimal" name="input_per_m" required class="text-ink border-slate-400 bg-white <?php echo esc_attr( $input_cls ); ?> text-xs text-ink border-slate-400 bg-white"></label>
+					<label class="text-[10px] text-ink-muted">Cache<input type="text" inputmode="decimal" name="cached_input_per_m" class="text-ink border-slate-400 bg-white <?php echo esc_attr( $input_cls ); ?> text-xs text-ink border-slate-400 bg-white"></label>
+					<label class="text-[10px] text-ink-muted">Ra<input type="text" inputmode="decimal" name="output_per_m" required class="text-ink border-slate-400 bg-white <?php echo esc_attr( $input_cls ); ?> text-xs text-ink border-slate-400 bg-white"></label>
+					<button type="submit" class="sm:col-span-6 py-2 rounded-xl bg-acc text-slate-900 text-xs font-black text-white">Lưu giá</button>
 				</form>
 			</details>
 		</section>
@@ -582,24 +582,24 @@ get_header();
 		<?php endif; ?>
 
 		<!-- Nhật ký giải thích câu hỏi -->
-		<details class="bg-slate-800/40 border border-slate-800 rounded-2xl p-5 text-xs">
-			<summary class="cursor-pointer text-sm font-black text-white">Nhật ký giải thích câu hỏi (AI job)</summary>
+		<details class="bg-acc-soft border border-slate-300 rounded-2xl p-5 text-xs">
+			<summary class="cursor-pointer text-sm font-black text-ink">Nhật ký giải thích câu hỏi (AI job)</summary>
 			<?php if ( ! $jobs_result['ok'] ) : ?>
-				<p class="text-slate-400 mt-2">Không tải được nhật ký (cần quyền ai.view): <?php echo esc_html( cvc_api_error_message( $jobs_result ) ); ?></p>
+				<p class="text-ink-muted mt-2">Không tải được nhật ký (cần quyền ai.view): <?php echo esc_html( cvc_api_error_message( $jobs_result ) ); ?></p>
 			<?php elseif ( empty( $jobs ) ) : ?>
-				<p class="text-slate-500 mt-2">Chưa có lần gọi AI nào.</p>
+				<p class="text-ink-muted mt-2">Chưa có lần gọi AI nào.</p>
 			<?php else : ?>
-				<p class="text-slate-400 mt-2">Kết quả thành công được dùng lại (cache) cho cùng câu hỏi + cùng model.</p>
+				<p class="text-ink-muted mt-2">Kết quả thành công được dùng lại (cache) cho cùng câu hỏi + cùng model.</p>
 				<div class="overflow-x-auto mt-2">
 					<table class="w-full text-left text-[11px]">
-						<thead class="text-slate-400"><tr><th class="py-1 pr-2">Thời gian</th><th class="pr-2">Câu hỏi</th><th class="pr-2">Model</th><th class="pr-2">Kết quả</th><th>ms</th></tr></thead>
+						<thead class="text-ink-muted"><tr><th class="py-1 pr-2">Thời gian</th><th class="pr-2">Câu hỏi</th><th class="pr-2">Model</th><th class="pr-2">Kết quả</th><th>ms</th></tr></thead>
 						<tbody>
 							<?php foreach ( $jobs as $job ) : ?>
-								<tr class="border-t border-slate-800">
+								<tr class="border-t border-slate-300">
 									<td class="py-1 pr-2 whitespace-nowrap"><?php echo esc_html( $fmt_time( $job['created_at'] ?? null ) ); ?></td>
 									<td class="pr-2">#<?php echo (int) ( $job['subject_id'] ?? 0 ); ?></td>
 									<td class="pr-2"><?php echo esc_html( ( $job['provider'] ?? '' ) . ' / ' . ( $job['model'] ?? '' ) ); ?></td>
-									<td class="pr-2 <?php echo 'succeeded' === ( $job['status'] ?? '' ) ? 'text-emerald-300' : 'text-rose-300'; ?>" title="<?php echo esc_attr( (string) ( $job['error'] ?? '' ) ); ?>"><?php echo 'succeeded' === ( $job['status'] ?? '' ) ? 'Thành công' : 'Lỗi'; ?></td>
+									<td class="pr-2 <?php echo 'succeeded' === ( $job['status'] ?? '' ) ? 'text-emerald-800' : 'text-red-700'; ?>" title="<?php echo esc_attr( (string) ( $job['error'] ?? '' ) ); ?>"><?php echo 'succeeded' === ( $job['status'] ?? '' ) ? 'Thành công' : 'Lỗi'; ?></td>
 									<td><?php echo (int) ( $job['duration_ms'] ?? 0 ); ?></td>
 								</tr>
 							<?php endforeach; ?>

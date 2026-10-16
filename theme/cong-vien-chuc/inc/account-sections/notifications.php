@@ -51,7 +51,7 @@ $notifications = $pagination['data'] ?? array();
 					$link = cvc_recruitment_url( $data['metadata']['recruitment_slug'] );
 				}
 				?>
-				<article class="cvc-notification-item<?php echo $is_unread ? ' is-unread' : ''; ?>">
+				<article class="cvc-notification-item <?php echo $is_unread ? ' is-unread' : ''; ?>">
 					<div class="cvc-notification-item__body">
 						<h3 class="cvc-notification-item__title">
 							<?php if ( $link ) : ?>

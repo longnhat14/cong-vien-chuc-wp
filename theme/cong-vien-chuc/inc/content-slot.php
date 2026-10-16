@@ -94,42 +94,36 @@ function cvc_slot_cta_url( string $kind ): string {
 }
 
 /**
- * Bieu tuong + mau nhan theo loai noi dung.
+ * Bieu tuong + nhan theo loai noi dung (giao dien van ban 16/10/2026: chi
+ * con 1 tong mau, phan biet bang chu nhan).
  *
  * @return array{0: string, 1: string}
  */
 function cvc_slot_kind_style( string $kind ): array {
 	$map = array(
-		'courses'      => array( 'fa-graduation-cap', 'text-amber-300 bg-amber-500/10 border-amber-500/30' ),
-		'recruitments' => array( 'fa-briefcase', 'text-emerald-300 bg-emerald-500/10 border-emerald-500/30' ),
-		'exams'        => array( 'fa-pen-to-square', 'text-cyan-300 bg-cyan-500/10 border-cyan-500/30' ),
-		'legal'        => array( 'fa-scale-balanced', 'text-indigo-300 bg-indigo-500/10 border-indigo-500/30' ),
-		'topics'       => array( 'fa-layer-group', 'text-rose-300 bg-rose-500/10 border-rose-500/30' ),
+		'courses'      => array( 'fa-graduation-cap', '' ),
+		'recruitments' => array( 'fa-briefcase', '' ),
+		'exams'        => array( 'fa-pen-to-square', '' ),
+		'legal'        => array( 'fa-scale-balanced', '' ),
+		'topics'       => array( 'fa-layer-group', '' ),
 	);
 
 	return $map[ $kind ] ?? $map['exams'];
 }
 
 /**
- * The 1 muc (dung chung cho moi loai).
+ * 1 muc dang dong muc luc (dung chung cho moi loai).
  */
 function cvc_render_slot_card( array $item ): void {
-	$kind            = (string) ( $item['kind'] ?? '' );
-	list( $icon, $tone ) = cvc_slot_kind_style( $kind );
-	$meta            = array_filter( array_map( 'strval', (array) ( $item['meta'] ?? array() ) ) );
+	$meta = array_filter( array_map( 'strval', (array) ( $item['meta'] ?? array() ) ) );
 	?>
-	<a href="<?php echo esc_url( cvc_slot_item_url( $item ) ); ?>" class="group bg-navy-950 p-5 rounded-3xl border border-slate-800 hover:border-amber-500/60 transition-colors flex flex-col justify-between gap-4 min-w-0">
-		<div class="space-y-3 min-w-0">
-			<span class="inline-flex items-center gap-1.5 text-[10px] font-black px-2.5 py-1 rounded-full border <?php echo esc_attr( $tone ); ?>">
-				<i class="fa-solid <?php echo esc_attr( $icon ); ?>" aria-hidden="true"></i><?php echo esc_html( (string) ( $item['badge'] ?? '' ) ); ?>
-			</span>
-			<h3 class="font-extrabold text-sm sm:text-base text-white group-hover:text-amber-300 leading-snug line-clamp-3 break-words"><?php echo esc_html( (string) ( $item['title'] ?? '' ) ); ?></h3>
-			<?php if ( $meta ) : ?>
-				<p class="text-[11px] text-slate-400 leading-relaxed"><?php echo esc_html( implode( ' · ', $meta ) ); ?></p>
-			<?php endif; ?>
+	<li>
+		<h3 class="dz-item-title"><a href="<?php echo esc_url( cvc_slot_item_url( $item ) ); ?>"><?php echo esc_html( (string) ( $item['title'] ?? '' ) ); ?></a></h3>
+		<div class="dz-item-meta">
+			<?php if ( ! empty( $item['badge'] ) ) : ?><span class="dz-tag"><?php echo esc_html( (string) $item['badge'] ); ?></span><?php endif; ?>
+			<?php foreach ( $meta as $m ) : ?><span><?php echo esc_html( $m ); ?></span><?php endforeach; ?>
 		</div>
-		<span class="text-xs font-black text-amber-400"><?php echo esc_html( (string) ( $item['cta_label'] ?? 'Xem' ) ); ?> &rarr;</span>
-	</a>
+	</li>
 	<?php
 }
 
@@ -137,41 +131,32 @@ function cvc_render_slot_card( array $item ): void {
  * Khu (section) day du - dung o trang chu / trang danh sach.
  *
  * @param array<string, mixed> $slot Du lieu tu cvc_content_slot().
- * @param array<string, mixed> $opts id, class, columns (3|4), heading_level.
+ * @param array<string, mixed> $opts id, class.
  */
 function cvc_render_content_slot_section( array $slot, array $opts = array() ): void {
 	$items = array_values( array_filter( (array) ( $slot['items'] ?? array() ), 'is_array' ) );
 	if ( empty( $items ) ) {
 		return;
 	}
-	$kind    = (string) ( $slot['kind'] ?? 'exams' );
-	$id      = (string) ( $opts['id'] ?? 'noi-dung-goi-y' );
-	$columns = 3 === (int) ( $opts['columns'] ?? 4 ) ? 'lg:grid-cols-3' : 'lg:grid-cols-4';
-	$class   = (string) ( $opts['class'] ?? 'py-20 bg-slate-900 border-t border-slate-800' );
-	list( , $tone ) = cvc_slot_kind_style( $kind );
+	$kind = (string) ( $slot['kind'] ?? 'exams' );
+	$id   = (string) ( $opts['id'] ?? 'noi-dung-goi-y' );
+	$hid  = $id . '-title';
 	?>
-	<section id="<?php echo esc_attr( $id ); ?>" class="<?php echo esc_attr( $class ); ?>" data-cvc-slot="<?php echo esc_attr( (string) ( $slot['slot'] ?? '' ) ); ?>" data-cvc-slot-kind="<?php echo esc_attr( $kind ); ?>">
-		<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
-			<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
-				<div class="space-y-2">
-					<span class="inline-block text-xs font-extrabold uppercase tracking-widest px-3.5 py-1.5 rounded-full border <?php echo esc_attr( $tone ); ?>"><?php echo esc_html( (string) ( $slot['eyebrow'] ?? '' ) ); ?></span>
-					<h2 class="text-2xl sm:text-4xl font-extrabold text-white tracking-normal"><?php echo esc_html( (string) ( $slot['title'] ?? '' ) ); ?></h2>
-					<?php if ( ! empty( $slot['subtitle'] ) ) : ?>
-						<p class="text-xs sm:text-sm text-slate-400"><?php echo esc_html( (string) $slot['subtitle'] ); ?></p>
-					<?php endif; ?>
-				</div>
-				<?php if ( ! empty( $slot['cta']['label'] ) ) : ?>
-					<a href="<?php echo esc_url( cvc_slot_cta_url( (string) ( $slot['cta']['kind'] ?? $kind ) ) ); ?>" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-extrabold text-xs rounded-xl transition-all border border-slate-700 inline-flex items-center gap-2 self-start md:self-auto">
-						<span><?php echo esc_html( (string) $slot['cta']['label'] ); ?></span><i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
-					</a>
-				<?php endif; ?>
-			</div>
-			<div class="grid grid-cols-1 sm:grid-cols-2 <?php echo esc_attr( $columns ); ?> gap-5">
-				<?php foreach ( $items as $item ) : ?>
-					<?php cvc_render_slot_card( $item ); ?>
-				<?php endforeach; ?>
-			</div>
+	<section id="<?php echo esc_attr( $id ); ?>" class="dz-section <?php echo esc_attr( (string) ( $opts['class'] ?? '' ) ); ?>" aria-labelledby="<?php echo esc_attr( $hid ); ?>" data-cvc-slot="<?php echo esc_attr( (string) ( $slot['slot'] ?? '' ) ); ?>" data-cvc-slot-kind="<?php echo esc_attr( $kind ); ?>">
+		<div class="dz-h2">
+			<h2 id="<?php echo esc_attr( $hid ); ?>"><?php echo esc_html( (string) ( $slot['title'] ?? '' ) ); ?></h2>
+			<?php if ( ! empty( $slot['cta']['label'] ) ) : ?>
+				<a href="<?php echo esc_url( cvc_slot_cta_url( (string) ( $slot['cta']['kind'] ?? $kind ) ) ); ?>"><?php echo esc_html( (string) $slot['cta']['label'] ); ?> →</a>
+			<?php endif; ?>
 		</div>
+		<?php if ( ! empty( $slot['subtitle'] ) ) : ?>
+			<p class="dz-muted" style="margin:-4px 0 6px;font-style:italic"><?php echo esc_html( (string) $slot['subtitle'] ); ?></p>
+		<?php endif; ?>
+		<ul class="dz-list">
+			<?php foreach ( $items as $item ) : ?>
+				<?php cvc_render_slot_card( $item ); ?>
+			<?php endforeach; ?>
+		</ul>
 	</section>
 	<?php
 }
@@ -189,21 +174,21 @@ function cvc_render_content_slot_compact( array $slot ): void {
 	$kind = (string) ( $slot['kind'] ?? 'exams' );
 	$hid  = 'cvc-slot-' . sanitize_html_class( (string) ( $slot['slot'] ?? 'side' ) );
 	?>
-	<section class="bg-navy-950 border border-slate-800 p-5 rounded-3xl space-y-3 shadow-xl text-xs" aria-labelledby="<?php echo esc_attr( $hid ); ?>" data-cvc-slot-kind="<?php echo esc_attr( $kind ); ?>">
-		<h2 id="<?php echo esc_attr( $hid ); ?>" class="font-extrabold text-xs text-cyan-400 uppercase tracking-wider border-b border-slate-800 pb-3"><?php echo esc_html( (string) ( $slot['eyebrow'] ?? '' ) ); ?></h2>
-		<ul class="space-y-2.5">
-			<?php foreach ( $items as $item ) : ?>
-				<li>
-					<a href="<?php echo esc_url( cvc_slot_item_url( $item ) ); ?>" class="block p-3 bg-slate-900 hover:bg-slate-800 rounded-2xl border border-slate-800 space-y-1.5">
-						<span class="block font-bold text-white leading-snug line-clamp-3 break-words"><?php echo esc_html( (string) ( $item['title'] ?? '' ) ); ?></span>
-						<span class="block text-slate-400"><?php echo esc_html( implode( ' · ', array_filter( array_map( 'strval', (array) ( $item['meta'] ?? array() ) ) ) ) ); ?></span>
-					</a>
-				</li>
-			<?php endforeach; ?>
-		</ul>
-		<?php if ( ! empty( $slot['cta']['label'] ) ) : ?>
-			<a href="<?php echo esc_url( cvc_slot_cta_url( (string) ( $slot['cta']['kind'] ?? $kind ) ) ); ?>" class="block text-center text-cyan-300 font-bold"><?php echo esc_html( (string) $slot['cta']['label'] ); ?></a>
-		<?php endif; ?>
+	<section class="dz-box" aria-labelledby="<?php echo esc_attr( $hid ); ?>" data-cvc-slot-kind="<?php echo esc_attr( $kind ); ?>">
+		<h2 id="<?php echo esc_attr( $hid ); ?>" class="dz-box-head"><?php echo esc_html( (string) ( $slot['eyebrow'] ?? ( $slot['title'] ?? '' ) ) ); ?></h2>
+		<div class="dz-box-body">
+			<ul class="dz-list dz-list-sm">
+				<?php foreach ( $items as $item ) : ?>
+					<li>
+						<a class="dz-sidelink" href="<?php echo esc_url( cvc_slot_item_url( $item ) ); ?>"><?php echo esc_html( (string) ( $item['title'] ?? '' ) ); ?></a>
+						<?php $m = array_filter( array_map( 'strval', (array) ( $item['meta'] ?? array() ) ) ); if ( $m ) : ?><div class="dz-item-meta"><?php echo esc_html( implode( ' · ', $m ) ); ?></div><?php endif; ?>
+					</li>
+				<?php endforeach; ?>
+			</ul>
+			<?php if ( ! empty( $slot['cta']['label'] ) ) : ?>
+				<p style="margin:10px 0 0"><a class="dz-link" href="<?php echo esc_url( cvc_slot_cta_url( (string) ( $slot['cta']['kind'] ?? $kind ) ) ); ?>"><?php echo esc_html( (string) $slot['cta']['label'] ); ?> →</a></p>
+			<?php endif; ?>
+		</div>
 	</section>
 	<?php
 }

@@ -35,13 +35,13 @@ function cvc_admin_render_official_domains(): void {
 	);
 	?>
 	<header class="space-y-1">
-		<h1 class="text-2xl font-black text-white">Nguồn chính thức &amp; nguồn sưu tầm</h1>
-		<p class="text-sm text-slate-400 max-w-3xl">Chính sách nguồn (16/10/2026): hệ thống <strong class="text-slate-200">chỉ quét, xử lý và đăng</strong> tin từ <strong class="text-slate-200">.gov.vn / .edu.vn</strong> và tên miền nhà nước / trường uy tín đã xác minh. Trang đối thủ, báo chí, mạng xã hội và tên miền chưa xác minh bị chặn; nguồn của tên miền chưa xác minh tạm dừng cho đến khi anh xác nhận.</p>
+		<h1 class="text-2xl font-black text-ink">Nguồn chính thức &amp; nguồn sưu tầm</h1>
+		<p class="text-sm text-ink-muted max-w-3xl">Chính sách nguồn (16/10/2026): hệ thống <strong class="text-ink">chỉ quét, xử lý và đăng</strong> tin từ <strong class="text-ink">.gov.vn / .edu.vn</strong> và tên miền nhà nước / trường uy tín đã xác minh. Trang đối thủ, báo chí, mạng xã hội và tên miền chưa xác minh bị chặn; nguồn của tên miền chưa xác minh tạm dừng cho đến khi anh xác nhận.</p>
 	</header>
 	<?php cvc_ingestion_tabs( 'ten-mien' ); ?>
 
 	<?php if ( ! $result['ok'] ) : ?>
-		<p class="text-sm text-rose-300"><?php echo esc_html( cvc_admin_error_message( $result ) ); ?></p>
+		<p class="text-sm text-red-700"><?php echo esc_html( cvc_admin_error_message( $result ) ); ?></p>
 		<?php return; ?>
 	<?php endif; ?>
 
@@ -54,72 +54,72 @@ function cvc_admin_render_official_domains(): void {
 			array( 'Nguồn đang tạm dừng vì chính sách', (int) ( $stats['blocked_sources'] ?? 0 ), 'text-cyan-300' ),
 		) as $s ) :
 			?>
-			<div class="bg-[#0A192F] border border-slate-800 rounded-xl p-3">
-				<div class="text-xs text-slate-400"><?php echo esc_html( $s[0] ); ?></div>
+			<div class="bg-white border border-slate-300 rounded-xl p-3">
+				<div class="text-xs text-ink-muted"><?php echo esc_html( $s[0] ); ?></div>
 				<div class="text-2xl font-black <?php echo esc_attr( $s[2] ); ?>"><?php echo esc_html( (string) $s[1] ); ?></div>
 			</div>
 		<?php endforeach; ?>
 	</div>
 
 	<div class="grid lg:grid-cols-2 gap-4">
-		<form method="get" action="<?php echo esc_url( cvc_admin_url( 'thu-thap' ) ); ?>" class="bg-[#0A192F] border border-slate-800 rounded-xl p-4 space-y-2">
+		<form method="get" action="<?php echo esc_url( cvc_admin_url( 'thu-thap' ) ); ?>" class="dz-card space-y-2">
 			<input type="hidden" name="xem" value="ten-mien">
-			<label class="text-xs font-bold text-slate-300" for="cvc-od-check">Kiểm tra một địa chỉ</label>
+			<label class="text-xs font-bold text-ink-2" for="cvc-od-check">Kiểm tra một địa chỉ</label>
 			<div class="flex gap-2">
 				<input id="cvc-od-check" type="url" name="kiem" value="<?php echo esc_attr( $check ); ?>" placeholder="https://..." class="<?php echo esc_attr( $input ); ?>">
-				<button class="<?php echo esc_attr( $btn ); ?> bg-slate-700 text-white shrink-0">Kiểm tra</button>
+				<button class="<?php echo esc_attr( $btn ); ?> bg-white text-ink shrink-0">Kiểm tra</button>
 			</div>
 			<?php if ( $checked ) : ?>
-				<p class="text-sm <?php echo ! empty( $checked['official'] ) ? 'text-emerald-300' : 'text-amber-300'; ?>">
+				<p class="text-sm <?php echo ! empty( $checked['official'] ) ? 'text-emerald-800' : 'text-acc'; ?>">
 					<?php echo esc_html( ( ! empty( $checked['official'] ) ? 'Chính thức' : 'Nguồn sưu tầm' ) . ' — ' . (string) ( $checked['reason'] ?? '' ) ); ?>
 				</p>
 			<?php endif; ?>
 		</form>
 
 		<?php if ( $can_upd ) : ?>
-			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="bg-[#0A192F] border border-slate-800 rounded-xl p-4 space-y-2">
+			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="dz-card space-y-2">
 				<?php wp_nonce_field( 'cvc_admin_official_domains' ); ?>
 				<input type="hidden" name="action" value="cvc_admin_official_domains">
 				<input type="hidden" name="op" value="create">
-				<div class="text-xs font-bold text-slate-300">Thêm tên miền</div>
+				<div class="text-xs font-bold text-ink-2">Thêm tên miền</div>
 				<div class="grid sm:grid-cols-2 gap-2">
-					<input type="text" name="domain" required placeholder="benhvienxyz.vn" class="<?php echo esc_attr( $input ); ?>" aria-label="Tên miền">
-					<select name="kind" class="<?php echo esc_attr( $input ); ?>" aria-label="Loại">
+					<input type="text" name="domain" required placeholder="benhvienxyz.vn" class="text-ink border-slate-400 bg-white <?php echo esc_attr( $input ); ?> text-ink border-slate-400 bg-white" aria-label="Tên miền">
+					<select name="kind" class="text-ink border-slate-400 bg-white <?php echo esc_attr( $input ); ?> text-ink border-slate-400 bg-white" aria-label="Loại">
 						<option value="allow">Nhà nước (chính thức)</option>
 						<option value="deny">Loại trừ (không phải nhà nước)</option>
 						<option value="competitor">Đối thủ / tổng hợp việc làm</option>
 					</select>
-					<input type="text" name="organization" placeholder="Tên cơ quan / đơn vị" class="<?php echo esc_attr( $input ); ?>" aria-label="Tên cơ quan">
-					<input type="url" name="evidence_url" placeholder="Link bằng chứng (VD trang đơn vị trực thuộc của Sở)" class="<?php echo esc_attr( $input ); ?>" aria-label="Link bằng chứng">
+					<input type="text" name="organization" placeholder="Tên cơ quan / đơn vị" class="text-ink border-slate-400 bg-white <?php echo esc_attr( $input ); ?> text-ink border-slate-400 bg-white" aria-label="Tên cơ quan">
+					<input type="url" name="evidence_url" placeholder="Link bằng chứng (VD trang đơn vị trực thuộc của Sở)" class="text-ink border-slate-400 bg-white <?php echo esc_attr( $input ); ?> text-ink border-slate-400 bg-white" aria-label="Link bằng chứng">
 				</div>
-				<button class="<?php echo esc_attr( $btn ); ?> bg-cyan-500 text-slate-950">Lưu</button>
+				<button class="<?php echo esc_attr( $btn ); ?> bg-acc text-slate-950 text-white">Lưu</button>
 			</form>
 		<?php endif; ?>
 	</div>
 
 	<?php foreach ( $groups as $key => $list ) : ?>
-		<section class="bg-[#0A192F] border border-slate-800 rounded-xl p-4 space-y-3">
-			<h2 class="text-sm font-extrabold text-slate-200"><?php echo esc_html( $titles[ $key ] . ' (' . count( $list ) . ')' ); ?></h2>
+		<section class="dz-card space-y-3">
+			<h2 class="text-sm font-extrabold text-ink"><?php echo esc_html( $titles[ $key ] . ' (' . count( $list ) . ')' ); ?></h2>
 			<?php if ( 'suggested' === $key ) : ?>
-				<p class="text-xs text-slate-400">Tên miền của bệnh viện, trường… có trong danh sách đơn vị trực thuộc trên trang của Sở. Kiểm tra link bằng chứng rồi xác nhận nếu đúng là đơn vị công lập — nguồn của tên miền đó tự bật lại.</p>
+				<p class="text-xs text-ink-muted">Tên miền của bệnh viện, trường… có trong danh sách đơn vị trực thuộc trên trang của Sở. Kiểm tra link bằng chứng rồi xác nhận nếu đúng là đơn vị công lập — nguồn của tên miền đó tự bật lại.</p>
 			<?php endif; ?>
 			<?php if ( empty( $list ) ) : ?>
-				<p class="text-xs text-slate-500">Chưa có.</p>
+				<p class="text-xs text-ink-muted">Chưa có.</p>
 			<?php else : ?>
 				<div class="overflow-x-auto">
 					<table class="w-full text-sm">
-						<tbody class="divide-y divide-slate-800">
+						<tbody class="divide-y divide-slate-200">
 							<?php foreach ( $list as $r ) : ?>
 								<tr class="align-top">
-									<td class="py-2 pr-3 font-mono text-slate-100"><?php echo esc_html( (string) $r['domain'] ); ?></td>
-									<td class="py-2 pr-3 text-slate-300"><?php echo esc_html( (string) ( $r['organization'] ?? '' ) ); ?>
+									<td class="py-2 pr-3 text-ink"><?php echo esc_html( (string) $r['domain'] ); ?></td>
+									<td class="py-2 pr-3 text-ink-2"><?php echo esc_html( (string) ( $r['organization'] ?? '' ) ); ?>
 										<?php if ( ! empty( $r['note'] ) ) : ?>
-											<div class="text-xs text-slate-500"><?php echo esc_html( (string) $r['note'] ); ?></div>
+											<div class="text-xs text-ink-muted"><?php echo esc_html( (string) $r['note'] ); ?></div>
 										<?php endif; ?>
 									</td>
 									<td class="py-2 pr-3 text-xs">
 										<?php if ( ! empty( $r['evidence_url'] ) ) : ?>
-											<a class="text-cyan-300 underline" href="<?php echo esc_url( (string) $r['evidence_url'] ); ?>" target="_blank" rel="noopener nofollow">Bằng chứng</a>
+											<a class="text-acc underline" href="<?php echo esc_url( (string) $r['evidence_url'] ); ?>" target="_blank" rel="noopener nofollow">Bằng chứng</a>
 										<?php endif; ?>
 									</td>
 									<td class="py-2 text-right whitespace-nowrap">

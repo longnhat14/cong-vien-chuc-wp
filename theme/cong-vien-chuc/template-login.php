@@ -25,7 +25,7 @@ cvc_seo_set_noindex();
 get_header();
 ?>
 
-<main id="main" class="container cvc-page cvc-auth-page">
+<main id="main" class="dz-main container cvc-auth-page">
 	<?php
 	cvc_render_breadcrumbs(
 		array(

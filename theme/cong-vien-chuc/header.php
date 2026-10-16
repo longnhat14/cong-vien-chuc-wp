@@ -1,213 +1,65 @@
 <!DOCTYPE html>
-<html lang="vi" class="scroll-smooth">
+<html lang="vi">
 <head>
 <?php wp_head(); ?>
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CÔNG VIÊN CHỨC - Nền tảng Đào tạo & Phát triển Sự nghiệp Công cao cấp</title>
+<title>CÔNG VIÊN CHỨC - Ôn thi công chức, viên chức</title>
 <!-- Tailwind CSS CDN -->
 <script src="https://cdn.tailwindcss.com"></script>
-<!-- FontAwesome 6 Pro/Free Icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<!-- Google Fonts: Plus Jakarta Sans & Dancing Script -->
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet">
 <script>
+/*
+ * 16/10/2026 - Giao diện "văn bản" toàn site (đồng bộ trang làm bài thi):
+ * Times New Roman, nền trắng chữ đen, điểm nhấn xanh hải quân, bo góc 2px,
+ * không bóng đổ/gradient. Bảng màu cũ (navy/gold/azure) được ÁNH XẠ LẠI
+ * sang tông xanh hải quân để class cũ còn sót vẫn đồng bộ.
+ */
 tailwind.config = {
 theme: {
-extend: {
-colors: {
-navy: {
-950: '#020C1B',
-900: '#0A192F',
-800: '#0F2027',
-700: '#112240',
-600: '#1D3557',
-500: '#2A4365',
-},
-gold: {
-300: '#FDE047',
-400: '#FBBF24',
-500: '#F59E0B',
-600: '#D97706',
-700: '#B45309',
-},
-azure: {
-400: '#38BDF8',
-500: '#0EA5E9',
-600: '#0284C7',
-glow: '#06B6D4',
-}
-},
 fontFamily: {
-sans: ['Plus Jakarta Sans', 'sans-serif'],
-handwriting: ['Dancing Script', 'cursive'],
+sans: ['"Times New Roman"', 'Times', '"Liberation Serif"', 'Tinos', 'serif'],
+serif: ['"Times New Roman"', 'Times', '"Liberation Serif"', 'Tinos', 'serif'],
+mono: ['ui-monospace', 'Consolas', 'monospace'],
+handwriting: ['"Times New Roman"', 'Times', 'serif'],
+},
+borderRadius: {
+none: '0', sm: '2px', DEFAULT: '2px', md: '2px', lg: '2px', xl: '3px', '2xl': '3px', '3xl': '4px', full: '9999px',
 },
 boxShadow: {
-'glow-gold': '0 0 25px -5px rgba(245, 158, 11, 0.35)',
-'glow-azure': '0 0 25px -5px rgba(6, 182, 212, 0.35)',
-'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
-'executive': '0 20px 40px -15px rgba(2, 12, 27, 0.12)',
+none: 'none', sm: 'none', DEFAULT: 'none', md: 'none', lg: 'none', xl: 'none', '2xl': 'none', inner: 'none',
+'glow-gold': 'none', 'glow-azure': 'none', glass: 'none', executive: 'none',
 },
-keyframes: {
-marquee: {
-'0%': { transform: 'translateX(0%)' },
-'100%': { transform: 'translateX(-50%)' },
+extend: {
+colors: {
+ink: { DEFAULT: '#111111', 2: '#333333', muted: '#5c5c5c' },
+acc: { DEFAULT: '#123a63', 2: '#1767aa', soft: '#eaf3fc', line: '#8fb4da', deep: '#0b2744' },
+navy: { 950: '#0b2744', 900: '#123a63', 800: '#1a4775', 700: '#1f5288', 600: '#2a6db0', 500: '#4a7fb8' },
+gold: { 300: '#bcd5ee', 400: '#8fb4da', 500: '#1767aa', 600: '#123a63', 700: '#0b2744' },
+azure: { 400: '#3d7fc0', 500: '#1767aa', 600: '#123a63', glow: '#1767aa' },
 },
-pulseGlow: {
-'0%, 100%': { opacity: '0.4', transform: 'scale(1)' },
-'50%': { opacity: '0.8', transform: 'scale(1.05)' },
+fontSize: {
+'2xs': ['13px', '1.4'],
 },
-shimmer: {
-'100%': { transform: 'translateX(100%)' }
-}
-},
-animation: {
-'marquee': 'marquee 30s linear infinite',
-'pulse-glow': 'pulseGlow 6s infinite ease-in-out',
-'shimmer': 'shimmer 2.5s infinite'
-}
 }
 }
 }
 </script>
-<style>
-body {
-font-family: 'Plus Jakarta Sans', sans-serif;
-background-color: #f8fafc;
-color: #0f172a;
-}
-/* Glassmorphism utility */
-.glass-card {
-background: rgba(255, 255, 255, 0.85);
-backdrop-filter: blur(16px);
--webkit-backdrop-filter: blur(16px);
-border: 1px solid rgba(255, 255, 255, 0.6);
-}
-.glass-dark {
-background: rgba(15, 32, 39, 0.75);
-backdrop-filter: blur(20px);
--webkit-backdrop-filter: blur(20px);
-border: 1px solid rgba(255, 255, 255, 0.1);
-}
-.glass-header {
-background: rgba(255, 255, 255, 0.92);
-backdrop-filter: blur(20px);
--webkit-backdrop-filter: blur(20px);
-}
-/* Metallic Gold Gradient Text */
-.text-gold-gradient {
-background: linear-gradient(135deg, #FFE082 0%, #F59E0B 50%, #D97706 100%);
--webkit-background-clip: text;
--webkit-text-fill-color: transparent;
-}
-.text-azure-gradient {
-background: linear-gradient(135deg, #38BDF8 0%, #0EA5E9 50%, #0284C7 100%);
--webkit-background-clip: text;
--webkit-text-fill-color: transparent;
-}
-.hero-gradient {
-background: radial-gradient(circle at 80% 20%, #112240 0%, #0A192F 50%, #020C1B 100%);
-}
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-width: 8px;
-}
-::-webkit-scrollbar-track {
-background: #020C1B;
-}
-::-webkit-scrollbar-thumb {
-background: #1D3557;
-border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-background: #F59E0B;
-}
-</style>
-
-<style>
-/* CSS Resets & Spacing Enhancements */
-#main.cvc-homepage-prototype-100 a,
-header a,
-footer a,
-#search-modal a, #action-modal a, #login-modal a {
-    color: inherit;
-    text-decoration: none;
-}
-
-#main.cvc-homepage-prototype-100 h1,
-#main.cvc-homepage-prototype-100 h2,
-#main.cvc-homepage-prototype-100 h3,
-#main.cvc-homepage-prototype-100 h4,
-#main.cvc-homepage-prototype-100 h5,
-#main.cvc-homepage-prototype-100 h6,
-header h1, header h2, header h3, header h4, header h5, header h6,
-footer h1, footer h2, footer h3, footer h4, footer h5, footer h6 {
-    margin-top: 0.35rem;
-    margin-bottom: 0.5rem;
-    line-height: 1.35;
-    letter-spacing: normal;
-}
-
-#main.cvc-homepage-prototype-100 p,
-header p,
-footer p,
-#search-modal p, #action-modal p, #login-modal p {
-    margin-top: 0.25rem;
-    margin-bottom: 0.5rem;
-    line-height: 1.65;
-}
-
-html, body, button, input, select, textarea,
-#main.cvc-homepage-prototype-100,
-header, footer, #search-modal, #action-modal, #login-modal {
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
-#main.cvc-homepage-prototype-100 *:not(i):not([class*="fa-"]),
-header *:not(i):not([class*="fa-"]),
-footer *:not(i):not([class*="fa-"]),
-#search-modal *:not(i):not([class*="fa-"]),
-#action-modal *:not(i):not([class*="fa-"]),
-#login-modal *:not(i):not([class*="fa-"]) {
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
-
-/* Explicitly protect FontAwesome icon font family and weight */
-i.fa, i.fas, i.far, i.fal, i.fab, i.fa-solid, i.fa-regular, i.fa-brands, [class*="fa-"] {
-    font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important;
-}
-.fa-solid, .fas {
-    font-family: "Font Awesome 6 Free" !important;
-    font-weight: 900 !important;
-}
-.fa-regular, .far {
-    font-family: "Font Awesome 6 Free" !important;
-    font-weight: 400 !important;
-}
-.fa-brands, .fab {
-    font-family: "Font Awesome 6 Brands" !important;
-    font-weight: 400 !important;
-}
-.font-handwriting {
-    font-family: 'Dancing Script', cursive !important;
-}
-</style>
+<link rel="stylesheet" href="<?php echo esc_url( get_template_directory_uri() . '/assets/css/cvc-doc.css?ver=' . (string) filemtime( get_theme_file_path( '/assets/css/cvc-doc.css' ) ) ); ?>">
 </head>
 <?php
 if ( ! defined( "ABSPATH" ) ) {
 	exit;
 }
 ?>
-<body <?php body_class( "bg-slate-50 text-slate-900 antialiased selection:bg-gold-500 selection:text-white" ); ?>>
+<body <?php body_class( 'cvc-doc' ); ?>>
 <?php wp_body_open(); ?>
 <?php cvc_render_notice(); ?>
 
 <?php
 /*
- * Header (viết lại Phase 12): bỏ nội dung giả - bản tin "EXECUTIVE BULLETIN"
+ * Header (viết lại Phase 12; giao diện văn bản 16/10/2026): bỏ nội dung giả - bản tin "EXECUTIVE BULLETIN"
  * bịa, hotline 1900 888 999 không có thật, link "Trợ lý AI" chết, chuông
  * thông báo luôn có chấm đỏ và 2 thông báo mẫu, nút "Đăng Nhập" hiện cả khi
  * đã đăng nhập. Menu thu về nút 3 gạch dưới 1280px để không bị chật.
@@ -237,99 +89,80 @@ $cvc_nav_items   = array(
 );
 $cvc_current_url = home_url( add_query_arg( null, null ) );
 ?>
-<!-- 1. THANH THÔNG TIN -->
-<div class="bg-navy-950 text-slate-300 text-xs py-2 px-4 border-b border-navy-700/60 relative z-50">
-<div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
-<a href="<?php echo esc_url( cvc_recruitments_url() ); ?>" class="text-[11px] text-slate-300 hover:text-white truncate">
-<i class="fa-solid fa-bullhorn text-gold-400 mr-1.5" aria-hidden="true"></i> Tin tuyển dụng công chức, viên chức mới cập nhật — xem hạn nộp hồ sơ
-</a>
-<a href="<?php echo esc_url( cvc_search_url() ); ?>" class="hidden sm:inline text-[11px] text-gold-400 hover:text-gold-300 font-bold shrink-0"><i class="fa-solid fa-magnifying-glass mr-1" aria-hidden="true"></i> Tìm kiếm</a>
+<a class="cvc-skip-link" href="#main">Bỏ qua, tới nội dung chính</a>
+<!-- Thanh trên: dòng tin ngắn + tìm kiếm -->
+<div class="dz-topbar">
+<div class="dz-wrap dz-topbar-in">
+<a href="<?php echo esc_url( cvc_recruitments_url() ); ?>" class="dz-topbar-link"><i class="fa-solid fa-bullhorn" aria-hidden="true"></i> Tin tuyển dụng công chức, viên chức cập nhật hằng ngày — xem hạn nộp hồ sơ</a>
+<a href="<?php echo esc_url( cvc_search_url() ); ?>" class="dz-topbar-link dz-hide-sm"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i> Tra cứu</a>
 </div>
 </div>
-<!-- 2. NAVIGATION HEADER -->
-<header class="sticky top-0 z-40 glass-header border-b border-slate-200/80 shadow-sm transition-all duration-300">
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-<div class="flex items-center justify-between gap-4 h-20">
-<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="flex items-center gap-3 group shrink-0">
-<span class="w-11 h-11 bg-gradient-to-tr from-navy-950 via-navy-900 to-navy-700 text-white rounded-2xl flex items-center justify-center text-xl shadow-xl shadow-navy-950/20 border border-slate-700/50" aria-hidden="true">
-<i class="fa-solid fa-landmark-dome text-gold-400"></i>
-</span>
-<span class="flex flex-col justify-center">
-<span class="text-lg sm:text-xl font-black text-navy-950 leading-tight whitespace-nowrap group-hover:text-azure-600 transition-colors">CÔNG VIÊN CHỨC</span>
-<span class="hidden sm:block text-[10px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Ôn thi công chức, viên chức</span>
-</span>
+<!-- Đầu trang -->
+<header class="dz-masthead">
+<div class="dz-wrap dz-masthead-in">
+<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="dz-brand">
+<span class="dz-emblem" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 9h18L12 3 3 9Z"/><path d="M5 10v8m4-8v8m6-8v8m4-8v8M3 20h18"/></svg></span>
+<span class="dz-brandtext"><span class="dz-org">CÔNG VIÊN CHỨC</span><span class="dz-motto">Ôn thi công chức, viên chức · Kiến thức vững vàng, sự nghiệp bền vững</span></span>
 </a>
-<nav class="hidden xl:flex items-center gap-0.5 text-[13px] font-bold text-slate-700" aria-label="Menu chính">
+<nav class="dz-nav" aria-label="Menu chính">
 <?php foreach ( $cvc_nav_items as $cvc_nav ) : ?>
 <?php
 $cvc_urls   = array_merge( array( $cvc_nav['url'] ), array_column( (array) ( $cvc_nav['children'] ?? array() ), 'url' ) );
 $cvc_active = (bool) array_filter( $cvc_urls, fn ( $u ) => 0 === strpos( $cvc_current_url, $u ) );
-$cvc_cls    = 'px-2.5 py-2 rounded-xl whitespace-nowrap transition-colors ' . ( $cvc_active ? 'text-navy-900 bg-slate-100 border-b-2 border-gold-500' : 'hover:text-azure-600 hover:bg-slate-100' );
 ?>
 <?php if ( ! empty( $cvc_nav['children'] ) ) : ?>
-<div class="relative group">
-<a href="<?php echo esc_url( $cvc_nav['url'] ); ?>" class="<?php echo esc_attr( $cvc_cls ); ?> inline-flex items-center gap-1" aria-haspopup="true" <?php echo $cvc_active ? 'aria-current="page"' : ''; ?>><?php echo esc_html( $cvc_nav['label'] ); ?><i class="fa-solid fa-chevron-down text-[9px] opacity-60" aria-hidden="true"></i></a>
-<div class="absolute left-0 top-full pt-2 hidden group-hover:block group-focus-within:block z-50">
-<ul class="min-w-[220px] bg-white border border-slate-200 rounded-2xl shadow-xl p-2 space-y-0.5">
+<div class="dz-navgroup">
+<a href="<?php echo esc_url( $cvc_nav['url'] ); ?>" class="dz-navlink<?php echo $cvc_active ? ' is-active' : ''; ?>" aria-haspopup="true" <?php echo $cvc_active ? 'aria-current="page"' : ''; ?>><?php echo esc_html( $cvc_nav['label'] ); ?> <i class="fa-solid fa-chevron-down" aria-hidden="true"></i></a>
+<ul class="dz-dropdown">
 <?php foreach ( $cvc_nav['children'] as $cvc_child ) : ?>
-<li><a href="<?php echo esc_url( $cvc_child['url'] ); ?>" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-azure-600"><i class="fa-solid <?php echo esc_attr( $cvc_child['icon'] ?? 'fa-angle-right' ); ?> w-4 text-slate-400" aria-hidden="true"></i><span class="flex-1"><?php echo esc_html( $cvc_child['label'] ); ?></span><?php if ( ! empty( $cvc_child['badge'] ) ) : ?><span class="text-[10px] font-black px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700"><?php echo esc_html( $cvc_child['badge'] ); ?></span><?php endif; ?></a></li>
+<li><a href="<?php echo esc_url( $cvc_child['url'] ); ?>"><span><?php echo esc_html( $cvc_child['label'] ); ?></span><?php if ( ! empty( $cvc_child['badge'] ) ) : ?><em class="dz-tag"><?php echo esc_html( $cvc_child['badge'] ); ?></em><?php endif; ?></a></li>
 <?php endforeach; ?>
 </ul>
 </div>
-</div>
 <?php else : ?>
-<a href="<?php echo esc_url( $cvc_nav['url'] ); ?>" class="<?php echo esc_attr( $cvc_cls ); ?>" <?php echo $cvc_active ? 'aria-current="page"' : ''; ?>><?php echo esc_html( $cvc_nav['label'] ); ?></a>
+<a href="<?php echo esc_url( $cvc_nav['url'] ); ?>" class="dz-navlink<?php echo $cvc_active ? ' is-active' : ''; ?>" <?php echo $cvc_active ? 'aria-current="page"' : ''; ?>><?php echo esc_html( $cvc_nav['label'] ); ?></a>
 <?php endif; ?>
 <?php endforeach; ?>
 </nav>
-<div class="flex items-center gap-2 shrink-0">
-<button type="button" onclick="toggleSearchModal()" class="w-10 h-10 text-slate-600 hover:text-azure-600 hover:bg-slate-100 rounded-xl flex items-center justify-center transition-colors" aria-label="Tìm kiếm">
-<i class="fa-solid fa-magnifying-glass text-base" aria-hidden="true"></i>
-</button>
+<div class="dz-actions">
+<button type="button" onclick="toggleSearchModal()" class="dz-iconbtn" aria-label="Tìm kiếm"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></button>
 <?php if ( $cvc_header_logged_in ) : ?>
-<a href="<?php echo esc_url( cvc_account_url( 'notifications' ) ); ?>" class="w-10 h-10 text-slate-600 hover:text-azure-600 hover:bg-slate-100 rounded-xl flex items-center justify-center transition-colors relative" aria-label="<?php echo esc_attr( $cvc_header_unread > 0 ? sprintf( 'Thông báo: %d chưa đọc', $cvc_header_unread ) : 'Thông báo' ); ?>">
-<i class="fa-regular fa-bell text-base" aria-hidden="true"></i>
-<?php if ( $cvc_header_unread > 0 ) : ?>
-<span class="absolute top-1 right-1 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center"><?php echo esc_html( $cvc_header_unread > 9 ? '9+' : (string) $cvc_header_unread ); ?></span>
-<?php endif; ?>
+<a href="<?php echo esc_url( cvc_account_url( 'notifications' ) ); ?>" class="dz-iconbtn" aria-label="<?php echo esc_attr( $cvc_header_unread > 0 ? sprintf( 'Thông báo: %d chưa đọc', $cvc_header_unread ) : 'Thông báo' ); ?>">
+<i class="fa-regular fa-bell" aria-hidden="true"></i>
+<?php if ( $cvc_header_unread > 0 ) : ?><span class="dz-count"><?php echo esc_html( $cvc_header_unread > 9 ? '9+' : (string) $cvc_header_unread ); ?></span><?php endif; ?>
 </a>
 <?php if ( function_exists( 'cvc_admin_is_staff' ) && cvc_admin_is_staff() ) : ?>
-<a href="<?php echo esc_url( cvc_admin_url() ); ?>" class="hidden sm:flex px-3 py-2.5 bg-amber-500 hover:bg-amber-400 text-navy-950 text-xs font-black rounded-xl items-center gap-1.5"><i class="fa-solid fa-gauge-high" aria-hidden="true"></i><span>Quản trị</span></a>
+<a href="<?php echo esc_url( cvc_admin_url() ); ?>" class="dz-btn dz-hide-sm">Quản trị</a>
 <?php endif; ?>
-<a href="<?php echo esc_url( cvc_account_url() ); ?>" class="hidden sm:flex px-4 py-2.5 bg-gradient-to-r from-navy-950 to-navy-800 hover:from-navy-900 hover:to-navy-700 text-white text-xs font-bold rounded-xl shadow-md items-center gap-2 border border-slate-700/40">
-<i class="fa-solid fa-user-shield text-gold-400" aria-hidden="true"></i><span>Tài khoản</span>
-</a>
+<a href="<?php echo esc_url( cvc_account_url() ); ?>" class="dz-btn dz-btn-primary dz-hide-sm"><i class="fa-regular fa-user" aria-hidden="true"></i> Tài khoản</a>
 <?php else : ?>
-<a href="<?php echo esc_url( cvc_login_url( $cvc_current_url ) ); ?>" class="hidden sm:inline-flex px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold rounded-xl">Đăng nhập</a>
-<a href="<?php echo esc_url( cvc_register_url() ); ?>" class="hidden sm:inline-flex px-4 py-2.5 bg-gradient-to-r from-navy-950 to-navy-800 text-white text-xs font-bold rounded-xl shadow-md border border-slate-700/40">Đăng ký</a>
+<a href="<?php echo esc_url( cvc_login_url( $cvc_current_url ) ); ?>" class="dz-btn dz-hide-sm">Đăng nhập</a>
+<a href="<?php echo esc_url( cvc_register_url() ); ?>" class="dz-btn dz-btn-primary dz-hide-sm">Đăng ký</a>
 <?php endif; ?>
-<button type="button" onclick="toggleMobileMenu()" class="xl:hidden w-10 h-10 text-slate-700 hover:bg-slate-100 rounded-xl flex items-center justify-center" aria-label="Mở menu" aria-controls="mobile-menu">
-<i class="fa-solid fa-bars text-xl" aria-hidden="true"></i>
-</button>
+<button type="button" onclick="toggleMobileMenu()" class="dz-iconbtn dz-menubtn" aria-label="Mở menu" aria-controls="mobile-menu"><i class="fa-solid fa-bars" aria-hidden="true"></i></button>
 </div>
 </div>
-</div>
-<div id="mobile-menu" class="hidden xl:hidden bg-white border-b border-slate-200 px-4 py-5 space-y-2 shadow-xl">
+<div id="mobile-menu" class="hidden dz-mobile">
 <?php foreach ( $cvc_nav_items as $cvc_nav ) : ?>
 <?php if ( ! empty( $cvc_nav['children'] ) ) : ?>
-<p class="px-4 pt-1 text-[11px] font-black uppercase tracking-wider text-slate-400"><?php echo esc_html( $cvc_nav['label'] ); ?></p>
+<p class="dz-mobile-label"><?php echo esc_html( $cvc_nav['label'] ); ?></p>
 <?php foreach ( $cvc_nav['children'] as $cvc_child ) : ?>
-<a href="<?php echo esc_url( $cvc_child['url'] ); ?>" class="flex items-center gap-2 px-4 py-2.5 text-slate-700 hover:bg-slate-50 font-semibold rounded-xl text-sm"><span class="flex-1"><?php echo esc_html( $cvc_child['label'] ); ?></span><?php if ( ! empty( $cvc_child['badge'] ) ) : ?><span class="text-[10px] font-black px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700"><?php echo esc_html( $cvc_child['badge'] ); ?></span><?php endif; ?></a>
+<a href="<?php echo esc_url( $cvc_child['url'] ); ?>" class="dz-mobile-link"><span><?php echo esc_html( $cvc_child['label'] ); ?></span><?php if ( ! empty( $cvc_child['badge'] ) ) : ?><em class="dz-tag"><?php echo esc_html( $cvc_child['badge'] ); ?></em><?php endif; ?></a>
 <?php endforeach; ?>
 <?php else : ?>
-<a href="<?php echo esc_url( $cvc_nav['url'] ); ?>" class="block px-4 py-2.5 text-slate-700 hover:bg-slate-50 font-semibold rounded-xl text-sm"><?php echo esc_html( $cvc_nav['label'] ); ?></a>
+<a href="<?php echo esc_url( $cvc_nav['url'] ); ?>" class="dz-mobile-link"><?php echo esc_html( $cvc_nav['label'] ); ?></a>
 <?php endif; ?>
 <?php endforeach; ?>
-<div class="pt-3 border-t border-slate-100 flex gap-2">
+<div class="dz-mobile-actions">
 <?php if ( $cvc_header_logged_in ) : ?>
 <?php if ( function_exists( 'cvc_admin_is_staff' ) && cvc_admin_is_staff() ) : ?>
-<a href="<?php echo esc_url( cvc_admin_url() ); ?>" class="flex-1 py-2.5 bg-amber-500 text-navy-950 font-black rounded-xl text-xs text-center">Quản trị</a>
+<a href="<?php echo esc_url( cvc_admin_url() ); ?>" class="dz-btn">Quản trị</a>
 <?php endif; ?>
-<a href="<?php echo esc_url( cvc_account_url() ); ?>" class="flex-1 py-2.5 bg-navy-950 text-white font-bold rounded-xl text-xs text-center">Tài khoản</a>
-<a href="<?php echo esc_url( cvc_logout_url() ); ?>" class="flex-1 py-2.5 bg-slate-100 text-slate-800 font-bold rounded-xl text-xs text-center">Đăng xuất</a>
+<a href="<?php echo esc_url( cvc_account_url() ); ?>" class="dz-btn dz-btn-primary">Tài khoản</a>
+<a href="<?php echo esc_url( cvc_logout_url() ); ?>" class="dz-btn">Đăng xuất</a>
 <?php else : ?>
-<a href="<?php echo esc_url( cvc_login_url( $cvc_current_url ) ); ?>" class="flex-1 py-2.5 bg-slate-100 text-slate-800 font-bold rounded-xl text-xs text-center">Đăng nhập</a>
-<a href="<?php echo esc_url( cvc_register_url() ); ?>" class="flex-1 py-2.5 bg-navy-950 text-white font-bold rounded-xl text-xs text-center">Đăng ký</a>
+<a href="<?php echo esc_url( cvc_login_url( $cvc_current_url ) ); ?>" class="dz-btn">Đăng nhập</a>
+<a href="<?php echo esc_url( cvc_register_url() ); ?>" class="dz-btn dz-btn-primary">Đăng ký</a>
 <?php endif; ?>
 </div>
 </div>

@@ -888,7 +888,7 @@ final class CVC_Subpage_Fixtures {
 
 <h3 class="text-base font-black text-cyan-400 mb-3 border-b border-slate-800 pb-2">2. Khoanh Vùng Các Phân Đoạn Điểm Số Cao Vòng 1</h3>
 <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 mb-4 space-y-3">
-  <p class="font-bold text-white text-xs">📌 10 Nhóm Câu Hỏi Tần Suất Cao (90% Xuất Hiện Trong Đề Thi Thật):</p>
+  <p class="font-bold text-white text-xs bg-acc hover:bg-acc-deep">📌 10 Nhóm Câu Hỏi Tần Suất Cao (90% Xuất Hiện Trong Đề Thi Thật):</p>
   <ul class="list-disc pl-5 space-y-2 text-slate-300 text-xs">
     <li><strong>Điều 36 (Điều kiện đăng ký dự tuyển):</strong> 7 điều kiện chung (Có quốc tịch Việt Nam, đủ 18 tuổi trở lên, có đơn dự tuyển, lý lịch rõ ràng, văn bằng chuyên môn phù hợp, phẩm chất đạo đức, đủ sức khỏe). Phân biệt với 2 trường hợp KHÔNG được dự tuyển (Mất/hạn chế năng lực hành vi dân sự; đang bị truy cứu trách nhiệm hình sự hoặc chấp hành bản án).</li>
     <li><strong>Điều 37 (Phương thức tuyển dụng):</strong> Thi tuyển là phương thức chủ đạo (2 vòng thi). Xét tuyển chỉ áp dụng cho cam kết 05 năm ở vùng kinh tế đặc biệt khó khăn và sinh viên xuất sắc/nhà khoa học trẻ.</li>
@@ -911,13 +911,13 @@ final class CVC_Subpage_Fixtures {
     </thead>
     <tbody class="divide-y divide-slate-800/60">
       <tr>
-        <td class="p-2.5 font-bold text-white border-r border-slate-800">Chuyên viên & tương đương</td>
+        <td class="p-2.5 font-bold text-white border-r border-slate-800 bg-acc hover:bg-acc-deep">Chuyên viên & tương đương</td>
         <td class="p-2.5 text-amber-300 font-bold border-r border-slate-800">12 tháng</td>
         <td class="p-2.5 border-r border-slate-800">85% bậc 1 lương ngạch Chuyên viên</td>
         <td class="p-2.5">Đã có từ đủ 12 tháng làm công việc chuyên môn phù hợp có đóng BHXH bắt buộc</td>
       </tr>
       <tr>
-        <td class="p-2.5 font-bold text-white border-r border-slate-800">Cán sự & tương đương</td>
+        <td class="p-2.5 font-bold text-white border-r border-slate-800 bg-acc hover:bg-acc-deep">Cán sự & tương đương</td>
         <td class="p-2.5 text-emerald-300 font-bold border-r border-slate-800">06 tháng</td>
         <td class="p-2.5 border-r border-slate-800">85% bậc 1 lương ngạch Cán sự</td>
         <td class="p-2.5">Đã có từ đủ 06 tháng làm công việc chuyên môn phù hợp có đóng BHXH bắt buộc</td>
@@ -969,14 +969,14 @@ final class CVC_Subpage_Fixtures {
 
 <h3 class="text-base font-black text-cyan-400 mb-3 border-b border-slate-800 pb-2">2. Thể Thức & Kỹ Thuật Trình Bày Văn Bản Chuẩn Quốc Gia</h3>
 <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 mb-4 space-y-3 text-xs text-slate-300">
-  <p class="font-bold text-white">📏 Quy chuẩn căn lề trang giấy A4 (210mm x 297mm):</p>
+  <p class="font-bold text-white bg-acc hover:bg-acc-deep">📏 Quy chuẩn căn lề trang giấy A4 (210mm x 297mm):</p>
   <ul class="list-disc pl-5 space-y-1.5">
     <li>Lề trên (Top margin): Căn cách mép trên từ <strong>20 mm đến 25 mm</strong> (2 - 2.5 cm).</li>
     <li>Lề dưới (Bottom margin): Căn cách mép dưới từ <strong>20 mm đến 25 mm</strong> (2 - 2.5 cm).</li>
     <li>Lề trái (Left margin): Căn cách mép trái từ <strong>30 mm đến 35 mm</strong> (3 - 3.5 cm - phục vụ đóng đóng sổ/hồ sơ).</li>
     <li>Lề phải (Right margin): Căn cách mép phải từ <strong>15 mm đến 20 mm</strong> (1.5 - 2 cm).</li>
   </ul>
-  <p class="font-bold text-white pt-2">🔤 Phông chữ & Cỡ chữ quy định chuẩn:</p>
+  <p class="font-bold text-white pt-2 bg-acc hover:bg-acc-deep">🔤 Phông chữ & Cỡ chữ quy định chuẩn:</p>
   <ul class="list-disc pl-5 space-y-1.5">
     <li>Phông chữ tiếng Việt: <strong>Times New Roman</strong> bộ mã ký tự Unicode TCVN 6909:2001.</li>
     <li>Quốc hiệu "CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM": Chữ in hoa, đứng, đậm, cỡ chữ <strong>12 đến 13</strong>.</li>
@@ -1031,7 +1031,7 @@ final class CVC_Subpage_Fixtures {
 
 <h3 class="text-base font-black text-cyan-400 mb-3 border-b border-slate-800 pb-2">2. Cấu Trúc Đề Thi Trắc Nghiệm 100 Câu Hỏi Quốc Gia</h3>
 <div class="bg-slate-950 p-5 rounded-2xl border border-slate-800 mb-4 space-y-3 text-xs text-slate-300">
-  <p class="font-bold text-white text-sm">📝 Chi tiết ma trận 100 câu hỏi thi máy tính (120 phút):</p>
+  <p class="font-bold text-white text-sm bg-acc hover:bg-acc-deep">📝 Chi tiết ma trận 100 câu hỏi thi máy tính (120 phút):</p>
   <ul class="list-disc pl-5 space-y-2">
     <li><strong>Phần 1: Hiểu biết chung về hệ thống chính trị & Quản lý nhà nước (40 câu):</strong> Chủ trương, đường lối của Đảng; Hiến pháp 2013; Luật Tổ chức Chính phủ 2015 (sửa đổi 2019); Luật Tổ chức chính quyền địa phương 2015 (sửa đổi 2019); Luật Cán bộ, công chức 2008 (sửa đổi 2019).</li>
     <li><strong>Phần 2: Năng lực tư duy logic & Phân tích định lượng (30 câu):</strong> Giải quyết vấn đề, phân tích biểu đồ, dãy số, suy luận logic hành chính và xử lý số liệu thống kê công vụ.</li>
@@ -1051,17 +1051,17 @@ final class CVC_Subpage_Fixtures {
     </thead>
     <tbody class="divide-y divide-slate-800/60">
       <tr>
-        <td class="p-2.5 font-bold text-white border-r border-slate-800">Điểm số ĐẠT kiểm định</td>
+        <td class="p-2.5 font-bold text-white border-r border-slate-800 bg-acc hover:bg-acc-deep">Điểm số ĐẠT kiểm định</td>
         <td class="p-2.5 text-amber-300 font-bold border-r border-slate-800">Đạt từ 50/100 câu đúng trở lên (50%)</td>
         <td class="p-2.5">Được Bộ Nội vụ cấp Giấy chứng nhận kết quả kiểm định điện tử</td>
       </tr>
       <tr>
-        <td class="p-2.5 font-bold text-white border-r border-slate-800">Thời hạn hiệu lực</td>
+        <td class="p-2.5 font-bold text-white border-r border-slate-800 bg-acc hover:bg-acc-deep">Thời hạn hiệu lực</td>
         <td class="p-2.5 text-emerald-300 font-bold border-r border-slate-800">24 tháng trên toàn quốc</td>
         <td class="p-2.5">Miễn thi Vòng 1 khi tham gia thi tuyển tại tất cả 34 Tỉnh/Thành & Bộ Ngành</td>
       </tr>
       <tr>
-        <td class="p-2.5 font-bold text-white border-r border-slate-800">Quyền thi lại khi chưa ĐẠT</td>
+        <td class="p-2.5 font-bold text-white border-r border-slate-800 bg-acc hover:bg-acc-deep">Quyền thi lại khi chưa ĐẠT</td>
         <td class="p-2.5 border-r border-slate-800">Được đăng ký ở các kỳ kiểm định tiếp theo</td>
         <td class="p-2.5">Bộ Nội vụ tổ chức định kỳ 2 lần/năm (tháng 7 và tháng 11)</td>
       </tr>

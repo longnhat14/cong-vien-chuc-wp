@@ -42,11 +42,11 @@ if ( ! $is_found ) {
 	cvc_seo_set_title( 'Không tìm thấy bài học' );
 	get_header();
 	?>
-	<main id="main" class="cvc-page bg-slate-900 text-slate-100 min-h-screen py-12">
+	<main id="main" class="dz-main">
 		<div class="max-w-3xl mx-auto px-4 space-y-4">
 			<?php cvc_render_notfound_state( 'Không tìm thấy bài học này. Bài học có thể chưa được công bố hoặc đường dẫn không đúng.' ); ?>
 			<p>
-				<a class="text-cyan-300 font-bold" href="<?php echo esc_url( $course ? cvc_course_url( $course_slug ) : cvc_courses_url() ); ?>">&larr; <?php echo $course ? 'Về trang khóa học' : 'Danh sách khóa học'; ?></a>
+				<a class="text-acc font-bold" href="<?php echo esc_url( $course ? cvc_course_url( $course_slug ) : cvc_courses_url() ); ?>">&larr; <?php echo $course ? 'Về trang khóa học' : 'Danh sách khóa học'; ?></a>
 			</p>
 		</div>
 	</main>
@@ -130,40 +130,40 @@ cvc_seo_set_canonical( cvc_course_lesson_url( $course_slug, $lesson_id ) );
 cvc_seo_add_breadcrumb_jsonld( $breadcrumb_items );
 
 $status_meta = array(
-	'completed'   => array( 'fa-circle-check text-emerald-400', 'Đã học xong' ),
-	'in_progress' => array( 'fa-circle-half-stroke text-amber-400', 'Đang học' ),
+	'completed'   => array( 'fa-circle-check text-emerald-800', 'Đã học xong' ),
+	'in_progress' => array( 'fa-circle-half-stroke text-acc', 'Đang học' ),
 );
 
 get_header();
 ?>
 
-<main id="main" class="min-h-screen bg-slate-900 text-slate-100 py-6">
+<main id="main" class="dz-main">
 	<?php cvc_render_track_marker( 'lesson_viewed', 'course_lesson', $lesson_id ); ?>
 
-	<div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+	<div class="dz-wrap space-y-6">
 
 		<?php cvc_render_breadcrumbs( $breadcrumb_items ); ?>
 		<?php cvc_render_notice(); ?>
 
-		<section class="bg-gradient-to-r from-navy-950 via-slate-900 to-indigo-950 p-6 sm:p-8 rounded-3xl border border-amber-500/30 shadow-2xl space-y-3">
+		<section class="dz-herohead">
 			<div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
 				<div class="space-y-2 max-w-3xl">
 					<div class="flex items-center gap-2 flex-wrap text-xs">
 						<?php if ( $position ) : ?>
-							<span class="bg-amber-500 text-navy-950 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase">
+							<span class="bg-acc text-white text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase">
 								Bài <?php echo esc_html( $position ); ?>/<?php echo esc_html( count( $flat_lessons ) ); ?>
 							</span>
 						<?php endif; ?>
 						<?php cvc_render_free_badge( ! empty( $lesson['is_free'] ) ); ?>
 						<?php if ( isset( $status_meta[ $progress_status ] ) ) : ?>
-							<span class="text-[11px] font-bold text-slate-200 flex items-center gap-1"><i class="fa-solid <?php echo esc_attr( $status_meta[ $progress_status ][0] ); ?>" aria-hidden="true"></i> <?php echo esc_html( $status_meta[ $progress_status ][1] ); ?></span>
+							<span class="text-[11px] font-bold text-ink flex items-center gap-1"><i class="fa-solid <?php echo esc_attr( $status_meta[ $progress_status ][0] ); ?>" aria-hidden="true"></i> <?php echo esc_html( $status_meta[ $progress_status ][1] ); ?></span>
 						<?php endif; ?>
 					</div>
 
-					<h1 class="text-xl sm:text-3xl font-black text-white leading-snug"><?php echo esc_html( $lesson['title'] ); ?></h1>
+					<h1 class="text-xl sm:text-3xl font-black text-ink leading-snug"><?php echo esc_html( $lesson['title'] ); ?></h1>
 
-					<p class="text-xs text-slate-300">
-						Khóa học: <a href="<?php echo esc_url( cvc_course_url( $course_slug ) ); ?>" class="text-amber-400 font-bold hover:underline"><?php echo esc_html( $course['title'] ?? '' ); ?></a>
+					<p class="text-xs text-ink-2">
+						Khóa học: <a href="<?php echo esc_url( cvc_course_url( $course_slug ) ); ?>" class="text-acc font-bold hover:underline"><?php echo esc_html( $course['title'] ?? '' ); ?></a>
 						<?php if ( ! empty( $lesson['duration_minutes'] ) ) : ?>
 							&middot; <?php echo esc_html( (int) $lesson['duration_minutes'] ); ?> phút
 						<?php endif; ?>
@@ -173,9 +173,9 @@ get_header();
 				<?php if ( $enrollment ) : ?>
 					<?php $pct = max( 0, min( 100, (int) ( $enrollment['progress_percent'] ?? 0 ) ) ); ?>
 					<div class="w-full md:w-56 shrink-0 text-xs space-y-1">
-						<div class="flex justify-between font-bold text-slate-300"><span>Tiến độ khóa học</span><span class="text-cyan-300"><?php echo esc_html( $pct ); ?>%</span></div>
-						<div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden" role="progressbar" aria-valuenow="<?php echo esc_attr( $pct ); ?>" aria-valuemin="0" aria-valuemax="100">
-							<div class="h-full bg-gradient-to-r from-cyan-500 to-emerald-500" style="width: <?php echo esc_attr( $pct ); ?>%"></div>
+						<div class="flex justify-between font-bold text-ink-2"><span>Tiến độ khóa học</span><span class="text-acc"><?php echo esc_html( $pct ); ?>%</span></div>
+						<div class="w-full h-2 bg-white rounded-full overflow-hidden" role="progressbar" aria-valuenow="<?php echo esc_attr( $pct ); ?>" aria-valuemin="0" aria-valuemax="100">
+							<div class="h-full" style="width: <?php echo esc_attr( $pct ); ?>%"></div>
 						</div>
 					</div>
 				<?php endif; ?>
@@ -185,8 +185,8 @@ get_header();
 		<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
 			<aside class="lg:col-span-3 order-2 lg:order-1">
-				<nav class="bg-[#0A192F] border border-slate-800 p-5 rounded-2xl space-y-3 shadow-lg text-xs" aria-label="Giáo trình khóa học">
-					<h2 class="font-extrabold text-xs text-amber-400 uppercase tracking-wider border-b border-slate-800 pb-2">Giáo trình (<?php echo esc_html( count( $flat_lessons ) ); ?> bài)</h2>
+				<nav class="dz-card space-y-3 text-xs" aria-label="Giáo trình khóa học">
+					<h2 class="dz-sideh2">Giáo trình (<?php echo esc_html( count( $flat_lessons ) ); ?> bài)</h2>
 					<ol class="space-y-2 max-h-[550px] overflow-y-auto pr-1">
 						<?php foreach ( $flat_lessons as $l_idx => $l_item ) : ?>
 							<?php
@@ -195,7 +195,7 @@ get_header();
 							$l_status = $status_meta[ $lesson_progress[ (string) $l_id ] ?? $lesson_progress[ $l_id ] ?? '' ] ?? null;
 							?>
 							<li>
-								<a href="<?php echo esc_url( cvc_course_lesson_url( $course_slug, $l_id ) ); ?>" class="block p-3 rounded-xl border transition-colors space-y-1 <?php echo $is_curr ? 'bg-amber-500/10 border-amber-500/50 text-amber-300 font-extrabold' : 'bg-slate-900 hover:bg-slate-800 border-slate-800 text-slate-300'; ?>" <?php echo $is_curr ? 'aria-current="page"' : ''; ?>>
+								<a href="<?php echo esc_url( cvc_course_lesson_url( $course_slug, $l_id ) ); ?>" class="block p-3 rounded-xl border transition-colors space-y-1 <?php echo $is_curr ? 'bg-acc-soft border-acc-line text-acc font-extrabold' : 'bg-white hover:bg-acc-soft border-slate-300 text-ink-2'; ?>" <?php echo $is_curr ? 'aria-current="page"' : ''; ?>>
 									<span class="flex items-center justify-between text-[10px]">
 										<span>Bài <?php echo esc_html( $l_idx + 1 ); ?></span>
 										<span class="flex items-center gap-1.5">
@@ -215,55 +215,55 @@ get_header();
 
 				<?php if ( ! $can_access ) : ?>
 
-					<div class="bg-[#0A192F] border border-amber-500/40 p-8 rounded-3xl text-center space-y-4 shadow-xl">
-						<div class="w-16 h-16 mx-auto rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-2xl border border-amber-500/40" aria-hidden="true">
+					<div class="dz-panel text-center space-y-4">
+						<div class="w-16 h-16 mx-auto rounded-full bg-acc-soft text-acc flex items-center justify-center text-2xl border border-acc-line" aria-hidden="true">
 							<i class="fa-solid fa-lock"></i>
 						</div>
-						<h2 class="text-xl font-black text-white">Bài học dành cho học viên của khóa</h2>
-						<p class="text-xs text-slate-300 max-w-md mx-auto">Mua khóa học để mở toàn bộ bài học, lưu tiến độ và nhận chứng chỉ khi hoàn thành.</p>
+						<h2 class="text-xl font-black text-ink">Bài học dành cho học viên của khóa</h2>
+						<p class="text-xs text-ink-2 max-w-md mx-auto">Mua khóa học để mở toàn bộ bài học, lưu tiến độ và nhận chứng chỉ khi hoàn thành.</p>
 						<?php if ( $logged_in ) : ?>
-							<a href="<?php echo esc_url( cvc_course_url( $course_slug ) ); ?>" class="inline-block px-6 py-3 bg-amber-500 hover:bg-amber-600 text-navy-950 font-black text-xs rounded-xl shadow">Xem học phí &amp; mua khóa học</a>
+							<a href="<?php echo esc_url( cvc_course_url( $course_slug ) ); ?>" class="inline-block px-6 py-3 bg-acc hover:bg-acc-deep text-white font-black text-xs rounded-xl">Xem học phí &amp; mua khóa học</a>
 						<?php else : ?>
-							<a href="<?php echo esc_url( cvc_login_url( cvc_course_lesson_url( $course_slug, $lesson_id ) ) ); ?>" class="inline-block px-6 py-3 bg-amber-500 hover:bg-amber-600 text-navy-950 font-black text-xs rounded-xl shadow">Đăng nhập</a>
-							<p class="text-[11px] text-slate-400">Đã mua khóa học? Đăng nhập để mở bài.</p>
+							<a href="<?php echo esc_url( cvc_login_url( cvc_course_lesson_url( $course_slug, $lesson_id ) ) ); ?>" class="inline-block px-6 py-3 bg-acc hover:bg-acc-deep text-white font-black text-xs rounded-xl">Đăng nhập</a>
+							<p class="text-[11px] text-ink-muted">Đã mua khóa học? Đăng nhập để mở bài.</p>
 						<?php endif; ?>
 					</div>
 
 				<?php else : ?>
 
 					<?php if ( $logged_in && ! $is_enrolled && ! empty( $course['can_enroll'] ) ) : ?>
-						<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 bg-cyan-500/10 border border-cyan-500/30 rounded-2xl text-xs text-cyan-100">
+						<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 bg-acc-soft border border-acc-line rounded-2xl text-xs text-acc">
 							<span>Ghi danh khóa học để lưu tiến độ từng bài và nhận chứng chỉ khi học xong.</span>
 							<?php wp_nonce_field( 'cvc_course_enroll' ); ?>
 							<input type="hidden" name="action" value="cvc_course_enroll">
 							<input type="hidden" name="course_id" value="<?php echo esc_attr( (string) (int) ( $course['id'] ?? 0 ) ); ?>">
 							<input type="hidden" name="course_slug" value="<?php echo esc_attr( $course_slug ); ?>">
 							<input type="hidden" name="lesson_id" value="<?php echo esc_attr( (string) $lesson_id ); ?>">
-							<button type="submit" class="px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-navy-950 font-black rounded-xl shrink-0">Ghi danh</button>
+							<button type="submit" class="px-4 py-2 bg-acc hover:bg-acc-deep text-white font-black rounded-xl shrink-0">Ghi danh</button>
 						</form>
 					<?php elseif ( ! $logged_in ) : ?>
-						<p class="p-4 bg-slate-800/60 border border-slate-700 rounded-2xl text-xs text-slate-300">
-							Bạn đang học thử. <a class="text-cyan-300 font-bold" href="<?php echo esc_url( cvc_login_url( cvc_course_lesson_url( $course_slug, $lesson_id ) ) ); ?>">Đăng nhập</a> để lưu tiến độ.
+						<p class="dz-card text-xs text-ink-2">
+							Bạn đang học thử. <a class="text-acc font-bold" href="<?php echo esc_url( cvc_login_url( cvc_course_lesson_url( $course_slug, $lesson_id ) ) ); ?>">Đăng nhập</a> để lưu tiến độ.
 						</p>
 					<?php endif; ?>
 
-					<article class="bg-[#0A192F] border border-slate-800 rounded-3xl p-4 sm:p-5 space-y-4 shadow-xl">
+					<article class="dz-card space-y-4">
 						<?php if ( '' !== $video_embed ) : ?>
-							<div class="aspect-video bg-slate-950 rounded-2xl border border-slate-800 overflow-hidden max-w-full">
+							<div class="aspect-video bg-white rounded-2xl border border-slate-300 overflow-hidden max-w-full">
 								<iframe src="<?php echo esc_url( $video_embed ); ?>" title="<?php echo esc_attr( 'Video: ' . $lesson['title'] ); ?>" class="w-full h-full" loading="lazy" allow="accelerometer; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
 							</div>
 						<?php elseif ( '' !== $video_url ) : ?>
-							<a href="<?php echo esc_url( $video_url ); ?>" target="_blank" rel="noopener" class="flex items-center gap-3 p-4 bg-slate-950 rounded-2xl border border-slate-800 text-cyan-300 font-bold text-xs">
-								<i class="fa-solid fa-circle-play text-2xl text-amber-400" aria-hidden="true"></i> Mở video bài giảng
+							<a href="<?php echo esc_url( $video_url ); ?>" target="_blank" rel="noopener" class="dz-card flex items-center gap-3 text-acc font-bold text-xs">
+								<i class="fa-solid fa-circle-play text-2xl text-acc" aria-hidden="true"></i> Mở video bài giảng
 							</a>
 						<?php endif; ?>
 
 						<?php if ( ! empty( $lesson['short_description'] ) ) : ?>
-							<p class="text-sm text-slate-200 font-semibold"><?php echo esc_html( (string) $lesson['short_description'] ); ?></p>
+							<p class="text-sm text-ink font-semibold"><?php echo esc_html( (string) $lesson['short_description'] ); ?></p>
 						<?php endif; ?>
 
 						<?php if ( ! empty( $lesson['content'] ) ) : ?>
-							<div class="cvc-prose text-xs sm:text-sm text-slate-300 leading-relaxed space-y-3">
+							<div class="cvc-prose text-xs sm:text-sm text-ink-2 leading-relaxed space-y-3">
 								<?php echo wp_kses_post( wpautop( (string) $lesson['content'] ) ); ?>
 							</div>
 						<?php elseif ( '' === $video_url && empty( $lesson['file_url'] ) ) : ?>
@@ -271,11 +271,11 @@ get_header();
 						<?php endif; ?>
 
 						<?php if ( ! empty( $lesson['file_url'] ) ) : ?>
-							<div class="p-4 bg-slate-900 rounded-2xl border border-slate-800 flex items-center justify-between gap-3 text-xs">
-								<span class="flex items-center gap-3 text-white font-bold">
-									<i class="fa-solid fa-paperclip text-cyan-400" aria-hidden="true"></i> Tài liệu đính kèm bài học
+							<div class="dz-card flex items-center justify-between gap-3 text-xs">
+								<span class="flex items-center gap-3 text-ink font-bold">
+									<i class="fa-solid fa-paperclip text-acc" aria-hidden="true"></i> Tài liệu đính kèm bài học
 								</span>
-								<a href="<?php echo esc_url( (string) $lesson['file_url'] ); ?>" target="_blank" rel="noopener" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-navy-950 font-black text-xs rounded-xl shadow flex items-center gap-1">
+								<a href="<?php echo esc_url( (string) $lesson['file_url'] ); ?>" target="_blank" rel="noopener" class="px-4 py-2 bg-acc hover:bg-acc-deep text-white font-black text-xs rounded-xl flex items-center gap-1">
 									<i class="fa-solid fa-download" aria-hidden="true"></i> Tải về
 								</a>
 							</div>
@@ -283,8 +283,8 @@ get_header();
 
 						<?php foreach ( (array) ( $lesson['children'] ?? array() ) as $child ) : ?>
 							<?php if ( ! empty( $child['id'] ) ) : ?>
-								<a href="<?php echo esc_url( cvc_course_lesson_url( $course_slug, (int) $child['id'] ) ); ?>" class="block p-3 bg-slate-900 hover:bg-slate-800 rounded-xl border border-slate-800 text-xs text-slate-200">
-									<i class="fa-solid fa-angle-right text-amber-400" aria-hidden="true"></i> <?php echo esc_html( (string) ( $child['title'] ?? '' ) ); ?>
+								<a href="<?php echo esc_url( cvc_course_lesson_url( $course_slug, (int) $child['id'] ) ); ?>" class="block p-3 bg-white hover:bg-acc-soft rounded-xl border border-slate-300 text-xs text-ink">
+									<i class="fa-solid fa-angle-right text-acc" aria-hidden="true"></i> <?php echo esc_html( (string) ( $child['title'] ?? '' ) ); ?>
 								</a>
 							<?php endif; ?>
 						<?php endforeach; ?>
@@ -296,9 +296,9 @@ get_header();
 			<aside class="lg:col-span-3 space-y-4 order-3">
 
 				<?php if ( $can_access && $is_enrolled ) : ?>
-					<div class="bg-[#0A192F] border border-emerald-500/30 p-4 rounded-2xl space-y-2 shadow-xl text-xs">
+					<div class="dz-card space-y-2 text-xs">
 						<?php if ( 'completed' === $progress_status ) : ?>
-							<p class="text-emerald-400 font-black flex items-center gap-2"><i class="fa-solid fa-circle-check" aria-hidden="true"></i> Bạn đã học xong bài này</p>
+							<p class="text-emerald-800 font-black flex items-center gap-2"><i class="fa-solid fa-circle-check" aria-hidden="true"></i> Bạn đã học xong bài này</p>
 						<?php else : ?>
 							<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 								<?php wp_nonce_field( 'cvc_lesson_progress' ); ?>
@@ -307,7 +307,7 @@ get_header();
 								<input type="hidden" name="lesson_id" value="<?php echo esc_attr( (string) $lesson_id ); ?>">
 								<input type="hidden" name="course_slug" value="<?php echo esc_attr( $course_slug ); ?>">
 								<input type="hidden" name="next_lesson_id" value="<?php echo esc_attr( (string) (int) ( $next_lesson['id'] ?? 0 ) ); ?>">
-								<button type="submit" class="w-full py-2.5 bg-emerald-500 hover:bg-emerald-400 text-navy-950 font-black rounded-xl shadow">
+								<button type="submit" class="w-full py-2.5 bg-acc hover:bg-acc-deep text-white font-black rounded-xl">
 									<?php echo $next_lesson ? 'Hoàn thành &amp; học bài tiếp' : 'Đánh dấu hoàn thành'; ?>
 								</button>
 							</form>
@@ -315,19 +315,19 @@ get_header();
 					</div>
 				<?php endif; ?>
 
-				<nav class="bg-[#0A192F] border border-slate-800 p-4 rounded-2xl space-y-2 shadow-xl text-xs" aria-label="Chuyển bài">
-					<h2 class="font-extrabold text-[11px] text-cyan-400 uppercase tracking-wider border-b border-slate-800 pb-2">Chuyển bài</h2>
+				<nav class="dz-card space-y-2 text-xs" aria-label="Chuyển bài">
+					<h2 class="dz-sideh2">Chuyển bài</h2>
 					<?php if ( $prev_lesson ) : ?>
-						<a href="<?php echo esc_url( cvc_course_lesson_url( $course_slug, (int) $prev_lesson['id'] ) ); ?>" class="block p-2.5 bg-slate-900 hover:bg-slate-800 rounded-xl border border-slate-800 text-slate-300 font-bold">
+						<a href="<?php echo esc_url( cvc_course_lesson_url( $course_slug, (int) $prev_lesson['id'] ) ); ?>" class="block p-2.5 bg-white hover:bg-acc-soft rounded-xl border border-slate-300 text-ink-2 font-bold">
 							&laquo; Bài trước: <?php echo esc_html( wp_trim_words( (string) $prev_lesson['title'], 6 ) ); ?>
 						</a>
 					<?php endif; ?>
 					<?php if ( $next_lesson ) : ?>
-						<a href="<?php echo esc_url( cvc_course_lesson_url( $course_slug, (int) $next_lesson['id'] ) ); ?>" class="block p-2.5 bg-slate-900 hover:bg-slate-800 rounded-xl border border-slate-800 text-slate-300 font-bold">
+						<a href="<?php echo esc_url( cvc_course_lesson_url( $course_slug, (int) $next_lesson['id'] ) ); ?>" class="block p-2.5 bg-white hover:bg-acc-soft rounded-xl border border-slate-300 text-ink-2 font-bold">
 							Bài tiếp: <?php echo esc_html( wp_trim_words( (string) $next_lesson['title'], 6 ) ); ?> &raquo;
 						</a>
 					<?php endif; ?>
-					<a href="<?php echo esc_url( cvc_course_url( $course_slug ) ); ?>" class="block p-2.5 text-cyan-300 font-bold">&larr; Tổng quan khóa học</a>
+					<a href="<?php echo esc_url( cvc_course_url( $course_slug ) ); ?>" class="block p-2.5 text-acc font-bold">&larr; Tổng quan khóa học</a>
 				</nav>
 
 			</aside>

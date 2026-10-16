@@ -21,10 +21,10 @@ if ( ! cvc_admin_is_staff() ) {
 	cvc_seo_set_title( 'Không có quyền truy cập' );
 	get_header();
 	?>
-	<main id="main" class="cvc-page bg-slate-900 text-slate-100 min-h-screen py-12">
+	<main id="main" class="dz-main">
 		<div class="max-w-3xl mx-auto px-4 space-y-4">
 			<?php cvc_render_notfound_state( 'Tài khoản của bạn không có quyền vào khu quản trị.' ); ?>
-			<p><a class="text-cyan-300 font-bold" href="<?php echo esc_url( cvc_account_url() ); ?>">&larr; Về trang tài khoản</a></p>
+			<p><a class="text-acc font-bold" href="<?php echo esc_url( cvc_account_url() ); ?>">&larr; Về trang tài khoản</a></p>
 		</div>
 	</main>
 	<?php
@@ -84,20 +84,20 @@ $cvc_admin_user = cvc_current_user();
 get_header();
 ?>
 
-<main id="main" class="min-h-screen bg-slate-900 text-slate-100 py-6">
-<div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+<main id="main" class="dz-main">
+<div class="dz-wrap">
 <div class="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-6 items-start">
 
 	<aside class="lg:sticky lg:top-24 space-y-3">
-		<details class="lg:open bg-[#0A192F] border border-slate-800 rounded-2xl p-4" open>
-			<summary class="cursor-pointer list-none flex items-center justify-between text-xs font-black text-amber-400 uppercase tracking-wider">
+		<details class="dz-card lg:open" open>
+			<summary class="cursor-pointer list-none flex items-center justify-between text-xs font-black text-acc uppercase tracking-wider">
 				<span><i class="fa-solid fa-gauge-high mr-1.5" aria-hidden="true"></i> Khu quản trị</span>
-				<span class="lg:hidden text-slate-400" aria-hidden="true">▾</span>
+				<span class="lg:hidden text-ink-muted" aria-hidden="true">▾</span>
 			</summary>
 			<nav class="mt-3 space-y-4 text-sm" aria-label="Menu quản trị">
-				<a href="<?php echo esc_url( cvc_admin_url() ); ?>" class="flex items-center gap-2 px-2.5 py-2 rounded-lg <?php echo 'dashboard' === $view ? 'bg-cyan-500/15 text-cyan-200 font-bold' : 'text-slate-300 hover:bg-slate-800'; ?>"><i class="fa-solid fa-chart-pie w-4" aria-hidden="true"></i> Tổng quan</a>
+				<a href="<?php echo esc_url( cvc_admin_url() ); ?>" class="flex items-center gap-2 px-2.5 py-2 rounded-lg <?php echo 'dashboard' === $view ? 'bg-acc-soft text-acc font-bold' : 'text-ink-2 hover:bg-acc-soft'; ?>"><i class="fa-solid fa-chart-pie w-4" aria-hidden="true"></i> Tổng quan</a>
 				<?php if ( cvc_admin_can( 'recruitment.view' ) ) : ?>
-					<a href="<?php echo esc_url( cvc_admin_url( 'thu-thap' ) ); ?>" class="flex items-center gap-2 px-2.5 py-2 rounded-lg <?php echo 'ingestion' === $view ? 'bg-cyan-500/15 text-cyan-200 font-bold' : 'text-slate-300 hover:bg-slate-800'; ?>"><i class="fa-solid fa-robot w-4" aria-hidden="true"></i> Thu thập tin</a>
+					<a href="<?php echo esc_url( cvc_admin_url( 'thu-thap' ) ); ?>" class="flex items-center gap-2 px-2.5 py-2 rounded-lg <?php echo 'ingestion' === $view ? 'bg-acc-soft text-acc font-bold' : 'text-ink-2 hover:bg-acc-soft'; ?>"><i class="fa-solid fa-robot w-4" aria-hidden="true"></i> Thu thập tin</a>
 				<?php endif; ?>
 				<?php foreach ( cvc_admin_menu_groups() as $group_label => $keys ) : ?>
 					<?php
@@ -110,25 +110,25 @@ get_header();
 					}
 					?>
 					<div>
-						<p class="px-2.5 text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1"><?php echo esc_html( $group_label ); ?></p>
+						<p class="px-2.5 text-[10px] font-black uppercase tracking-wider text-ink-muted mb-1"><?php echo esc_html( $group_label ); ?></p>
 						<?php foreach ( $visible as $k ) : ?>
 							<?php $r = cvc_admin_resource( $k ); ?>
-							<a href="<?php echo esc_url( cvc_admin_url( $k ) ); ?>" class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg <?php echo $k === $resource_key ? 'bg-cyan-500/15 text-cyan-200 font-bold' : 'text-slate-300 hover:bg-slate-800'; ?>" <?php echo $k === $resource_key ? 'aria-current="page"' : ''; ?>>
-								<i class="fa-solid <?php echo esc_attr( $r['icon'] ); ?> w-4 text-slate-400" aria-hidden="true"></i> <?php echo esc_html( $r['label'] ); ?>
+							<a href="<?php echo esc_url( cvc_admin_url( $k ) ); ?>" class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg <?php echo $k === $resource_key ? 'bg-acc-soft text-acc font-bold' : 'text-ink-2 hover:bg-acc-soft'; ?>" <?php echo $k === $resource_key ? 'aria-current="page"' : ''; ?>>
+								<i class="fa-solid <?php echo esc_attr( $r['icon'] ); ?> w-4 text-ink-muted" aria-hidden="true"></i> <?php echo esc_html( $r['label'] ); ?>
 							</a>
 						<?php endforeach; ?>
 					</div>
 				<?php endforeach; ?>
 				<?php if ( cvc_admin_can( 'settings.view' ) ) : ?>
 					<div>
-						<p class="px-2.5 text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1">Cấu hình</p>
-						<a href="<?php echo esc_url( cvc_admin_url( 'thanh-toan' ) ); ?>" class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg <?php echo 'payment' === $view ? 'bg-cyan-500/15 text-cyan-200 font-bold' : 'text-slate-300 hover:bg-slate-800'; ?>"><i class="fa-solid fa-credit-card w-4 text-slate-400" aria-hidden="true"></i> Thanh toán</a>
-						<a href="<?php echo esc_url( cvc_admin_ai_settings_url() ); ?>" class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-slate-300 hover:bg-slate-800"><i class="fa-solid fa-robot w-4 text-slate-400" aria-hidden="true"></i> AI giải thích</a>
+						<p class="px-2.5 text-[10px] font-black uppercase tracking-wider text-ink-muted mb-1">Cấu hình</p>
+						<a href="<?php echo esc_url( cvc_admin_url( 'thanh-toan' ) ); ?>" class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg <?php echo 'payment' === $view ? 'bg-acc-soft text-acc font-bold' : 'text-ink-2 hover:bg-acc-soft'; ?>"><i class="fa-solid fa-credit-card w-4 text-ink-muted" aria-hidden="true"></i> Thanh toán</a>
+						<a href="<?php echo esc_url( cvc_admin_ai_settings_url() ); ?>" class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-ink-2 hover:bg-acc-soft"><i class="fa-solid fa-robot w-4 text-ink-muted" aria-hidden="true"></i> AI giải thích</a>
 					</div>
 				<?php endif; ?>
 			</nav>
 		</details>
-		<p class="text-[11px] text-slate-500 px-1">Đăng nhập: <?php echo esc_html( (string) ( $cvc_admin_user['name'] ?? '' ) ); ?> · <?php echo esc_html( implode( ', ', (array) ( $cvc_admin_user['roles'] ?? array() ) ) ); ?></p>
+		<p class="text-[11px] text-ink-muted px-1">Đăng nhập: <?php echo esc_html( (string) ( $cvc_admin_user['name'] ?? '' ) ); ?> · <?php echo esc_html( implode( ', ', (array) ( $cvc_admin_user['roles'] ?? array() ) ) ); ?></p>
 	</aside>
 
 	<div class="min-w-0 space-y-5">
@@ -154,8 +154,8 @@ get_header();
 			);
 			?>
 			<header>
-				<h1 class="text-2xl font-black text-white">Tổng quan</h1>
-				<p class="text-sm text-slate-400">Số liệu trực tiếp từ hệ thống.</p>
+				<h1 class="text-2xl font-black text-ink">Tổng quan</h1>
+				<p class="text-sm text-ink-muted">Số liệu trực tiếp từ hệ thống.</p>
 			</header>
 			<?php if ( ! $dash['ok'] ) : ?>
 				<?php cvc_render_error_state( cvc_admin_error_message( $dash ) ); ?>
@@ -163,13 +163,13 @@ get_header();
 				<dl class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
 					<?php foreach ( $tiles as $tile ) : ?>
 						<?php $tile_res = cvc_admin_resource( $tile[2] ); ?>
-						<div class="bg-[#0A192F] border border-slate-800 rounded-2xl p-4">
-							<dt class="text-[11px] font-bold uppercase tracking-wider text-slate-400"><?php echo esc_html( $tile[0] ); ?></dt>
-							<dd class="text-2xl font-black text-white tabular-nums mt-1"><?php echo esc_html( null === $tile[1] ? '—' : ( is_numeric( $tile[1] ) ? number_format_i18n( (float) $tile[1] ) : (string) $tile[1] ) ); ?></dd>
-							<dd class="text-xs text-slate-400 mt-0.5 flex justify-between gap-2">
+						<div class="dz-card">
+							<dt class="text-[11px] font-bold uppercase tracking-wider text-ink-muted"><?php echo esc_html( $tile[0] ); ?></dt>
+							<dd class="text-2xl font-black text-ink tabular-nums mt-1"><?php echo esc_html( null === $tile[1] ? '—' : ( is_numeric( $tile[1] ) ? number_format_i18n( (float) $tile[1] ) : (string) $tile[1] ) ); ?></dd>
+							<dd class="text-xs text-ink-muted mt-0.5 flex justify-between gap-2">
 								<span><?php echo esc_html( $tile[3] ); ?></span>
 								<?php if ( $tile_res && cvc_admin_can( $tile_res['module'] . '.view' ) ) : ?>
-									<a class="text-cyan-300 font-bold shrink-0" href="<?php echo esc_url( cvc_admin_url( $tile[2] ) ); ?>">Xem</a>
+									<a class="text-acc font-bold shrink-0" href="<?php echo esc_url( cvc_admin_url( $tile[2] ) ); ?>">Xem</a>
 								<?php endif; ?>
 							</dd>
 						</div>
@@ -192,28 +192,28 @@ get_header();
 				}
 				?>
 				<div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
-					<section class="bg-[#0A192F] border border-slate-800 rounded-2xl p-5" aria-labelledby="cvc-admin-todo">
-						<h2 id="cvc-admin-todo" class="text-sm font-black text-white mb-3">Cần xử lý</h2>
+					<section class="dz-card" aria-labelledby="cvc-admin-todo">
+						<h2 id="cvc-admin-todo" class="text-sm font-black text-ink mb-3">Cần xử lý</h2>
 						<?php if ( empty( $todo ) ) : ?>
-							<p class="text-sm text-slate-400">Không có việc tồn đọng.</p>
+							<p class="text-sm text-ink-muted">Không có việc tồn đọng.</p>
 						<?php else : ?>
 							<ul class="space-y-2 text-sm">
 								<?php foreach ( $todo as $t ) : ?>
-									<li><a class="text-amber-300 hover:underline" href="<?php echo esc_url( $t[1] ); ?>"><?php echo esc_html( $t[0] ); ?></a></li>
+									<li><a class="text-acc hover:underline" href="<?php echo esc_url( $t[1] ); ?>"><?php echo esc_html( $t[0] ); ?></a></li>
 								<?php endforeach; ?>
 							</ul>
 						<?php endif; ?>
 					</section>
-					<section class="bg-[#0A192F] border border-slate-800 rounded-2xl p-5" aria-labelledby="cvc-admin-audit">
-						<h2 id="cvc-admin-audit" class="text-sm font-black text-white mb-3">Thao tác gần đây</h2>
+					<section class="dz-card" aria-labelledby="cvc-admin-audit">
+						<h2 id="cvc-admin-audit" class="text-sm font-black text-ink mb-3">Thao tác gần đây</h2>
 						<?php if ( empty( $d['recent_audit'] ) ) : ?>
-							<p class="text-sm text-slate-400">Chưa có thao tác nào được ghi nhận.</p>
+							<p class="text-sm text-ink-muted">Chưa có thao tác nào được ghi nhận.</p>
 						<?php else : ?>
-							<ul class="space-y-1.5 text-xs text-slate-300">
+							<ul class="space-y-1.5 text-xs text-ink-2">
 								<?php foreach ( (array) $d['recent_audit'] as $log ) : ?>
 									<li class="flex justify-between gap-3">
-										<span><strong class="text-slate-100"><?php echo esc_html( (string) ( $log['user_name'] ?? 'Hệ thống' ) ); ?></strong> · <?php echo esc_html( (string) $log['action'] . ' ' . (string) $log['entity_type'] . ' #' . (string) $log['entity_id'] ); ?></span>
-										<span class="text-slate-500 shrink-0"><?php echo esc_html( cvc_admin_format( $log['created_at'] ?? null, 'datetime' ) ); ?></span>
+										<span><strong class="text-ink"><?php echo esc_html( (string) ( $log['user_name'] ?? 'Hệ thống' ) ); ?></strong> · <?php echo esc_html( (string) $log['action'] . ' ' . (string) $log['entity_type'] . ' #' . (string) $log['entity_id'] ); ?></span>
+										<span class="text-ink-muted shrink-0"><?php echo esc_html( cvc_admin_format( $log['created_at'] ?? null, 'datetime' ) ); ?></span>
 									</li>
 								<?php endforeach; ?>
 							</ul>
@@ -272,26 +272,26 @@ get_header();
 				);
 				?>
 				<header>
-					<h1 class="text-2xl font-black text-white">Cấu hình thanh toán</h1>
-					<p class="text-sm text-slate-400">Khóa bí mật được mã hóa khi lưu và không hiển thị lại. Để trống ô bí mật nếu không muốn đổi.</p>
+					<h1 class="text-2xl font-black text-ink">Cấu hình thanh toán</h1>
+					<p class="text-sm text-ink-muted">Khóa bí mật được mã hóa khi lưu và không hiển thị lại. Để trống ô bí mật nếu không muốn đổi.</p>
 				</header>
 				<?php if ( ! $settings['ok'] ) : ?>
 					<?php cvc_render_error_state( cvc_admin_error_message( $settings ) ); ?>
 				<?php endif; ?>
 				<div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
 					<?php foreach ( $schema as $group => $conf ) : ?>
-						<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="bg-[#0A192F] border border-slate-800 rounded-2xl p-5 space-y-4">
+						<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="dz-card space-y-4">
 							<?php wp_nonce_field( 'cvc_admin_payment_settings' ); ?>
 							<input type="hidden" name="action" value="cvc_admin_payment_settings">
 							<input type="hidden" name="group" value="<?php echo esc_attr( $group ); ?>">
-							<h2 class="text-base font-black text-white"><?php echo esc_html( $conf['title'] ); ?></h2>
+							<h2 class="text-base font-black text-ink"><?php echo esc_html( $conf['title'] ); ?></h2>
 							<?php foreach ( $conf['fields'] as $key => $f ) : ?>
 								<?php
 								$current = $groups[ $group ][ $key ] ?? array();
 								$fid     = str_replace( '.', '__', $key );
 								?>
 								<div class="space-y-1.5">
-									<label for="<?php echo esc_attr( $fid ); ?>" class="block text-xs font-bold text-slate-300"><?php echo esc_html( $f[0] ); ?></label>
+									<label for="<?php echo esc_attr( $fid ); ?>" class="block text-xs font-bold text-ink-2"><?php echo esc_html( $f[0] ); ?></label>
 									<?php if ( 'select' === $f[1] ) : ?>
 										<select id="<?php echo esc_attr( $fid ); ?>" name="<?php echo esc_attr( $fid ); ?>" class="<?php echo esc_attr( cvc_admin_input_class() ); ?>">
 											<?php foreach ( $f[2] as $ov => $ol ) : ?>
@@ -306,7 +306,7 @@ get_header();
 								</div>
 							<?php endforeach; ?>
 							<?php if ( cvc_admin_can( 'settings.update' ) ) : ?>
-								<button type="submit" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-navy-950 font-black text-sm rounded-xl">Lưu <?php echo esc_html( $conf['title'] ); ?></button>
+								<button type="submit" class="px-4 py-2 bg-acc hover:bg-acc-deep text-white font-black text-sm rounded-xl">Lưu <?php echo esc_html( $conf['title'] ); ?></button>
 							<?php endif; ?>
 						</form>
 					<?php endforeach; ?>
@@ -344,17 +344,17 @@ get_header();
 			?>
 			<header class="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
 				<div>
-					<h1 class="text-2xl font-black text-white"><?php echo esc_html( $res['label'] ); ?></h1>
-					<p class="text-sm text-slate-400"><?php echo esc_html( $list['ok'] ? number_format_i18n( $total ) . ' bản ghi' . ( empty( $base_args ) ? '' : ' khớp bộ lọc' ) : '' ); ?></p>
+					<h1 class="text-2xl font-black text-ink"><?php echo esc_html( $res['label'] ); ?></h1>
+					<p class="text-sm text-ink-muted"><?php echo esc_html( $list['ok'] ? number_format_i18n( $total ) . ' bản ghi' . ( empty( $base_args ) ? '' : ' khớp bộ lọc' ) : '' ); ?></p>
 				</div>
 				<?php if ( cvc_admin_can_resource( $res, 'create' ) ) : ?>
-					<a href="<?php echo esc_url( cvc_admin_url( $resource_key, 'new', array_intersect_key( $current_filters, array_flip( array( 'recruitment_id', 'exam_subject_id', 'topic_id', 'legal_document_id', 'course_id' ) ) ) ) ); ?>" class="inline-flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-400 text-navy-950 font-black text-sm rounded-xl self-start">
+					<a href="<?php echo esc_url( cvc_admin_url( $resource_key, 'new', array_intersect_key( $current_filters, array_flip( array( 'recruitment_id', 'exam_subject_id', 'topic_id', 'legal_document_id', 'course_id' ) ) ) ) ); ?>" class="inline-flex items-center gap-2 px-4 py-2 bg-acc hover:bg-acc-deep text-white font-black text-sm rounded-xl self-start">
 						<i class="fa-solid fa-plus" aria-hidden="true"></i> Thêm <?php echo esc_html( $res['singular'] ); ?>
 					</a>
 				<?php endif; ?>
 			</header>
 
-			<form method="get" action="<?php echo esc_url( cvc_admin_url( $resource_key ) ); ?>" class="flex flex-wrap items-end gap-2 bg-[#0A192F] border border-slate-800 rounded-2xl p-3" role="search">
+			<form method="get" action="<?php echo esc_url( cvc_admin_url( $resource_key ) ); ?>" class="flex flex-wrap items-end gap-2 bg-white border border-slate-300 rounded-2xl p-3" role="search">
 				<div class="flex-1 min-w-[200px]">
 					<label for="cvc-admin-q" class="sr-only">Tìm kiếm</label>
 					<input type="search" id="cvc-admin-q" name="q" value="<?php echo esc_attr( $q ); ?>" placeholder="Tìm theo tên, mã..." class="<?php echo esc_attr( cvc_admin_input_class() ); ?>">
@@ -376,14 +376,14 @@ get_header();
 						<input type="hidden" name="<?php echo esc_attr( $fk ); ?>" value="<?php echo esc_attr( $current_filters[ $fk ] ); ?>">
 					<?php endif; ?>
 				<?php endforeach; ?>
-				<button type="submit" class="px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-navy-950 font-black text-sm rounded-xl">Lọc</button>
+				<button type="submit" class="px-4 py-2 bg-acc hover:bg-acc-deep text-white font-black text-sm rounded-xl">Lọc</button>
 				<?php if ( ! empty( $base_args ) ) : ?>
-					<a href="<?php echo esc_url( cvc_admin_url( $resource_key ) ); ?>" class="px-3 py-2 text-sm text-cyan-300 font-bold">Xóa lọc</a>
+					<a href="<?php echo esc_url( cvc_admin_url( $resource_key ) ); ?>" class="px-3 py-2 text-sm text-acc font-bold">Xóa lọc</a>
 				<?php endif; ?>
 			</form>
 
 			<?php if ( ! empty( $res['note'] ) ) : ?>
-				<p class="text-xs text-slate-400"><?php echo esc_html( $res['note'] ); ?></p>
+				<p class="text-xs text-ink-muted"><?php echo esc_html( $res['note'] ); ?></p>
 			<?php endif; ?>
 
 			<?php if ( ! $list['ok'] ) : ?>
@@ -391,10 +391,10 @@ get_header();
 			<?php elseif ( empty( $rows ) ) : ?>
 				<?php cvc_render_empty_state( 'Chưa có bản ghi nào' . ( empty( $base_args ) ? '.' : ' khớp bộ lọc.' ) ); ?>
 			<?php else : ?>
-				<div class="overflow-x-auto bg-[#0A192F] border border-slate-800 rounded-2xl">
+				<div class="overflow-x-auto bg-white border border-slate-300 rounded-2xl">
 					<table class="w-full text-sm">
 						<thead>
-							<tr class="text-left text-[11px] uppercase tracking-wider text-slate-400 border-b border-slate-800">
+							<tr class="text-left text-[11px] uppercase tracking-wider text-ink-muted border-b border-slate-300">
 								<?php foreach ( $res['columns'] as $col ) : ?>
 									<th scope="col" class="px-4 py-3 font-bold whitespace-nowrap"><?php echo esc_html( $col['label'] ); ?></th>
 								<?php endforeach; ?>
@@ -404,7 +404,7 @@ get_header();
 						<tbody>
 							<?php foreach ( $rows as $row ) : ?>
 								<?php $edit_url = cvc_admin_url( $resource_key, (int) $row['id'] ); ?>
-								<tr class="border-b border-slate-800/70 hover:bg-slate-800/40 align-top">
+								<tr class="border-b border-slate-300 hover:bg-acc-soft align-top">
 									<?php foreach ( $res['columns'] as $col ) : ?>
 										<?php
 										$raw   = cvc_admin_get( $row, $col['key'] );
@@ -418,14 +418,14 @@ get_header();
 											<?php if ( 'status' === $fmt && null !== $raw ) : ?>
 												<span class="inline-block text-[11px] font-bold px-2 py-0.5 rounded-full border <?php echo esc_attr( cvc_admin_status_class( $raw ) ); ?>"><?php echo esc_html( $text ); ?></span>
 											<?php elseif ( ! empty( $col['link'] ) ) : ?>
-												<a href="<?php echo esc_url( $edit_url ); ?>" class="font-bold text-white hover:text-cyan-300"><?php echo esc_html( $text ); ?></a>
+												<a href="<?php echo esc_url( $edit_url ); ?>" class="font-bold text-ink hover:text-acc-2"><?php echo esc_html( $text ); ?></a>
 											<?php else : ?>
-												<span class="text-slate-300"><?php echo esc_html( $text ); ?></span>
+												<span class="text-ink-2"><?php echo esc_html( $text ); ?></span>
 											<?php endif; ?>
 										</td>
 									<?php endforeach; ?>
 									<td class="px-4 py-2.5 text-right whitespace-nowrap">
-										<a href="<?php echo esc_url( $edit_url ); ?>" class="text-xs font-bold text-cyan-300"><?php echo ( empty( $res['read_only'] ) && cvc_admin_can_resource( $res, 'update' ) ) ? 'Sửa' : 'Xem'; ?></a>
+										<a href="<?php echo esc_url( $edit_url ); ?>" class="text-xs font-bold text-acc"><?php echo ( empty( $res['read_only'] ) && cvc_admin_can_resource( $res, 'update' ) ) ? 'Sửa' : 'Xem'; ?></a>
 									</td>
 								</tr>
 							<?php endforeach; ?>
@@ -434,13 +434,13 @@ get_header();
 				</div>
 				<?php if ( $last_page > 1 ) : ?>
 					<nav class="flex items-center justify-between text-sm" aria-label="Phân trang">
-						<span class="text-slate-400">Trang <?php echo esc_html( $paged . '/' . $last_page ); ?></span>
+						<span class="text-ink-muted">Trang <?php echo esc_html( $paged . '/' . $last_page ); ?></span>
 						<span class="flex gap-2">
 							<?php if ( $paged > 1 ) : ?>
-								<a class="px-3 py-1.5 rounded-lg border border-slate-700 text-slate-200" href="<?php echo esc_url( cvc_admin_url( $resource_key, null, array_merge( $base_args, array( 'trang' => $paged - 1 ) ) ) ); ?>">&laquo; Trước</a>
+								<a class="px-3 py-1.5 rounded-lg border border-slate-300 text-ink" href="<?php echo esc_url( cvc_admin_url( $resource_key, null, array_merge( $base_args, array( 'trang' => $paged - 1 ) ) ) ); ?>">&laquo; Trước</a>
 							<?php endif; ?>
 							<?php if ( $paged < $last_page ) : ?>
-								<a class="px-3 py-1.5 rounded-lg border border-slate-700 text-slate-200" href="<?php echo esc_url( cvc_admin_url( $resource_key, null, array_merge( $base_args, array( 'trang' => $paged + 1 ) ) ) ); ?>">Sau &raquo;</a>
+								<a class="px-3 py-1.5 rounded-lg border border-slate-300 text-ink" href="<?php echo esc_url( cvc_admin_url( $resource_key, null, array_merge( $base_args, array( 'trang' => $paged + 1 ) ) ) ); ?>">Sau &raquo;</a>
 							<?php endif; ?>
 						</span>
 					</nav>
@@ -462,9 +462,9 @@ get_header();
 			$status    = (string) ( $item['status'] ?? '' );
 			$public    = $is_create ? '' : cvc_admin_public_url( $res, $item );
 			?>
-			<nav class="text-xs text-slate-400" aria-label="Đường dẫn">
-				<a class="hover:text-cyan-300" href="<?php echo esc_url( cvc_admin_url() ); ?>">Quản trị</a> /
-				<a class="hover:text-cyan-300" href="<?php echo esc_url( cvc_admin_url( $resource_key ) ); ?>"><?php echo esc_html( $res['label'] ); ?></a>
+			<nav class="text-xs text-ink-muted" aria-label="Đường dẫn">
+				<a class="hover:text-acc-2" href="<?php echo esc_url( cvc_admin_url() ); ?>">Quản trị</a> /
+				<a class="hover:text-acc-2" href="<?php echo esc_url( cvc_admin_url( $resource_key ) ); ?>"><?php echo esc_html( $res['label'] ); ?></a>
 			</nav>
 
 			<?php if ( '' !== $load_err ) : ?>
@@ -472,9 +472,9 @@ get_header();
 			<?php else : ?>
 				<header class="flex flex-col md:flex-row md:items-start justify-between gap-3">
 					<div class="space-y-1 min-w-0">
-						<h1 class="text-2xl font-black text-white break-words"><?php echo esc_html( $is_create ? 'Thêm ' . $res['singular'] : cvc_admin_item_title( $res, $item ) ); ?></h1>
+						<h1 class="text-2xl font-black text-ink break-words"><?php echo esc_html( $is_create ? 'Thêm ' . $res['singular'] : cvc_admin_item_title( $res, $item ) ); ?></h1>
 						<?php if ( ! $is_create ) : ?>
-							<p class="text-xs text-slate-400 flex flex-wrap items-center gap-2">
+							<p class="text-xs text-ink-muted flex flex-wrap items-center gap-2">
 								<span>ID <?php echo (int) $item['id']; ?></span>
 								<?php if ( '' !== $status ) : ?>
 									<span class="text-[11px] font-bold px-2 py-0.5 rounded-full border <?php echo esc_attr( cvc_admin_status_class( $item['status'] ) ); ?>"><?php echo esc_html( cvc_admin_format( $item['status'], 'status' ) ); ?></span>
@@ -483,7 +483,7 @@ get_header();
 									<span>Cập nhật <?php echo esc_html( cvc_admin_format( $item['updated_at'], 'datetime' ) ); ?></span>
 								<?php endif; ?>
 								<?php if ( '' !== $public ) : ?>
-									<a class="text-cyan-300 font-bold" href="<?php echo esc_url( $public ); ?>" target="_blank" rel="noopener">Xem trang công khai ↗</a>
+									<a class="text-acc font-bold" href="<?php echo esc_url( $public ); ?>" target="_blank" rel="noopener">Xem trang công khai ↗</a>
 								<?php endif; ?>
 							</p>
 						<?php endif; ?>
@@ -498,7 +498,7 @@ get_header();
 									<input type="hidden" name="resource" value="<?php echo esc_attr( $resource_key ); ?>">
 									<input type="hidden" name="id" value="<?php echo (int) $item['id']; ?>">
 									<input type="hidden" name="workflow" value="<?php echo esc_attr( $act['action'] ); ?>">
-									<button type="submit" class="px-4 py-2 rounded-xl text-sm font-black <?php echo 'publish' === $act['action'] ? 'bg-emerald-500 hover:bg-emerald-400 text-navy-950' : 'bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-600'; ?>"><?php echo esc_html( $act['label'] ); ?></button>
+									<button type="submit" class="px-4 py-2 rounded-xl text-sm font-black <?php echo 'publish' === $act['action'] ? 'bg-acc-soft hover:bg-acc-soft text-acc font-bold border-acc-line' : 'bg-white hover:bg-acc-soft text-ink border border-slate-300'; ?>"><?php echo esc_html( $act['label'] ); ?></button>
 								</form>
 							<?php endforeach; ?>
 						</div>
@@ -506,11 +506,11 @@ get_header();
 				</header>
 
 				<?php if ( ! empty( $res['note'] ) ) : ?>
-					<p class="text-xs text-slate-400"><?php echo esc_html( $res['note'] ); ?></p>
+					<p class="text-xs text-ink-muted"><?php echo esc_html( $res['note'] ); ?></p>
 				<?php endif; ?>
 
 				<?php if ( ! empty( $res['fields'] ) ) : ?>
-					<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="bg-[#0A192F] border border-slate-800 rounded-2xl p-5 space-y-5" <?php echo ! empty( $res['multipart'] ) ? 'enctype="multipart/form-data"' : ''; ?> data-cvc-admin-form>
+					<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="dz-card space-y-5" <?php echo ! empty( $res['multipart'] ) ? 'enctype="multipart/form-data"' : ''; ?> data-cvc-admin-form>
 						<?php wp_nonce_field( 'cvc_admin_save' ); ?>
 						<input type="hidden" name="action" value="cvc_admin_save">
 						<input type="hidden" name="resource" value="<?php echo esc_attr( $resource_key ); ?>">
@@ -540,12 +540,12 @@ get_header();
 							<?php endforeach; ?>
 						</fieldset>
 						<?php if ( $can_save ) : ?>
-							<div class="flex flex-wrap items-center gap-3 pt-2 border-t border-slate-800">
-								<button type="submit" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-navy-950 font-black text-sm rounded-xl"><?php echo $is_create ? 'Tạo mới' : 'Lưu thay đổi'; ?></button>
-								<a href="<?php echo esc_url( cvc_admin_url( $resource_key ) ); ?>" class="text-sm text-slate-300">Hủy</a>
+							<div class="flex flex-wrap items-center gap-3 pt-2 border-t border-slate-300">
+								<button type="submit" class="px-5 py-2.5 bg-acc hover:bg-acc-deep text-white font-black text-sm rounded-xl"><?php echo $is_create ? 'Tạo mới' : 'Lưu thay đổi'; ?></button>
+								<a href="<?php echo esc_url( cvc_admin_url( $resource_key ) ); ?>" class="text-sm text-ink-2">Hủy</a>
 							</div>
 						<?php else : ?>
-							<p class="text-xs text-slate-400">Bạn chỉ có quyền xem mục này.</p>
+							<p class="text-xs text-ink-muted">Bạn chỉ có quyền xem mục này.</p>
 						<?php endif; ?>
 					</form>
 				<?php endif; ?>
@@ -565,20 +565,20 @@ get_header();
 						$child_rows = $child_list['ok'] ? (array) ( $child_list['data']['data']['data'] ?? array() ) : array();
 						$child_tot  = $child_list['ok'] ? (int) ( $child_list['data']['data']['total'] ?? 0 ) : 0;
 						?>
-						<section class="bg-[#0A192F] border border-slate-800 rounded-2xl p-5 space-y-3" aria-label="<?php echo esc_attr( $child['label'] ); ?>">
+						<section class="dz-card space-y-3" aria-label="<?php echo esc_attr( $child['label'] ); ?>">
 							<div class="flex items-center justify-between gap-3">
-								<h2 class="text-base font-black text-white"><?php echo esc_html( $child['label'] ); ?> <span class="text-slate-400 font-bold text-sm">(<?php echo esc_html( number_format_i18n( $child_tot ) ); ?>)</span></h2>
+								<h2 class="text-base font-black text-ink"><?php echo esc_html( $child['label'] ); ?> <span class="text-ink-muted font-bold text-sm">(<?php echo esc_html( number_format_i18n( $child_tot ) ); ?>)</span></h2>
 								<?php if ( cvc_admin_can_resource( $child_res, 'create' ) ) : ?>
-									<a class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-100 text-xs font-bold rounded-lg" href="<?php echo esc_url( cvc_admin_url( $child['resource'], 'new', array( $child['fk'] => (int) $item['id'] ) ) ); ?>">+ Thêm</a>
+									<a class="px-3 py-1.5 bg-white hover:bg-acc-soft border border-slate-300 text-ink text-xs font-bold rounded-lg" href="<?php echo esc_url( cvc_admin_url( $child['resource'], 'new', array( $child['fk'] => (int) $item['id'] ) ) ); ?>">+ Thêm</a>
 								<?php endif; ?>
 							</div>
 							<?php if ( empty( $child_rows ) ) : ?>
-								<p class="text-sm text-slate-400">Chưa có.</p>
+								<p class="text-sm text-ink-muted">Chưa có.</p>
 							<?php else : ?>
-								<ul class="divide-y divide-slate-800 text-sm">
+								<ul class="divide-y divide-slate-200 text-sm">
 									<?php foreach ( $child_rows as $crow ) : ?>
 										<li class="py-2 flex items-center justify-between gap-3">
-											<a class="text-slate-100 hover:text-cyan-300 font-semibold" href="<?php echo esc_url( cvc_admin_url( $child['resource'], (int) $crow['id'] ) ); ?>"><?php echo esc_html( cvc_admin_item_title( $child_res, $crow ) ); ?></a>
+											<a class="text-ink hover:text-acc-2 font-semibold" href="<?php echo esc_url( cvc_admin_url( $child['resource'], (int) $crow['id'] ) ); ?>"><?php echo esc_html( cvc_admin_item_title( $child_res, $crow ) ); ?></a>
 											<?php if ( isset( $crow['status'] ) ) : ?>
 												<span class="text-[11px] font-bold px-2 py-0.5 rounded-full border <?php echo esc_attr( cvc_admin_status_class( $crow['status'] ) ); ?>"><?php echo esc_html( cvc_admin_format( $crow['status'], 'status' ) ); ?></span>
 											<?php endif; ?>
@@ -586,23 +586,23 @@ get_header();
 									<?php endforeach; ?>
 								</ul>
 								<?php if ( $child_tot > count( $child_rows ) ) : ?>
-									<a class="text-xs text-cyan-300 font-bold" href="<?php echo esc_url( cvc_admin_url( $child['resource'], null, array( $child['fk'] => (int) $item['id'] ) ) ); ?>">Xem tất cả</a>
+									<a class="text-xs text-acc font-bold" href="<?php echo esc_url( cvc_admin_url( $child['resource'], null, array( $child['fk'] => (int) $item['id'] ) ) ); ?>">Xem tất cả</a>
 								<?php endif; ?>
 							<?php endif; ?>
 						</section>
 					<?php endforeach; ?>
 
 					<?php if ( cvc_admin_can_resource( $res, 'delete' ) ) : ?>
-						<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="border border-rose-500/30 bg-rose-500/5 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3" data-cvc-confirm="<?php echo esc_attr( 'Xóa vĩnh viễn ' . $res['singular'] . ' này? Không thể hoàn tác.' ); ?>">
+						<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="border border-acc-line bg-acc-soft rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3" data-cvc-confirm="<?php echo esc_attr( 'Xóa vĩnh viễn ' . $res['singular'] . ' này? Không thể hoàn tác.' ); ?>">
 							<?php wp_nonce_field( 'cvc_admin_delete' ); ?>
 							<input type="hidden" name="action" value="cvc_admin_delete">
 							<input type="hidden" name="resource" value="<?php echo esc_attr( $resource_key ); ?>">
 							<input type="hidden" name="id" value="<?php echo (int) $item['id']; ?>">
 							<div>
-								<h2 class="text-sm font-black text-rose-200">Xóa <?php echo esc_html( $res['singular'] ); ?></h2>
-								<p class="text-xs text-slate-400">Xóa vĩnh viễn. Nếu chỉ muốn ẩn khỏi trang công khai, hãy chuyển sang Nháp.</p>
+								<h2 class="text-sm font-black text-red-700">Xóa <?php echo esc_html( $res['singular'] ); ?></h2>
+								<p class="text-xs text-ink-muted">Xóa vĩnh viễn. Nếu chỉ muốn ẩn khỏi trang công khai, hãy chuyển sang Nháp.</p>
 							</div>
-							<button type="submit" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white font-black text-sm rounded-xl self-start">Xóa</button>
+							<button type="submit" class="px-4 py-2 bg-acc hover:bg-acc-deep text-white font-black text-sm rounded-xl self-start">Xóa</button>
 						</form>
 					<?php endif; ?>
 				<?php endif; ?>

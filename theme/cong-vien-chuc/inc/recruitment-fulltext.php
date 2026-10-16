@@ -17,7 +17,7 @@ function cvc_notice_text( string $text ): string {
 		static function ( $m ) {
 			$url  = rtrim( $m[1], '.,;:' );
 			$tail = substr( $m[1], strlen( $url ) );
-			return '<a class="text-azure-300 underline break-all" href="' . esc_url( html_entity_decode( $url ) ) . '" target="_blank" rel="noopener nofollow">' . $url . '</a>' . $tail;
+			return '<a class="text-acc underline break-all" href="' . esc_url( html_entity_decode( $url ) ) . '" target="_blank" rel="noopener nofollow">' . $url . '</a>' . $tail;
 		},
 		$html
 	);
@@ -57,19 +57,19 @@ function cvc_render_notice_details( array $details ): void {
 	if ( ! $has ) {
 		return;
 	}
-	$h3 = 'text-sm font-extrabold text-slate-100';
+	$h3 = 'text-sm font-extrabold text-ink';
 	?>
-	<section id="chi-tiet" class="bg-navy-950 p-6 sm:p-8 rounded-3xl border border-slate-800 space-y-6 shadow-xl">
-		<div class="border-b border-slate-800 pb-3">
-			<h2 class="text-lg font-extrabold text-amber-400">Chi tiết thông báo</h2>
-			<p class="text-[11px] text-slate-500 mt-1">Chép lại theo từng mục từ thông báo của cơ quan tuyển dụng. Khi có khác biệt, căn cứ theo toàn văn thông báo bên dưới.</p>
+	<section id="chi-tiet" class="dz-panel space-y-6">
+		<div class="border-b border-slate-300 pb-3">
+			<h2 class="text-lg font-extrabold text-acc">Chi tiết thông báo</h2>
+			<p class="text-[11px] text-ink-muted mt-1">Chép lại theo từng mục từ thông báo của cơ quan tuyển dụng. Khi có khác biệt, căn cứ theo toàn văn thông báo bên dưới.</p>
 		</div>
 
 		<?php foreach ( array( 'general_conditions', 'specific_requirements', 'disqualified' ) as $k ) : ?>
 			<?php if ( ! empty( $details[ $k ] ) ) : ?>
 				<div class="space-y-2">
 					<h3 class="<?php echo esc_attr( $h3 ); ?>"><?php echo esc_html( $lists[ $k ] ); ?></h3>
-					<ul class="list-disc pl-5 space-y-1.5 text-sm text-slate-300 leading-relaxed">
+					<ul class="list-disc pl-5 space-y-1.5 text-sm text-ink-2 leading-relaxed">
 						<?php foreach ( (array) $details[ $k ] as $line ) : ?>
 							<li><?php echo cvc_notice_text( (string) $line ); // phpcs:ignore WordPress.Security.EscapeOutput ?></li>
 						<?php endforeach; ?>
@@ -83,15 +83,15 @@ function cvc_render_notice_details( array $details ): void {
 				<h3 class="<?php echo esc_attr( $h3 ); ?>">Hình thức, nội dung tuyển dụng</h3>
 				<ol class="space-y-3">
 					<?php foreach ( (array) $details['selection_rounds'] as $r ) : ?>
-						<li class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-1.5 text-sm text-slate-300">
-							<p class="font-bold text-slate-100"><?php echo esc_html( (string) ( $r['name'] ?? '' ) ); ?></p>
+						<li class="dz-card space-y-1.5 text-sm text-ink-2">
+							<p class="font-bold text-ink"><?php echo esc_html( (string) ( $r['name'] ?? '' ) ); ?></p>
 							<?php
 							foreach ( array( 'format' => 'Hình thức', 'content' => 'Nội dung', 'duration' => 'Thời gian', 'scoring' => 'Thang điểm / điều kiện đạt' ) as $f => $label ) :
 								if ( empty( $r[ $f ] ) ) {
 									continue;
 								}
 								?>
-								<p><span class="text-slate-500"><?php echo esc_html( $label ); ?>:</span> <?php echo cvc_notice_text( (string) $r[ $f ] ); // phpcs:ignore WordPress.Security.EscapeOutput ?></p>
+								<p><span class="text-ink-muted"><?php echo esc_html( $label ); ?>:</span> <?php echo cvc_notice_text( (string) $r[ $f ] ); // phpcs:ignore WordPress.Security.EscapeOutput ?></p>
 							<?php endforeach; ?>
 						</li>
 					<?php endforeach; ?>
@@ -102,7 +102,7 @@ function cvc_render_notice_details( array $details ): void {
 		<?php if ( ! empty( $details['documents_required'] ) ) : ?>
 			<div class="space-y-2">
 				<h3 class="<?php echo esc_attr( $h3 ); ?>">Hồ sơ dự tuyển</h3>
-				<ol class="list-decimal pl-5 space-y-1.5 text-sm text-slate-300 leading-relaxed">
+				<ol class="list-decimal pl-5 space-y-1.5 text-sm text-ink-2 leading-relaxed">
 					<?php foreach ( (array) $details['documents_required'] as $line ) : ?>
 						<li><?php echo cvc_notice_text( (string) $line ); // phpcs:ignore WordPress.Security.EscapeOutput ?></li>
 					<?php endforeach; ?>
@@ -113,10 +113,10 @@ function cvc_render_notice_details( array $details ): void {
 		<?php if ( ! empty( $details['application_place'] ) || ! empty( $details['application_fee'] ) ) : ?>
 			<dl class="grid gap-3 text-sm">
 				<?php if ( ! empty( $details['application_place'] ) ) : ?>
-					<div><dt class="<?php echo esc_attr( $h3 ); ?>">Nơi, cách nộp hồ sơ</dt><dd class="text-slate-300 leading-relaxed mt-1"><?php echo cvc_notice_text( (string) $details['application_place'] ); // phpcs:ignore WordPress.Security.EscapeOutput ?></dd></div>
+					<div><dt class="<?php echo esc_attr( $h3 ); ?>">Nơi, cách nộp hồ sơ</dt><dd class="text-ink-2 leading-relaxed mt-1"><?php echo cvc_notice_text( (string) $details['application_place'] ); // phpcs:ignore WordPress.Security.EscapeOutput ?></dd></div>
 				<?php endif; ?>
 				<?php if ( ! empty( $details['application_fee'] ) ) : ?>
-					<div><dt class="<?php echo esc_attr( $h3 ); ?>">Lệ phí</dt><dd class="text-slate-300 leading-relaxed mt-1"><?php echo cvc_notice_text( (string) $details['application_fee'] ); // phpcs:ignore WordPress.Security.EscapeOutput ?></dd></div>
+					<div><dt class="<?php echo esc_attr( $h3 ); ?>">Lệ phí</dt><dd class="text-ink-2 leading-relaxed mt-1"><?php echo cvc_notice_text( (string) $details['application_fee'] ); // phpcs:ignore WordPress.Security.EscapeOutput ?></dd></div>
 				<?php endif; ?>
 			</dl>
 		<?php endif; ?>
@@ -124,14 +124,14 @@ function cvc_render_notice_details( array $details ): void {
 		<?php if ( ! empty( $details['schedule'] ) ) : ?>
 			<div class="space-y-2">
 				<h3 class="<?php echo esc_attr( $h3 ); ?>">Lịch trình</h3>
-				<ol class="border-l border-slate-700 ml-1.5 space-y-3">
+				<ol class="border-l border-slate-300 ml-1.5 space-y-3">
 					<?php foreach ( (array) $details['schedule'] as $x ) : ?>
 						<li class="pl-4 relative text-sm">
-							<span class="absolute -left-[5px] top-1.5 w-2.5 h-2.5 rounded-full bg-amber-400" aria-hidden="true"></span>
+							<span class="absolute -left-[5px] top-1.5 w-2.5 h-2.5 rounded-full bg-acc text-white" aria-hidden="true"></span>
 							<?php if ( ! empty( $x['time'] ) ) : ?>
-								<p class="text-xs font-bold text-amber-300"><?php echo esc_html( (string) $x['time'] ); ?></p>
+								<p class="text-xs font-bold text-acc"><?php echo esc_html( (string) $x['time'] ); ?></p>
 							<?php endif; ?>
-							<p class="text-slate-300"><?php echo cvc_notice_text( (string) ( $x['event'] ?? '' ) ); // phpcs:ignore WordPress.Security.EscapeOutput ?></p>
+							<p class="text-ink-2"><?php echo cvc_notice_text( (string) ( $x['event'] ?? '' ) ); // phpcs:ignore WordPress.Security.EscapeOutput ?></p>
 						</li>
 					<?php endforeach; ?>
 				</ol>
@@ -139,13 +139,13 @@ function cvc_render_notice_details( array $details ): void {
 		<?php endif; ?>
 
 		<?php if ( ! empty( $details['priority'] ) ) : ?>
-			<div class="space-y-1"><h3 class="<?php echo esc_attr( $h3 ); ?>">Đối tượng, điểm ưu tiên</h3><p class="text-sm text-slate-300"><?php echo cvc_notice_text( (string) $details['priority'] ); // phpcs:ignore WordPress.Security.EscapeOutput ?></p></div>
+			<div class="space-y-1"><h3 class="<?php echo esc_attr( $h3 ); ?>">Đối tượng, điểm ưu tiên</h3><p class="text-sm text-ink-2"><?php echo cvc_notice_text( (string) $details['priority'] ); // phpcs:ignore WordPress.Security.EscapeOutput ?></p></div>
 		<?php endif; ?>
 
 		<?php if ( ! empty( $details['notes'] ) ) : ?>
 			<div class="space-y-2">
 				<h3 class="<?php echo esc_attr( $h3 ); ?>">Lưu ý</h3>
-				<ul class="list-disc pl-5 space-y-1.5 text-sm text-slate-300"><?php foreach ( (array) $details['notes'] as $line ) : ?><li><?php echo cvc_notice_text( (string) $line ); // phpcs:ignore WordPress.Security.EscapeOutput ?></li><?php endforeach; ?></ul>
+				<ul class="list-disc pl-5 space-y-1.5 text-sm text-ink-2"><?php foreach ( (array) $details['notes'] as $line ) : ?><li><?php echo cvc_notice_text( (string) $line ); // phpcs:ignore WordPress.Security.EscapeOutput ?></li><?php endforeach; ?></ul>
 			</div>
 		<?php endif; ?>
 	</section>
@@ -159,25 +159,25 @@ function cvc_render_notice_fulltext( array $full, string $source_url, string $so
 		return;
 	}
 	?>
-	<section id="toan-van" class="bg-navy-950 p-6 sm:p-8 rounded-3xl border border-slate-800 space-y-4 shadow-xl">
-		<div class="border-b border-slate-800 pb-3">
-			<h2 class="text-lg font-extrabold text-amber-400">Toàn văn thông báo</h2>
-			<p class="text-[11px] text-slate-500 mt-1">
+	<section id="toan-van" class="dz-panel space-y-4">
+		<div class="border-b border-slate-300 pb-3">
+			<h2 class="text-lg font-extrabold text-acc">Toàn văn thông báo</h2>
+			<p class="text-[11px] text-ink-muted mt-1">
 				Đăng lại nguyên văn từ <?php echo '' !== $source_url ? '<a class="underline" href="' . esc_url( $source_url ) . '" target="_blank" rel="noopener nofollow">' . esc_html( $source_name ?: ( wp_parse_url( $source_url, PHP_URL_HOST ) ?: 'trang gốc' ) ) . '</a>' : 'trang của cơ quan'; ?>. Văn bản có giá trị pháp lý là bản do cơ quan tuyển dụng ban hành.
 			</p>
 		</div>
 		<?php if ( '' !== $html ) : ?>
 			<details class="cvc-fulltext group" open>
-				<summary class="cursor-pointer text-xs font-bold text-azure-300 select-none">Thu gọn / mở rộng</summary>
-				<div class="cvc-notice-prose mt-3 text-sm text-slate-300 leading-relaxed overflow-x-auto">
+				<summary class="cursor-pointer text-xs font-bold text-acc select-none">Thu gọn / mở rộng</summary>
+				<div class="cvc-notice-prose mt-3 text-sm text-ink-2 leading-relaxed overflow-x-auto">
 					<?php echo cvc_notice_kses( $html ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 				</div>
 			</details>
 		<?php endif; ?>
 		<?php foreach ( $docs as $i => $d ) : ?>
-			<details class="bg-slate-900 border border-slate-800 rounded-2xl p-4" <?php echo '' === $html && 0 === $i ? 'open' : ''; ?>>
-				<summary class="cursor-pointer text-sm font-bold text-slate-100"><i class="fa-solid fa-file-lines mr-1.5 text-rose-300" aria-hidden="true"></i><?php echo esc_html( (string) ( $d['name'] ?? 'Công văn' ) ); ?> <span class="text-xs text-slate-500 font-normal">(chữ trích từ công văn)</span></summary>
-				<div class="mt-3 text-sm text-slate-300 leading-relaxed whitespace-pre-line break-words max-h-[70vh] overflow-y-auto"><?php echo cvc_notice_text( (string) ( $d['text'] ?? '' ) ); // phpcs:ignore WordPress.Security.EscapeOutput ?></div>
+			<details class="dz-card" <?php echo '' === $html && 0 === $i ? 'open' : ''; ?>>
+				<summary class="cursor-pointer text-sm font-bold text-ink"><i class="fa-solid fa-file-lines mr-1.5 text-red-700" aria-hidden="true"></i><?php echo esc_html( (string) ( $d['name'] ?? 'Công văn' ) ); ?> <span class="text-xs text-ink-muted font-normal">(chữ trích từ công văn)</span></summary>
+				<div class="mt-3 text-sm text-ink-2 leading-relaxed whitespace-pre-line break-words max-h-[70vh] overflow-y-auto"><?php echo cvc_notice_text( (string) ( $d['text'] ?? '' ) ); // phpcs:ignore WordPress.Security.EscapeOutput ?></div>
 			</details>
 		<?php endforeach; ?>
 	</section>

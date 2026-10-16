@@ -126,12 +126,12 @@ if ( $is_demo_mode ) {
 	cvc_seo_set_title( 'Không tìm thấy lượt thi' );
 	get_header();
 	?>
-	<main id="main" class="cvc-page bg-slate-900 text-slate-100 min-h-screen py-12">
-		<div class="max-w-3xl mx-auto px-4 space-y-4">
+	<main id="main" class="dz-main">
+		<div class="dz-wrap" style="max-width:820px">
 			<?php cvc_render_notfound_state( 'Không tìm thấy lượt thi này trong tài khoản của bạn.' ); ?>
-			<p class="flex gap-4 flex-wrap">
-				<a class="text-cyan-300 font-bold" href="<?php echo esc_url( cvc_account_url( 'exam-history' ) ); ?>">Xem lịch sử làm bài</a>
-				<a class="text-cyan-300 font-bold" href="<?php echo esc_url( cvc_exams_url() ); ?>">Danh sách đề thi</a>
+			<p style="display:flex;gap:16px;flex-wrap:wrap;margin-top:12px">
+				<a class="dz-link" href="<?php echo esc_url( cvc_account_url( 'exam-history' ) ); ?>">Xem lịch sử làm bài</a>
+				<a class="dz-link" href="<?php echo esc_url( cvc_exams_url() ); ?>">Danh sách đề thi</a>
 			</p>
 		</div>
 	</main>

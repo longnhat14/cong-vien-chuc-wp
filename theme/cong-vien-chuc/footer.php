@@ -2,98 +2,86 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+/*
+ * Chân trang - giao diện "văn bản" (16/10/2026): nền trắng, kẻ đôi phía
+ * trên, chữ Times New Roman, liên kết dạng mục lục.
+ */
 ?>
-<footer class="bg-navy-950 text-slate-400 pt-16 pb-8 border-t border-navy-800 text-xs">
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8">
-<!-- Col 1: Brand info (4 cols) -->
-<div class="lg:col-span-4 space-y-4">
-<div class="flex items-center space-x-3 text-white">
-<div class="w-11 h-11 bg-gradient-to-br from-gold-500 to-gold-600 rounded-xl flex items-center justify-center text-navy-950 font-black text-xl shadow-lg">
-<i class="fa-solid fa-landmark-dome"></i>
+<footer class="dz-footer">
+<div class="dz-wrap">
+<div class="dz-footer-grid">
+<div class="dz-footer-brand">
+<p class="dz-org">CÔNG VIÊN CHỨC</p>
+<p class="dz-motto">Ôn thi công chức, viên chức</p>
+<p class="dz-footer-note">Nền tảng ôn thi công chức, viên chức: đề thi trắc nghiệm có chấm điểm, văn bản pháp luật, mẫu hồ sơ và tin tuyển dụng tổng hợp từ cổng thông tin chính thức của cơ quan nhà nước.</p>
 </div>
-<div>
-<p class="font-black text-lg text-white tracking-tight">CÔNG VIÊN CHỨC</p>
-<p class="text-[10px] text-gold-400 uppercase tracking-widest font-bold">Ôn thi công chức, viên chức</p>
-</div>
-</div>
-<p class="text-slate-400 leading-relaxed text-xs">
-Nền tảng ôn thi công chức, viên chức: khóa học, đề thi trắc nghiệm có chấm điểm, văn bản pháp luật và tin tuyển dụng theo từng đợt.
-</p>
-</div>
-<!-- Col 2: Chương trình học (2 cols) -->
-<div class="lg:col-span-2 space-y-3">
-<h4 class="text-white font-extrabold text-xs uppercase tracking-wider">Ôn thi</h4>
-<ul class="space-y-2">
-<li><a href="<?php echo esc_url( cvc_courses_url() ); ?>" class="hover:text-gold-400 transition-colors">Khóa học</a></li>
-<li><a href="<?php echo esc_url( cvc_exams_url() ); ?>" class="hover:text-gold-400 transition-colors">Đề thi thử</a></li>
-<li><a href="<?php echo esc_url( cvc_topics_url() ); ?>" class="hover:text-gold-400 transition-colors">Chủ đề ôn thi</a></li>
-<li><a href="<?php echo esc_url( cvc_knowledge_url() ); ?>" class="hover:text-gold-400 transition-colors">Kiến thức</a></li>
-<li><a href="<?php echo esc_url( cvc_documents_url() ); ?>" class="hover:text-gold-400 transition-colors">Tài liệu</a></li>
+<nav class="dz-footer-col" aria-label="Ôn thi">
+<h2>Ôn thi</h2>
+<ul>
+<li><a href="<?php echo esc_url( cvc_exams_url() ); ?>">Đề thi thử</a></li>
+<li><a href="<?php echo esc_url( cvc_topics_url() ); ?>">Chủ đề ôn thi</a></li>
+<li><a href="<?php echo esc_url( cvc_knowledge_url() ); ?>">Kiến thức trọng tâm</a></li>
+<li><a href="<?php echo esc_url( cvc_courses_url() ); ?>">Khóa học</a></li>
 </ul>
-</div>
-<!-- Col 3: Thư viện & Tuyển dụng (2 cols) -->
-<div class="lg:col-span-2 space-y-3">
-<h4 class="text-white font-extrabold text-xs uppercase tracking-wider">Tuyển dụng & pháp luật</h4>
-<ul class="space-y-2">
-<li><a href="<?php echo esc_url( cvc_recruitments_url() ); ?>" class="hover:text-gold-400 transition-colors">Tin tuyển dụng</a></li>
-<li><a href="<?php echo esc_url( cvc_legal_documents_url() ); ?>" class="hover:text-gold-400 transition-colors">Văn bản pháp luật</a></li>
-<li><a href="<?php echo esc_url( cvc_documents_url() ); ?>" class="hover:text-gold-400 transition-colors">Mẫu hồ sơ &amp; tài liệu</a></li>
-<li><a href="<?php echo esc_url( cvc_account_url() ); ?>" class="hover:text-gold-400 transition-colors">Tài khoản học viên</a></li>
+</nav>
+<nav class="dz-footer-col" aria-label="Tuyển dụng và pháp luật">
+<h2>Tuyển dụng &amp; pháp luật</h2>
+<ul>
+<li><a href="<?php echo esc_url( cvc_recruitments_url() ); ?>">Tin tuyển dụng</a></li>
+<li><a href="<?php echo esc_url( cvc_legal_documents_url() ); ?>">Văn bản pháp luật</a></li>
+<li><a href="<?php echo esc_url( cvc_documents_url() ); ?>">Mẫu hồ sơ &amp; tài liệu</a></li>
+<li><a href="<?php echo esc_url( cvc_account_url() ); ?>">Tài khoản học viên</a></li>
 </ul>
-</div>
-<!-- Col 4: Newsletter & Contact (4 cols) -->
-<div class="lg:col-span-4 space-y-4">
-<h4 class="text-white font-extrabold text-xs uppercase tracking-wider">Nhận bản tin qua email</h4>
-<p class="text-xs text-slate-400">Đăng ký để nhận thông tin tuyển dụng và văn bản pháp luật mới.</p>
-<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="relative max-w-sm">
+</nav>
+<div class="dz-footer-col">
+<h2>Nhận bản tin qua email</h2>
+<p class="dz-footer-note">Thông tin tuyển dụng và văn bản pháp luật mới, gửi định kỳ.</p>
+<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="dz-inline-form">
 <input type="hidden" name="action" value="cvc_newsletter_subscribe">
 <?php wp_nonce_field( 'cvc_newsletter_subscribe' ); ?>
-<input type="email" name="email" required placeholder="Nhập email cán bộ / cá nhân..." class="w-full pl-4 pr-12 py-3.5 rounded-xl bg-navy-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-gold-500">
-<button type="submit" class="absolute right-1.5 top-1.5 bottom-1.5 px-4 bg-gold-500 hover:bg-gold-600 text-navy-950 font-bold rounded-lg text-xs transition-colors">
-<i class="fa-solid fa-paper-plane"></i>
-</button>
+<label class="sr-only" for="dz-newsletter-email">Email</label>
+<input id="dz-newsletter-email" type="email" name="email" required placeholder="Địa chỉ email">
+<button type="submit" class="dz-btn dz-btn-primary">Đăng ký</button>
 </form>
 </div>
 </div>
-<!-- Bottom Copyright Bar -->
-<div class="pt-8 border-t border-navy-800 flex flex-col sm:flex-row justify-between items-center text-[11px] text-slate-500 gap-2">
-<p>© <?php echo esc_html( wp_date( 'Y' ) ); ?> Công Viên Chức. Tất cả quyền được bảo lưu.</p>
-<div class="flex space-x-4">
-<a href="<?php echo esc_url( cvc_search_url() ); ?>" class="hover:text-slate-300">Tìm kiếm</a>
-</div>
+<div class="dz-footer-bottom">
+<p>© <?php echo esc_html( wp_date( 'Y' ) ); ?> Công Viên Chức. Thông tin tuyển dụng, văn bản chỉ mang tính tham khảo — đối chiếu bản gốc tại cơ quan ban hành.</p>
+<a href="<?php echo esc_url( cvc_search_url() ); ?>">Tra cứu</a>
 </div>
 </div>
 </footer>
-<!-- SEARCH MODAL -->
-<div id="search-modal" class="hidden fixed inset-0 bg-navy-950/80 backdrop-blur-md z-50 flex items-start justify-center pt-20 px-4">
-<div class="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-slate-100 relative animate-fadeIn">
-<button type="button" onclick="toggleSearchModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
-<form method="get" action="<?php echo esc_url( home_url( '/tim-kiem/' ) ); ?>" class="flex items-center border-b border-slate-200 pb-3">
-<i class="fa-solid fa-magnifying-glass text-gold-500 text-xl mr-3"></i>
-<input type="search" name="q" placeholder="Gõ từ khóa cần tìm: Luật công chức, Đề thi chuyên viên..." class="w-full text-base font-bold text-slate-800 placeholder-slate-400 focus:outline-none" autofocus>
+<!-- Hộp tìm kiếm -->
+<div id="search-modal" class="hidden dz-modal" role="dialog" aria-modal="true" aria-label="Tìm kiếm">
+<div class="dz-modal-box">
+<button type="button" onclick="toggleSearchModal()" class="dz-iconbtn dz-modal-close" aria-label="Đóng"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+<p class="dz-kicker">Tra cứu</p>
+<form method="get" action="<?php echo esc_url( home_url( '/tim-kiem/' ) ); ?>" class="dz-searchform">
+<label class="sr-only" for="dz-search-q">Từ khóa</label>
+<input id="dz-search-q" type="search" name="q" placeholder="Luật Cán bộ, công chức; đề thi chuyên viên; tuyển dụng giáo viên…">
+<button type="submit" class="dz-btn dz-btn-primary">Tìm</button>
 </form>
-<div class="mt-4 space-y-2 text-xs">
-<p class="font-bold text-slate-400 uppercase">Gợi ý tìm kiếm phổ biến:</p>
-<div class="flex flex-wrap gap-2">
-<a href="<?php echo esc_url( cvc_search_url( 'Bảng lương công chức 2026' ) ); ?>" class="px-3 py-1 bg-slate-100 hover:bg-gold-100 rounded-lg cursor-pointer">Bảng lương công chức 2026</a>
-<a href="<?php echo esc_url( cvc_search_url( 'Thi sát hạch Chuyên viên chính' ) ); ?>" class="px-3 py-1 bg-slate-100 hover:bg-gold-100 rounded-lg cursor-pointer">Thi sát hạch Chuyên viên chính</a>
-<a href="<?php echo esc_url( cvc_search_url( 'Nghị định 170/2025/NĐ-CP' ) ); ?>" class="px-3 py-1 bg-slate-100 hover:bg-gold-100 rounded-lg cursor-pointer">Nghị định 170/2025/NĐ-CP</a>
+<p class="dz-muted">Gợi ý:</p>
+<div class="dz-chips">
+<a href="<?php echo esc_url( cvc_search_url( 'Bảng lương công chức 2026' ) ); ?>">Bảng lương công chức 2026</a>
+<a href="<?php echo esc_url( cvc_search_url( 'Thi sát hạch Chuyên viên chính' ) ); ?>">Thi sát hạch Chuyên viên chính</a>
+<a href="<?php echo esc_url( cvc_search_url( 'Nghị định 170/2025/NĐ-CP' ) ); ?>">Nghị định 170/2025/NĐ-CP</a>
 </div>
 </div>
 </div>
-</div>
-<!-- JAVASCRIPT LOGIC & INTERACTIONS -->
 <script>
 function toggleNotifications() {
-document.getElementById('notif-dropdown').classList.toggle('hidden');
+var el = document.getElementById('notif-dropdown'); if (el) el.classList.toggle('hidden');
 }
 function toggleMobileMenu() {
 document.getElementById('mobile-menu').classList.toggle('hidden');
 }
 function toggleSearchModal() {
-document.getElementById('search-modal').classList.toggle('hidden');
+var m = document.getElementById('search-modal');
+m.classList.toggle('hidden');
+if (!m.classList.contains('hidden')) { var q = document.getElementById('dz-search-q'); if (q) q.focus(); }
 }
+document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { var m = document.getElementById('search-modal'); if (m && !m.classList.contains('hidden')) m.classList.add('hidden'); } });
 </script>
 <?php wp_footer(); ?>
 </body>

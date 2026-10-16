@@ -139,14 +139,14 @@ $item_type_labels = array(
 						'skipped'     => 'Đã bỏ qua',
 					);
 					?>
-					<li class="cvc-learning-path-steps__item cvc-learning-path-steps__item--<?php echo esc_attr( $step_status ); ?>">
+					<li class="cvc-learning-path-steps__item cvc-learning-path-steps__item-- <?php echo esc_attr( $step_status ); ?>">
 						<span class="cvc-badge cvc-badge--subject"><?php echo esc_html( $label ); ?></span>
 						<?php if ( $link ) : ?>
 							<a href="<?php echo esc_url( $link ); ?>"><?php echo esc_html( $name ); ?></a>
 						<?php else : ?>
 							<?php echo esc_html( $name ); ?>
 						<?php endif; ?>
-						<span class="cvc-badge cvc-badge--status cvc-badge--status-<?php echo esc_attr( $step_status ); ?>"><?php echo esc_html( $step_labels[ $step_status ] ?? $step_status ); ?></span>
+						<span class="cvc-badge cvc-badge--status cvc-badge--status- <?php echo esc_attr( $step_status ); ?>"><?php echo esc_html( $step_labels[ $step_status ] ?? $step_status ); ?></span>
 						<span class="cvc-learning-path-steps__actions">
 							<?php foreach ( ( $next_steps[ $step_status ] ?? array() ) as $to_status => $to_label ) : ?>
 								<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">

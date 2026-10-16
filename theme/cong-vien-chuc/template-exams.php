@@ -1,6 +1,6 @@
 <?php
 /**
- * CÔNG VIÊN CHỨC — THI TRẮC NGHIỆM AI (Executive 3-Column Architecture)
+ * Danh sách đề thi - giao diện văn bản (16/10/2026). Chỉ hiển thị số liệu thật của từng đề.
  * URL: /de-thi/ và /de-thi/page/{n}/
  */
 
@@ -36,95 +36,70 @@ cvc_seo_set_listing_pagination_state( $currentPg, 'cvc_exams_url' );
 get_header();
 ?>
 
-<main id="main" class="min-h-screen bg-slate-900 text-slate-100 py-6">
-
-	<div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-
-		<!-- Breadcrumbs -->
-		<?php
-		cvc_render_breadcrumbs(
-			array(
-				array( 'label' => 'Trang chủ', 'url' => home_url( '/' ) ),
-				array( 'label' => 'Đề thi thử' ),
-			)
-		);
-		?>
-
-		<?php
-		$cvc_total = isset( $pagination['total'] ) ? (int) $pagination['total'] : ( isset( $rawdata['total'] ) ? (int) $rawdata['total'] : null );
-		cvc_render_listing_hero(
-			'Đề thi thử',
-			'Đề thi trắc nghiệm ôn thi công chức, viên chức',
-			'Làm đề có đồng hồ, chấm điểm ngay khi nộp và xem giải thích từng câu.',
-			null !== $cvc_total ? array( array( number_format_i18n( $cvc_total ), 'đề thi' . ( '' !== $q ? ' khớp từ khóa' : '' ) ) ) : array()
-		);
-		?>
-
-		<!-- 3-COLUMN SHELL GRID -->
-		<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-
-			<!-- LEFT COLUMN (3 COLS — EXAM SUBJECT FILTERS) -->
-			<aside class="lg:col-span-3 space-y-4">
-				<?php cvc_render_listing_search( cvc_exams_url(), $q, 'Tên đề thi...', 'Tìm đề thi' ); ?>
-				<?php cvc_render_listing_explore_nav( 'exams' ); ?>
-			</aside>
-
-			<!-- CENTER MAIN COLUMN (6 COLS — EXAMS GRID) -->
-			<div class="lg:col-span-6 space-y-6">
-
-				<div class="flex items-center justify-between bg-[#0A192F] p-4 rounded-2xl border border-slate-800 text-xs">
-					<span class="text-slate-300">Tổng cộng <strong class="text-white"><?php echo count( $exams ); ?></strong> bộ đề thi chuẩn sát hạch</span>
-				</div>
-
-				<?php if ( ! $ok ) : ?>
-					<?php cvc_render_error_state( 'Không tải được danh sách đề thi, vui lòng thử lại sau.' ); ?>
-				<?php elseif ( empty( $exams ) ) : ?>
-					<?php cvc_render_empty_state( 'Chưa có đề thi nào.' ); ?>
-				<?php else : ?>
-					<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-						<?php foreach ( $exams as $exam ) : ?>
-							<article class="bg-[#0A192F] border border-slate-800 hover:border-amber-500/50 rounded-2xl p-5 space-y-4 shadow-lg transition-all hover:-translate-y-1">
-								<div class="flex items-center justify-between border-b border-slate-800 pb-2">
-									<span class="bg-amber-500/20 text-amber-300 text-[10px] font-extrabold px-2.5 py-0.5 rounded uppercase border border-amber-500/30">
-										MÃ ĐỀ: KTC-2026
-									</span>
-									<span class="text-xs text-slate-400 font-mono">60 Câu · 60 Phút</span>
+<main id="main" class="dz-main">
+<div class="dz-wrap">
+	<?php
+	cvc_render_breadcrumbs(
+		array(
+			array( 'label' => 'Trang chủ', 'url' => home_url( '/' ) ),
+			array( 'label' => 'Đề thi thử' ),
+		)
+	);
+	$cvc_total = isset( $pagination['total'] ) ? (int) $pagination['total'] : null;
+	cvc_render_listing_hero(
+		'Đề thi thử',
+		'Đề thi trắc nghiệm ôn thi công chức, viên chức',
+		'Làm đề có đồng hồ, chấm điểm ngay khi nộp và xem giải thích, căn cứ pháp lý từng câu.',
+		null !== $cvc_total ? array( array( number_format_i18n( $cvc_total ), 'đề thi' . ( '' !== $q ? ' khớp từ khóa' : '' ) ) ) : array()
+	);
+	$cvc_exam_types = array( 'practice' => 'Luyện tập', 'mock' => 'Thi thử', 'official' => 'Đề chính thức' );
+	?>
+	<div class="dz-cols is-3">
+		<aside class="dz-colside">
+			<?php cvc_render_listing_search( cvc_exams_url(), $q, 'Tên đề thi…', 'Tìm đề thi' ); ?>
+			<?php cvc_render_listing_explore_nav( 'exams' ); ?>
+		</aside>
+		<div class="dz-colmain">
+			<div class="dz-h2"><h2><?php echo '' !== $q ? 'Kết quả cho “' . esc_html( $q ) . '”' : 'Danh sách đề thi'; ?></h2><span class="dz-muted" style="font-size:15px">Trang <?php echo (int) $currentPg; ?>/<?php echo (int) max( 1, $lastPg ); ?></span></div>
+			<?php if ( ! $ok ) : ?>
+				<?php cvc_render_error_state( 'Không tải được danh sách đề thi, vui lòng thử lại sau.' ); ?>
+			<?php elseif ( empty( $exams ) ) : ?>
+				<?php cvc_render_empty_state( 'Chưa có đề thi nào.' ); ?>
+			<?php else : ?>
+				<ul class="dz-list">
+					<?php foreach ( $exams as $exam ) :
+						$e_slug  = (string) ( $exam['slug'] ?? '' );
+						$e_q     = (int) ( $exam['total_questions'] ?? ( $exam['questions_count'] ?? 0 ) );
+						$e_min   = (int) ( $exam['duration_minutes'] ?? 0 );
+						$e_code  = (string) ( $exam['code'] ?? '' );
+						$e_type  = $cvc_exam_types[ (string) ( $exam['exam_type'] ?? '' ) ] ?? '';
+						$e_pass  = isset( $exam['passing_score'], $exam['total_score'] ) && (float) $exam['total_score'] > 0 ? rtrim( rtrim( (string) $exam['passing_score'], '0' ), '.' ) . '/' . rtrim( rtrim( (string) $exam['total_score'], '0' ), '.' ) : '';
+						$e_desc  = trim( (string) ( $exam['description'] ?? '' ) );
+					?>
+						<li class="dz-row">
+							<div>
+								<h3 class="dz-item-title"><a href="<?php echo esc_url( cvc_exam_url( $e_slug ) ); ?>"><?php echo esc_html( (string) ( $exam['title'] ?? '' ) ); ?></a></h3>
+								<div class="dz-item-meta">
+									<?php if ( '' !== $e_type ) : ?><span class="dz-tag"><?php echo esc_html( $e_type ); ?></span><?php endif; ?>
+									<?php if ( '' !== $e_code ) : ?><span>Mã đề: <?php echo esc_html( $e_code ); ?></span><?php endif; ?>
+									<?php if ( $e_q > 0 ) : ?><span><?php echo (int) $e_q; ?> câu</span><?php endif; ?>
+									<?php if ( $e_min > 0 ) : ?><span><?php echo (int) $e_min; ?> phút</span><?php endif; ?>
+									<?php if ( '' !== $e_pass ) : ?><span>Điểm đạt <?php echo esc_html( $e_pass ); ?></span><?php endif; ?>
 								</div>
-
-								<h3 class="font-extrabold text-base text-white hover:text-amber-400 transition-colors">
-									<a href="<?php echo esc_url( cvc_exam_url( $exam['slug'] ?? 'de-thi' ) ); ?>">
-										<?php echo esc_html( $exam['title'] ?? 'Đề Thi Sát Hạch Kiến Thức Chung Số 01' ); ?>
-									</a>
-								</h3>
-
-								<p class="text-xs text-slate-400 line-clamp-2">
-									<?php echo esc_html( (string) ( $exam['description'] ?? '' ) ); ?>
-								</p>
-
-								<div class="pt-3 border-t border-slate-800 flex items-center justify-between">
-									<span class="text-xs text-slate-400"><?php echo ! empty( $exam['questions_count'] ) ? esc_html( (int) $exam['questions_count'] . ' câu' ) : ''; ?><?php echo ! empty( $exam['duration_minutes'] ) ? esc_html( ' · ' . (int) $exam['duration_minutes'] . ' phút' ) : ''; ?></span>
-									<a href="<?php echo esc_url( cvc_exam_url( (string) ( $exam['slug'] ?? '' ) ) ); ?>" class="px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-navy-950 font-black rounded-xl text-xs shadow hover:scale-105 transition-transform">
-										Vào Thi Ngay &rarr;
-									</a>
-								</div>
-							</article>
-						<?php endforeach; ?>
-					</div>
-
-					<?php cvc_render_pagination( $currentPg, $lastPg, cvc_listing_page_url_builder( 'cvc_exams_url', $q ) ); ?>
-				<?php endif; ?>
-
-			</div>
-
-			<!-- RIGHT SIDEBAR (3 COLS — HIGH-CONVERSION CTA) -->
-			<aside class="lg:col-span-3 space-y-4 sticky top-[80px]">
-				<?php cvc_render_study_sidebar( array( 'exams' ) ); ?>
-			</aside>
-
+								<?php if ( '' !== $e_desc ) : ?><p class="dz-item-sum"><?php echo esc_html( wp_trim_words( $e_desc, 28 ) ); ?></p><?php endif; ?>
+							</div>
+							<a class="dz-btn dz-btn-sm" href="<?php echo esc_url( cvc_exam_url( $e_slug ) ); ?>">Làm bài</a>
+						</li>
+					<?php endforeach; ?>
+				</ul>
+				<?php cvc_render_pagination( $currentPg, $lastPg, cvc_listing_page_url_builder( 'cvc_exams_url', $q ) ); ?>
+			<?php endif; ?>
 		</div>
-
+		<aside class="dz-colside">
+			<?php cvc_render_study_sidebar( array( 'exams' ) ); ?>
+		</aside>
 	</div>
-
+</div>
 </main>
 
 <?php get_footer(); ?>

@@ -8,25 +8,25 @@ Version: 1.2.0
 
 /* --- Design tokens --- */
 :root {
-    --cvc-color-primary: #0a58ca;
-    --cvc-color-primary-dark: #084298;
-    --cvc-color-primary-deep: #062a5c;
-    --cvc-color-primary-tint: #eef4ff;
-    --cvc-color-primary-tint-strong: #dbe9ff;
-    --cvc-color-accent-green: #16a34a;
-    --cvc-color-accent-amber: #d97706;
-    --cvc-color-accent-red: #dc2626;
-    --cvc-color-accent-purple: #7c3aed;
-    --cvc-color-text: #101828;
-    --cvc-color-text-muted: #475467;
-    --cvc-color-text-subtle: #667085;
-    --cvc-color-border: #e5e7eb;
-    --cvc-color-border-strong: #d0d5dd;
+    --cvc-color-primary: #123a63;
+    --cvc-color-primary-dark: #0b2744;
+    --cvc-color-primary-deep: #0b2744;
+    --cvc-color-primary-tint: #eaf3fc;
+    --cvc-color-primary-tint-strong: #d6e6f5;
+    --cvc-color-accent-green: #16734f;
+    --cvc-color-accent-amber: #8a5300;
+    --cvc-color-accent-red: #b42318;
+    --cvc-color-accent-purple: #1767aa;
+    --cvc-color-text: #111111;
+    --cvc-color-text-muted: #333333;
+    --cvc-color-text-subtle: #5c5c5c;
+    --cvc-color-border: #d4d4d4;
+    --cvc-color-border-strong: #9a9a9a;
     --cvc-color-bg: #ffffff;
-    --cvc-color-bg-alt: #f8fafc;
-    --cvc-color-bg-tint: #f0f6ff;
+    --cvc-color-bg-alt: #f6f6f4;
+    --cvc-color-bg-tint: #eaf3fc;
 
-    --cvc-font-sans: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --cvc-font-sans: "Times New Roman", Times, "Liberation Serif", "Tinos", serif;
 
     /* Type scale - clamp() để tự responsive, không cần media query riêng
        cho từng heading (Phase 10A.2 - typography trước đây quá nhỏ). */
@@ -51,15 +51,15 @@ Version: 1.2.0
     --cvc-section-py: clamp(2.5rem, 2rem + 2vw, 5rem);
     --cvc-section-py-lg: clamp(3rem, 2.5rem + 2.5vw, 6rem);
 
-    --cvc-radius-sm: 8px;
-    --cvc-radius: 14px;
-    --cvc-radius-lg: 20px;
+    --cvc-radius-sm: 2px;
+    --cvc-radius: 2px;
+    --cvc-radius-lg: 3px;
     --cvc-radius-pill: 999px;
 
-    --cvc-shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.06);
-    --cvc-shadow: 0 4px 12px rgba(16, 24, 40, 0.08);
-    --cvc-shadow-md: 0 8px 24px rgba(16, 24, 40, 0.1);
-    --cvc-shadow-lg: 0 20px 48px rgba(6, 42, 92, 0.16);
+    --cvc-shadow-sm: none;
+    --cvc-shadow: none;
+    --cvc-shadow-md: none;
+    --cvc-shadow-lg: none;
 
     --cvc-container-width: 1240px;
     --cvc-prose-width: 72ch;
@@ -5283,36 +5283,8 @@ button.cvc-btn:disabled {
    trắng lạc tông. Định nghĩa lại token màu trong phạm vi khung tài khoản.
    ========================================================================== */
 .cvc-account-section-wrapper {
-    --cvc-color-text: #e2e8f0;
-    --cvc-color-text-muted: #94a3b8;
-    --cvc-color-text-subtle: #94a3b8;
-    --cvc-color-border: #1d3557;
-    --cvc-color-border-strong: #24406b;
-    --cvc-color-bg: #112240;
-    --cvc-color-bg-alt: #0a192f;
-    --cvc-color-bg-tint: #112240;
-    --cvc-color-primary-tint: rgba(6, 182, 212, 0.12);
-    --cvc-color-primary-tint-strong: rgba(6, 182, 212, 0.22);
+    /* 16/10/2026: giao diện văn bản - khung tài khoản nền trắng như toàn site. */
     color: var(--cvc-color-text);
-}
-
-.cvc-account-section-wrapper h2,
-.cvc-account-section-wrapper h3,
-.cvc-account-section-wrapper h4,
-.cvc-account-section-wrapper strong {
-    color: #f8fafc;
-}
-
-.cvc-account-section-wrapper input:not([type="checkbox"]):not([type="radio"]),
-.cvc-account-section-wrapper select,
-.cvc-account-section-wrapper textarea {
-    background: #0a192f;
-    color: #e2e8f0;
-    border-color: #1d3557;
-}
-
-.cvc-account-section-wrapper a:not(.cvc-btn):not([class*="bg-"]) {
-    color: #67e8f9;
 }
 
 /* Gợi ý dưới ô nhập (đăng ký, đặt lại mật khẩu). */

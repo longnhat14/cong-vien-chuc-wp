@@ -45,7 +45,7 @@ $transitions = array(
 				?>
 				<article class="cvc-card cvc-goal-card" data-cvc-track="recruitment_match_impression" data-cvc-target-type="recruitment_match" data-cvc-target-id="<?php echo esc_attr( $match['id'] ); ?>">
 					<div class="cvc-card__body">
-						<span class="cvc-badge cvc-badge--status cvc-badge--status-<?php echo esc_attr( $status ); ?>"><?php echo esc_html( cvc_status_label( $status ) ); ?></span>
+						<span class="cvc-badge cvc-badge--status cvc-badge--status- <?php echo esc_attr( $status ); ?>"><?php echo esc_html( cvc_status_label( $status ) ); ?></span>
 						<?php if ( $expired ) : ?>
 							<span class="cvc-badge cvc-badge--expired">Đã hết hạn</span>
 						<?php endif; ?>

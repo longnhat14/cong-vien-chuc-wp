@@ -74,7 +74,7 @@
 			post('cvc_mini_quiz_load').then(function (res) {
 				if (!res.success || !res.data || !res.data.questions || !res.data.questions.length) {
 					progress.textContent = 'Chưa tải được câu hỏi';
-					body.innerHTML = '<p class="text-sm text-slate-400">Hãy thử lại sau hoặc vào trang đề thi.</p>';
+					body.innerHTML = '<p class="dz-muted">Hãy thử lại sau hoặc vào trang đề thi.</p>';
 					reloadBtn.classList.remove('hidden');
 					return;
 				}
@@ -93,10 +93,10 @@
 			scoreEl.textContent = 'Đúng ' + state.correct + '/' + state.index;
 			nextBtn.classList.add('hidden');
 			body.innerHTML =
-				'<p class="text-base font-bold text-white leading-relaxed">' + esc(q.question_text) + '</p>' +
-				'<div class="grid gap-2" role="group" aria-label="Các phương án">' +
+				'<p class="dz-quiz-q">' + esc(q.question_text) + '</p>' +
+				'<div class="dz-quiz-opts" role="group" aria-label="Các phương án">' +
 				q.options.map(function (o) {
-					return '<button type="button" class="cvc-quiz-opt text-left px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 hover:border-amber-400 text-sm text-slate-200" data-option="' + o.id + '"><strong class="text-amber-300 mr-2">' + esc(o.key) + '.</strong>' + esc(o.option_text) + '</button>';
+					return '<button type="button" class="cvc-quiz-opt dz-quiz-opt" data-option="' + o.id + '"><strong>' + esc(o.key) + '.</strong>' + esc(o.option_text) + '</button>';
 				}).join('') +
 				'</div><div data-quiz-feedback></div>';
 
@@ -114,7 +114,7 @@
 				.then(function (res) {
 					var fb = body.querySelector('[data-quiz-feedback]');
 					if (!res.success) {
-						fb.innerHTML = '<p class="text-rose-300 text-sm mt-2">' + esc((res.data && res.data.message) || 'Không chấm được câu này.') + '</p>';
+						fb.innerHTML = '<p class="dz-warn">' + esc((res.data && res.data.message) || 'Không chấm được câu này.') + '</p>';
 						reloadBtn.classList.remove('hidden');
 						return;
 					}
@@ -126,13 +126,13 @@
 						else if (b === btn) b.classList.add('is-wrong');
 					});
 					var links = [];
-					if (d.legal_reference && d.legal_reference.slug) links.push('<a class="text-amber-300 hover:underline" href="' + cfg.homeUrl + 'van-ban-phap-luat/' + encodeURIComponent(d.legal_reference.slug) + '/">Căn cứ: ' + esc((d.legal_reference.document_number ? d.legal_reference.document_number + ' - ' : '') + d.legal_reference.title) + '</a>');
-					if (d.topic && d.topic.slug) links.push('<a class="text-cyan-300 hover:underline" href="' + cfg.homeUrl + 'chu-de/' + encodeURIComponent(d.topic.slug) + '/">Ôn chủ đề: ' + esc(d.topic.name) + '</a>');
-					if (d.exam && d.exam.slug) links.push('<a class="text-cyan-300 hover:underline" href="' + cfg.homeUrl + 'thi-trac-nghiem/' + encodeURIComponent(d.exam.slug) + '/">Làm cả đề: ' + esc(d.exam.title) + '</a>');
-					fb.innerHTML = '<div class="mt-3 p-4 rounded-xl ' + (d.is_correct ? 'bg-emerald-500/10 border border-emerald-500/40' : 'bg-rose-500/10 border border-rose-500/40') + ' text-sm space-y-2">' +
-						'<p class="font-black ' + (d.is_correct ? 'text-emerald-300' : 'text-rose-300') + '">' + (d.is_correct ? '✓ Chính xác!' : '✗ Chưa đúng - đáp án đúng là ' + esc(d.correct_option_key)) + '</p>' +
-						(d.explanation ? '<p class="text-slate-300">' + esc(d.explanation) + '</p>' : '') +
-						(links.length ? '<p class="flex flex-wrap gap-3 text-xs">' + links.join('') + '</p>' : '') + '</div>';
+					if (d.legal_reference && d.legal_reference.slug) links.push('<a class="dz-link" href="' + cfg.homeUrl + 'van-ban-phap-luat/' + encodeURIComponent(d.legal_reference.slug) + '/">Căn cứ: ' + esc((d.legal_reference.document_number ? d.legal_reference.document_number + ' - ' : '') + d.legal_reference.title) + '</a>');
+					if (d.topic && d.topic.slug) links.push('<a class="dz-link" href="' + cfg.homeUrl + 'chu-de/' + encodeURIComponent(d.topic.slug) + '/">Ôn chủ đề: ' + esc(d.topic.name) + '</a>');
+					if (d.exam && d.exam.slug) links.push('<a class="dz-link" href="' + cfg.homeUrl + 'thi-trac-nghiem/' + encodeURIComponent(d.exam.slug) + '/">Làm cả đề: ' + esc(d.exam.title) + '</a>');
+					fb.innerHTML = '<div class="dz-quiz-fb ' + (d.is_correct ? 'is-ok' : 'is-no') + '">' +
+						'<p class="dz-quiz-fbtitle">' + (d.is_correct ? '✓ Chính xác!' : '✗ Chưa đúng - đáp án đúng là ' + esc(d.correct_option_key)) + '</p>' +
+						(d.explanation ? '<p>' + esc(d.explanation) + '</p>' : '') +
+						(links.length ? '<p class="dz-quiz-links">' + links.join('') + '</p>' : '') + '</div>';
 					scoreEl.textContent = 'Đúng ' + state.correct + '/' + (state.index + 1);
 					if (state.index < state.questions.length - 1) {
 						nextBtn.classList.remove('hidden');

@@ -64,7 +64,7 @@ function cvc_enqueue_assets(): void {
 		'cvc-style',
 		get_stylesheet_uri(),
 		array(),
-		wp_get_theme()->get( 'Version' )
+		(string) filemtime( get_stylesheet_directory() . '/style.css' )
 	);
 
 	wp_enqueue_script(
@@ -90,13 +90,7 @@ function cvc_enqueue_assets(): void {
 	 * request về WordPress -> 404. Đã chmod thư mục 755 / file 644. Mỗi lần
 	 * deploy theme bằng scp từ Windows phải chạy lại bước chmod này.
 	 */
-	wp_enqueue_script(
-		'cvc-scroll-reveal',
-		get_theme_file_uri( '/assets/js/scroll-reveal.js' ),
-		array(),
-		wp_get_theme()->get( 'Version' ),
-		true
-	);
+	// 16/10/2026: bỏ hiệu ứng hiện dần khi cuộn - giao diện văn bản hiển thị đầy đủ ngay.
 
 	wp_localize_script(
 		'cvc-engagement',
