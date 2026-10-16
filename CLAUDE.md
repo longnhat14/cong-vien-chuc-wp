@@ -46,3 +46,9 @@ Trước khi code:
 3. Kiểm tra API liên quan.
 4. Đề xuất thay đổi nhỏ, có thể kiểm tra được.
 5. Không tự ý xây lại những phần đã hoạt động.
+
+## Trang làm bài thi (`/lam-bai/{id}/`, cập nhật 16/10/2026)
+- `template-exam-attempt.php` + `assets/css/exam-smart.css` + `assets/js/exam-smart.js` (giao diện văn bản pháp luật: Times New Roman, nền trắng chữ đen). Template này KHÔNG còn nạp `exam-os.css/js`.
+- Dữ liệu đưa xuống JS qua `window.CVC_SMART_EXAM`; đáp án đúng/is_correct chỉ có khi lượt thi đã nộp. Câu bỏ trống sau khi nộp: `is_correct = null` (không tô đỏ).
+- AJAX: `cvc_exam_answer` (không gửi option = bỏ chọn), `cvc_exam_meta`, `cvc_exam_submit`, `cvc_exam_ai_explain` (chỉ sau khi nộp).
+- Thanh trái giữ các liên kết người dùng; cột phải: thời gian & nộp bài, bản đồ câu hỏi, thông tin đề, phân tích năng lực.
