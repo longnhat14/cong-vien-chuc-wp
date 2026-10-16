@@ -246,7 +246,7 @@ $doc_icon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H
 <div class="cvc-smart-exam" id="cvc-smart-exam" data-total="<?php echo (int) $total_q; ?>">
 
 	<header class="sx-top">
-		<div class="sx-examtitle"><?php echo $doc_icon; // phpcs:ignore WordPress.Security.EscapeOutput ?><span>Đề thi: <?php echo esc_html( $exam_title ); ?></span></div>
+		<div class="sx-examtitle"><?php echo $doc_icon; // phpcs:ignore WordPress.Security.EscapeOutput ?><span title="<?php echo esc_attr( $exam_title ); ?>">Đề thi: <?php echo esc_html( $exam_title ); ?></span></div>
 		<div class="sx-stats">
 			<div class="sx-stat"><small>Đã trả lời</small><strong><span id="sx-answered">0</span>/<?php echo (int) $total_q; ?></strong></div>
 			<div class="sx-stat sx-progressstat"><small>Tiến độ</small><div class="sx-statbar"><div class="sx-bar"><span id="sx-progress"></span></div><strong id="sx-percent">0%</strong></div></div>

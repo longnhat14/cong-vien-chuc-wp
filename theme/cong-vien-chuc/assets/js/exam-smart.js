@@ -223,10 +223,10 @@
   }
 
   /* --- Nộp bài --- */
-  function submitDialog() {
+  function submitDialog(lead) {
     if (submitted || busy) return;
     var n = count(), fl = Q.filter(function (q) { return q.flagged; }).length;
-    $('#sx-submitMessage').textContent = 'Đã trả lời ' + n + '/' + TOTAL + ' câu. Còn ' + (TOTAL - n) + ' câu chưa trả lời và ' + fl + ' câu đánh dấu xem lại. Sau khi nộp sẽ không sửa được đáp án. Bạn có muốn nộp bài không?';
+    $('#sx-submitMessage').textContent = (lead || '') + 'Đã trả lời ' + n + '/' + TOTAL + ' câu. Còn ' + (TOTAL - n) + ' câu chưa trả lời và ' + fl + ' câu đánh dấu xem lại. Sau khi nộp sẽ không sửa được đáp án. Bạn có muốn nộp bài không?';
     $('#sx-submitDialog').classList.add('show');
     $('#sx-confirm').focus();
   }
@@ -301,6 +301,7 @@
   function paintClock() {
     var el = $('#sx-timer');
     if (tmode === 'done') { el.textContent = 'Đã nộp'; $('#sx-sideProgress').style.width = '0%'; return; }
+    if (tmode === 'over') { el.textContent = 'Hết giờ'; el.classList.add('warn'); $('#sx-sideProgress').style.width = '0%'; return; }
     el.textContent = clock(remaining);
     el.classList.toggle('warn', tmode === 'countdown' && remaining <= 300);
     $('#sx-sideProgress').style.width = (tmode === 'countdown' && duration ? Math.max(0, remaining / duration * 100) : 100) + '%';
@@ -354,7 +355,18 @@
   current = submitted ? 0 : (firstOpen > -1 ? firstOpen : 0);
   render();
   paintClock();
-  if (!submitted && tmode !== 'done') timer = setInterval(tick, 1000);
+  /* Lượt thi đã quá giờ từ trước khi mở trang (ví dụ bỏ dở rồi quay lại): KHÔNG tự nộp
+     ngay khi tải trang - báo hết giờ, cho người dùng chọn nộp bài hoặc luyện tiếp. */
+  if (!submitted && tmode === 'countdown' && remaining <= 0) {
+    tmode = 'over';
+    paintClock();
+    setTimeout(function () {
+      submitDialog('Lượt thi này đã hết thời gian làm bài (' + Math.round(duration / 60) + ' phút). Bạn có thể nộp bài để xem kết quả, hoặc tiếp tục luyện tập không tính giờ. ');
+      $('#sx-submitTitle').textContent = 'Đã hết giờ làm bài';
+      $('#sx-cancel').textContent = 'Luyện tập tiếp';
+    }, 300);
+  }
+  if (!submitted && (tmode === 'countdown' || tmode === 'elapsed')) timer = setInterval(tick, 1000);
   if (submitted) {
     renderAnalysis();
     if (location.hash === '#phan-tich') setTimeout(function () { $('#sx-analysis').scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 200);

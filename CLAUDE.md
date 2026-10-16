@@ -52,3 +52,5 @@ Trước khi code:
 - Dữ liệu đưa xuống JS qua `window.CVC_SMART_EXAM`; đáp án đúng/is_correct chỉ có khi lượt thi đã nộp. Câu bỏ trống sau khi nộp: `is_correct = null` (không tô đỏ).
 - AJAX: `cvc_exam_answer` (không gửi option = bỏ chọn), `cvc_exam_meta`, `cvc_exam_submit`, `cvc_exam_ai_explain` (chỉ sau khi nộp).
 - Thanh trái giữ các liên kết người dùng; cột phải: thời gian & nộp bài, bản đồ câu hỏi, thông tin đề, phân tích năng lực.
+- DEPLOY lên Hostinger bằng tar PHẢI đặt quyền khi đóng gói: `tar --mode='u=rw,go=r' -cf - <files> | ssh ... 'tar xf -'`. File tạo trên Windows mang quyền 700 → LiteSpeed trả 403 cho CSS/JS/tải về (sự cố 16/10/2026: trang làm bài mất toàn bộ giao diện). Sau deploy kiểm tra `curl -o /dev/null -w '%{http_code}'` từng file tĩnh.
+- Lượt thi đã quá giờ khi mở lại trang: không tự nộp, hiện hộp "Đã hết giờ làm bài" (nộp bài / luyện tập tiếp). Chỉ tự nộp khi đồng hồ về 0 trong lúc đang làm.

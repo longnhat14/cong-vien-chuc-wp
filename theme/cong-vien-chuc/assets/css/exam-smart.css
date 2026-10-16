@@ -25,7 +25,10 @@ body.cvc-exam-legal{background:#fff!important;color:#111}
 .sx-stats{display:flex;align-items:center;gap:clamp(10px,1.8vw,25px)}
 .sx-stat{padding-left:16px;border-left:1px solid var(--line)}
 .sx-stat:first-child{border:0}
-.sx-stat small{display:block;color:var(--muted);font-size:14px}
+.sx-stat small{display:block;color:var(--muted);font-size:14px;white-space:nowrap}
+.sx-stats{flex-shrink:0}
+.sx-examtitle span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#sx-topic{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .sx-stat strong{font-size:22px;white-space:nowrap}
 .sx-statbar{display:flex;align-items:center;gap:8px}
 .sx-statbar strong{font-size:16px}
@@ -209,5 +212,6 @@ body.cvc-exam-legal{background:#fff!important;color:#111}
 @media(max-width:480px){.sx-org{font-size:19px}.sx-mark{width:38px;height:38px}.sx-stat strong{font-size:19px}.sx-examtitle{font-size:16px}.sx-main{padding:12px}.sx-qtext{font-size:19px}.sx-answer{gap:8px;padding:8px}.sx-answer.sel{padding:7px}.sx-letter{width:31px;height:31px;min-width:31px}.sx-nav{margin:14px -12px -12px;padding:11px 12px}.sx-nav .sx-btn{min-width:0;flex:1}.sx-group{width:100%}.sx-group .sx-btn{flex:1}.sx-grid{gap:3px}.sx-num{font-size:12px}.sx-filters .sx-btn{font-size:13px;padding:6px 4px}.sx-grid-large{gap:4px}.sx-grid-large .sx-num{font-size:14px}}
 @media(max-width:600px){.sx-top{padding:10px 12px}.sx-stats{gap:14px}.sx-progressstat{flex:1}.sx-statbar{width:100%}.sx-statbar .sx-bar{flex:1}.sx-switch{flex-wrap:nowrap}.sx-mode{white-space:nowrap;font-size:14px;padding:8px 4px;gap:4px}.sx-switch>button{min-width:0;flex:1 1 auto}.sx-switch>button:last-child{flex:0 0 42px}.sx-leftnav{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin}.sx-leftitem{white-space:nowrap;flex:0 0 auto;padding:8px 10px}}
 @media(max-width:420px){.sx-ic{display:none}}
+@media(max-width:600px){.sx-doctitle{font-size:17px;line-height:1.4}.sx-examtitle{font-size:16px}}
 @media(prefers-reduced-motion:reduce){.cvc-smart-exam *{transition:none!important}}
 @media print{.sx-side,.sx-left,.sx-toolbar,.sx-nav,.sx-actions{display:none!important}.sx-page{display:block}.sx-panel{border:0}}
