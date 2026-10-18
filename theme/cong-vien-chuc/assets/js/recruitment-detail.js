@@ -165,6 +165,73 @@
 		}
 	}
 
+	/* ---- Số người đã xem + tin tuyển dụng gần bạn (18/10/2026) ---- */
+	var nearBox = root.querySelector( '[data-rd-near] .rd-near-body' );
+	var viewsEl = root.querySelector( '[data-rd-views]' );
+	var rid = parseInt( root.getAttribute( 'data-rd-id' ) || '0', 10 );
+	function visitorId() {
+		try {
+			var v = localStorage.getItem( 'cvc_vid' );
+			if ( ! v ) {
+				v = ( window.crypto && crypto.randomUUID ? crypto.randomUUID().replace( /-/g, '' ) : Math.random().toString( 36 ).slice( 2 ) + Date.now().toString( 36 ) );
+				localStorage.setItem( 'cvc_vid', v );
+			}
+			return v;
+		} catch ( e ) {
+			return '';
+		}
+	}
+	function chosenProvince() {
+		var m = document.cookie.match( /(?:^|;\s*)cvc_tinh=([a-z0-9-]+)/ );
+		return m ? m[ 1 ] : '';
+	}
+	function loadCtx( withView ) {
+		if ( ! cfg.ajax || ( ! nearBox && ! ( viewsEl && rid ) ) ) {
+			return;
+		}
+		var fd = new FormData();
+		fd.append( 'action', 'cvc_rd_ctx' );
+		fd.append( 'id', String( rid || 0 ) );
+		fd.append( 'vid', visitorId() );
+		fd.append( 'tinh', chosenProvince() );
+		if ( withView && rid ) {
+			fd.append( 'view', '1' );
+		}
+		fetch( cfg.ajax, { method: 'POST', body: fd, credentials: 'same-origin' } )
+			.then( function ( r ) {
+				return r.json();
+			} )
+			.then( function ( j ) {
+				if ( ! j || ! j.success ) {
+					throw new Error( 'ctx' );
+				}
+				if ( viewsEl && null !== j.data.viewers && j.data.viewers > 0 ) {
+					viewsEl.querySelector( 'b' ).textContent = j.data.viewers.toLocaleString( 'vi-VN' );
+					viewsEl.hidden = false;
+				}
+				if ( nearBox && j.data.near_html ) {
+					nearBox.innerHTML = j.data.near_html;
+				}
+			} )
+			.catch( function () {
+				if ( nearBox ) {
+					nearBox.innerHTML = '<p class="rd-small rd-muted">Chưa tải được tin gần bạn.</p>';
+				}
+			} );
+	}
+	if ( nearBox ) {
+		nearBox.addEventListener( 'change', function ( e ) {
+			var sel = e.target.closest( '[data-rd-tinh]' );
+			if ( ! sel ) {
+				return;
+			}
+			document.cookie = 'cvc_tinh=' + ( sel.value || '' ) + ';path=/;max-age=' + ( sel.value ? 15552000 : 0 ) + ';SameSite=Lax';
+			nearBox.innerHTML = '<p class="rd-small rd-muted">Đang tải…</p>';
+			loadCtx( false );
+		} );
+	}
+	loadCtx( true );
+
 	/* ---- Chia sẻ ---- */
 	root.querySelectorAll( '[data-rd-share]' ).forEach( function ( b ) {
 		b.addEventListener( 'click', function () {

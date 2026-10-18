@@ -145,6 +145,11 @@ get_header();
 		</span>
 	</form>
 
+	<div class="rd-card rd-hubnear" data-rd-near>
+		<p class="rd-hubnear-h"><span class="rd-ico" aria-hidden="true">⌖</span><b>Tuyển dụng gần bạn</b></p>
+		<div class="rd-near-body" aria-live="polite"><p class="rd-small rd-muted">Đang tìm tin đang nhận hồ sơ gần bạn…</p></div>
+	</div>
+
 	<?php if ( ! $res['ok'] ) : ?>
 		<div class="rd-card rd-card-body"><p><b>Chưa tải được danh sách vị trí.</b> Hệ thống đang bận — vui lòng <a href="<?php echo esc_url( $page_url( $paged ) ); ?>">tải lại trang</a> sau ít phút.</p></div>
 	<?php elseif ( ! $items ) : ?>
@@ -156,7 +161,7 @@ get_header();
 				<?php
 				$r   = (array) ( $it['recruitment'] ?? array() );
 				$st  = (array) ( $r['status'] ?? array() );
-				$cls = ! empty( $st['is_open'] ) ? ( isset( $st['days_left'] ) && (int) $st['days_left'] <= 7 ? 'is-warn' : 'is-ok' ) : 'is-off';
+				$cls = ! empty( $st['is_open'] ) ? ( empty( $st['deadline'] ) ? 'is-gold' : ( isset( $st['days_left'] ) && (int) $st['days_left'] <= 7 ? 'is-warn' : 'is-ok' ) ) : 'is-off';
 				$url = cvc_position_url( (string) $it['slug'] );
 				?>
 				<article class="rd-pcard">
@@ -170,7 +175,7 @@ get_header();
 					<p class="rd-pcard-org"><?php echo esc_html( implode( ' · ', array_filter( array( (string) ( $r['agency'] ?? '' ), (string) ( $r['province'] ?? '' ) ) ) ) ); ?></p>
 					<dl class="rd-pcard-facts">
 						<div><dt>Chỉ tiêu</dt><dd><?php echo null !== ( $it['quantity'] ?? null ) ? (int) $it['quantity'] : '—'; ?></dd></div>
-						<div><dt>Hạn nộp</dt><dd><?php echo ! empty( $st['deadline'] ) ? esc_html( cvc_format_date_vn( (string) $st['deadline'] ) ) : 'Xem bản gốc'; ?></dd></div>
+						<div><dt>Hạn nộp</dt><dd><?php echo ! empty( $st['deadline'] ) ? esc_html( cvc_format_date_vn( (string) $st['deadline'] ) ) : 'Chưa rõ hạn nộp'; ?></dd></div>
 						<div class="is-wide"><dt>Trình độ, chuyên ngành</dt><dd><?php echo esc_html( implode( ' · ', array_filter( array( ! empty( $it['education_level'] ) ? cvc_rd_clip( (string) $it['education_level'], 60 ) : '', ! empty( $it['major_requirements'] ) ? cvc_rd_clip( (string) $it['major_requirements'], 120 ) : '' ) ) ) ?: 'Theo thông báo gốc' ); ?></dd></div>
 					</dl>
 					<p class="rd-pcard-foot">

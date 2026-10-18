@@ -221,7 +221,11 @@ $cq_btn = static function ( string $label, string $class ) use ( $rid, $here_url
 };
 
 // Trạng thái nhận hồ sơ.
-if ( $is_open ) {
+if ( $is_open && '' === $deadline ) {
+	// 18/10/2026: tin chưa có hạn nộp trong dữ liệu trích xuất -> không ghi "Đang nhận hồ sơ".
+	$st_label = 'Chưa rõ hạn nộp';
+	$st_class = 'is-mid';
+} elseif ( $is_open ) {
 	$st_label = 'Đang nhận hồ sơ' . ( null !== $days_left && $days_left <= 7 && ! $dl_unver ? ( 0 === $days_left ? ' · hạn cuối hôm nay' : ' · còn ' . $days_left . ' ngày' ) : '' );
 	$st_class = null !== $days_left && $days_left <= 7 ? 'is-warn' : 'is-ok';
 } elseif ( $in_progress ) {
@@ -234,7 +238,7 @@ if ( $is_open ) {
 
 get_header();
 ?>
-<main id="main" class="rd<?php echo 'position' === $rd_mode ? ' is-position' : ''; ?>" data-rd-slug="<?php echo esc_attr( $slug ); ?>">
+<main id="main" class="rd<?php echo 'position' === $rd_mode ? ' is-position' : ''; ?>" data-rd-slug="<?php echo esc_attr( $slug ); ?>" data-rd-id="<?php echo (int) $rid; ?>">
 <?php cvc_render_track_marker( 'recruitment_viewed', 'recruitment', $rid ); ?>
 <div class="rd-wrap">
 
@@ -269,6 +273,7 @@ get_header();
 				<?php endif; ?>
 				<?php if ( $has_pdf ) : ?><span class="rd-chip">Có văn bản gốc PDF</span><?php endif; ?>
 				<?php if ( '' !== $doc_number ) : ?><span class="rd-chip">Số: <?php echo esc_html( $doc_number ); ?></span><?php endif; ?>
+				<span class="rd-chip is-views" data-rd-views hidden>◉ <b></b> người đã xem</span>
 			</p>
 		</div>
 		<div class="rd-hero-side">
@@ -303,7 +308,7 @@ get_header();
 			</div>
 			<div class="rd-metric">
 				<span>Hạn nhận hồ sơ</span>
-				<b><?php echo esc_html( '' !== $deadline ? cvc_format_date_vn( $deadline ) : 'Chưa rõ' ); ?></b>
+				<b><?php echo esc_html( '' !== $deadline ? cvc_format_date_vn( $deadline ) : 'Chưa rõ hạn nộp' ); ?></b>
 				<small>
 					<?php
 					if ( '' === $deadline ) {
@@ -358,13 +363,13 @@ get_header();
 					<h2 id="rd-cur-h"><?php echo esc_html( $p_name ); ?></h2>
 					<p><?php echo esc_html( $agency_name . ( '' !== $location ? ' · ' . $location : '' ) ); ?></p>
 				</div>
-				<span class="rd-pill <?php echo esc_attr( $st_class ); ?>"><?php echo esc_html( $is_open ? 'Đang nhận hồ sơ' : ( $in_progress ? 'Đang tổ chức' : 'Đã hết hạn' ) ); ?></span>
+				<span class="rd-pill <?php echo esc_attr( $st_class ); ?>"><?php echo esc_html( $is_open ? ( '' === $deadline ? 'Chưa rõ hạn nộp' : 'Đang nhận hồ sơ' ) : ( $in_progress ? 'Đang tổ chức' : 'Đã hết hạn' ) ); ?></span>
 			</div>
 			<div class="rd-current-body">
 				<dl class="rd-facts is-3">
 					<div><dt>Chức danh / vị trí</dt><dd><?php echo esc_html( $p_name ); ?></dd></div>
 					<div><dt>Chỉ tiêu tuyển</dt><dd><?php echo ! empty( $position['quantity'] ) ? esc_html( $fmt_n( (int) $position['quantity'] ) ) : 'Theo thông báo gốc'; ?></dd></div>
-					<div><dt>Hạn nộp hồ sơ</dt><dd><?php echo esc_html( '' !== $deadline ? cvc_format_date_vn( $deadline ) : 'Theo thông báo gốc' ); ?></dd></div>
+					<div><dt>Hạn nộp hồ sơ</dt><dd><?php echo esc_html( '' !== $deadline ? cvc_format_date_vn( $deadline ) : 'Chưa rõ hạn nộp' ); ?></dd></div>
 					<div class="is-wide"><dt>Trình độ</dt><dd><?php echo esc_html( ! empty( $position['education_level'] ) ? (string) $position['education_level'] : 'Theo thông báo gốc' ); ?></dd></div>
 					<div class="is-wide"><dt>Ngành, chuyên ngành</dt><dd><?php echo esc_html( ! empty( $position['major_requirements'] ) ? (string) $position['major_requirements'] : 'Theo thông báo gốc' ); ?></dd></div>
 					<?php if ( '' !== $p_type || '' !== $p_method ) : ?>
@@ -525,7 +530,7 @@ get_header();
 			<?php foreach ( array( 'application_start_date' => 'Bắt đầu nhận hồ sơ', 'application_deadline' => 'Hạn nhận hồ sơ' ) as $k => $lbl ) : ?>
 				<div>
 					<dt><?php echo esc_html( $lbl ); ?></dt>
-					<dd><?php echo esc_html( ! empty( $dates[ $k ] ) ? cvc_format_date_vn( (string) $dates[ $k ] ) : 'Chưa rõ — xem bản gốc' ); ?></dd>
+					<dd><?php echo esc_html( ! empty( $dates[ $k ] ) ? cvc_format_date_vn( (string) $dates[ $k ] ) : ( 'application_deadline' === $k ? 'Chưa rõ hạn nộp' : 'Chưa rõ — xem bản gốc' ) ); ?></dd>
 					<?php $ev = $evidence[ $k ] ?? null; ?>
 					<?php if ( is_array( $ev ) && ! empty( $ev['snippet'] ) ) : ?>
 						<details class="rd-cite"><summary>✓ Trích dẫn văn bản</summary><p>“<?php echo esc_html( (string) $ev['snippet'] ); ?>”<small><?php echo esc_html( 'Nguồn: ' . (string) ( $ev['source'] ?? '' ) . ( ! empty( $ev['note'] ) ? ' — ' . $ev['note'] : '' ) ); ?></small></p></details>
@@ -959,8 +964,8 @@ get_header();
 					<div><b data-u="m">—</b><span>Phút</span></div>
 				</div>
 			<?php elseif ( $is_open ) : ?>
-				<p class="rd-dl"><?php echo esc_html( '' !== $deadline ? cvc_format_date_vn( $deadline ) : 'Chưa xác minh' ); ?></p>
-				<p class="rd-muted rd-small">Không hiển thị đếm ngược khi hạn nộp chưa có trích dẫn từ nguồn chính thức. Đối chiếu văn bản gốc.</p>
+				<p class="rd-dl"><?php echo esc_html( '' !== $deadline ? cvc_format_date_vn( $deadline ) : 'Chưa rõ hạn nộp' ); ?></p>
+				<p class="rd-muted rd-small"><?php echo '' !== $deadline ? 'Không hiển thị đếm ngược khi hạn nộp chưa có trích dẫn từ nguồn chính thức. Đối chiếu văn bản gốc.' : 'Thông báo chưa nêu rõ hoặc hệ thống chưa trích được hạn nộp. Đọc văn bản gốc hoặc liên hệ cơ quan tuyển dụng.'; ?></p>
 			<?php else : ?>
 				<p class="rd-dl is-off"><?php echo '' !== $deadline ? esc_html( cvc_format_date_vn( $deadline ) ) : 'Đã kết thúc'; ?></p>
 				<p class="rd-muted rd-small"><?php echo $in_progress ? esc_html( $st_label ) . '.' : 'Đã hết hạn nhận hồ sơ.'; ?></p>
@@ -976,6 +981,11 @@ get_header();
 			<div class="rd-bar <?php echo esc_attr( $vv['class'] ); ?>"><span style="width:<?php echo (int) ( $vv['score'] ?? 0 ); ?>%"></span></div>
 			<p class="rd-small"><b><?php echo null !== $vv['score'] ? (int) $vv['score'] . '/100' : '—'; ?></b> · Điểm bằng chứng</p>
 			<a class="rd-btn is-block" href="#xac-minh">Xem tiêu chí xác minh ↓</a>
+		</div>
+
+		<div class="rd-scard" id="gan-ban" data-rd-near>
+			<h2><span class="rd-ico" aria-hidden="true">⌖</span>Tuyển dụng gần bạn</h2>
+			<div class="rd-near-body" aria-live="polite"><p class="rd-small rd-muted">Đang tìm tin đang nhận hồ sơ gần bạn…</p></div>
 		</div>
 
 		<?php if ( '' !== $agency_name ) : ?>

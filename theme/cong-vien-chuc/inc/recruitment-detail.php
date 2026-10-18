@@ -244,3 +244,67 @@ function cvc_rd_clip( string $text, int $len ): string {
 
 	return rtrim( false !== $sp && $sp > $len * 0.6 ? mb_substr( $cut, 0, $sp ) : $cut, ' ,.;:' ) . '…';
 }
+
+/* ------------------------------------------------------------------
+ * 18/10/2026: số người đã xem + tin tuyển dụng gần bạn (theo IP / tỉnh tự chọn).
+ * Trang được lưu đệm (LiteSpeed) nên phần này nạp bằng AJAX công khai `cvc_rd_ctx`.
+ * WordPress gửi kèm IP thật của người xem cho API (X-CVC-Client-IP); API không lưu IP.
+ * ------------------------------------------------------------------ */
+add_action( 'wp_ajax_cvc_rd_ctx', 'cvc_rd_ajax_ctx' );
+add_action( 'wp_ajax_nopriv_cvc_rd_ctx', 'cvc_rd_ajax_ctx' );
+
+function cvc_rd_ajax_ctx(): void {
+	// phpcs:disable WordPress.Security.NonceVerification.Missing
+	$id   = absint( $_POST['id'] ?? 0 );
+	$vid  = preg_replace( '/[^A-Za-z0-9_-]/', '', (string) wp_unslash( $_POST['vid'] ?? '' ) );
+	$tinh = sanitize_title( wp_unslash( (string) ( $_POST['tinh'] ?? '' ) ) );
+	$view = ! empty( $_POST['view'] );
+	// phpcs:enable
+	nocache_headers();
+	$out = array( 'viewers' => null, 'near_html' => '' );
+	$api = new CVC_Api_Client( null, 8 );
+	if ( $id > 0 && $view ) {
+		$r = $api->post( '/api/recruitments/' . $id . '/view', array_filter( array( 'vid' => strlen( $vid ) >= 8 ? substr( $vid, 0, 64 ) : null ) ) );
+		if ( $r['ok'] ) {
+			$out['viewers'] = (int) ( $r['data']['data']['viewers'] ?? 0 );
+		}
+	}
+	$n = $api->get( '/api/recruitments/nearby', array_filter( array( 'province' => $tinh, 'exclude' => $id ?: null, 'limit' => 5 ) ) );
+	if ( $n['ok'] ) {
+		$out['near_html'] = cvc_rd_near_html( (array) ( $n['data']['data'] ?? array() ), $id > 0 );
+	}
+	wp_send_json_success( $out );
+}
+
+function cvc_rd_near_html( array $d, bool $detail ): string {
+	$prov  = is_array( $d['province'] ?? null ) ? $d['province'] : null;
+	$items = (array) ( $d['items'] ?? array() );
+	$opts  = '<option value="">— Chọn tỉnh / thành —</option>';
+	foreach ( (array) ( $d['provinces'] ?? array() ) as $p ) {
+		$opts .= '<option value="' . esc_attr( (string) $p['slug'] ) . '"' . selected( $prov['slug'] ?? '', (string) $p['slug'], false ) . '>' . esc_html( (string) $p['name'] ) . '</option>';
+	}
+	$select = '<label class="rd-near-pick"><span>' . ( $prov ? 'Không đúng nơi bạn ở?' : 'Chọn nơi bạn muốn làm việc:' ) . '</span><select data-rd-tinh aria-label="Chọn tỉnh / thành">' . $opts . '</select></label>';
+	ob_start();
+	if ( ! $prov ) {
+		echo '<p class="rd-small rd-muted">Chưa xác định được tỉnh/thành của bạn từ kết nối mạng.</p>' . $select; // phpcs:ignore WordPress.Security.EscapeOutput
+	} else {
+		$src = 'chosen' === ( $d['source'] ?? '' ) ? 'bạn đã chọn' : 'ước tính theo kết nối mạng';
+		echo '<p class="rd-near-where"><b>' . esc_html( (string) $prov['name'] ) . '</b><small>' . esc_html( $src ) . '</small></p>';
+		if ( ! $items ) {
+			echo '<p class="rd-small rd-muted">Chưa có tin ' . ( $detail ? 'khác ' : '' ) . 'đang nhận hồ sơ tại ' . esc_html( (string) $prov['name'] ) . '.</p>';
+		} else {
+			echo '<ul class="rd-near-list">';
+			foreach ( $items as $it ) {
+				$st   = (array) ( $it['status'] ?? array() );
+				$meta = array_filter( array( (string) ( $it['agency'] ?? '' ), (string) ( $st['label'] ?? '' ), ! empty( $it['viewers'] ) ? (int) $it['viewers'] . ' người đã xem' : '' ) );
+				echo '<li><a href="' . esc_url( cvc_recruitment_url( (string) $it['slug'] ) ) . '">' . esc_html( cvc_rd_clip( (string) $it['title'], 95 ) ) . '</a><small>' . esc_html( implode( ' · ', $meta ) ) . '</small></li>';
+			}
+			echo '</ul>';
+			echo '<p class="rd-near-more"><a href="' . esc_url( add_query_arg( array( 'tinh' => $prov['slug'], 'con-han' => 1 ), cvc_positions_url() ) ) . '">Xem vị trí đang tuyển tại ' . esc_html( (string) $prov['name'] ) . ' (' . (int) ( $d['total'] ?? 0 ) . ' thông báo) →</a></p>';
+		}
+		echo $select; // phpcs:ignore WordPress.Security.EscapeOutput
+	}
+	echo '<p class="rd-near-note">Vị trí ước tính từ IP bằng dữ liệu <a href="https://db-ip.com" target="_blank" rel="noopener nofollow">DB-IP</a>; hệ thống không lưu địa chỉ IP của bạn.</p>';
+
+	return (string) ob_get_clean();
+}
