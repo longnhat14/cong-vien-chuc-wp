@@ -39,6 +39,12 @@ $item_type_labels = array(
 	'exam_subject' => 'Môn thi',
 	'topic'        => 'Chủ đề',
 	'course'       => 'Khóa học',
+	// Lộ trình Career Intelligence (trang /tuyen-dung/, 18/10/2026).
+	'exam'           => 'Đề thi',
+	'legal_document' => 'Văn bản',
+	'knowledge_item' => 'Kiến thức',
+	'practice'       => 'Bài luyện',
+	'task'           => 'Nhiệm vụ',
 );
 ?>
 

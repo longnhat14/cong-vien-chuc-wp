@@ -216,6 +216,8 @@ get_header();
 					<?php endif; ?>
 				</div>
 
+				<?php if ( function_exists( 'cvc_ci_render_exam_jobs' ) ) { cvc_ci_render_exam_jobs( (int) ( $exam['id'] ?? 0 ) ); } // Career Intelligence: đề -> tin tuyển dụng ?>
+
 				<div class="dz-card space-y-2 text-xs">
 					<h3 class="font-extrabold text-xs text-acc uppercase tracking-wider">Ôn thêm trước khi thi</h3>
 					<p class="text-ink-muted text-[11px]">Xem khóa học và tài liệu ôn thi đang có trên hệ thống.</p>

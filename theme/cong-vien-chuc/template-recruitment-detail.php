@@ -234,6 +234,7 @@ get_header();
 					<a href="#lo-trinh-on" class="block p-2 rounded-xl hover:bg-acc-soft hover:text-emerald-800 text-emerald-800">Lộ trình ôn theo danh mục</a>
 				<?php endif; ?>
 				<a href="#ho-so-on-thi" class="block p-2 rounded-xl hover:bg-acc-soft hover:text-emerald-800">Hồ sơ ôn thi</a>
+				<a href="#lien-quan" class="block p-2 rounded-xl hover:bg-acc-soft hover:text-emerald-800 text-emerald-800">Đề &amp; văn bản liên quan · lưu / nhắc hạn</a>
 				<a href="#chuan-bi-ho-so" class="block p-2 rounded-xl hover:bg-acc-soft hover:text-emerald-800">Chuẩn bị hồ sơ &amp; điểm ưu tiên</a>
 			</nav>
 
@@ -575,6 +576,8 @@ get_header();
 					</div>
 				<?php endif; ?>
 			</section>
+
+			<?php if ( function_exists( 'cvc_ci_render_detail_block' ) ) { cvc_ci_render_detail_block( (int) ( $recruitment['id'] ?? 0 ) ); } // Career Intelligence 18/10/2026 ?>
 
 			<?php cvc_render_candidate_kit( $recruitment ); ?>
 
