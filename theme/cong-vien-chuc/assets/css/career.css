@@ -205,3 +205,14 @@ main.ci{background:var(--ci-bg);padding:0 0 46px}
 .ci .ci-btn.is-primary,.ci .ci-btn.is-teal{color:#fff}
 .ci .ci-pill{text-decoration:none}
 @media(max-width:700px){.ci-job-top{flex-wrap:wrap}.ci-job-top>.ci-pill{order:3;margin-left:50px}.ci-job-title{font-size:16px}}
+/* 18/10/2026: KPI vị trí đang tuyển (link) + 2 nút nổi bật Tuyển công chức / viên chức */
+a.ci-kpi{color:inherit;text-decoration:none;transition:border-color .15s,box-shadow .15s}a.ci-kpi:hover{border-color:#b7d6c7;box-shadow:0 6px 16px rgba(23,54,77,.08)}
+.ci-quick{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-bottom:11px}
+.ci-quick-btn{display:flex;align-items:center;gap:11px;padding:11px 13px;border:1px solid #cfe0d8;border-radius:11px;background:#fff;color:var(--ci-navy);text-decoration:none;transition:border-color .15s,box-shadow .15s,background .15s}
+.ci-quick-btn:hover{border-color:var(--ci-teal);box-shadow:0 6px 16px rgba(22,139,131,.1)}
+.ci-quick-btn b{display:block;font-size:16px;line-height:1.2}.ci-quick-btn small{display:block;color:var(--ci-muted);font-size:12px;margin-top:2px}
+.ci-quick-ico{display:grid;place-items:center;width:38px;height:38px;border-radius:10px;background:var(--ci-teal2);color:var(--ci-teal);font-size:19px;flex:none}
+.ci-quick-btn[data-ci-kind="public"] .ci-quick-ico{background:var(--ci-goldbg);color:#906c25}
+.ci-quick-btn.is-on{background:var(--ci-navy);border-color:var(--ci-navy);color:#fff}.ci-quick-btn.is-on small{color:#c9dce2}.ci-quick-btn.is-on .ci-quick-ico{background:rgba(255,255,255,.14);color:#fff}
+.ci-quick-btn:focus-visible{outline:2px solid var(--ci-teal);outline-offset:2px}
+@media(max-width:520px){.ci-quick{grid-template-columns:1fr}}

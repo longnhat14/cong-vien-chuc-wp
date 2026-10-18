@@ -95,7 +95,7 @@ get_header();
 	<div class="ci-wrap ci-main">
 		<section class="ci-kpis" aria-label="Số liệu">
 			<div class="ci-kpi"><span class="ci-sym" aria-hidden="true">⌂</span><div><b><?php echo isset( $counts['open_recruitments'] ) ? esc_html( number_format_i18n( (int) $counts['open_recruitments'] ) ) : '—'; ?></b><small>Tin đang nhận hồ sơ</small></div></div>
-			<div class="ci-kpi"><span class="ci-sym" aria-hidden="true">◷</span><div><b><?php echo isset( $counts['examining'] ) ? esc_html( number_format_i18n( (int) $counts['examining'] ) ) : '—'; ?></b><small>Đợt đang thi / có kết quả</small></div></div>
+			<a class="ci-kpi" href="<?php echo esc_url( add_query_arg( 'con-han', 1, cvc_positions_url() ) ); ?>"><span class="ci-sym" aria-hidden="true">☷</span><div><b><?php echo isset( $counts['open_positions'] ) ? esc_html( number_format_i18n( (int) $counts['open_positions'] ) ) : '—'; ?></b><small>Vị trí đang tuyển dụng</small></div></a>
 			<div class="ci-kpi"><span class="ci-sym" aria-hidden="true">▣</span><div><b><?php echo isset( $counts['published_exams'] ) ? esc_html( number_format_i18n( (int) $counts['published_exams'] ) ) : '—'; ?></b><small>Đề thi đang phát hành</small></div></div>
 			<div class="ci-kpi"><span class="ci-sym" aria-hidden="true">§</span><div><b><?php echo isset( $counts['verified_legal_documents'] ) ? esc_html( number_format_i18n( (int) $counts['verified_legal_documents'] ) ) : '—'; ?></b><small>Văn bản đã đối chiếu nguồn</small></div></div>
 		</section>
@@ -168,6 +168,23 @@ get_header();
 			<div class="ci-center">
 				<section id="ci-search" class="ci-composer">
 					<div class="ci-composer-top"><div><h3>Tìm kiếm thông minh</h3><p>Một truy vấn — tìm tin tuyển dụng, đề thi và văn bản liên quan.</p></div><span class="ci-pill">4 chế độ</span></div>
+					<div class="ci-quick" role="group" aria-label="Tìm nhanh theo loại tuyển dụng">
+						<?php
+						$quick = array(
+							'civil'  => array( 'Tuyển công chức', '⚖', 'Cơ quan hành chính nhà nước' ),
+							'public' => array( 'Tuyển viên chức', '✚', 'Đơn vị sự nghiệp công lập' ),
+						);
+						foreach ( $quick as $k => $qk ) :
+							$on    = array( $k ) === $f['loai'];
+							$nopen = isset( $counts['open_by_kind'][ $k ] ) ? (int) $counts['open_by_kind'][ $k ] : null;
+							$href  = cvc_ci_url( array( 'loai' => $on ? null : $k, 'tinh' => $f['tinh'] ?: null, 'nhom' => $f['nhom'] ?: null, 'q' => $f['q'] ?: null ) );
+							?>
+							<a class="ci-quick-btn<?php echo $on ? ' is-on' : ''; ?>" href="<?php echo esc_url( $href ); ?>" data-ci-kind="<?php echo esc_attr( $k ); ?>" aria-pressed="<?php echo $on ? 'true' : 'false'; ?>">
+								<span class="ci-quick-ico" aria-hidden="true"><?php echo esc_html( $qk[1] ); ?></span>
+								<span><b><?php echo esc_html( $qk[0] ); ?></b><small><?php echo esc_html( null !== $nopen ? $nopen . ' tin đang nhận hồ sơ · ' . $qk[2] : $qk[2] ); ?></small></span>
+							</a>
+						<?php endforeach; ?>
+					</div>
 					<div class="ci-modes" role="tablist" aria-label="Chế độ tìm kiếm">
 						<button type="button" class="ci-mode is-active" data-mode="all">Tất cả</button>
 						<button type="button" class="ci-mode" data-mode="jobs">Theo tin tuyển dụng</button>

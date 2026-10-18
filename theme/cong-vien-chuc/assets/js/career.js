@@ -173,6 +173,28 @@
     });
     $$('select', sf).forEach(function (s) { s.addEventListener('change', function () { var t = $('#' + s.getAttribute('data-sync')); if (t) t.value = s.value; }); });
   }
+  /* 18/10/2026: 2 nút nổi bật "Tuyển công chức" / "Tuyển viên chức" = bật đúng 1 loại trong bộ lọc */
+  function syncKindChips() {
+    var kinds = form ? $$('[name="loai[]"]:checked', form).map(function (x) { return x.value; }) : [];
+    $$('[data-ci-kind]').forEach(function (x) {
+      var act = kinds.length === 1 && kinds[0] === x.getAttribute('data-ci-kind');
+      x.classList.toggle('is-on', act); x.setAttribute('aria-pressed', act ? 'true' : 'false');
+    });
+  }
+  $$('[data-ci-kind]').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      if (!form) return;
+      e.preventDefault();
+      var k = a.getAttribute('data-ci-kind'), on = a.classList.contains('is-on');
+      $$('[name="loai[]"]', form).forEach(function (b) { b.checked = !on && b.value === k; });
+      state.tin = 0;
+      syncKindChips();
+      refreshAll();
+      setTab('jobs');
+      var j = $('#ci-tab-jobs'); if (j) j.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+  if (form) form.addEventListener('change', syncKindChips);
   ['#ci-e-type', '#ci-e-done', '#ci-e-sort'].forEach(function (id) { var el = $(id); if (el) el.addEventListener('change', function () { load('exams', 1); }); });
 
   /* ---------- Tin đang chọn -> đề & tài liệu ---------- */
