@@ -274,7 +274,7 @@
     $('#sx-resultBody').innerHTML = scoreHtml(a) + (fresh ? '<p class="sx-muted">Bấm "Xem lại bài làm" để xem đúng/sai từng câu, đáp án và căn cứ pháp lý.</p>' : '');
     $('#sx-resultDialog').classList.add('show');
     $('#sx-closeResult').onclick = function () { if (fresh) { location.reload(); return; } $('#sx-resultDialog').classList.remove('show'); };
-    $('#sx-showAnalysis').onclick = function () { if (fresh) { location.hash = 'phan-tich'; location.reload(); return; } $('#sx-resultDialog').classList.remove('show'); $('#sx-analysis').scrollIntoView({ behavior: 'smooth', block: 'center' }); };
+    $('#sx-showAnalysis').onclick = function () { if (D.result_url) { location.href = D.result_url; return; } if (fresh) { location.hash = 'phan-tich'; location.reload(); return; } $('#sx-resultDialog').classList.remove('show'); $('#sx-analysis').scrollIntoView({ behavior: 'smooth', block: 'center' }); };
   }
   function renderAnalysis() {
     if (!submitted) return;

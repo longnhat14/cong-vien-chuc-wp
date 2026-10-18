@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Tăng số này khi thêm/sửa rewrite rule để buộc flush lại đúng 1 lần.
-const CVC_REWRITE_VERSION = '12';
+const CVC_REWRITE_VERSION = '13';
 
 /**
  * Section hợp lệ của /tai-khoan/{section}/ (Phase 10) - map slug tiếng
@@ -221,6 +221,13 @@ function cvc_register_rewrite_rules(): void {
 		'top'
 	);
 
+	/* Kết quả & phân tích bài thi (18/10/2026) - chỉ chính chủ (API kiểm tra). */
+	add_rewrite_rule(
+		'^ket-qua-thi/([0-9]+)/?$',
+		'index.php?cvc_page=exam-result&cvc_attempt_id=$matches[1]',
+		'top'
+	);
+
 	/*
 	 * Tài liệu (Document model - Phase 11 monetization) - catalog free/
 	 * trả phí, chi tiết + mua, và proxy tải file (KHÔNG trỏ thẳng ra
@@ -422,6 +429,7 @@ function cvc_template_include( string $template ): string {
 		'admin'                 => 'template-admin.php',
 		'salary'                => 'template-salary.php',
 		'recruitment-round'     => 'template-recruitment-round.php',
+		'exam-result'           => 'template-exam-result.php',
 	);
 
 	if ( isset( $map[ $page ] ) ) {

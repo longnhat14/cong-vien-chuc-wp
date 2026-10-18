@@ -215,6 +215,7 @@ $smart_payload = array(
 	'attempt_id' => (int) $real_attempt_id,
 	'home_url'   => home_url( '/' ),
 	'submitted'  => (bool) $is_submitted,
+	'result_url' => $real_attempt_id > 0 ? cvc_exam_result_url( (int) $real_attempt_id ) : '',
 	'timer'      => array( 'mode' => $timer_mode, 'seconds' => (int) $timer_seconds, 'duration' => $exam_duration * 60 ),
 	'exam'       => array(
 		'title'         => $exam_title,
@@ -381,7 +382,7 @@ $doc_icon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H
 					<div id="sx-scorebox"></div>
 					<div id="sx-weakness"><p class="sx-muted">Kết quả theo chủ đề hiển thị ngay sau khi nộp bài.</p></div>
 					<div id="sx-recs"></div>
-					<a class="sx-btn sx-wide" href="<?php echo esc_url( cvc_account_url( 'recommendations' ) ); ?>">Xem gợi ý ôn tập</a>
+					<?php if ( $is_submitted && $real_attempt_id > 0 ) : ?><a class="sx-btn sx-primary sx-wide" href="<?php echo esc_url( cvc_exam_result_url( (int) $real_attempt_id ) ); ?>">Xem kết quả &amp; lộ trình ôn tập</a><?php else : ?><a class="sx-btn sx-wide" href="<?php echo esc_url( cvc_account_url( 'recommendations' ) ); ?>">Xem gợi ý ôn tập</a><?php endif; ?>
 				</div>
 			</section>
 		</aside>

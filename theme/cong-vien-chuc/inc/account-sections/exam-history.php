@@ -81,7 +81,7 @@ $status_labels = array(
 								<?php if ( 'in_progress' === $status ) : ?>
 									<a class="cvc-btn cvc-btn--small cvc-btn--primary" href="<?php echo esc_url( cvc_exam_attempt_url( $attempt['id'] ) ); ?>">Tiếp tục</a>
 								<?php else : ?>
-									<a class="cvc-btn cvc-btn--small cvc-btn--secondary" href="<?php echo esc_url( cvc_exam_attempt_url( $attempt['id'] ) ); ?>">Xem kết quả</a>
+									<a class="cvc-btn cvc-btn--small cvc-btn--primary" href="<?php echo esc_url( cvc_exam_result_url( (int) $attempt['id'] ) ); ?>">Phân tích</a> <a class="cvc-btn cvc-btn--small cvc-btn--secondary" href="<?php echo esc_url( cvc_exam_attempt_url( $attempt['id'] ) ); ?>">Bài làm</a>
 								<?php endif; ?>
 							</td>
 						</tr>

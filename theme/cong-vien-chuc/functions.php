@@ -50,6 +50,7 @@ require_once __DIR__ . '/inc/seo.php';
 require_once __DIR__ . '/inc/auth.php';
 require_once __DIR__ . '/inc/actions.php';
 require_once __DIR__ . '/inc/exam.php';
+require_once __DIR__ . '/inc/exam-result.php';
 require_once __DIR__ . '/inc/documents.php';
 require_once __DIR__ . '/inc/admin-settings.php';
 require_once __DIR__ . '/inc/combo.php';
