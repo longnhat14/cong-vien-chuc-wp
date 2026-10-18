@@ -295,3 +295,4 @@ a.side-btn{text-decoration:none}
 .er-introside{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}.er-tool{border:1px solid #cbd6d2;background:#fff;color:#17334f;border-radius:10px;padding:8px 13px;font:inherit;font-size:14px;cursor:pointer;text-decoration:none;white-space:nowrap}.er-tool:hover{border-color:#8fa9bd}
 @media(max-width:650px){.er-introside{justify-content:flex-start;margin-top:12px}.er-introside .complete{margin-top:0}}
 @media print{.er-introside .er-tool{display:none!important}}
+.cq-goform{margin:0}.cq-goform .side-btn{width:100%;text-align:left;font:inherit;cursor:pointer}

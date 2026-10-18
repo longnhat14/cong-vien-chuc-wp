@@ -23,6 +23,7 @@ const CVC_REWRITE_VERSION = '13';
 function cvc_account_sections(): array {
 	return array(
 		'tong-quan'         => 'overview',
+		'ho-so-chinh-phuc'  => 'conquest',
 		'ho-so'             => 'profile',
 		'muc-tieu'          => 'goals',
 		'lo-trinh'          => 'learning-path',
@@ -36,6 +37,11 @@ function cvc_account_sections(): array {
 		'chung-chi'         => 'certificates',
 		'bao-mat'           => 'security',
 	);
+}
+
+/** Mục chính của khu vực tài khoản (thứ tự hiển thị, 18/10/2026). */
+function cvc_account_primary_sections(): array {
+	return array( 'overview', 'conquest', 'bookmarks', 'my-documents', 'exam-history', 'learning-path' );
 }
 
 add_action( 'init', 'cvc_register_rewrite_rules' );

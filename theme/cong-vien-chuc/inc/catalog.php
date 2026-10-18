@@ -246,6 +246,7 @@ function cvc_cat_card_exam( array $e, int $no ): void {
 		<div class="ec-actions">
 			<a class="ec-btn is-primary" href="<?php echo esc_url( $url ); ?>"><?php echo esc_html( $label ); ?></a>
 			<?php echo cvc_cat_save_btn( 'exam', (int) $e['id'], ! empty( $e['saved'] ), 'đề' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+			<button type="button" class="ec-attach" data-ec-attach="<?php echo (int) $e['id']; ?>" title="Thêm đề này vào lộ trình của Hồ sơ chinh phục kỳ thi">⊕ Gắn mục tiêu</button>
 		</div>
 	</article>
 	<?php
@@ -778,6 +779,25 @@ function cvc_cat_ajax_view(): void {
 			'fcount' => cvc_cat_filter_count( $f ),
 		)
 	);
+}
+
+add_action( 'wp_ajax_cvc_cat_attach', 'cvc_cat_ajax_attach' );
+add_action( 'wp_ajax_nopriv_cvc_cat_attach', 'cvc_cat_ajax_attach' );
+
+/** "Gắn đề thi với mục tiêu của tôi" -> lộ trình của hồ sơ chinh phục chính. */
+function cvc_cat_ajax_attach(): void {
+	check_ajax_referer( 'cvc_cat', 'nonce' );
+	$token = cvc_auth_token();
+	if ( null === $token ) {
+		wp_send_json_error( array( 'message' => 'Đăng nhập để gắn đề vào hồ sơ chinh phục.', 'login' => true ), 401 );
+	}
+	$res = ( new CVC_Api_Client( null, 30 ) )->post( '/api/me/conquest/attach-exam', array( 'exam_id' => absint( $_POST['id'] ?? 0 ) ), $token );
+	$url = function_exists( 'cvc_conquest_url' ) ? cvc_conquest_url( (int) ( $res['data']['data']['goal_id'] ?? 0 ) ) : cvc_account_url();
+	if ( ! $res['ok'] ) {
+		$msg = (string) ( $res['data']['message'] ?? '' );
+		wp_send_json_error( array( 'message' => '' !== $msg && in_array( (int) $res['status'], array( 404, 422 ), true ) ? $msg : cvc_api_error_message( $res ), 'profile' => ! empty( $res['data']['need_profile'] ) ? cvc_conquest_url() : null ), (int) ( $res['status'] ?? 0 ) ?: 500 );
+	}
+	wp_send_json_success( array( 'message' => (string) ( $res['data']['message'] ?? 'Đã gắn đề vào hồ sơ.' ), 'url' => $url ) );
 }
 
 add_action( 'wp_ajax_cvc_cat_save', 'cvc_cat_ajax_save' );

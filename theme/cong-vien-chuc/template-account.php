@@ -23,6 +23,12 @@ if ( 'my-documents' === $section_slug ) {
 	$section_slug = 'tai-lieu-da-mua';
 }
 
+if ( 'muc-tieu' === $section_slug || 'goals' === $section_slug ) {
+	// 18/10/2026: mục tiêu ôn thi quản lý trong Hồ sơ chinh phục kỳ thi (mỗi mục tiêu = 1 hồ sơ).
+	wp_safe_redirect( cvc_account_url( 'conquest' ) );
+	exit;
+}
+
 $section = $sections[ $section_slug ] ?? null;
 
 if ( null === $section ) {
@@ -33,23 +39,24 @@ if ( null === $section ) {
 cvc_seo_set_noindex();
 
 $section_titles = array(
-	'overview'             => 'Tổng quan',
-	'profile'              => 'Hồ sơ cá nhân',
-	'goals'                => 'Mục tiêu ôn thi',
-	'learning-path'        => 'Lộ trình học tập',
-	'bookmarks'            => 'Đã đánh dấu',
-	'exam-history'         => 'Lịch sử làm bài',
-	'my-courses'           => 'Khóa học của tôi',
-	'my-documents'         => 'Tài liệu đã mua',
-	'recommendations'      => 'Gợi ý cho bạn',
+	'overview'             => 'Tổng quan cá nhân',
+	'conquest'             => 'Hồ sơ chinh phục kỳ thi',
+	'bookmarks'            => 'Tin & nội dung đã lưu',
+	'my-documents'         => 'Tài liệu của tôi',
+	'exam-history'         => 'Lịch sử luyện thi & kết quả',
+	'learning-path'        => 'Kế hoạch & nhắc lịch',
 	'recruitment-matches'  => 'Việc làm phù hợp',
+	'recommendations'      => 'Gợi ý cho bạn',
+	'my-courses'           => 'Khóa học của tôi',
 	'notifications'        => 'Thông báo',
 	'certificates'         => 'Chứng chỉ của tôi',
+	'profile'              => 'Hồ sơ cá nhân',
 	'security'             => 'Bảo mật & đăng nhập',
 );
 
 $section_fa_icons = array(
 	'overview'             => 'fa-chart-pie',
+	'conquest'             => 'fa-flag-checkered',
 	'profile'              => 'fa-user-gear',
 	'goals'                => 'fa-bullseye',
 	'learning-path'        => 'fa-route',
@@ -64,7 +71,7 @@ $section_fa_icons = array(
 	'security'             => 'fa-shield-halved',
 );
 
-cvc_seo_set_title( $section_titles[ $section ] . ' — Dashboard Công Viên Chức' );
+cvc_seo_set_title( ( $section_titles[ $section ] ?? 'Tài khoản' ) . ' — Công Viên Chức' );
 
 function cvc_status_label( string $status ): string {
 	$map = array(
@@ -80,6 +87,11 @@ function cvc_status_label( string $status ): string {
 	);
 
 	return $map[ $status ] ?? $status;
+}
+
+if ( 'conquest' === $section ) {
+	require get_theme_file_path( '/inc/account-sections/conquest-page.php' );
+	return;
 }
 
 get_header();

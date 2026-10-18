@@ -886,9 +886,9 @@ function cvc_ci_render_detail_block( int $recruitment_id ): void {
 						<?php if ( ! empty( $st['is_open'] ) && ! empty( $st['deadline_verified'] ) ) : ?>
 							<button type="button" class="ci-btn<?php echo ! empty( $rec['reminder'] ) ? ' is-teal' : ''; ?>" data-ci="reminder" data-id="<?php echo (int) $recruitment_id; ?>" aria-pressed="<?php echo ! empty( $rec['reminder'] ) ? 'true' : 'false'; ?>"><?php echo ! empty( $rec['reminder'] ) ? '◷ Đang nhắc hạn' : '◷ Nhắc hạn nộp hồ sơ'; ?></button>
 						<?php endif; ?>
-						<button type="button" class="ci-btn is-primary" data-ci="goal-rec" data-id="<?php echo (int) $recruitment_id; ?>">◎ Đặt làm mục tiêu &amp; tạo lộ trình</button>
+						<?php echo cvc_cq_go_button( 'recruitment', (int) $recruitment_id, '◎ Chinh phục kỳ thi này', 'ci-btn is-primary', home_url( add_query_arg( null, null ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 					<?php else : ?>
-						<a class="ci-btn is-primary" href="<?php echo esc_url( cvc_ci_login_url() ); ?>" rel="nofollow">Đăng nhập để lưu, nhắc hạn và tạo lộ trình</a>
+						<a class="ci-btn is-primary" href="<?php echo esc_url( cvc_ci_login_url() ); ?>" rel="nofollow">Đăng nhập để chinh phục kỳ thi này</a>
 					<?php endif; ?>
 					<a class="ci-btn" href="<?php echo esc_url( cvc_ci_url( array( 'nhom' => (string) ( $rec['job_family'] ?? '' ) ) ) ); ?>">Tin cùng nhóm vị trí →</a>
 				</div>
