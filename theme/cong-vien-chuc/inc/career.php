@@ -696,7 +696,7 @@ add_action( 'wp_enqueue_scripts', 'cvc_ci_assets', 60 );
 
 function cvc_ci_assets(): void {
 	$page = (string) get_query_var( 'cvc_page' );
-	if ( ! in_array( $page, array( 'recruitments', 'recruitment-detail', 'exam-detail' ), true ) ) {
+	if ( ! in_array( $page, array( 'recruitments', 'recruitment-detail', 'recruitment-position', 'exam-detail' ), true ) ) {
 		return;
 	}
 	wp_enqueue_style( 'cvc-career', get_theme_file_uri( '/assets/css/career.css' ), array(), (string) filemtime( get_theme_file_path( '/assets/css/career.css' ) ) );

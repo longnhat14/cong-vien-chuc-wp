@@ -80,7 +80,7 @@ get_header();
 					<div class="ci-eyebrow"><i class="ci-pulse" aria-hidden="true"></i> Tuyển dụng · Đề thi · Văn bản · Lộ trình</div>
 					<h1><?php echo esc_html( '' !== $f['nhom'] || '' !== $province_name ? $title : 'Từ cơ hội tuyển dụng đến lộ trình chinh phục' ); ?></h1>
 					<p>Tìm cơ hội còn hạn từ nguồn chính thức, xem đề thi và văn bản liên quan, hiểu vì sao nội dung được đề xuất — rồi biến mục tiêu dự tuyển thành kế hoạch học tập rõ ràng.</p>
-					<div class="ci-hero-actions"><a class="ci-btn is-primary" href="#ci-search">Tìm cơ hội &amp; đề thi ↗</a><a class="ci-btn" href="<?php echo esc_url( add_query_arg( 'tab', 'path', cvc_ci_url() ) ); ?>" data-ci-tab="path">Xem lộ trình cá nhân</a></div>
+					<div class="ci-hero-actions"><a class="ci-btn is-primary" href="#ci-search">Tìm cơ hội &amp; đề thi ↗</a><a class="ci-btn" href="<?php echo esc_url( cvc_positions_url() ); ?>">Tìm theo vị trí tuyển dụng</a><a class="ci-btn" href="<?php echo esc_url( add_query_arg( 'tab', 'path', cvc_ci_url() ) ); ?>" data-ci-tab="path">Xem lộ trình cá nhân</a></div>
 				</div>
 				<div class="ci-hero-summary">
 					<small>ĐANG NHẬN HỒ SƠ</small>

@@ -136,7 +136,7 @@ function cvc_is_nav_section_active( string $section ): bool {
 		case 'topics':
 			return in_array( $page, array( 'topics', 'topic-detail' ), true );
 		case 'recruitments':
-			return in_array( $page, array( 'recruitments', 'recruitment-detail' ), true );
+			return in_array( $page, array( 'recruitments', 'recruitment-detail', 'recruitment-position', 'recruitment-positions' ), true );
 		case 'knowledge':
 			return in_array( $page, array( 'knowledge', 'knowledge-detail' ), true );
 		case 'exams':

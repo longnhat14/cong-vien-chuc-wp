@@ -141,6 +141,20 @@ add_filter(
 	}
 );
 
+// 18/10/2026: trang đã gọi cvc_seo_set_noindex() -> Rank Math cũng in noindex (trước đây in kèm "index, follow").
+add_filter(
+	'rank_math/frontend/robots',
+	static function ( $robots ) {
+		if ( empty( $GLOBALS['cvc_seo']['noindex'] ) || ! is_array( $robots ) ) {
+			return $robots;
+		}
+		$robots['index']  = 'noindex';
+		$robots['follow'] = 'follow';
+
+		return $robots;
+	}
+);
+
 function cvc_seo_filter_title( string $title ): string {
 	if ( ! empty( $GLOBALS['cvc_seo']['title'] ) ) {
 		return $GLOBALS['cvc_seo']['title'] . ' - ' . get_bloginfo( 'name' );
