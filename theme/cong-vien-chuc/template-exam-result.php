@@ -307,7 +307,6 @@ else :
 							<button class="primary-action" type="button" data-action="practice" data-kind="<?php echo esc_attr( (string) $act['kind'] ); ?>">Bắt đầu làm bài</button>
 						<?php else : ?>
 							<button class="primary-action" type="button" data-action="start-exam" data-exam="<?php echo (int) ( $act['exam_id'] ?? 0 ); ?>">Bắt đầu làm bài</button>
-							<a href="<?php $a( cvc_exam_url( (string) ( $act['slug'] ?? '' ) ) ); ?>">Chi tiết đề</a>
 						<?php endif; ?>
 					</div>
 				</article>

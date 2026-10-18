@@ -28,6 +28,29 @@ if ( ! $is_found ) {
 	cvc_seo_set_noindex();
 }
 
+/*
+ * Vào thi ngay (18/10/2026): người đã đăng nhập mở đề là bắt đầu làm bài luôn - không còn bước
+ * "xem trước câu hỏi". API tự mở lại lượt đang làm dở của đề nếu có (không tạo lượt trùng).
+ * Khách / bot không có token -> vẫn thấy trang giới thiệu đề + nút đăng nhập (đăng nhập xong
+ * quay lại đúng URL này và vào thi luôn).
+ */
+$start_error = '';
+$token       = cvc_auth_token();
+if ( $is_found && null !== $token && (int) ( $exam['questions_count'] ?? count( (array) ( $exam['questions'] ?? array() ) ) ) > 0 ) {
+	nocache_headers();
+	$started = ( new CVC_Exam_Attempt_Service() )->start( (int) ( $exam['id'] ?? 0 ), 'mock', $token );
+	$att_id  = (int) ( $started['data']['data']['id'] ?? 0 );
+	if ( $started['ok'] && $att_id > 0 ) {
+		wp_safe_redirect( cvc_exam_attempt_url( $att_id ) );
+		exit;
+	}
+	if ( 401 === (int) ( $started['status'] ?? 0 ) ) {
+		$token = null; // token hết hạn -> hiện nút đăng nhập.
+	} else {
+		$start_error = cvc_api_error_message( $started );
+	}
+}
+
 cvc_seo_set_title( $is_found ? (string) $exam['title'] : 'Chi tiết đề thi trắc nghiệm' );
 
 $breadcrumb_items = array(
@@ -136,64 +159,24 @@ get_header();
 
 				</aside>
 
-				<!-- CENTER MAIN COLUMN (6 COLS — QUESTION PREVIEW) -->
+				<!-- CENTER MAIN COLUMN (6 COLS — HƯỚNG DẪN; đã bỏ phần xem trước câu hỏi 18/10/2026) -->
 				<div class="lg:col-span-6 space-y-4">
-
-					<div class="dz-panel space-y-5">
-						<div class="flex items-center justify-between border-b border-slate-300 pb-3">
-							<h2 class="text-base font-black text-ink flex items-center gap-2">
-								<i class="fa-solid fa-eye text-acc"></i> Xem trước câu hỏi (<?php echo esc_html( min( 5, count( $questions ) ) ); ?>/<?php echo esc_html( $total_q ); ?> câu)
-							</h2>
-						</div>
-
-						<?php if ( empty( $questions ) ) : ?>
-							<?php cvc_render_empty_state( 'Đề thi này chưa có câu hỏi được công bố.' ); ?>
+					<div class="dz-panel space-y-4 text-sm text-ink-2">
+						<h2 class="text-base font-black text-ink flex items-center gap-2"><i class="fa-solid fa-circle-play text-acc"></i> Vào thi ngay</h2>
+						<?php if ( '' !== $start_error ) : ?>
+							<p class="text-red-700 font-bold"><?php echo esc_html( $start_error ); ?></p>
 						<?php endif; ?>
-
-						<div class="space-y-4">
-							<?php
-							$preview_questions = array_slice( $questions, 0, 5 );
-							foreach ( $preview_questions as $q_idx => $q_item ) :
-								$q_text          = $q_item['question_text'] ?? ( $q_item['question'] ?? ( $q_item['content'] ?? 'Nội dung câu hỏi trắc nghiệm.' ) );
-								$raw_opts        = $q_item['options'] ?? array();
-								$normalized_opts = array();
-								if ( is_array( $raw_opts ) ) {
-									foreach ( $raw_opts as $k => $v ) {
-										if ( is_array( $v ) ) {
-											$normalized_opts[] = array(
-												'option_key'  => $v['option_key'] ?? $k,
-												'option_text' => $v['option_text'] ?? ( $v['text'] ?? '' ),
-											);
-										} else {
-											$normalized_opts[] = array(
-												'option_key'  => is_string( $k ) ? $k : chr( 65 + (int) $k ),
-												'option_text' => (string) $v,
-											);
-										}
-									}
-								}
-								?>
-								<div class="dz-card space-y-3 text-xs">
-									<h4 class="font-extrabold text-ink leading-relaxed flex items-start gap-2">
-										<span class="text-acc shrink-0">Câu <?php echo $q_idx + 1; ?>:</span>
-										<span><?php echo esc_html( $q_text ); ?></span>
-									</h4>
-
-									<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-ink-2 pt-1">
-										<?php foreach ( $normalized_opts as $opt ) : ?>
-											<div class="p-2 bg-white border border-slate-300 rounded-xl flex items-center gap-2">
-												<span class="w-5 h-5 rounded-lg bg-white text-acc font-bold flex items-center justify-center text-[10px] shrink-0">
-													<?php echo esc_html( $opt['option_key'] ); ?>
-												</span>
-												<span class="truncate"><?php echo esc_html( $opt['option_text'] ); ?></span>
-											</div>
-										<?php endforeach; ?>
-									</div>
-								</div>
-							<?php endforeach; ?>
-						</div>
+						<?php if ( empty( $questions ) && 0 === $total_q ) : ?>
+							<?php cvc_render_empty_state( 'Đề thi này chưa có câu hỏi được công bố.' ); ?>
+						<?php else : ?>
+							<p>Đề gồm <strong><?php echo esc_html( (string) $total_q ); ?> câu</strong><?php echo $duration > 0 ? ', làm trong <strong>' . esc_html( (string) $duration ) . ' phút</strong>' : ''; ?>. Bấm vào thi là đồng hồ bắt đầu chạy; câu hỏi chỉ hiện khi bạn làm bài.</p>
+							<ul class="list-disc pl-5 space-y-1">
+								<li>Đáp án được lưu tự động vào tài khoản sau mỗi lần chọn.</li>
+								<li>Có thể đánh dấu câu để xem lại và nộp bài bất cứ lúc nào; hết giờ hệ thống tự nộp.</li>
+								<li>Nộp bài xong mở ngay trang Kết quả &amp; Phân tích: điểm, câu sai, căn cứ văn bản và bài luyện đề xuất.</li>
+							</ul>
+						<?php endif; ?>
 					</div>
-
 				</div>
 
 				<!-- RIGHT SIDEBAR (3 COLS — LAUNCH EXAM OS X CTA + UPSELL) -->
@@ -212,11 +195,11 @@ get_header();
 						</p>
 					</div>
 
-					<?php if ( empty( $questions ) ) : ?>
+					<?php if ( empty( $questions ) && 0 === $total_q ) : ?>
 						<p class="text-xs text-ink-muted">Đề chưa có câu hỏi nên chưa thể làm bài.</p>
-					<?php elseif ( ! cvc_is_logged_in() ) : ?>
-						<a href="<?php echo esc_url( cvc_login_url( cvc_exam_url( $slug ) ) ); ?>" class="block w-full py-3.5 text-white font-black text-sm rounded-2xl bg-acc hover:bg-acc-deep">
-							Đăng nhập để làm bài &rarr;
+					<?php elseif ( null === $token ) : ?>
+						<a href="<?php echo esc_url( cvc_login_url( cvc_exam_url( $slug ) ) ); ?>" rel="nofollow" class="block w-full py-3.5 text-white font-black text-sm rounded-2xl bg-acc hover:bg-acc-deep">
+							Đăng nhập để vào thi &rarr;
 						</a>
 						<p class="text-[10px] text-ink-muted">Miễn phí. Cần tài khoản để lưu kết quả và xem giải thích từng câu.</p>
 					<?php else : ?>
@@ -226,7 +209,7 @@ get_header();
 							<input type="hidden" name="exam_id" value="<?php echo esc_attr( (string) (int) ( $exam['id'] ?? 0 ) ); ?>">
 							<input type="hidden" name="mode" value="mock">
 							<button type="submit" class="block w-full py-3.5 text-white font-black text-sm rounded-2xl bg-acc hover:bg-acc-deep">
-								Bắt đầu làm bài &rarr;
+								Vào thi &rarr;
 							</button>
 						</form>
 						<p class="text-[10px] text-ink-muted">Bài làm được lưu tự động; nộp bài để xem điểm và giải thích.</p>
