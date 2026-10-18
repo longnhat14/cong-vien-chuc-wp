@@ -115,7 +115,7 @@ get_header();
 		<div class="rd-metrics is-3">
 			<div class="rd-metric"><span>Vị trí trên hệ thống</span><b><?php echo esc_html( number_format( (int) ( $facets['total'] ?? 0 ), 0, ',', '.' ) ); ?></b><small>Từ các thông báo đã đăng</small></div>
 			<div class="rd-metric"><span>Đang nhận hồ sơ</span><b><?php echo esc_html( number_format( (int) ( $facets['open'] ?? 0 ), 0, ',', '.' ) ); ?></b><small>Còn hạn theo văn bản</small></div>
-			<div class="rd-metric"><span>Tỉnh / thành có tuyển</span><b><?php echo count( (array) ( $facets['provinces'] ?? array() ) ); ?></b><small>Theo nơi làm việc</small></div>
+			<div class="rd-metric"><span>Tỉnh / thành có tuyển</span><b><?php echo count( array_filter( (array) ( $facets['provinces'] ?? array() ), static fn ( $p ) => (int) ( $p['count'] ?? 0 ) > 0 ) ); ?></b><small>Theo nơi làm việc</small></div>
 		</div>
 	</header>
 

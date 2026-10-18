@@ -23,7 +23,8 @@ if ( $logged_in ) {
 $overview_res = cvc_ci_api( '/api/career/overview', array(), null, 10, 300 );
 $ov           = $overview_res['ok'] ? (array) ( $overview_res['data']['data'] ?? array() ) : array();
 $counts       = (array) ( $ov['counts'] ?? array() );
-$provinces    = array_values( array_filter( (array) ( $ov['provinces'] ?? array() ), static fn ( $p ) => is_array( $p ) && (int) ( $p['total'] ?? 0 ) > 0 ) );
+// 18/10/2026: hiện đủ 34 tỉnh/thành (API trả cả tỉnh chưa có tin, open_count = 0).
+$provinces    = array_values( array_filter( (array) ( $ov['provinces'] ?? array() ), static fn ( $p ) => is_array( $p ) && ! empty( $p['id'] ) ) );
 $families     = (array) ( $ov['families'] ?? array() );
 $fam_counts   = array();
 foreach ( $families as $fm ) {
