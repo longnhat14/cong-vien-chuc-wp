@@ -249,13 +249,15 @@
     post('cvc_exam_submit', {}).then(function (res) {
       busy = false;
       if (!res || !res.success) {
-        if (res && res.data && res.data.already_submitted) { location.reload(); return; }
+        if (res && res.data && res.data.already_submitted) { if (D.result_url) { location.href = D.result_url; return; } location.reload(); return; }
         $('#sx-submitTop').disabled = false; $('#sx-submitTop').textContent = '▤ Nộp bài';
         toast((res && res.data && res.data.message) || 'Nộp bài thất bại, vui lòng thử lại.');
         return;
       }
       var p = res.data || {};
       try { sessionStorage.setItem(resultKey, JSON.stringify({ topic_stats: p.topic_stats || [], recommendations: p.recommendations || [] })); } catch (e) {}
+      // Nộp xong -> mở thẳng trang Kết quả & Phân tích (/ket-qua-thi/{id}/).
+      if (D.result_url) { submitted = true; $('#sx-submitTop').textContent = 'Đã nộp — đang mở kết quả…'; toast('Đã nộp bài. Đang mở trang kết quả và phân tích…'); location.href = D.result_url; return; }
       showResult(p.data || {}, true);
     }).catch(function () {
       busy = false; $('#sx-submitTop').disabled = false; $('#sx-submitTop').textContent = '▤ Nộp bài';
