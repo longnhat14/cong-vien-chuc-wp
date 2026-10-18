@@ -27,6 +27,27 @@ if ( $cvc_province_id > 0 && function_exists( 'cvc_home17_data' ) ) {
 	}
 }
 
+// Phase 16: loc theo loai tuyen dung (?loai=) x phuong thuc (?phuong-thuc=) - bang tra backend.
+$cvc_types   = cvc_employment_type_options();
+$cvc_methods = cvc_recruitment_method_options();
+$cvc_type    = isset( $_GET['loai'] ) ? sanitize_key( wp_unslash( $_GET['loai'] ) ) : '';
+$cvc_type    = isset( $cvc_types[ $cvc_type ] ) ? $cvc_type : '';
+$cvc_method  = isset( $_GET['phuong-thuc'] ) ? sanitize_key( wp_unslash( $_GET['phuong-thuc'] ) ) : '';
+$cvc_method  = isset( $cvc_methods[ $cvc_method ] ) ? $cvc_method : '';
+$cvc_filter_args = array_filter(
+	array(
+		'tinh'        => $cvc_province_id > 0 ? $cvc_province_id : null,
+		'loai'        => '' !== $cvc_type ? $cvc_type : null,
+		'phuong-thuc' => '' !== $cvc_method ? $cvc_method : null,
+	)
+);
+$cvc_list_url = static function ( array $override = array(), int $page = 1 ) use ( $cvc_filter_args, $q ): string {
+	$args = array_filter( array_merge( $cvc_filter_args, $override ), static fn ( $v ) => null !== $v && '' !== $v );
+	$url  = cvc_listing_page_url_builder( 'cvc_recruitments_url', $q )( $page );
+
+	return empty( $args ) ? $url : add_query_arg( $args, $url );
+};
+
 $service = new CVC_Recruitment_Service();
 $result  = $service->list(
 	array(
@@ -34,6 +55,8 @@ $result  = $service->list(
 		'page'     => $paged,
 		'search'   => $q,
 	) + ( $cvc_province_id > 0 ? array( 'province_id' => $cvc_province_id ) : array() )
+	+ ( '' !== $cvc_type ? array( 'employment_type' => $cvc_type ) : array() )
+	+ ( '' !== $cvc_method ? array( 'method' => $cvc_method ) : array() )
 );
 
 $ok           = (bool) $result['ok'];
@@ -44,11 +67,11 @@ $lastPg       = (int) ( $pagination['last_page'] ?? 1 );
 
 // Không còn fallback dữ liệu mẫu (fixture) khi API lỗi/trống - hiện đúng trạng thái.
 
-// Dot da het han nop nhung dang to chuc thi / vua co ket qua - thi sinh theo doi (chi trang 1, khong tim kiem).
-$cvc_examining = array();
-if ( 1 === $paged && '' === $q && 0 === $cvc_province_id ) {
-	$cvc_ex_res    = $service->list( array( 'stage' => 'examining', 'per_page' => 10 ) );
-	$cvc_examining = ! empty( $cvc_ex_res['ok'] ) ? (array) ( $cvc_ex_res['data']['data']['data'] ?? array() ) : array();
+// Phase 16: dot dang to chuc thi / co ket qua - ke ca dot chi co lich thi, danh sach, ket qua
+// (chua thu thap duoc thong bao mo dang ky). Chi trang 1, khong tim kiem / loc loai.
+$cvc_rounds = array();
+if ( 1 === $paged && '' === $q && '' === $cvc_type && '' === $cvc_method ) {
+	$cvc_rounds = cvc_recruitment_rounds_in_progress( 10, $cvc_province_id );
 }
 
 cvc_seo_set_title( 'Tin tuyển dụng công chức, viên chức' );
@@ -78,16 +101,38 @@ get_header();
 	<div class="dz-cols is-3">
 		<aside class="dz-colside">
 			<?php cvc_render_listing_search( cvc_recruitments_url(), $q, 'Tên cơ quan, địa phương…', 'Tìm tin tuyển dụng' ); ?>
+			<nav class="dz-box" aria-label="Lọc theo loại tuyển dụng">
+				<h2 class="dz-box-head">Loại tuyển dụng</h2>
+				<div class="dz-box-body">
+					<ul class="dz-toc">
+						<li><a href="<?php echo esc_url( $cvc_list_url( array( 'loai' => null ) ) ); ?>" class="<?php echo '' === $cvc_type ? 'is-active' : ''; ?>">Tất cả</a></li>
+						<?php foreach ( $cvc_types as $k => $lbl ) : ?>
+							<li><a href="<?php echo esc_url( $cvc_list_url( array( 'loai' => $k ) ) ); ?>" class="<?php echo $k === $cvc_type ? 'is-active' : ''; ?>"><?php echo esc_html( $lbl ); ?></a></li>
+						<?php endforeach; ?>
+					</ul>
+				</div>
+			</nav>
+			<nav class="dz-box" aria-label="Lọc theo phương thức tuyển">
+				<h2 class="dz-box-head">Phương thức tuyển</h2>
+				<div class="dz-box-body">
+					<ul class="dz-toc">
+						<li><a href="<?php echo esc_url( $cvc_list_url( array( 'phuong-thuc' => null ) ) ); ?>" class="<?php echo '' === $cvc_method ? 'is-active' : ''; ?>">Tất cả</a></li>
+						<?php foreach ( $cvc_methods as $k => $lbl ) : ?>
+							<li><a href="<?php echo esc_url( $cvc_list_url( array( 'phuong-thuc' => $k ) ) ); ?>" class="<?php echo $k === $cvc_method ? 'is-active' : ''; ?>"><?php echo esc_html( $lbl ); ?></a></li>
+						<?php endforeach; ?>
+					</ul>
+				</div>
+			</nav>
 			<?php cvc_render_listing_explore_nav( 'recruitments' ); ?>
 		</aside>
 
 		<div class="dz-colmain">
-			<div class="dz-h2"><h2><?php echo '' !== $q ? 'Kết quả cho “' . esc_html( $q ) . '”' : 'Đang nhận hồ sơ'; ?><?php echo '' !== $cvc_province_name ? ' · ' . esc_html( $cvc_province_name ) : ''; ?></h2><span class="dz-muted" style="font-size:15px">Hiển thị <?php echo count( $recruitments ); ?><?php echo isset( $pagination['total'] ) ? ' / ' . esc_html( number_format_i18n( (int) $pagination['total'] ) ) : ''; ?> tin</span></div>
+			<div class="dz-h2"><h2><?php echo '' !== $q ? 'Kết quả cho “' . esc_html( $q ) . '”' : 'Đang nhận hồ sơ'; ?><?php echo '' !== $cvc_province_name ? ' · ' . esc_html( $cvc_province_name ) : ''; ?><?php echo '' !== $cvc_type ? ' · ' . esc_html( $cvc_types[ $cvc_type ] ) : ''; ?><?php echo '' !== $cvc_method ? ' · ' . esc_html( $cvc_methods[ $cvc_method ] ) : ''; ?></h2><span class="dz-muted" style="font-size:15px">Hiển thị <?php echo count( $recruitments ); ?><?php echo isset( $pagination['total'] ) ? ' / ' . esc_html( number_format_i18n( (int) $pagination['total'] ) ) : ''; ?> tin</span></div>
 
 			<?php if ( ! $ok ) : ?>
 				<?php cvc_render_error_state( 'Không tải được danh sách tin tuyển dụng, vui lòng thử lại sau.' ); ?>
 			<?php elseif ( empty( $recruitments ) ) : ?>
-				<?php cvc_render_empty_state( empty( $cvc_examining ) ? 'Chưa có tin tuyển dụng nào.' : 'Hiện chưa có đợt tuyển dụng nào đang nhận hồ sơ. Các đợt đang tổ chức thi ở bên dưới.' ); ?>
+				<?php cvc_render_empty_state( ( '' !== $cvc_type || '' !== $cvc_method ) ? 'Chưa có tin phù hợp bộ lọc. Hãy bỏ bớt điều kiện lọc.' : ( empty( $cvc_rounds ) ? 'Chưa có tin tuyển dụng nào.' : 'Hiện chưa có đợt tuyển dụng nào đang nhận hồ sơ. Các đợt đang tổ chức thi ở bên dưới.' ) ); ?>
 			<?php endif; ?>
 
 			<ol class="dz-list dz-numbered" id="recruitmentListContainer" start="<?php echo (int) ( ( $currentPg - 1 ) * 12 + 1 ); ?>">
@@ -98,7 +143,8 @@ get_header();
 					$agency_raw   = $rec['agency'] ?? null;
 					$agency_name  = is_array( $agency_raw ) ? (string) ( $agency_raw['name'] ?? '' ) : ( is_string( $agency_raw ) ? $agency_raw : '' );
 					$type_labels  = array( 'civil_servant' => 'Công chức', 'public_employee' => 'Viên chức' );
-					$rec_type     = $type_labels[ (string) ( $rec['recruitment_type'] ?? '' ) ] ?? '';
+					$rec_type     = $cvc_types[ (string) ( $rec['employment_type'] ?? '' ) ] ?? ( $type_labels[ (string) ( $rec['recruitment_type'] ?? '' ) ] ?? '' );
+					$rec_method   = (string) ( $rec['method_summary_label'] ?? '' );
 					$quota        = ! empty( $rec['total_positions'] ) ? (int) $rec['total_positions'] : 0;
 					$dates_raw    = is_array( $rec['dates'] ?? null ) ? $rec['dates'] : array();
 					$deadline_raw = (string) ( $dates_raw['application_deadline'] ?? '' );
@@ -111,6 +157,7 @@ get_header();
 						<div class="dz-item-meta">
 							<span class="dz-tag <?php echo $is_open ? 'is-ok' : 'is-off'; ?>"><?php echo $is_open ? 'Đang nhận hồ sơ' : 'Đã hết hạn nộp'; ?></span>
 							<?php if ( $rec_type ) : ?><span class="dz-tag"><?php echo esc_html( $rec_type ); ?></span><?php endif; ?>
+							<?php if ( '' !== $rec_method ) : ?><span class="dz-tag"><?php echo esc_html( $rec_method ); ?></span><?php endif; ?>
 							<?php if ( $agency_name ) : ?><span><?php echo esc_html( $agency_name ); ?></span><?php endif; ?>
 						</div>
 						<?php if ( '' !== $summary ) : ?><p class="dz-item-sum"><?php echo esc_html( wp_trim_words( $summary, 34 ) ); ?></p><?php endif; ?>
@@ -122,28 +169,15 @@ get_header();
 				<?php endforeach; ?>
 			</ol>
 
-			<?php cvc_render_pagination( $currentPg, $lastPg, ( $cvc_province_id > 0 ? static fn( int $n ): string => add_query_arg( 'tinh', $cvc_province_id, cvc_listing_page_url_builder( 'cvc_recruitments_url', $q )( $n ) ) : cvc_listing_page_url_builder( 'cvc_recruitments_url', $q ) ) ); ?>
+			<?php cvc_render_pagination( $currentPg, $lastPg, static fn( int $n ): string => $cvc_list_url( array(), $n ) ); ?>
 
 			<?php cvc_render_suggest_widget(); ?>
 
-			<?php if ( ! empty( $cvc_examining ) ) : ?>
-				<section class="dz-section" aria-labelledby="cvc-examining" style="margin-top:26px">
-					<div class="dz-h2"><h2 id="cvc-examining">Đợt tuyển dụng đang tổ chức thi</h2></div>
-					<p class="dz-muted" style="margin:-4px 0 6px;font-style:italic">Đã hết hạn nhận phiếu — dành cho thí sinh đã nộp theo dõi danh sách, triệu tập, tài liệu ôn tập, lịch thi và kết quả.</p>
-					<ul class="dz-list">
-						<?php foreach ( $cvc_examining as $rec ) : ?>
-							<li>
-								<h3 class="dz-item-title"><a href="<?php echo esc_url( cvc_recruitment_url( (string) ( $rec['slug'] ?? '' ) ) ); ?>"><?php echo esc_html( (string) ( $rec['title'] ?? '' ) ); ?></a></h3>
-								<div class="dz-item-meta">
-									<span class="dz-tag is-warn"><?php echo esc_html( (string) ( $rec['stage_label'] ?? 'Đang tổ chức thi' ) ); ?></span>
-									<?php if ( ! empty( $rec['doc_number'] ) ) : ?><span><?php echo esc_html( (string) $rec['doc_number'] ); ?></span><?php endif; ?>
-									<span><?php echo esc_html( (string) ( $rec['agency']['name'] ?? '' ) ); ?></span>
-									<?php if ( ! empty( $rec['total_positions'] ) ) : ?><span><?php echo (int) $rec['total_positions']; ?> chỉ tiêu</span><?php endif; ?>
-									<span>Hết hạn nộp <?php echo esc_html( ! empty( $rec['dates']['application_deadline'] ) ? cvc_format_date_vn( (string) $rec['dates']['application_deadline'] ) : '—' ); ?></span>
-								</div>
-							</li>
-						<?php endforeach; ?>
-					</ul>
+			<?php if ( ! empty( $cvc_rounds ) ) : ?>
+				<section id="dang-to-chuc-thi" class="dz-section" aria-labelledby="cvc-rounds" style="margin-top:26px">
+					<div class="dz-h2"><h2 id="cvc-rounds">Đợt đang tổ chức thi / có kết quả</h2></div>
+					<p class="dz-muted" style="margin:-4px 0 6px;font-style:italic">Dành cho thí sinh đã nộp hồ sơ: theo dõi danh sách thí sinh, triệu tập, tài liệu ôn tập, lịch thi và kết quả theo văn bản chính thức của cơ quan tuyển dụng.</p>
+					<?php cvc_render_round_list( $cvc_rounds ); ?>
 				</section>
 			<?php endif; ?>
 		</div>

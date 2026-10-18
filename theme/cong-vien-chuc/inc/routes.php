@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Tăng số này khi thêm/sửa rewrite rule để buộc flush lại đúng 1 lần.
-const CVC_REWRITE_VERSION = '11';
+const CVC_REWRITE_VERSION = '12';
 
 /**
  * Section hợp lệ của /tai-khoan/{section}/ (Phase 10) - map slug tiếng
@@ -81,6 +81,12 @@ function cvc_register_rewrite_rules(): void {
 	add_rewrite_rule(
 		'^tuyen-dung/page/([0-9]+)/?$',
 		'index.php?cvc_page=recruitments&cvc_paged=$matches[1]',
+		'top'
+	);
+	// Phase 16: trang dot tuyen dung (phai dung truoc quy tac chi tiet tin).
+	add_rewrite_rule(
+		'^tuyen-dung/dot/([^/]+)/?$',
+		'index.php?cvc_page=recruitment-round&cvc_round_slug=$matches[1]',
 		'top'
 	);
 	add_rewrite_rule(
@@ -315,6 +321,7 @@ function cvc_register_query_vars( array $vars ): array {
 	$vars[] = 'cvc_lesson_id';
 	$vars[] = 'cvc_topic_slug';
 	$vars[] = 'cvc_recruitment_slug';
+	$vars[] = 'cvc_round_slug';
 	$vars[] = 'cvc_knowledge_slug';
 	$vars[] = 'cvc_exam_slug';
 	$vars[] = 'cvc_legal_document_slug';
@@ -414,6 +421,7 @@ function cvc_template_include( string $template ): string {
 		'admin-ai-settings'     => 'template-admin-ai-settings.php',
 		'admin'                 => 'template-admin.php',
 		'salary'                => 'template-salary.php',
+		'recruitment-round'     => 'template-recruitment-round.php',
 	);
 
 	if ( isset( $map[ $page ] ) ) {

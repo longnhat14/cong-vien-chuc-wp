@@ -347,3 +347,17 @@ body.cvc-doc .cvc-overview-tile__icon img{filter:grayscale(1) contrast(1.1)}
 body.cvc-doc .cvc-badge{border-radius:2px!important}
 @media(max-width:900px){.dz-explore{display:none}}
 @media(max-width:640px){.dz-facts td{width:auto!important;text-align:left}.dz-facts span{letter-spacing:.02em!important}}
+
+/* Phase 16 (18/10/2026): dong thoi gian van ban cua dot tuyen dung */
+.dz-timeline{list-style:none;margin:0;padding:0 0 0 22px;border-left:1px solid var(--dz-line);display:flex;flex-direction:column;gap:16px}
+.dz-timeline-item{position:relative}
+.dz-timeline-item::before{content:"";position:absolute;left:-28px;top:6px;width:11px;height:11px;border-radius:50%;background:var(--dz-paper);border:2px solid var(--dz-acc)}
+.dz-timeline-item.is-exam::before{border-color:var(--dz-amber)}
+.dz-timeline-item.is-result::before{background:var(--dz-green);border-color:var(--dz-green)}
+.dz-timeline-item.is-hot::before{background:var(--dz-red);border-color:var(--dz-red)}
+.dz-timeline-meta{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;font-size:14px}
+.dz-timeline-type{font-weight:bold;text-transform:uppercase;letter-spacing:.04em!important;color:var(--dz-ink2)}
+.dz-timeline-num{color:var(--dz-acc)}
+.dz-timeline-title{margin:2px 0 0;font-weight:bold;line-height:1.4;color:var(--dz-ink)}
+.dz-timeline-links{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:4px;font-size:14px}
+.dz-timeline-links a{color:var(--dz-acc2);text-decoration:underline}

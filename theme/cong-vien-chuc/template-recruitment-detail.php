@@ -93,6 +93,10 @@ $stage       = (string) ( $recruitment['stage'] ?? '' );
 $stage_label = (string) ( $recruitment['stage_label'] ?? '' );
 $doc_number  = (string) ( $recruitment['doc_number'] ?? '' );
 $round_docs  = is_array( $recruitment['round_documents'] ?? null ) ? $recruitment['round_documents'] : array();
+// Phase 16: dong thoi gian su kien cua dot (uu tien hon round_documents cu).
+$round_events = is_array( $recruitment['events'] ?? null ) ? $recruitment['events'] : array();
+$round_count  = ! empty( $round_events ) ? count( $round_events ) : count( $round_docs );
+$method_label = (string) ( $recruitment['method_summary_label'] ?? '' );
 $changes     = is_array( $recruitment['changes'] ?? null ) ? $recruitment['changes'] : array();
 $study_plan  = is_array( $recruitment['study_plan'] ?? null ) ? $recruitment['study_plan'] : array();
 $evidence    = is_array( $recruitment['evidence'] ?? null ) ? $recruitment['evidence'] : array();
@@ -157,6 +161,9 @@ get_header();
 				<?php if ( ! empty( $recruitment['recruitment_type'] ) && 'other' !== $recruitment['recruitment_type'] ) : ?>
 					<span class="dz-tag"><?php echo esc_html( cvc_recruitment_type_label( (string) $recruitment['recruitment_type'] ) ); ?></span>
 				<?php endif; ?>
+				<?php if ( '' !== $method_label ) : ?>
+					<span class="dz-tag"><?php echo esc_html( $method_label ); ?></span>
+				<?php endif; ?>
 			</p>
 		</div>
 		<p class="dz-kicker">Thông báo tuyển dụng</p>
@@ -220,8 +227,8 @@ get_header();
 					<a href="#toan-van" class="block p-2 rounded-xl hover:bg-acc-soft hover:text-emerald-800">Toàn văn thông báo</a>
 				<?php endif; ?>
 				<a href="#vi-tri" class="block p-2 rounded-xl hover:bg-acc-soft hover:text-emerald-800">Vị trí &amp; chỉ tiêu (<?php echo count( $positions ); ?>)</a>
-				<?php if ( ! empty( $round_docs ) ) : ?>
-					<a href="#van-ban-dot" class="block p-2 rounded-xl hover:bg-acc-soft hover:text-emerald-800">Văn bản của đợt tuyển (<?php echo count( $round_docs ); ?>)</a>
+				<?php if ( $round_count > 0 ) : ?>
+					<a href="#van-ban-dot" class="block p-2 rounded-xl hover:bg-acc-soft hover:text-emerald-800">Văn bản của đợt tuyển (<?php echo (int) $round_count; ?>)</a>
 				<?php endif; ?>
 				<?php if ( ! empty( $study_plan ) ) : ?>
 					<a href="#lo-trinh-on" class="block p-2 rounded-xl hover:bg-acc-soft hover:text-emerald-800 text-emerald-800">Lộ trình ôn theo danh mục</a>
@@ -348,7 +355,9 @@ get_header();
 				</section>
 			<?php endif; ?>
 
-			<?php if ( ! empty( $round_docs ) ) : ?>
+			<?php if ( ! empty( $round_events ) ) : ?>
+				<?php cvc_render_round_timeline( $round_events, $legal_basis ); ?>
+			<?php elseif ( ! empty( $round_docs ) ) : ?>
 				<section id="van-ban-dot" class="dz-panel space-y-4">
 					<h2 class="dz-sech2">Văn bản của đợt tuyển</h2>
 					<ol class="relative pl-5 border-l border-slate-300 space-y-5">
@@ -408,6 +417,7 @@ get_header();
 														<?php if ( ! empty( $pos['is_sensitive'] ) ) : ?><span class="ml-1 align-middle text-[10px] font-black px-2 py-0.5 rounded-full bg-acc-soft text-red-700 border border-acc-line">Cơ mật, trọng yếu</span><?php endif; ?>
 													</span>
 													<span class="flex items-center gap-2 shrink-0">
+														<?php echo cvc_position_taxonomy_chip( $pos ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 														<?php if ( count( $units ) > 1 ) : ?><span class="text-[10px] text-ink-muted"><?php echo esc_html( (string) count( $units ) ); ?> cơ quan</span><?php endif; ?>
 														<span class="bg-acc-soft text-acc font-extrabold px-2.5 py-0.5 rounded-full border border-acc-line"><?php echo (int) ( $pos['quantity'] ?? 0 ); ?> chỉ tiêu</span>
 													</span>
@@ -438,7 +448,7 @@ get_header();
 						<?php foreach ( $positions as $pos ) : ?>
 							<article class="dz-card space-y-2 text-xs text-ink-2">
 								<div class="flex flex-wrap items-center justify-between gap-2">
-									<h3 class="font-extrabold text-base text-ink"><?php echo esc_html( (string) ( $pos['name'] ?? '' ) ); ?></h3>
+									<h3 class="font-extrabold text-base text-ink"><?php echo esc_html( (string) ( $pos['name'] ?? '' ) ); ?> <?php echo cvc_position_taxonomy_chip( $pos ); // phpcs:ignore WordPress.Security.EscapeOutput ?></h3>
 									<?php if ( ! empty( $pos['quantity'] ) ) : ?>
 										<span class="bg-acc-soft text-acc font-extrabold px-3 py-1 rounded-full border border-acc-line">Chỉ tiêu: <?php echo (int) $pos['quantity']; ?></span>
 									<?php endif; ?>
@@ -453,7 +463,7 @@ get_header();
 									'employment_type'         => 'Hình thức',
 								);
 								foreach ( $pos_fields as $field => $label ) :
-									if ( empty( $pos[ $field ] ) ) {
+									if ( empty( $pos[ $field ] ) || ( 'employment_type' === $field && ! empty( $pos['employment_type_label'] ) ) ) {
 										continue;
 									}
 									?>
