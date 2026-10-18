@@ -8,22 +8,7 @@
  */
 (function(){
  const CFG=window.CVC_HOME||{};
- const toggle=document.getElementById('menuToggle'),nav=document.getElementById('navLinks');
- // Menu "Ôn thi": trên màn hình cảm ứng, chạm lần đầu mở mục con (desktop dùng hover / focus).
- document.querySelectorAll('.nav-group>.nav-parent').forEach(p=>{
-  p.addEventListener('click',e=>{
-   const g=p.parentElement;
-   if(window.matchMedia('(max-width:760px)').matches)return;
-   if(window.matchMedia('(hover:none)').matches&&!g.classList.contains('open')){e.preventDefault();e.stopPropagation();g.classList.add('open');p.setAttribute('aria-expanded','true');}
-  });
- });
- document.addEventListener('click',e=>{document.querySelectorAll('.nav-group.open').forEach(g=>{if(!g.contains(e.target)){g.classList.remove('open');g.querySelector('.nav-parent').setAttribute('aria-expanded','false');}});});
- if(toggle&&nav){
-  toggle.addEventListener('click',()=>{const open=nav.classList.toggle('open');toggle.setAttribute('aria-expanded',String(open));toggle.setAttribute('aria-label',open?'Đóng menu':'Mở menu');});
-  nav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{nav.classList.remove('open');toggle.setAttribute('aria-expanded','false');toggle.setAttribute('aria-label','Mở menu')}));
-  document.addEventListener('keydown',e=>{if(e.key==='Escape'){nav.classList.remove('open');toggle.setAttribute('aria-expanded','false');toggle.setAttribute('aria-label','Mở menu')}});
-  document.addEventListener('click',e=>{if(!nav.contains(e.target)&&!toggle.contains(e.target)&&nav.classList.contains('open')){nav.classList.remove('open');toggle.setAttribute('aria-expanded','false');toggle.setAttribute('aria-label','Mở menu')}});
- }
+ // Menu đầu trang: assets/js/site-chrome.js (dùng chung toàn site).
 
  function esc(s){const d=document.createElement('div');d.textContent=s==null?'':String(s);return d.innerHTML;}
  function post(action,data){

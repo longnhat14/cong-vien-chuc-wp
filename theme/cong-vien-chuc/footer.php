@@ -3,54 +3,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 /*
- * Chân trang - giao diện "văn bản" (16/10/2026): nền trắng, kẻ đôi phía
- * trên, chữ Times New Roman, liên kết dạng mục lục.
+ * Chân trang dùng chung (18/10/2026): giống trang chủ v17 - cvc_chrome_footer() trong inc/chrome.php.
+ * Giữ hộp tìm kiếm (nút kính lúp ở đầu trang mở hộp này).
  */
 ?>
-<footer class="dz-footer">
-<div class="dz-wrap">
-<div class="dz-footer-grid">
-<div class="dz-footer-brand">
-<p class="dz-org">CÔNG VIÊN CHỨC</p>
-<p class="dz-motto">Ôn thi công chức, viên chức</p>
-<p class="dz-footer-note">Nền tảng ôn thi công chức, viên chức: đề thi trắc nghiệm có chấm điểm, văn bản pháp luật, mẫu hồ sơ và tin tuyển dụng tổng hợp từ cổng thông tin chính thức của cơ quan nhà nước.</p>
-</div>
-<nav class="dz-footer-col" aria-label="Ôn thi">
-<h2>Ôn thi</h2>
-<ul>
-<li><a href="<?php echo esc_url( cvc_exams_url() ); ?>">Đề thi thử</a></li>
-<li><a href="<?php echo esc_url( cvc_topics_url() ); ?>">Chủ đề ôn thi</a></li>
-<li><a href="<?php echo esc_url( cvc_knowledge_url() ); ?>">Kiến thức trọng tâm</a></li>
-<li><a href="<?php echo esc_url( cvc_courses_url() ); ?>">Khóa học</a></li>
-</ul>
-</nav>
-<nav class="dz-footer-col" aria-label="Tuyển dụng và pháp luật">
-<h2>Tuyển dụng &amp; pháp luật</h2>
-<ul>
-<li><a href="<?php echo esc_url( cvc_recruitments_url() ); ?>">Tin tuyển dụng</a></li>
-<li><a href="<?php echo esc_url( cvc_legal_documents_url() ); ?>">Văn bản pháp luật</a></li>
-<li><a href="<?php echo esc_url( cvc_documents_url() ); ?>">Mẫu hồ sơ &amp; tài liệu</a></li>
-<li><a href="<?php echo esc_url( cvc_account_url() ); ?>">Tài khoản học viên</a></li>
-</ul>
-</nav>
-<div class="dz-footer-col">
-<h2>Nhận bản tin qua email</h2>
-<p class="dz-footer-note">Thông tin tuyển dụng và văn bản pháp luật mới, gửi định kỳ.</p>
-<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="dz-inline-form">
-<input type="hidden" name="action" value="cvc_newsletter_subscribe">
-<?php wp_nonce_field( 'cvc_newsletter_subscribe' ); ?>
-<label class="sr-only" for="dz-newsletter-email">Email</label>
-<input id="dz-newsletter-email" type="email" name="email" required placeholder="Địa chỉ email">
-<button type="submit" class="dz-btn dz-btn-primary">Đăng ký</button>
-</form>
-</div>
-</div>
-<div class="dz-footer-bottom">
-<p>© <?php echo esc_html( wp_date( 'Y' ) ); ?> Công Viên Chức. Thông tin tuyển dụng, văn bản chỉ mang tính tham khảo — đối chiếu bản gốc tại cơ quan ban hành.</p>
-<a href="<?php echo esc_url( cvc_search_url() ); ?>">Tra cứu</a>
-</div>
-</div>
-</footer>
+<?php cvc_chrome_footer(); // inc/chrome.php - chân trang dùng chung, giống trang chủ. ?>
 <!-- Hộp tìm kiếm -->
 <div id="search-modal" class="hidden dz-modal" role="dialog" aria-modal="true" aria-label="Tìm kiếm">
 <div class="dz-modal-box">
@@ -74,7 +31,7 @@ function toggleNotifications() {
 var el = document.getElementById('notif-dropdown'); if (el) el.classList.toggle('hidden');
 }
 function toggleMobileMenu() {
-document.getElementById('mobile-menu').classList.toggle('hidden');
+var m = document.getElementById('mobile-menu'); if (m) m.classList.toggle('hidden');
 }
 function toggleSearchModal() {
 var m = document.getElementById('search-modal');

@@ -130,51 +130,7 @@ $GLOBALS['cvc_home17_cfg'] = array(
 </head>
 <body <?php body_class( 'cvc-home17' ); ?>>
 <?php wp_body_open(); ?>
-<div class="topline"><div class="container inner"><span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="vertical-align:middle;width:17px"><path d="M12 3v18M3 12h18"/></svg> Cùng bạn chuẩn bị tốt hơn cho kỳ thi và hành trình công vụ</span><span class="secondary">Tin tuyển dụng mới · Tài liệu · Ôn thi <a href="<?php $a( $u['rec'] ); ?>">Xem cập nhật →</a></span></div></div>
-<header class="site-header">
- <div class="container nav">
-  <a class="brand" href="<?php $a( $u['home'] ); ?>" aria-label="Công Viên Chức - Trang chủ">
-   <span class="brand-mark"><?php echo $ico_brand; // phpcs:ignore ?></span>
-   <span><span class="brand-name">CÔNG VIÊN CHỨC</span><span class="brand-sub">Ôn thi vững vàng · Công vụ tự tin</span></span>
-  </a>
-  <nav class="nav-links" id="navLinks" aria-label="Điều hướng chính">
-   <?php
-   // Menu chính dùng chung (cvc_main_nav_items) - cùng thứ tự, cùng mục con với header các trang khác.
-   $cvc_nav_icons = array(
-	'exams' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="3.5" width="14" height="17" rx="2"/><path d="M8 8h8M8 12h2m3 0h3M8 16h8"/></svg>',
-	'rec'   => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="7" width="17" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3.5 12h17M10 12v2h4v-2"/></svg>',
-	'legal' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3 20 7v5c0 4.5-3.1 7.4-8 9-4.9-1.6-8-4.5-8-9V7l8-4Z"/><path d="m8.5 12 2.2 2.2 4.8-5"/></svg>',
-	'docs'  => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3.5h8l4 4V20a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1Z"/><path d="M14 3.5V8h4M8 12h8M8 16h8"/></svg>',
-   );
-   foreach ( cvc_main_nav_items() as $cvc_nav ) :
-	$cvc_ico = $cvc_nav_icons[ $cvc_nav['key'] ] ?? '';
-	if ( ! empty( $cvc_nav['children'] ) ) :
-		?>
-   <div class="nav-group">
-    <a class="nav-parent" href="<?php $a( $cvc_nav['url'] ); ?>" aria-haspopup="true" aria-expanded="false"><span class="nav-icon"><?php echo $cvc_ico; // phpcs:ignore ?></span><span><?php $e( $cvc_nav['label'] ); ?></span><i><?php $e( $cvc_nav['hint'] ); ?></i><em class="nav-caret" aria-hidden="true">▾</em></a>
-    <div class="nav-sub">
-     <?php foreach ( $cvc_nav['children'] as $cvc_child ) : ?>
-     <a href="<?php $a( $cvc_child['url'] ); ?>"><span><?php $e( $cvc_child['label'] ); ?></span><?php if ( ! empty( $cvc_child['badge'] ) ) : ?><small class="nav-badge"><?php $e( $cvc_child['badge'] ); ?></small><?php endif; ?></a>
-     <?php endforeach; ?>
-    </div>
-   </div>
-		<?php else : ?>
-   <a href="<?php $a( $cvc_nav['url'] ); ?>"><span class="nav-icon"><?php echo $cvc_ico; // phpcs:ignore ?></span><span><?php $e( $cvc_nav['label'] ); ?></span><i><?php $e( $cvc_nav['hint'] ); ?></i><b aria-hidden="true">↗</b></a>
-		<?php
-	endif;
-   endforeach;
-   ?>
-  </nav>
-  <div class="nav-actions">
-   <?php if ( $logged_in ) : ?>
-   <a class="btn btn-outline btn-small" href="<?php $a( $u['logout'] ); ?>">Đăng xuất</a><a class="btn btn-primary btn-small" href="<?php $a( $u['account'] ); ?>">Tài khoản <?php echo $ico_arrow; // phpcs:ignore ?></a>
-   <?php else : ?>
-   <a class="btn btn-outline btn-small" href="<?php $a( $u['login'] ); ?>">Đăng nhập</a><a class="btn btn-primary btn-small" href="<?php $a( $u['register'] ); ?>">Tạo tài khoản <?php echo $ico_arrow; // phpcs:ignore ?></a>
-   <?php endif; ?>
-   <button class="menu-toggle" id="menuToggle" aria-label="Mở menu" aria-expanded="false"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
-  </div>
- </div>
-</header>
+<?php cvc_chrome_header(); // inc/chrome.php - đầu trang dùng chung toàn site. ?>
 
 <div class="sticky-news-ticker" aria-label="Tin tuyển dụng, văn bản pháp luật và đề thi mới">
  <div class="ticker-label"><span class="ticker-live"></span><span>TIN MỚI</span></div>
@@ -599,17 +555,7 @@ $GLOBALS['cvc_home17_cfg'] = array(
  </div>
 </section>
 </main>
-<footer class="footer">
- <div class="container">
-  <div class="footer-grid">
-   <div><a class="brand" href="<?php $a( $u['home'] ); ?>"><span class="brand-mark"><?php echo $ico_brand; // phpcs:ignore ?></span><span><span class="brand-name">CÔNG VIÊN CHỨC</span><span class="brand-sub">Ôn thi vững vàng · Công vụ tự tin</span></span></a><p>Nền tảng hỗ trợ ôn thi công chức, viên chức, tra cứu văn bản, tìm tài liệu và theo dõi thông báo tuyển dụng.</p></div>
-   <div><h3>Ôn thi</h3><div class="footer-links"><a href="<?php $a( $u['exams'] ); ?>">Đề thi thử</a><a href="<?php $a( $u['topics'] ); ?>">Chủ đề ôn thi</a><a href="<?php $a( $u['courses'] ); ?>">Khóa học</a><a href="<?php $a( $u['docs'] ); ?>">Tài liệu</a></div></div>
-   <div><h3>Tra cứu</h3><div class="footer-links"><a href="<?php $a( $u['rec'] ); ?>">Tin tuyển dụng</a><a href="<?php $a( $u['legal'] ); ?>">Văn bản pháp luật</a><a href="<?php $a( $u['docs'] ); ?>">Mẫu hồ sơ</a><a href="<?php $a( $u['salary'] ); ?>">Ước tính lương</a></div></div>
-   <div><h3>Tài khoản</h3><div class="footer-links"><?php if ( $logged_in ) : ?><a href="<?php $a( $u['account'] ); ?>">Tài khoản của tôi</a><a href="<?php $a( cvc_account_url( 'exam-history' ) ); ?>">Lịch sử thi</a><a href="<?php $a( $u['logout'] ); ?>">Đăng xuất</a><?php else : ?><a href="<?php $a( $u['login'] ); ?>">Đăng nhập</a><a href="<?php $a( $u['register'] ); ?>">Đăng ký miễn phí</a><a href="<?php $a( $u['home'] ); ?>">Trang chủ</a><?php endif; ?></div></div>
-  </div>
-  <div class="footer-bottom"><span>© <?php echo esc_html( wp_date( 'Y' ) ); ?> Công Viên Chức. Tất cả quyền được bảo lưu.</span><span>Thông tin chỉ mang tính tham khảo; vui lòng đối chiếu văn bản và thông báo gốc từ cơ quan ban hành.</span></div>
- </div>
-</footer>
+<?php cvc_chrome_footer(); ?>
 <div class="mobile-cta"><a class="btn btn-primary" href="<?php $a( $u['exams'] ); ?>">Luyện đề miễn phí</a><a class="btn btn-gold" href="<?php $a( $u['docs'] ); ?>">Xem tài liệu</a></div>
 
 <button class="ai-chat-launcher" id="aiChatLauncher" type="button" aria-expanded="false" aria-controls="aiChatPanel">

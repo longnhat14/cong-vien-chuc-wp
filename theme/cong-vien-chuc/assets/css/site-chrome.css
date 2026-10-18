@@ -1,0 +1,245 @@
+/* Header + footer dùng chung toàn site (18/10/2026) - SINH TỰ ĐỘNG từ home-v17.css (genchrome.py):
+ * giữ nguyên giao diện trang chủ, đổi class sang tiền tố ch- để không va chạm Tailwind/cvc-doc/style.css. */
+/* ---- Nền tảng (đặt trước phần sinh tự động) ---- */
+:root :is(.ch-topline,.ch-header,.ch-footer){font-family:"Times New Roman",Times,"Liberation Serif",serif;line-height:1.55;color:#14263b;-webkit-text-size-adjust:100%;letter-spacing:normal}
+:root :is(.ch-header,.ch-footer){font-size:18px}
+:root :is(.ch-topline,.ch-header,.ch-footer),:root :is(.ch-topline,.ch-header,.ch-footer) *,:root :is(.ch-topline,.ch-header,.ch-footer) *:before,:root :is(.ch-topline,.ch-header,.ch-footer) *:after{box-sizing:border-box}
+:root :where(.ch-topline,.ch-header,.ch-footer) a{color:inherit;text-decoration:none}
+:root :where(.ch-header,.ch-footer) :where(h3,p){margin:0}
+:root :where(.ch-header,.ch-footer) button{font:inherit;cursor:pointer}
+:root :where(.ch-header,.ch-footer) svg{display:inline-block}
+:root :is(.ch-topline,.ch-header,.ch-footer){--navy:#0a1d33;--navy2:#123456;--blue:#204f7c;--blue-soft:#eaf1f7;--orange:#f08a24;--orange-deep:#d96813;--teal:#168b88;
+  --gold:#f08a24;--gold-soft:#fff0df;--ink:#14263b;--muted:#42566d;
+  --paper:#fbfaf7;--white:#fff;--line:#e4e8ec;--green:#23765a;
+  --shadow:0 18px 50px rgba(16,40,70,.09);--radius:20px;--orange:#f07819;--orange-deep:#d45e0b;--teal:#168b88;--glass:rgba(255,255,255,.78);--navy:#0a1d33;--navy2:#123456;--ink:#14263b;--muted:#42566d;--orange:#f07819;--orange-deep:#c95108;--paper:#f6f5f1;--line:#dfe4e8;--surface-soft:#f0f1ee;--surface-warm:#f7f5ef;--motion-fast:160ms;
+ --motion-standard:220ms;
+ --motion-ease:cubic-bezier(.2,.75,.25,1);
+ --accent-line:#d5a35e;
+ --surface-main:#f6f5f1;
+ --surface-soft:#e9eeeb;
+ --surface-soft-deep:#e2e9e5;}
+:root .ch-container{width:min(1160px,calc(100% - 40px));margin-inline:auto}
+:root .ch-topline{background:var(--navy);color:#e8eef5;font-size:15px}
+:root .ch-topline .ch-inner{display:flex;justify-content:space-between;gap:16px;align-items:center;min-height:38px}
+:root .ch-topline a{color:#f4d9a5;font-weight:bold}
+:root .ch-header{position:sticky;top:0;z-index:20;background:rgba(251,250,247,.94);backdrop-filter:blur(16px);border-bottom:1px solid rgba(228,232,236,.9)}
+:root .ch-nav{min-height:82px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+:root .ch-brand{display:flex;align-items:center;gap:12px;min-width:220px}
+:root .ch-brand-mark{width:46px;height:46px;border-radius:15px;background:linear-gradient(145deg,#193e64,#0b2039);display:grid;place-items:center;color:#f0cf91;box-shadow:0 8px 20px #10284625}
+:root .ch-brand-name{font-size:22px;font-weight:bold;line-height:1.05;color:var(--navy);letter-spacing:.2px}
+:root .ch-brand-sub{font-size:13px;color:var(--muted);margin-top:4px}
+:root .ch-nav-links{display:flex;align-items:center;gap:24px;font-size:17px;color:#3d5064}
+:root .ch-nav-links a:hover{color:var(--blue)}
+:root .ch-nav-actions{display:flex;align-items:center;gap:10px}
+:root .ch-btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;border:1px solid transparent;border-radius:12px;padding:12px 18px;font-weight:bold;line-height:1.2;cursor:pointer;transition:transform .18s,box-shadow .18s,background .18s}
+:root .ch-btn:hover{transform:translateY(-2px)}
+:root .ch-btn-primary{background:var(--navy);color:#fff;box-shadow:0 8px 18px #10284620}
+:root .ch-btn-primary:hover{background:#1b426a;box-shadow:0 12px 24px #1028462b}
+:root .ch-btn-outline{border-color:#cbd5df;background:transparent;color:var(--navy)}
+:root .ch-btn-small{padding:9px 13px;font-size:16px}
+:root .ch-icon{width:21px;height:21px;display:inline-block;flex:none}
+:root .ch-menu-toggle{display:none;background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px;color:var(--navy)}
+:root .ch-footer{background:#0b1f35;color:#dbe4ed;padding:44px 0 24px;margin-top:70px}
+:root .ch-footer-grid{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:28px;padding-bottom:30px}
+:root .ch-footer .ch-brand-name{color:#fff}
+:root .ch-footer .ch-brand-sub{color:#d0dae5}
+:root .ch-footer p{color:#d0dae5;font-size:16px;max-width:330px;margin-top:15px}
+:root .ch-footer h3{font-size:19px;color:#fff;margin-bottom:12px}
+:root .ch-footer-links{display:grid;gap:9px;color:#dbe4ed;font-size:16px}
+:root .ch-footer-links a:hover{color:#f0cf91}
+:root .ch-footer-bottom{border-top:1px solid #ffffff20;padding-top:18px;display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;color:#c2cedb;font-size:14px}
+:root .ch-brand-mark{animation:floatSoft 5s ease-in-out infinite}
+@media(prefers-reduced-motion:reduce){
+ :root .ch-brand-mark{animation:none!important}
+}
+:root .ch-header{box-shadow:0 4px 22px rgba(16,40,70,.035);transition:box-shadow .25s}
+:root .ch-header:after{content:"";height:2px;display:block;background:linear-gradient(90deg,transparent,#f07819 30%,#f8c16f 55%,#168b88 78%,transparent);opacity:.65}
+:root .ch-brand-mark{position:relative;overflow:hidden}
+:root .ch-brand-mark:after{content:"";position:absolute;inset:-60%;background:linear-gradient(110deg,transparent 35%,#ffffff55 48%,transparent 60%);transform:translateX(-80%) rotate(10deg);animation:logoShimmer 7s ease-in-out infinite}
+:root .ch-btn{position:relative;overflow:hidden}
+:root .ch-btn:after{content:"";position:absolute;top:-80%;left:-45%;width:35%;height:260%;transform:rotate(25deg);background:#ffffff3d;transition:left .55s}
+:root .ch-btn:hover:after{left:130%}
+:root .ch-footer{background:radial-gradient(circle at 80% 0%,#173b5d 0%,transparent 38%),#0b1f35}
+:root .ch-footer .ch-brand-mark{box-shadow:0 8px 24px #0002}
+@media(prefers-reduced-motion:reduce){
+ :root .ch-brand-mark:after{animation:none!important}
+}
+:root .ch-header{top:0}
+@media(max-width:1000px){
+ :root .ch-nav-links{gap:14px}
+ :root .ch-brand{min-width:190px}
+ :root .ch-nav-actions .ch-btn-outline{display:none}
+ :root .ch-footer-grid{grid-template-columns:1.4fr 1fr 1fr}
+}
+@media(max-width:760px){
+ :root .ch-container{width:min(100% - 28px,600px)}
+ :root .ch-topline .ch-inner{justify-content:center;text-align:center;min-height:36px}
+ :root .ch-topline .ch-secondary{display:none}
+ :root .ch-nav{min-height:70px}
+ :root .ch-brand-mark{width:41px;height:41px}
+ :root .ch-brand-name{font-size:20px}
+ :root .ch-menu-toggle{display:grid;place-items:center}
+ :root .ch-nav-links{display:none;position:absolute;top:70px;left:0;right:0;background:var(--paper);padding:18px 22px 22px;border-bottom:1px solid var(--line);box-shadow:0 16px 24px #10284610;flex-direction:column;align-items:stretch;gap:0}
+ :root .ch-nav-links.open{display:flex}
+ :root .ch-nav-links a{padding:11px 0;border-bottom:1px solid var(--line)}
+ :root .ch-nav-actions .ch-btn-primary{display:none}
+ :root .ch-footer-grid{grid-template-columns:1fr 1fr;gap:25px}
+ :root .ch-footer-grid>div:first-child{grid-column:1/-1}
+ :root .ch-footer{padding-bottom:90px}
+}
+@media(max-width:390px){
+ :root .ch-footer-grid{grid-template-columns:1fr}
+ :root .ch-footer-grid>div:first-child{grid-column:auto}
+}
+:root .ch-header{background:rgba(251,250,247,.96);border-bottom:1px solid #dfe5eb;box-shadow:0 5px 22px rgba(13,36,61,.045)}
+:root .ch-nav{gap:clamp(12px,2vw,28px)}
+:root .ch-brand{min-width:unset;flex-shrink:0;gap:13px}
+:root .ch-brand-mark{width:50px;height:50px;border-radius:17px;position:relative;isolation:isolate;box-shadow:0 9px 22px #1028462b, inset 0 1px 0 #ffffff30;transition:transform .25s,box-shadow .25s}
+:root .ch-brand-mark:after{content:"";position:absolute;inset:-4px;border:1px solid #d6b97880;border-radius:20px;z-index:-1;opacity:0;transform:scale(.88);transition:opacity .25s,transform .25s}
+:root .ch-brand:hover .ch-brand-mark{transform:translateY(-2px);box-shadow:0 13px 28px #10284635,inset 0 1px 0 #ffffff30}
+:root .ch-brand:hover .ch-brand-mark:after{opacity:1;transform:scale(1)}
+:root .ch-brand-name{display:block;font-size:clamp(19px,1.65vw,23px);letter-spacing:.35px;white-space:nowrap}
+:root .ch-brand-sub{display:block;font-size:13px;line-height:1.2;letter-spacing:.15px;white-space:nowrap;color:#68798a;margin-top:5px}
+:root .ch-nav-links{gap:clamp(3px,.7vw,10px);padding:6px;border:1px solid #e5e9ed;border-radius:17px;background:linear-gradient(180deg,#fffefa,#f7f6f2);box-shadow:0 4px 13px #10284608}
+:root .ch-nav-links a{position:relative;display:flex;align-items:center;justify-content:center;gap:7px;padding:12px 13px;border-radius:12px;color:#344a61;font-size:16px;font-weight:bold;white-space:nowrap;transition:color .22s,background .22s,transform .22s,box-shadow .22s}
+:root .ch-nav-links a:before{content:"";position:absolute;left:13px;right:13px;bottom:5px;height:2px;border-radius:9px;background:linear-gradient(90deg,#d9b66e,#e77822);transform:scaleX(0);transform-origin:left;transition:transform .25s}
+:root .ch-nav-links a:hover{color:#102b48;background:#eef3f7;transform:translateY(-1px);box-shadow:0 5px 12px #1028460d}
+:root .ch-nav-links a:hover:before{transform:scaleX(1)}
+:root .ch-nav-icon{display:grid;place-items:center;width:29px;height:29px;flex:none;border-radius:9px;color:#b46a20;background:linear-gradient(145deg,#fff1d6,#f7e4bd);box-shadow:inset 0 0 0 1px #e7d0a3}
+:root .ch-nav-icon svg{width:17px;height:17px}
+:root .ch-nav-links a>i,:root .ch-nav-links a>b{display:none}
+:root .ch-nav-actions{gap:9px;flex-shrink:0}
+:root .ch-nav-actions .ch-btn-outline{border-color:#d3dce5;background:#fffefa}
+:root .ch-nav-actions .ch-btn-primary{background:linear-gradient(135deg,#183b60,#0b2038);box-shadow:0 7px 18px #10284624}
+:root .ch-menu-toggle{width:44px;height:44px;border-radius:13px;background:linear-gradient(145deg,#fff,#f4f6f8);border-color:#d9e1e9;box-shadow:0 5px 13px #10284610;transition:transform .2s,background .2s}
+:root .ch-menu-toggle:hover{transform:translateY(-1px);background:#f0f4f7}
+@media(min-width:761px) and (max-width:1100px){
+ :root .ch-brand-sub{display:none}
+ :root .ch-nav-links a{padding:10px 8px;font-size:15px}
+ :root .ch-nav-icon{width:26px;height:26px}
+ :root .ch-nav-links{gap:2px}
+ :root .ch-nav-actions .ch-btn-primary{padding:9px 10px;font-size:14px}
+}
+@media(max-width:760px){
+ :root .ch-nav{min-height:72px;gap:10px}
+ :root .ch-brand{gap:10px;min-width:0;max-width:calc(100% - 58px)}
+ :root .ch-brand-mark{width:43px;height:43px;border-radius:14px}
+ :root .ch-brand-name{font-size:clamp(17px,4.6vw,20px);letter-spacing:.1px}
+ :root .ch-brand-sub{display:block;font-size:12px;white-space:normal;margin-top:4px}
+ :root .ch-nav-actions{margin-left:auto}
+ :root .ch-nav-actions .ch-btn-outline,:root .ch-nav-actions .ch-btn-primary{display:none}
+ :root .ch-menu-toggle{display:grid;place-items:center;width:45px;height:45px;flex:none}
+ :root .ch-nav-links{display:none;position:absolute;top:calc(100% + 8px);left:14px;right:14px;padding:10px;border:1px solid #dce4eb;border-radius:19px;background:rgba(255,254,250,.98);box-shadow:0 22px 50px rgba(9,31,53,.2);backdrop-filter:blur(18px);flex-direction:column;align-items:stretch;gap:5px;z-index:30;transform-origin:top center;animation:menuDrop .22s ease-out}
+ :root .ch-nav-links.open{display:flex}
+ :root .ch-nav-links a{justify-content:flex-start;gap:12px;padding:11px 12px;min-height:64px;border:1px solid transparent;border-radius:13px;white-space:normal}
+ :root .ch-nav-links a:before{display:none}
+ :root .ch-nav-links a:hover{background:#f0f5f8;border-color:#e1e9ef;transform:none;box-shadow:none}
+ :root .ch-nav-icon{width:42px;height:42px;border-radius:13px;background:linear-gradient(145deg,#fff0d2,#f4dfb4);box-shadow:inset 0 0 0 1px #e6cea0;transition:transform .2s}
+ :root .ch-nav-links a:hover .ch-nav-icon{transform:scale(1.05) rotate(-3deg)}
+ :root .ch-nav-icon svg{width:21px;height:21px}
+ :root .ch-nav-links a>span:nth-child(2){font-size:17px;color:#102b48;line-height:1.2}
+ :root .ch-nav-links a>i{display:block;font-style:normal;font-size:13px;font-weight:normal;color:#7a8997;margin-top:4px}
+ :root .ch-nav-links a>b{display:grid;place-items:center;margin-left:auto;width:28px;height:28px;border-radius:9px;background:#f5ead5;color:#a65d17;font-size:17px}
+ :root .ch-nav-links a:active{background:#eaf1f6}
+}
+@media(prefers-reduced-motion:reduce){
+ :root .ch-nav-links{animation:none}
+ :root .ch-brand-mark,:root .ch-nav-links a,:root .ch-nav-icon{transition:none}
+}
+@media(max-width:520px){
+ :root .ch-brand-name{font-size:clamp(16px,4.2vw,19px)}
+ :root .ch-brand-sub{font-size:11px;white-space:normal;max-width:230px}
+}
+:root .ch-btn:focus-visible{outline:3px solid rgba(35,113,143,.45);
+ outline-offset:3px;}
+:root .ch-btn{transition:transform var(--motion-fast) var(--motion-ease),box-shadow var(--motion-fast) ease,background-color var(--motion-fast) ease,border-color var(--motion-fast) ease}
+:root .ch-btn:hover{transform:translateY(-1px)}
+:root .ch-btn:active{transform:translateY(0) scale(.985)}
+@media(prefers-reduced-motion:reduce){
+ :root .ch-btn{transition:none!important}
+}
+:root .ch-nav-group{position:relative;display:flex}
+:root .ch-nav-links .ch-nav-caret{font-style:normal;font-size:12px;color:#8a97a5;margin-left:-2px;transition:transform .2s}
+:root .ch-nav-sub{display:none;position:absolute;top:100%;left:0;min-width:262px;padding:10px 6px 6px;z-index:45}
+:root .ch-nav-sub:before{content:"";position:absolute;inset:6px 0 0;border:1px solid #dce4eb;border-radius:14px;background:#fffefa;box-shadow:0 18px 40px rgba(9,31,53,.16);z-index:-1}
+:root .ch-nav-group:hover .ch-nav-sub,:root .ch-nav-group:focus-within .ch-nav-sub,:root .ch-nav-group.open .ch-nav-sub{display:block}
+:root .ch-nav-group:hover .ch-nav-caret,:root .ch-nav-group.open .ch-nav-caret{transform:rotate(180deg)}
+:root .ch-nav-links .ch-nav-sub a{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 14px;margin:2px 4px;border-radius:10px;font-size:16px;font-weight:normal;color:#253a50;white-space:nowrap;min-height:0}
+:root .ch-nav-links .ch-nav-sub a:before{display:none}
+:root .ch-nav-links .ch-nav-sub a:hover{background:#eef3f7;color:#102b48;transform:none;box-shadow:none}
+:root .ch-nav-badge{font-size:12px;padding:2px 7px;border:1px solid #c8d5e1;border-radius:6px;color:#3c5874;background:#fff}
+@media(max-width:760px){
+ :root .ch-nav-group{display:block}
+ :root .ch-nav-links .ch-nav-caret{display:none}
+ :root .ch-nav-sub{display:block;position:static;min-width:0;padding:0 0 4px 54px}
+ :root .ch-nav-sub:before{display:none}
+ :root .ch-nav-links .ch-nav-sub a{min-height:0;padding:9px 10px;margin:0;font-size:15px;border:0;white-space:normal}
+}
+/* Máy tính bảng (761-1100px): menu thu vào nút 3 gạch như di động (header có thêm tìm kiếm, thông báo). */
+@media(min-width:761px) and (max-width:1100px){
+ :root .ch-menu-toggle{display:grid;place-items:center}
+ :root .ch-nav-links{display:none;position:absolute;top:70px;left:0;right:0;background:var(--paper);padding:18px 22px 22px;border-bottom:1px solid var(--line);box-shadow:0 16px 24px #10284610;flex-direction:column;align-items:stretch;gap:0}
+ :root .ch-nav-links.open{display:flex}
+ :root .ch-nav-links a{padding:11px 0;border-bottom:1px solid var(--line)}
+ :root .ch-nav-actions .ch-btn-primary{display:none}
+ :root .ch-nav-actions{margin-left:auto}
+ :root .ch-nav-actions .ch-btn-outline,:root .ch-nav-actions .ch-btn-primary{display:none}
+ :root .ch-menu-toggle{display:grid;place-items:center;width:45px;height:45px;flex:none}
+ :root .ch-nav-links{display:none;position:absolute;top:calc(100% + 8px);left:14px;right:14px;padding:10px;border:1px solid #dce4eb;border-radius:19px;background:rgba(255,254,250,.98);box-shadow:0 22px 50px rgba(9,31,53,.2);backdrop-filter:blur(18px);flex-direction:column;align-items:stretch;gap:5px;z-index:30;transform-origin:top center;animation:menuDrop .22s ease-out}
+ :root .ch-nav-links.open{display:flex}
+ :root .ch-nav-links a{justify-content:flex-start;gap:12px;padding:11px 12px;min-height:64px;border:1px solid transparent;border-radius:13px;white-space:normal}
+ :root .ch-nav-links a:before{display:none}
+ :root .ch-nav-links a:hover{background:#f0f5f8;border-color:#e1e9ef;transform:none;box-shadow:none}
+ :root .ch-nav-icon{width:42px;height:42px;border-radius:13px;background:linear-gradient(145deg,#fff0d2,#f4dfb4);box-shadow:inset 0 0 0 1px #e6cea0;transition:transform .2s}
+ :root .ch-nav-links a:hover .ch-nav-icon{transform:scale(1.05) rotate(-3deg)}
+ :root .ch-nav-icon svg{width:21px;height:21px}
+ :root .ch-nav-links a>span:nth-child(2){font-size:17px;color:#102b48;line-height:1.2}
+ :root .ch-nav-links a>i{display:block;font-style:normal;font-size:13px;font-weight:normal;color:#7a8997;margin-top:4px}
+ :root .ch-nav-links a>b{display:grid;place-items:center;margin-left:auto;width:28px;height:28px;border-radius:9px;background:#f5ead5;color:#a65d17;font-size:17px}
+ :root .ch-nav-links a:active{background:#eaf1f6}
+ :root .ch-nav-group{display:block}
+ :root .ch-nav-links .ch-nav-caret{display:none}
+ :root .ch-nav-sub{display:block;position:static;min-width:0;padding:0 0 4px 54px}
+ :root .ch-nav-sub:before{display:none}
+ :root .ch-nav-links .ch-nav-sub a{min-height:0;padding:9px 10px;margin:0;font-size:15px;border:0;white-space:normal}
+}
+@keyframes floatSoft{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes logoShimmer{0%,65%{transform:translateX(-80%) rotate(10deg)}85%,100%{transform:translateX(80%) rotate(10deg)}}
+@keyframes menuDrop{from{opacity:0;transform:translateY(-7px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+/* ---- Bổ sung cho trang trong (tìm kiếm, thông báo, mục đang xem, tài khoản trên di động, in) ---- */
+:root .ch-iconbtn{position:relative;display:grid;place-items:center;flex:none;width:44px;height:44px;border-radius:13px;background:linear-gradient(145deg,#fff,#f4f6f8);border:1px solid #d9e1e9;box-shadow:0 5px 13px #10284610;color:var(--navy);transition:transform .2s,background .2s}
+:root .ch-iconbtn:hover{transform:translateY(-1px);background:#f0f4f7}
+:root .ch-iconbtn .ch-icon{width:20px;height:20px}
+:root .ch-count{position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;padding:0 5px;border-radius:99px;background:#d96813;color:#fff;font-size:11px;font-weight:bold;line-height:20px;text-align:center;box-shadow:0 0 0 2px #fbfaf7}
+:root .ch-nav-links a.is-active{color:#102b48;background:#eef3f7}
+:root .ch-nav-links a.is-active:before{transform:scaleX(1)}
+:root .ch-nav-links .ch-nav-sub a.is-active{background:#eef3f7;font-weight:bold}
+:root .ch-mobile-acc{display:none}
+:root .ch-nav{gap:clamp(12px,1.4vw,20px)}
+@media(min-width:1101px){:root .ch-nav-links a{padding-left:11px;padding-right:11px}}
+@media(min-width:1101px) and (max-width:1260px){:root .ch-nav-links .ch-nav-icon{display:none}:root .ch-nav-links a{padding-left:12px;padding-right:12px}}
+@media(min-width:761px) and (max-width:1100px){
+ :root .ch-nav-links{left:auto;right:20px;width:min(420px,calc(100% - 40px))}
+ :root .ch-nav-links .ch-mobile-acc{display:flex;gap:8px;padding:10px 2px 2px;margin-top:4px;border-top:1px solid #e4e8ec}
+ :root .ch-nav-links .ch-mobile-acc a{flex:1;min-height:0;justify-content:center;padding:11px 10px;border-radius:12px;font-size:16px;border:1px solid #cbd5df}
+ :root .ch-nav-links .ch-mobile-acc a.ch-btn-primary{background:linear-gradient(135deg,#183b60,#0b2038);border-color:#0b2038;color:#fff}
+}
+:root :is(.ch-topline,.ch-header) .ch-container{width:min(1240px,calc(100% - 40px))}
+:root .ch-footer h3{font-weight:bold}
+:root .ch-topline .ch-staff-link{margin-left:10px;padding-left:10px;border-left:1px solid #ffffff40}
+@media(max-width:760px){
+ :root .ch-brand{flex:1;max-width:none;min-width:0}
+ :root .ch-brand>span:last-child{min-width:0}
+ :root .ch-brand-name{overflow:hidden;text-overflow:ellipsis}
+ :root .ch-nav-actions{gap:7px}
+ :root .ch-iconbtn{width:42px;height:42px}
+ :root .ch-nav-links .ch-mobile-acc{display:flex;gap:8px;padding:10px 2px 2px;margin-top:4px;border-top:1px solid #e4e8ec}
+ :root .ch-nav-links .ch-mobile-acc a{flex:1;min-height:0;justify-content:center;padding:11px 10px;border-radius:12px;font-size:16px;border:1px solid #cbd5df}
+ :root .ch-nav-links .ch-mobile-acc a.ch-btn-primary{background:linear-gradient(135deg,#183b60,#0b2038);border-color:#0b2038;color:#fff}
+}
+@media(max-width:430px){
+ :root .ch-brand-sub{display:none}
+ :root .ch-brand-mark{width:40px;height:40px}
+ :root .ch-iconbtn,:root .ch-menu-toggle{width:40px;height:40px}
+}
+@media print{:root .ch-topline,:root .ch-header,:root .ch-footer{display:none!important}}

@@ -82,7 +82,7 @@ if ( null !== $r ) {
 </head>
 <body <?php body_class( 'cvc-exam-result' ); ?>>
 <?php wp_body_open(); ?>
-<header class="header"><div class="wrap header-in"><a class="brand" href="<?php $a( home_url( '/' ) ); ?>" aria-label="Công Viên Chức - Trang chủ"><span class="brand-logo">CV</span><span><span class="brand-title">CÔNG VIÊN CHỨC</span><span class="brand-sub">Kiến thức vững vàng · Sự nghiệp bền vững</span></span></a><?php if ( function_exists( 'cvc_main_nav_items' ) ) : ?><button class="er-navtoggle" id="erNavToggle" type="button" aria-expanded="false" aria-controls="erNav">☰ Menu</button><nav class="er-nav" id="erNav" aria-label="Menu chính"><?php foreach ( cvc_main_nav_items() as $cvc_ni ) : ?><?php if ( ! empty( $cvc_ni['children'] ) ) : ?><div class="er-navgroup"><a class="er-navlink" href="<?php $a( $cvc_ni['url'] ); ?>" aria-haspopup="true"><?php echo esc_html( $cvc_ni['label'] ); ?> <em>▾</em></a><div class="er-navsub"><?php foreach ( $cvc_ni['children'] as $cvc_nc ) : ?><a href="<?php $a( $cvc_nc['url'] ); ?>"><?php echo esc_html( $cvc_nc['label'] ); ?><?php if ( ! empty( $cvc_nc['badge'] ) ) : ?><small><?php echo esc_html( $cvc_nc['badge'] ); ?></small><?php endif; ?></a><?php endforeach; ?></div></div><?php else : ?><a class="er-navlink" href="<?php $a( $cvc_ni['url'] ); ?>"><?php echo esc_html( $cvc_ni['label'] ); ?></a><?php endif; ?><?php endforeach; ?></nav><?php endif; ?><div class="header-right"><?php if ( null !== $r ) : ?><span class="header-pill">● Bài thi đã hoàn thành</span><?php endif; ?><a class="print" href="<?php $a( cvc_account_url( 'exam-history' ) ); ?>">Lịch sử thi</a><?php if ( null !== $r ) : ?><button class="print" id="print" type="button">In / Lưu PDF</button><?php endif; ?></div></div></header>
+<?php cvc_chrome_header(); // inc/chrome.php - đầu trang dùng chung. ?>
 
 <?php if ( null === $r ) : ?>
 <main class="wrap">
@@ -154,7 +154,7 @@ else :
 	?>
 <main class="wrap" id="cvc-result" data-attempt="<?php echo (int) $at['id']; ?>">
 	<div class="crumb"><a href="<?php $a( home_url( '/' ) ); ?>">Trang chủ</a>　›　<a href="<?php $a( cvc_exams_url() ); ?>">Thi thử</a>　›　<?php if ( ! empty( $ex['slug'] ) && empty( $ex['personal'] ) ) : ?><a href="<?php $a( cvc_exam_url( (string) $ex['slug'] ) ); ?>"><?php $e( $trim( $ex['title'] ?? '', 60 ) ); ?></a>　›　<?php endif; ?>Kết quả &amp; Phân tích</div>
-	<div class="intro"><div><div class="eyebrow">BÁO CÁO NĂNG LỰC CÁ NHÂN</div><h1>Kết quả &amp; Phân tích bài thi</h1><p>Không chỉ xem điểm — hiểu phần cần củng cố và chọn bước ôn tập tiếp theo.</p></div><div class="complete">● Đã chấm điểm</div></div>
+	<div class="intro"><div><div class="eyebrow">BÁO CÁO NĂNG LỰC CÁ NHÂN</div><h1>Kết quả &amp; Phân tích bài thi</h1><p>Không chỉ xem điểm — hiểu phần cần củng cố và chọn bước ôn tập tiếp theo.</p></div><div class="er-introside"><div class="complete">● Đã chấm điểm</div><a class="er-tool" href="<?php $a( cvc_account_url( 'exam-history' ) ); ?>">Lịch sử thi</a><button class="er-tool" id="print" type="button">In / Lưu PDF</button></div></div>
 
 	<div class="grid"><div class="left">
 
@@ -373,9 +373,8 @@ else :
 	</div></aside></div>
 </main>
 <?php endif; ?>
-<footer><div class="wrap foot"><span>© Công Viên Chức · Kiến thức vững vàng, sự nghiệp bền vững</span><span><a href="<?php $a( cvc_exams_url() ); ?>">Đề thi thử</a> · <a href="<?php $a( cvc_legal_documents_url() ); ?>">Văn bản pháp luật</a> · <a href="<?php $a( cvc_recruitments_url() ); ?>">Tuyển dụng</a></span></div></footer>
+<?php cvc_chrome_footer(); ?>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
-<script>(function(){var b=document.getElementById('erNavToggle'),n=document.getElementById('erNav');if(!b||!n)return;b.addEventListener('click',function(e){e.stopPropagation();var o=n.classList.toggle('open');b.setAttribute('aria-expanded',o?'true':'false');});document.addEventListener('click',function(e){if(!n.contains(e.target)){n.classList.remove('open');b.setAttribute('aria-expanded','false');}});})();</script>
 <?php wp_footer(); ?>
 </body>
 </html>

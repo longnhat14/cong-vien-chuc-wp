@@ -1,0 +1,37 @@
+/* ---- Bổ sung cho trang trong (tìm kiếm, thông báo, mục đang xem, tài khoản trên di động, in) ---- */
+:root .ch-iconbtn{position:relative;display:grid;place-items:center;flex:none;width:44px;height:44px;border-radius:13px;background:linear-gradient(145deg,#fff,#f4f6f8);border:1px solid #d9e1e9;box-shadow:0 5px 13px #10284610;color:var(--navy);transition:transform .2s,background .2s}
+:root .ch-iconbtn:hover{transform:translateY(-1px);background:#f0f4f7}
+:root .ch-iconbtn .ch-icon{width:20px;height:20px}
+:root .ch-count{position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;padding:0 5px;border-radius:99px;background:#d96813;color:#fff;font-size:11px;font-weight:bold;line-height:20px;text-align:center;box-shadow:0 0 0 2px #fbfaf7}
+:root .ch-nav-links a.is-active{color:#102b48;background:#eef3f7}
+:root .ch-nav-links a.is-active:before{transform:scaleX(1)}
+:root .ch-nav-links .ch-nav-sub a.is-active{background:#eef3f7;font-weight:bold}
+:root .ch-mobile-acc{display:none}
+:root .ch-nav{gap:clamp(12px,1.4vw,20px)}
+@media(min-width:1101px){:root .ch-nav-links a{padding-left:11px;padding-right:11px}}
+@media(min-width:1101px) and (max-width:1260px){:root .ch-nav-links .ch-nav-icon{display:none}:root .ch-nav-links a{padding-left:12px;padding-right:12px}}
+@media(min-width:761px) and (max-width:1100px){
+ :root .ch-nav-links{left:auto;right:20px;width:min(420px,calc(100% - 40px))}
+ :root .ch-nav-links .ch-mobile-acc{display:flex;gap:8px;padding:10px 2px 2px;margin-top:4px;border-top:1px solid #e4e8ec}
+ :root .ch-nav-links .ch-mobile-acc a{flex:1;min-height:0;justify-content:center;padding:11px 10px;border-radius:12px;font-size:16px;border:1px solid #cbd5df}
+ :root .ch-nav-links .ch-mobile-acc a.ch-btn-primary{background:linear-gradient(135deg,#183b60,#0b2038);border-color:#0b2038;color:#fff}
+}
+:root :is(.ch-topline,.ch-header) .ch-container{width:min(1240px,calc(100% - 40px))}
+:root .ch-footer h3{font-weight:bold}
+:root .ch-topline .ch-staff-link{margin-left:10px;padding-left:10px;border-left:1px solid #ffffff40}
+@media(max-width:760px){
+ :root .ch-brand{flex:1;max-width:none;min-width:0}
+ :root .ch-brand>span:last-child{min-width:0}
+ :root .ch-brand-name{overflow:hidden;text-overflow:ellipsis}
+ :root .ch-nav-actions{gap:7px}
+ :root .ch-iconbtn{width:42px;height:42px}
+ :root .ch-nav-links .ch-mobile-acc{display:flex;gap:8px;padding:10px 2px 2px;margin-top:4px;border-top:1px solid #e4e8ec}
+ :root .ch-nav-links .ch-mobile-acc a{flex:1;min-height:0;justify-content:center;padding:11px 10px;border-radius:12px;font-size:16px;border:1px solid #cbd5df}
+ :root .ch-nav-links .ch-mobile-acc a.ch-btn-primary{background:linear-gradient(135deg,#183b60,#0b2038);border-color:#0b2038;color:#fff}
+}
+@media(max-width:430px){
+ :root .ch-brand-sub{display:none}
+ :root .ch-brand-mark{width:40px;height:40px}
+ :root .ch-iconbtn,:root .ch-menu-toggle{width:40px;height:40px}
+}
+@media print{:root .ch-topline,:root .ch-header,:root .ch-footer{display:none!important}}

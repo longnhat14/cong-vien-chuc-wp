@@ -53,6 +53,7 @@ require_once __DIR__ . '/inc/exam.php';
 require_once __DIR__ . '/inc/exam-result.php';
 require_once __DIR__ . '/inc/career.php';
 require_once __DIR__ . '/inc/catalog.php';
+require_once __DIR__ . '/inc/chrome.php';
 require_once __DIR__ . '/inc/documents.php';
 require_once __DIR__ . '/inc/admin-settings.php';
 require_once __DIR__ . '/inc/combo.php';

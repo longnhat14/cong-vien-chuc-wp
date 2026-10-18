@@ -1,0 +1,8 @@
+/* ---- Nền tảng (đặt trước phần sinh tự động) ---- */
+:root :is(.ch-topline,.ch-header,.ch-footer){font-family:"Times New Roman",Times,"Liberation Serif",serif;line-height:1.55;color:#14263b;-webkit-text-size-adjust:100%;letter-spacing:normal}
+:root :is(.ch-header,.ch-footer){font-size:18px}
+:root :is(.ch-topline,.ch-header,.ch-footer),:root :is(.ch-topline,.ch-header,.ch-footer) *,:root :is(.ch-topline,.ch-header,.ch-footer) *:before,:root :is(.ch-topline,.ch-header,.ch-footer) *:after{box-sizing:border-box}
+:root :where(.ch-topline,.ch-header,.ch-footer) a{color:inherit;text-decoration:none}
+:root :where(.ch-header,.ch-footer) :where(h3,p){margin:0}
+:root :where(.ch-header,.ch-footer) button{font:inherit;cursor:pointer}
+:root :where(.ch-header,.ch-footer) svg{display:inline-block}

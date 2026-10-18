@@ -57,98 +57,11 @@ if ( ! defined( "ABSPATH" ) ) {
 <?php wp_body_open(); ?>
 <?php cvc_render_notice(); ?>
 
+<a class="cvc-skip-link" href="#main">Bỏ qua, tới nội dung chính</a>
 <?php
 /*
- * Header (viết lại Phase 12; giao diện văn bản 16/10/2026): bỏ nội dung giả - bản tin "EXECUTIVE BULLETIN"
- * bịa, hotline 1900 888 999 không có thật, link "Trợ lý AI" chết, chuông
- * thông báo luôn có chấm đỏ và 2 thông báo mẫu, nút "Đăng Nhập" hiện cả khi
- * đã đăng nhập. Menu thu về nút 3 gạch dưới 1280px để không bị chật.
+ * Đầu trang dùng chung toàn site (18/10/2026): cùng giao diện trang chủ v17 - xem inc/chrome.php
+ * (cvc_chrome_header: menu chính cvc_main_nav_items, tìm kiếm, thông báo, tài khoản, menu di động).
  */
-$cvc_header_logged_in = cvc_is_logged_in();
-$cvc_header_unread    = 0;
-if ( $cvc_header_logged_in && cvc_auth_token() ) {
-	$cvc_unread_result = ( new CVC_Notification_Service() )->unreadCount( (string) cvc_auth_token() );
-	$cvc_header_unread = ! empty( $cvc_unread_result['ok'] ) ? (int) ( $cvc_unread_result['data']['data']['unread_count'] ?? 0 ) : 0;
-}
-// Menu "On thi" gom de thi, chu de, kien thuc, khoa hoc (khoa hoc chua mo -> nhan "Sap mo").
-$cvc_nav_items = cvc_main_nav_items(); // inc/routes.php - dùng chung với trang chủ v17 và trang kết quả thi.
-$cvc_current_url = home_url( add_query_arg( null, null ) );
+cvc_chrome_header();
 ?>
-<a class="cvc-skip-link" href="#main">Bỏ qua, tới nội dung chính</a>
-<!-- Thanh trên: dòng tin ngắn + tìm kiếm -->
-<div class="dz-topbar">
-<div class="dz-wrap dz-topbar-in">
-<a href="<?php echo esc_url( cvc_recruitments_url() ); ?>" class="dz-topbar-link"><i class="fa-solid fa-bullhorn" aria-hidden="true"></i> Tin tuyển dụng công chức, viên chức cập nhật hằng ngày — xem hạn nộp hồ sơ</a>
-<a href="<?php echo esc_url( cvc_search_url() ); ?>" class="dz-topbar-link dz-hide-sm"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i> Tra cứu</a>
-</div>
-</div>
-<!-- Đầu trang -->
-<header class="dz-masthead">
-<div class="dz-wrap dz-masthead-in">
-<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="dz-brand">
-<span class="dz-emblem" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 9h18L12 3 3 9Z"/><path d="M5 10v8m4-8v8m6-8v8m4-8v8M3 20h18"/></svg></span>
-<span class="dz-brandtext"><span class="dz-org">CÔNG VIÊN CHỨC</span><span class="dz-motto">Ôn thi công chức, viên chức · Kiến thức vững vàng, sự nghiệp bền vững</span></span>
-</a>
-<nav class="dz-nav" aria-label="Menu chính">
-<?php foreach ( $cvc_nav_items as $cvc_nav ) : ?>
-<?php
-$cvc_urls   = array_merge( array( $cvc_nav['url'] ), array_column( (array) ( $cvc_nav['children'] ?? array() ), 'url' ) );
-$cvc_active = (bool) array_filter( $cvc_urls, fn ( $u ) => 0 === strpos( $cvc_current_url, $u ) );
-?>
-<?php if ( ! empty( $cvc_nav['children'] ) ) : ?>
-<div class="dz-navgroup">
-<a href="<?php echo esc_url( $cvc_nav['url'] ); ?>" class="dz-navlink<?php echo $cvc_active ? ' is-active' : ''; ?>" aria-haspopup="true" <?php echo $cvc_active ? 'aria-current="page"' : ''; ?>><?php echo esc_html( $cvc_nav['label'] ); ?> <i class="fa-solid fa-chevron-down" aria-hidden="true"></i></a>
-<ul class="dz-dropdown">
-<?php foreach ( $cvc_nav['children'] as $cvc_child ) : ?>
-<li><a href="<?php echo esc_url( $cvc_child['url'] ); ?>"><span><?php echo esc_html( $cvc_child['label'] ); ?></span><?php if ( ! empty( $cvc_child['badge'] ) ) : ?><em class="dz-tag"><?php echo esc_html( $cvc_child['badge'] ); ?></em><?php endif; ?></a></li>
-<?php endforeach; ?>
-</ul>
-</div>
-<?php else : ?>
-<a href="<?php echo esc_url( $cvc_nav['url'] ); ?>" class="dz-navlink<?php echo $cvc_active ? ' is-active' : ''; ?>" <?php echo $cvc_active ? 'aria-current="page"' : ''; ?>><?php echo esc_html( $cvc_nav['label'] ); ?></a>
-<?php endif; ?>
-<?php endforeach; ?>
-</nav>
-<div class="dz-actions">
-<button type="button" onclick="toggleSearchModal()" class="dz-iconbtn" aria-label="Tìm kiếm"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></button>
-<?php if ( $cvc_header_logged_in ) : ?>
-<a href="<?php echo esc_url( cvc_account_url( 'notifications' ) ); ?>" class="dz-iconbtn" aria-label="<?php echo esc_attr( $cvc_header_unread > 0 ? sprintf( 'Thông báo: %d chưa đọc', $cvc_header_unread ) : 'Thông báo' ); ?>">
-<i class="fa-regular fa-bell" aria-hidden="true"></i>
-<?php if ( $cvc_header_unread > 0 ) : ?><span class="dz-count"><?php echo esc_html( $cvc_header_unread > 9 ? '9+' : (string) $cvc_header_unread ); ?></span><?php endif; ?>
-</a>
-<?php if ( function_exists( 'cvc_admin_is_staff' ) && cvc_admin_is_staff() ) : ?>
-<a href="<?php echo esc_url( cvc_admin_url() ); ?>" class="dz-btn dz-hide-sm">Quản trị</a>
-<?php endif; ?>
-<a href="<?php echo esc_url( cvc_account_url() ); ?>" class="dz-btn dz-btn-primary dz-hide-sm"><i class="fa-regular fa-user" aria-hidden="true"></i> Tài khoản</a>
-<?php else : ?>
-<a href="<?php echo esc_url( cvc_login_url( $cvc_current_url ) ); ?>" class="dz-btn dz-hide-sm">Đăng nhập</a>
-<a href="<?php echo esc_url( cvc_register_url() ); ?>" class="dz-btn dz-btn-primary dz-hide-sm">Đăng ký</a>
-<?php endif; ?>
-<button type="button" onclick="toggleMobileMenu()" class="dz-iconbtn dz-menubtn" aria-label="Mở menu" aria-controls="mobile-menu"><i class="fa-solid fa-bars" aria-hidden="true"></i></button>
-</div>
-</div>
-<div id="mobile-menu" class="hidden dz-mobile">
-<?php foreach ( $cvc_nav_items as $cvc_nav ) : ?>
-<?php if ( ! empty( $cvc_nav['children'] ) ) : ?>
-<p class="dz-mobile-label"><?php echo esc_html( $cvc_nav['label'] ); ?></p>
-<?php foreach ( $cvc_nav['children'] as $cvc_child ) : ?>
-<a href="<?php echo esc_url( $cvc_child['url'] ); ?>" class="dz-mobile-link"><span><?php echo esc_html( $cvc_child['label'] ); ?></span><?php if ( ! empty( $cvc_child['badge'] ) ) : ?><em class="dz-tag"><?php echo esc_html( $cvc_child['badge'] ); ?></em><?php endif; ?></a>
-<?php endforeach; ?>
-<?php else : ?>
-<a href="<?php echo esc_url( $cvc_nav['url'] ); ?>" class="dz-mobile-link"><?php echo esc_html( $cvc_nav['label'] ); ?></a>
-<?php endif; ?>
-<?php endforeach; ?>
-<div class="dz-mobile-actions">
-<?php if ( $cvc_header_logged_in ) : ?>
-<?php if ( function_exists( 'cvc_admin_is_staff' ) && cvc_admin_is_staff() ) : ?>
-<a href="<?php echo esc_url( cvc_admin_url() ); ?>" class="dz-btn">Quản trị</a>
-<?php endif; ?>
-<a href="<?php echo esc_url( cvc_account_url() ); ?>" class="dz-btn dz-btn-primary">Tài khoản</a>
-<a href="<?php echo esc_url( cvc_logout_url() ); ?>" class="dz-btn">Đăng xuất</a>
-<?php else : ?>
-<a href="<?php echo esc_url( cvc_login_url( $cvc_current_url ) ); ?>" class="dz-btn">Đăng nhập</a>
-<a href="<?php echo esc_url( cvc_register_url() ); ?>" class="dz-btn dz-btn-primary">Đăng ký</a>
-<?php endif; ?>
-</div>
-</div>
-</header>
