@@ -923,3 +923,23 @@ a:focus-visible,button:focus-visible{
 /* AI Coach: giu xuong dong trong cau tra loi (ý gạch đầu dòng, trích dẫn) */
 .ai-msg.bot{white-space:pre-line}
 .ai-chat-link{white-space:normal}
+
+/* Menu "Ôn thi" có mục con - đồng nhất với header các trang (18/10/2026) */
+.nav-group{position:relative;display:flex}
+.nav-links .nav-caret{font-style:normal;font-size:12px;color:#8a97a5;margin-left:-2px;transition:transform .2s}
+.nav-sub{display:none;position:absolute;top:100%;left:0;min-width:262px;padding:10px 6px 6px;z-index:45}
+.nav-sub:before{content:"";position:absolute;inset:6px 0 0;border:1px solid #dce4eb;border-radius:14px;background:#fffefa;box-shadow:0 18px 40px rgba(9,31,53,.16);z-index:-1}
+.nav-group:hover .nav-sub,.nav-group:focus-within .nav-sub,.nav-group.open .nav-sub{display:block}
+.nav-group:hover .nav-caret,.nav-group.open .nav-caret{transform:rotate(180deg)}
+.nav-links .nav-sub a{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 14px;margin:2px 4px;border-radius:10px;font-size:16px;font-weight:normal;color:#253a50;white-space:nowrap;min-height:0}
+.nav-links .nav-sub a:before{display:none}
+.nav-links .nav-sub a:hover{background:#eef3f7;color:#102b48;transform:none;box-shadow:none}
+.nav-badge{font-size:12px;padding:2px 7px;border:1px solid #c8d5e1;border-radius:6px;color:#3c5874;background:#fff}
+@media(max-width:760px){
+ .nav-group{display:block}
+ .nav-links .nav-caret{display:none}
+ .nav-sub{display:block;position:static;min-width:0;padding:0 0 4px 54px}
+ .nav-sub:before{display:none}
+ .nav-links .nav-sub a{min-height:0;padding:9px 10px;margin:0;font-size:15px;border:0;white-space:normal}
+}
+

@@ -138,10 +138,32 @@ $GLOBALS['cvc_home17_cfg'] = array(
    <span><span class="brand-name">CÔNG VIÊN CHỨC</span><span class="brand-sub">Ôn thi vững vàng · Công vụ tự tin</span></span>
   </a>
   <nav class="nav-links" id="navLinks" aria-label="Điều hướng chính">
-   <a href="<?php $a( $u['exams'] ); ?>"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="3.5" width="14" height="17" rx="2"/><path d="M8 8h8M8 12h2m3 0h3M8 16h8"/></svg></span><span>Đề thi thử</span><i>Khám phá đề thi</i><b aria-hidden="true">↗</b></a>
-   <a href="<?php $a( $u['docs'] ); ?>"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3.5h8l4 4V20a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1Z"/><path d="M14 3.5V8h4M8 12h8M8 16h8"/></svg></span><span>Tài liệu</span><i>Kho tài liệu hữu ích</i><b aria-hidden="true">↗</b></a>
-   <a href="<?php $a( $u['legal'] ); ?>"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3 20 7v5c0 4.5-3.1 7.4-8 9-4.9-1.6-8-4.5-8-9V7l8-4Z"/><path d="m8.5 12 2.2 2.2 4.8-5"/></svg></span><span>Văn bản pháp luật</span><i>Tra cứu quy định</i><b aria-hidden="true">↗</b></a>
-   <a href="<?php $a( $u['rec'] ); ?>"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="7" width="17" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3.5 12h17M10 12v2h4v-2"/></svg></span><span>Tuyển dụng</span><i>Cơ hội mới nhất</i><b aria-hidden="true">↗</b></a>
+   <?php
+   // Menu chính dùng chung (cvc_main_nav_items) - cùng thứ tự, cùng mục con với header các trang khác.
+   $cvc_nav_icons = array(
+	'exams' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="3.5" width="14" height="17" rx="2"/><path d="M8 8h8M8 12h2m3 0h3M8 16h8"/></svg>',
+	'rec'   => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="7" width="17" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3.5 12h17M10 12v2h4v-2"/></svg>',
+	'legal' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3 20 7v5c0 4.5-3.1 7.4-8 9-4.9-1.6-8-4.5-8-9V7l8-4Z"/><path d="m8.5 12 2.2 2.2 4.8-5"/></svg>',
+	'docs'  => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3.5h8l4 4V20a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1Z"/><path d="M14 3.5V8h4M8 12h8M8 16h8"/></svg>',
+   );
+   foreach ( cvc_main_nav_items() as $cvc_nav ) :
+	$cvc_ico = $cvc_nav_icons[ $cvc_nav['key'] ] ?? '';
+	if ( ! empty( $cvc_nav['children'] ) ) :
+		?>
+   <div class="nav-group">
+    <a class="nav-parent" href="<?php $a( $cvc_nav['url'] ); ?>" aria-haspopup="true" aria-expanded="false"><span class="nav-icon"><?php echo $cvc_ico; // phpcs:ignore ?></span><span><?php $e( $cvc_nav['label'] ); ?></span><i><?php $e( $cvc_nav['hint'] ); ?></i><em class="nav-caret" aria-hidden="true">▾</em></a>
+    <div class="nav-sub">
+     <?php foreach ( $cvc_nav['children'] as $cvc_child ) : ?>
+     <a href="<?php $a( $cvc_child['url'] ); ?>"><span><?php $e( $cvc_child['label'] ); ?></span><?php if ( ! empty( $cvc_child['badge'] ) ) : ?><small class="nav-badge"><?php $e( $cvc_child['badge'] ); ?></small><?php endif; ?></a>
+     <?php endforeach; ?>
+    </div>
+   </div>
+		<?php else : ?>
+   <a href="<?php $a( $cvc_nav['url'] ); ?>"><span class="nav-icon"><?php echo $cvc_ico; // phpcs:ignore ?></span><span><?php $e( $cvc_nav['label'] ); ?></span><i><?php $e( $cvc_nav['hint'] ); ?></i><b aria-hidden="true">↗</b></a>
+		<?php
+	endif;
+   endforeach;
+   ?>
   </nav>
   <div class="nav-actions">
    <?php if ( $logged_in ) : ?>

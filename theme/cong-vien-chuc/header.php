@@ -71,22 +71,7 @@ if ( $cvc_header_logged_in && cvc_auth_token() ) {
 	$cvc_header_unread = ! empty( $cvc_unread_result['ok'] ) ? (int) ( $cvc_unread_result['data']['data']['unread_count'] ?? 0 ) : 0;
 }
 // Menu "On thi" gom de thi, chu de, kien thuc, khoa hoc (khoa hoc chua mo -> nhan "Sap mo").
-$cvc_has_courses = function_exists( 'cvc_has_sellable_courses' ) && cvc_has_sellable_courses();
-$cvc_nav_items   = array(
-	array(
-		'label'    => 'Ôn thi',
-		'url'      => cvc_exams_url(),
-		'children' => array(
-			array( 'label' => 'Đề thi thử miễn phí', 'url' => cvc_exams_url(), 'icon' => 'fa-pen-to-square' ),
-			array( 'label' => 'Chủ đề ôn thi', 'url' => cvc_topics_url(), 'icon' => 'fa-layer-group' ),
-			array( 'label' => 'Kiến thức trọng tâm', 'url' => cvc_knowledge_url(), 'icon' => 'fa-lightbulb' ),
-			array( 'label' => 'Khóa học', 'url' => cvc_courses_url(), 'icon' => 'fa-graduation-cap', 'badge' => $cvc_has_courses ? '' : 'Sắp mở' ),
-		),
-	),
-	array( 'label' => 'Tuyển dụng', 'url' => cvc_recruitments_url() ),
-	array( 'label' => 'Văn bản pháp luật', 'url' => cvc_legal_documents_url() ),
-	array( 'label' => 'Tài liệu', 'url' => cvc_documents_url() ),
-);
+$cvc_nav_items = cvc_main_nav_items(); // inc/routes.php - dùng chung với trang chủ v17 và trang kết quả thi.
 $cvc_current_url = home_url( add_query_arg( null, null ) );
 ?>
 <a class="cvc-skip-link" href="#main">Bỏ qua, tới nội dung chính</a>

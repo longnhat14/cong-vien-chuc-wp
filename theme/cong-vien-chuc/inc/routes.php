@@ -633,3 +633,31 @@ function cvc_certificate_verify_url( string $code = '' ): string {
 function cvc_admin_ai_settings_url(): string {
 	return home_url( '/quan-tri/cau-hinh-ai/' );
 }
+
+/**
+ * Menu chính dùng chung mọi giao diện (header.php, trang chủ v17, trang kết quả thi) - 18/10/2026.
+ * "Ôn thi" gom đề thi, chủ đề, kiến thức, khóa học (khóa học chưa mở -> nhãn "Sắp mở").
+ *
+ * @return array<int, array<string, mixed>>
+ */
+function cvc_main_nav_items(): array {
+	$has_courses = function_exists( 'cvc_has_sellable_courses' ) && cvc_has_sellable_courses();
+
+	return array(
+		array(
+			'key'      => 'exams',
+			'label'    => 'Ôn thi',
+			'hint'     => 'Đề thi, chủ đề, kiến thức',
+			'url'      => cvc_exams_url(),
+			'children' => array(
+				array( 'label' => 'Đề thi thử miễn phí', 'url' => cvc_exams_url(), 'icon' => 'fa-pen-to-square' ),
+				array( 'label' => 'Chủ đề ôn thi', 'url' => cvc_topics_url(), 'icon' => 'fa-layer-group' ),
+				array( 'label' => 'Kiến thức trọng tâm', 'url' => cvc_knowledge_url(), 'icon' => 'fa-lightbulb' ),
+				array( 'label' => 'Khóa học', 'url' => cvc_courses_url(), 'icon' => 'fa-graduation-cap', 'badge' => $has_courses ? '' : 'Sắp mở' ),
+			),
+		),
+		array( 'key' => 'rec', 'label' => 'Tuyển dụng', 'hint' => 'Cơ hội mới nhất', 'url' => cvc_recruitments_url() ),
+		array( 'key' => 'legal', 'label' => 'Văn bản pháp luật', 'hint' => 'Tra cứu quy định', 'url' => cvc_legal_documents_url() ),
+		array( 'key' => 'docs', 'label' => 'Tài liệu', 'hint' => 'Kho tài liệu hữu ích', 'url' => cvc_documents_url() ),
+	);
+}
