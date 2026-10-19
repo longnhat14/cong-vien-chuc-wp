@@ -709,7 +709,7 @@ function cvc_main_nav_items(): array {
 				array( 'group' => 'practice', 'label' => 'Ôn tập kiến thức', 'desc' => 'Làm câu hỏi, xem giải thích và học căn cứ pháp lý', 'url' => cvc_exams_mode_url( 'on-tap' ), 'sym' => '✎' ),
 				array( 'group' => 'practice', 'label' => 'Câu hỏi đã lưu', 'desc' => 'Câu đánh dấu, câu sai và câu cần ôn lại', 'url' => cvc_saved_questions_url(), 'sym' => '⚑' ),
 				array( 'group' => 'assess', 'label' => 'Thi thử như thi thật', 'desc' => 'Làm đề có thời gian, nộp bài và xem điểm', 'url' => cvc_exams_mode_url( 'thi-that' ), 'sym' => '◷' ),
-				array( 'group' => 'assess', 'label' => 'Kết quả & tiến độ', 'desc' => 'Lịch sử làm bài, điểm số và chủ đề còn yếu', 'url' => cvc_account_url( 'exam-history' ), 'sym' => '↗' ),
+				array( 'group' => 'assess', 'label' => 'Kết quả & tiến độ', 'desc' => 'Tổng quan điểm số, tiến độ và chủ đề còn yếu', 'url' => cvc_account_url( 'overview' ), 'sym' => '↗' ),
 				array( 'group' => 'more', 'label' => 'Chủ đề ôn thi', 'url' => cvc_topics_url() ),
 				array( 'group' => 'more', 'label' => 'Kiến thức trọng tâm', 'url' => cvc_knowledge_url() ),
 				array( 'group' => 'more', 'label' => 'Khóa học', 'url' => cvc_courses_url(), 'badge' => $has_courses ? '' : 'Sắp mở' ),
