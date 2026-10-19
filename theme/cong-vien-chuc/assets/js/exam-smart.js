@@ -359,6 +359,23 @@
     } else if (e.key === 'ArrowRight' && mode === 'focus') { current = Math.min(TOTAL - 1, current + 1); render(); }
     else if (e.key === 'ArrowLeft' && mode === 'focus') { current = Math.max(0, current - 1); render(); }
     else if (k === 'f' && keys) { toggleFlag(current); }
+    else if (k === 'n' && mode === 'focus') { e.preventDefault(); var nb = $('#sx-notes'); nb.classList.toggle('sx-hidden'); if (!nb.classList.contains('sx-hidden')) { $('#sx-note').focus(); } }
+    else if (e.key === 'Enter' && mode === 'focus' && ['BUTTON', 'A'].indexOf(tag) === -1) {
+      e.preventDefault();
+      if (current < TOTAL - 1) { current++; render(); } else { toast('Đây là câu cuối - bấm "Nộp bài" khi đã rà soát xong.'); }
+    }
+  });
+
+  /* --- Liên kết kiến thức: mở/đóng danh sách theo nhóm --- */
+  Array.prototype.forEach.call(document.querySelectorAll('[data-links]'), function (b) {
+    b.addEventListener('click', function () {
+      var open = b.getAttribute('aria-expanded') !== 'true';
+      Array.prototype.forEach.call(document.querySelectorAll('[data-links]'), function (o) {
+        o.setAttribute('aria-expanded', 'false');
+        var l = document.getElementById('sx-links-' + o.getAttribute('data-links')); if (l) { l.hidden = true; }
+      });
+      if (open) { b.setAttribute('aria-expanded', 'true'); var list = document.getElementById('sx-links-' + b.getAttribute('data-links')); if (list) { list.hidden = false; } }
+    });
   });
 
   /* --- Khởi động --- */

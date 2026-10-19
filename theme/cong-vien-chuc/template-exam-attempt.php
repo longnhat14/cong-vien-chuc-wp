@@ -148,6 +148,8 @@ $total_q = count( $questions );
  * phút đếm lại từ đầu mỗi lần tải trang).
  */
 $exam_info      = is_array( $attempt_data['exam'] ?? null ) ? $attempt_data['exam'] : array();
+// "Liên kết kiến thức" (backend ExamLinks): văn bản các câu dẫn chiếu, bài học theo Điều, tin tuyển dụng của đề.
+$exam_links     = is_array( $attempt_res['data']['links'] ?? null ) ? $attempt_res['data']['links'] : array();
 $exam_title     = trim( (string) ( $exam_info['title'] ?? '' ) ) ?: 'Bài thi trắc nghiệm';
 $exam_code      = (string) ( $exam_info['code'] ?? '' );
 $exam_duration  = (int) ( $exam_info['duration_minutes'] ?? 0 );
@@ -266,13 +268,24 @@ $doc_icon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H
 
 		<!-- Sidebar trái: liên kết tài khoản (giữ nguyên nội dung) -->
 		<aside class="sx-left" aria-label="Liên kết nhanh">
-			<nav class="sx-panel sx-leftnav">
-				<span class="sx-leftitem active"><span aria-hidden="true">📝</span> Làm bài thi</span>
-				<a href="<?php echo esc_url( cvc_account_url( 'exam-history' ) ); ?>" class="sx-leftitem"><span aria-hidden="true">📜</span> Lịch sử làm bài</a>
-				<a href="<?php echo esc_url( cvc_account_url( 'recommendations' ) ); ?>" class="sx-leftitem"><span aria-hidden="true">💡</span> Gợi ý ôn tập</a>
-				<a href="<?php echo esc_url( cvc_account_url( 'my-courses' ) ); ?>" class="sx-leftitem"><span aria-hidden="true">🎓</span> Khóa học của tôi</a>
-				<a href="<?php echo esc_url( cvc_exams_url() ); ?>" class="sx-leftitem"><span aria-hidden="true">📚</span> Danh sách đề thi</a>
-			</nav>
+			<section class="sx-panel sx-leftpanel">
+				<div class="sx-lefthead">Không gian thi</div>
+				<nav class="sx-leftnav">
+					<span class="sx-leftitem active" aria-current="page"><span class="sx-li" aria-hidden="true">✎</span> Làm bài thi</span>
+					<a href="<?php echo esc_url( cvc_account_url( 'exam-history' ) ); ?>" class="sx-leftitem"><span class="sx-li" aria-hidden="true">▤</span> Lịch sử làm bài</a>
+					<a href="<?php echo esc_url( cvc_account_url( 'recommendations' ) ); ?>" class="sx-leftitem"><span class="sx-li" aria-hidden="true">✦</span> Gợi ý ôn tập</a>
+					<a href="<?php echo esc_url( cvc_account_url( 'my-courses' ) ); ?>" class="sx-leftitem"><span class="sx-li" aria-hidden="true">♝</span> Khóa học của tôi</a>
+					<a href="<?php echo esc_url( cvc_exams_url() ); ?>" class="sx-leftitem"><span class="sx-li" aria-hidden="true">▣</span> Danh sách đề thi</a>
+				</nav>
+			</section>
+			<section class="sx-panel sx-leftpanel sx-tipspanel">
+				<div class="sx-lefthead">Mẹo làm bài</div>
+				<ul class="sx-lefttips">
+					<li>Câu chưa chắc: đánh dấu xem lại.</li>
+					<li>Chuyển câu bất kỳ bằng bản đồ.</li>
+					<li>Rà soát câu bỏ trống trước khi nộp.</li>
+				</ul>
+			</section>
 		</aside>
 
 		<main class="sx-panel sx-mainpanel" id="sx-mainpanel">
@@ -350,6 +363,7 @@ $doc_icon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H
 						<button type="button" class="sx-btn" data-filter="flagged">Xem lại</button>
 						<?php if ( $is_submitted ) : ?><button type="button" class="sx-btn" data-filter="wrong">Làm sai</button><?php endif; ?>
 					</div>
+					<p class="sx-maphint">Chọn số câu để di chuyển nhanh.</p>
 				</div>
 			</section>
 
@@ -360,18 +374,15 @@ $doc_icon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H
 						<?php if ( '' !== $exam_code ) : ?><tr><td>Mã đề</td><td><?php echo esc_html( $exam_code ); ?></td></tr><?php endif; ?>
 						<tr><td>Số câu</td><td><?php echo (int) $total_q; ?> câu</td></tr>
 						<tr><td>Thời gian</td><td><?php echo $exam_duration > 0 ? (int) $exam_duration . ' phút' : 'Không giới hạn'; ?></td></tr>
-						<tr><td>Hình thức</td><td>Trắc nghiệm, chọn một đáp án</td></tr>
+						<tr><td>Hình thức</td><td>Trắc nghiệm 1 đáp án</td></tr>
 						<?php if ( null !== $exam_passing_score && $exam_total_score ) : ?><tr><td>Điểm đạt</td><td><?php echo esc_html( rtrim( rtrim( number_format( $exam_passing_score, 2, ',', '' ), '0' ), ',' ) . '/' . rtrim( rtrim( number_format( $exam_total_score, 2, ',', '' ), '0' ), ',' ) ); ?></td></tr><?php endif; ?>
-						<tr><td>Trạng thái</td><td class="sx-status" id="sx-status"><?php echo $is_submitted ? '● Đã nộp bài' : '● Đang làm bài'; ?></td></tr>
+						<tr><td>Trạng thái</td><td class="sx-status<?php echo $is_submitted ? '' : ' is-live'; ?>" id="sx-status"><?php echo $is_submitted ? 'Đã nộp bài' : 'Đang làm bài'; ?></td></tr>
 					</table>
 					<div class="sx-tips">
-						<h3>♧ Thao tác nhanh</h3>
-						<ul>
-							<li>Phím 1–4 hoặc A–D: chọn đáp án.</li>
-							<li>Phím ← / →: chuyển câu.</li>
-							<li>Phím F: đánh dấu xem lại.</li>
-							<li>Đáp án được lưu tự động vào tài khoản.</li>
-						</ul>
+						<h3><span aria-hidden="true">⌨</span> Thao tác nhanh</h3>
+						<p class="sx-keys"><kbd>1-4</kbd> Chọn đáp án · <kbd>← →</kbd> Chuyển câu</p>
+						<p class="sx-keys"><kbd>F</kbd> Đánh dấu · <kbd>N</kbd> Ghi chú</p>
+						<p class="sx-keys"><kbd>Enter</kbd> Câu tiếp theo</p>
 					</div>
 				</div>
 			</section>
@@ -386,6 +397,55 @@ $doc_icon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H
 				</div>
 			</section>
 		</aside>
+	</div>
+
+	<div class="sx-linkswrap">
+		<?php
+		$lk_legal = (array) ( $exam_links['legal'] ?? array() );
+		$lk_study = (array) ( $exam_links['study'] ?? array() );
+		$lk_recs  = (array) ( $exam_links['recruitments'] ?? array() );
+		$lk_groups = array(
+			'legal' => array( '§', 'Văn bản pháp luật liên quan', $lk_legal, cvc_legal_documents_url() ),
+			'study' => array( '▤', 'Tài liệu ôn tập', $lk_study, cvc_documents_url() ),
+			'recs'  => array( '▣', 'Tuyển dụng liên quan', $lk_recs, cvc_recruitments_url() ),
+		);
+		?>
+		<section class="sx-panel sx-links" aria-labelledby="sx-linksTitle">
+			<div class="sx-linkshead"><h2 id="sx-linksTitle">Liên kết kiến thức</h2></div>
+			<div class="sx-body">
+				<div class="sx-linkbtns">
+					<?php foreach ( $lk_groups as $gk => $g ) : ?>
+						<?php if ( $g[2] ) : ?>
+							<button type="button" class="sx-btn sx-linkbtn" data-links="<?php echo esc_attr( $gk ); ?>" aria-expanded="false" aria-controls="sx-links-<?php echo esc_attr( $gk ); ?>"><span aria-hidden="true"><?php echo esc_html( $g[0] ); ?></span> <?php echo esc_html( $g[1] ); ?> <small>(<?php echo count( $g[2] ); ?>)</small></button>
+						<?php else : ?>
+							<a class="sx-btn sx-linkbtn" href="<?php echo esc_url( $g[3] ); ?>" target="_blank" rel="noopener"><span aria-hidden="true"><?php echo esc_html( $g[0] ); ?></span> <?php echo esc_html( $g[1] ); ?></a>
+						<?php endif; ?>
+					<?php endforeach; ?>
+				</div>
+				<?php if ( $lk_legal ) : ?>
+					<ul class="sx-linklist" id="sx-links-legal" hidden>
+						<?php foreach ( $lk_legal as $l ) : ?>
+							<li><a href="<?php echo esc_url( cvc_legal_document_url( (string) $l['slug'] ) ); ?>" target="_blank" rel="noopener"><?php echo esc_html( (string) $l['title'] ); ?></a><small><?php echo (int) $l['questions']; ?> câu trong đề dẫn chiếu văn bản này</small></li>
+						<?php endforeach; ?>
+					</ul>
+				<?php endif; ?>
+				<?php if ( $lk_study ) : ?>
+					<ul class="sx-linklist" id="sx-links-study" hidden>
+						<?php foreach ( $lk_study as $l ) : ?>
+							<li><a href="<?php echo esc_url( 'document' === ( $l['type'] ?? '' ) ? cvc_document_url( (string) $l['slug'] ) : cvc_knowledge_item_url( (string) $l['slug'] ) ); ?>" target="_blank" rel="noopener"><?php echo esc_html( (string) $l['title'] ); ?></a><small><?php echo 'document' === ( $l['type'] ?? '' ) ? 'Tài liệu cùng môn thi' : 'Bài học theo Điều luật mà câu hỏi trong đề dẫn chiếu'; ?></small></li>
+						<?php endforeach; ?>
+					</ul>
+				<?php endif; ?>
+				<?php if ( $lk_recs ) : ?>
+					<ul class="sx-linklist" id="sx-links-recs" hidden>
+						<?php foreach ( $lk_recs as $l ) : ?>
+							<li><a href="<?php echo esc_url( cvc_recruitment_url( (string) $l['slug'] ) ); ?>" target="_blank" rel="noopener"><?php echo esc_html( (string) $l['title'] ); ?></a><small><?php echo ! empty( $l['open'] ) ? 'Đang nhận hồ sơ' : 'Đã hết hạn nộp'; ?> · đề thi thử được dựng theo thông báo này</small></li>
+						<?php endforeach; ?>
+					</ul>
+				<?php endif; ?>
+				<p class="sx-linknote">Liên kết mở ở thẻ mới, bài làm vẫn được lưu.</p>
+			</div>
+		</section>
 	</div>
 
 	<aside class="sx-support" id="sx-support" role="dialog" aria-modal="true" aria-labelledby="sx-supportTitle">
