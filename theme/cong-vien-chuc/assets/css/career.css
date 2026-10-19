@@ -204,7 +204,8 @@ main.ci{background:var(--ci-bg);padding:0 0 46px}
 .ci .ci-btn{color:var(--ci-navy)}
 .ci .ci-btn.is-primary,.ci .ci-btn.is-teal{color:#fff}
 .ci .ci-pill{text-decoration:none}
-@media(max-width:700px){.ci-job-top{flex-wrap:wrap}.ci-job-top>.ci-pill{order:3;margin-left:50px}.ci-job-title{font-size:16px}}
+/* Điện thoại: tiêu đề chiếm trọn hàng, nhãn hạn nộp xuống dòng dưới (trước đây nhãn ép tiêu đề thành cột hẹp). */
+@media(max-width:700px){.ci-job-top{flex-wrap:wrap}.ci-job-top>.ci-job-main{flex:1 1 calc(100% - 50px)}.ci-job-top>.ci-pill{order:3;margin-left:50px;white-space:normal}.ci-job-title{font-size:16px}}
 /* 18/10/2026: KPI vị trí đang tuyển (link) + 2 nút nổi bật Tuyển công chức / viên chức */
 a.ci-kpi{color:inherit;text-decoration:none;transition:border-color .15s,box-shadow .15s}a.ci-kpi:hover{border-color:#b7d6c7;box-shadow:0 6px 16px rgba(23,54,77,.08)}
 .ci-quick{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-bottom:11px}
