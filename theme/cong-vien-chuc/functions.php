@@ -56,6 +56,7 @@ require_once __DIR__ . '/inc/conquest.php';
 require_once __DIR__ . '/inc/recruitment-detail.php';
 require_once __DIR__ . '/inc/legal-catalog.php';
 require_once __DIR__ . '/inc/legal-detail.php';
+require_once __DIR__ . '/inc/question-bank.php';
 require_once __DIR__ . '/inc/catalog.php';
 require_once __DIR__ . '/inc/chrome.php';
 require_once __DIR__ . '/inc/documents.php';

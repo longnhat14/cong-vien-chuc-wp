@@ -102,11 +102,36 @@ function cvc_chrome_header(): void {
 						?>
 				<div class="ch-nav-group">
 					<a class="ch-nav-parent<?php echo $on ? ' is-active' : ''; ?>" href="<?php echo esc_url( $nav['url'] ); ?>" aria-haspopup="true" aria-expanded="false"<?php echo $on ? ' aria-current="true"' : ''; ?>><span class="ch-nav-icon"><?php echo $svg; // phpcs:ignore WordPress.Security.EscapeOutput ?></span><span><?php echo esc_html( $nav['label'] ); ?></span><i><?php echo esc_html( $nav['hint'] ); ?></i><em class="ch-nav-caret" aria-hidden="true">▾</em></a>
+					<?php if ( ! empty( $kids[0]['group'] ) ) : ?>
+					<?php
+					// Mega menu 2 cột (19/10/2026): Luyện tập · Đánh giá + hàng "Học thêm".
+					$cols = array( 'practice' => 'Luyện tập', 'assess' => 'Đánh giá' );
+					$more = array_values( array_filter( $kids, static fn ( $k ) => 'more' === ( $k['group'] ?? '' ) ) );
+					?>
+					<div class="ch-nav-sub ch-mega">
+						<div class="ch-mega-cols">
+							<?php foreach ( $cols as $gk => $gl ) : ?>
+							<div class="ch-mega-col">
+								<p class="ch-mega-h"><?php echo esc_html( $gl ); ?></p>
+								<?php foreach ( $kids as $kid ) : if ( ( $kid['group'] ?? '' ) !== $gk ) { continue; } ?>
+								<a class="ch-mega-item<?php echo $active( array( $kid['url'] ) ) ? ' is-active' : ''; ?>" href="<?php echo esc_url( $kid['url'] ); ?>"<?php echo $active( array( $kid['url'] ) ) ? ' aria-current="page"' : ''; ?>><span class="ch-mega-sym" aria-hidden="true"><?php echo esc_html( (string) ( $kid['sym'] ?? '•' ) ); ?></span><span class="ch-mega-txt"><b><?php echo esc_html( $kid['label'] ); ?></b><?php if ( ! empty( $kid['desc'] ) ) : ?><small><?php echo esc_html( $kid['desc'] ); ?></small><?php endif; ?></span></a>
+								<?php endforeach; ?>
+							</div>
+							<?php endforeach; ?>
+						</div>
+						<?php if ( $more ) : ?>
+						<div class="ch-mega-more"><span>Học thêm:</span>
+							<?php foreach ( $more as $kid ) : ?><a href="<?php echo esc_url( $kid['url'] ); ?>"<?php echo $active( array( $kid['url'] ) ) ? ' class="is-active" aria-current="page"' : ''; ?>><?php echo esc_html( $kid['label'] ); ?><?php if ( ! empty( $kid['badge'] ) ) : ?> <small class="ch-nav-badge"><?php echo esc_html( $kid['badge'] ); ?></small><?php endif; ?></a><?php endforeach; ?>
+						</div>
+						<?php endif; ?>
+					</div>
+					<?php else : ?>
 					<div class="ch-nav-sub">
 						<?php foreach ( $kids as $kid ) : ?>
 						<a href="<?php echo esc_url( $kid['url'] ); ?>"<?php echo $active( array( $kid['url'] ) ) ? ' class="is-active" aria-current="page"' : ''; ?>><span><?php echo esc_html( $kid['label'] ); ?></span><?php if ( ! empty( $kid['badge'] ) ) : ?><small class="ch-nav-badge"><?php echo esc_html( $kid['badge'] ); ?></small><?php endif; ?></a>
 						<?php endforeach; ?>
 					</div>
+					<?php endif; ?>
 				</div>
 					<?php else : ?>
 				<a href="<?php echo esc_url( $nav['url'] ); ?>"<?php echo $on ? ' class="is-active" aria-current="page"' : ''; ?>><span class="ch-nav-icon"><?php echo $svg; // phpcs:ignore WordPress.Security.EscapeOutput ?></span><span><?php echo esc_html( $nav['label'] ); ?></span><i><?php echo esc_html( $nav['hint'] ); ?></i><b aria-hidden="true">↗</b></a>
@@ -149,7 +174,7 @@ function cvc_chrome_footer(): void {
 		<div class="ch-container">
 			<div class="ch-footer-grid">
 				<div><?php cvc_chrome_brand( $ico ); ?><p>Nền tảng hỗ trợ ôn thi công chức, viên chức, tra cứu văn bản, tìm tài liệu và theo dõi thông báo tuyển dụng.</p></div>
-				<div><h3>Ôn thi</h3><div class="ch-footer-links"><a href="<?php echo esc_url( cvc_exams_url() ); ?>">Đề thi thử</a><a href="<?php echo esc_url( cvc_topics_url() ); ?>">Chủ đề ôn thi</a><a href="<?php echo esc_url( cvc_knowledge_url() ); ?>">Kiến thức trọng tâm</a><a href="<?php echo esc_url( cvc_courses_url() ); ?>">Khóa học</a></div></div>
+				<div><h3>Ôn thi</h3><div class="ch-footer-links"><a href="<?php echo esc_url( cvc_question_bank_url() ); ?>">Ngân hàng câu hỏi</a><a href="<?php echo esc_url( cvc_exams_mode_url( 'on-tap' ) ); ?>">Ôn tập kiến thức</a><a href="<?php echo esc_url( cvc_exams_mode_url( 'thi-that' ) ); ?>">Thi thử như thi thật</a><a href="<?php echo esc_url( cvc_saved_questions_url() ); ?>">Câu hỏi đã lưu</a></div></div>
 				<div><h3>Tra cứu</h3><div class="ch-footer-links"><a href="<?php echo esc_url( cvc_recruitments_url() ); ?>">Tin tuyển dụng</a><a href="<?php echo esc_url( cvc_legal_documents_url() ); ?>">Văn bản pháp luật</a><a href="<?php echo esc_url( cvc_documents_url() ); ?>">Mẫu hồ sơ &amp; tài liệu</a><a href="<?php echo esc_url( home_url( '/tinh-luong/' ) ); ?>">Ước tính lương</a></div></div>
 				<div><h3>Tài khoản</h3><div class="ch-footer-links"><?php if ( $logged_in ) : ?><a href="<?php echo esc_url( cvc_account_url( 'conquest' ) ); ?>">Hồ sơ chinh phục kỳ thi</a><a href="<?php echo esc_url( cvc_account_url() ); ?>">Tài khoản của tôi</a><a href="<?php echo esc_url( cvc_account_url( 'exam-history' ) ); ?>">Lịch sử thi</a><a href="<?php echo esc_url( cvc_logout_url() ); ?>">Đăng xuất</a><?php else : ?><a href="<?php echo esc_url( cvc_login_url() ); ?>">Đăng nhập</a><a href="<?php echo esc_url( cvc_register_url() ); ?>">Đăng ký miễn phí</a><a href="<?php echo esc_url( home_url( '/' ) ); ?>">Trang chủ</a><?php endif; ?></div></div>
 			</div>

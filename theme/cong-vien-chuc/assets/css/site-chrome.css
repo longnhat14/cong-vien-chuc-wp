@@ -243,3 +243,28 @@
  :root .ch-iconbtn,:root .ch-menu-toggle{width:40px;height:40px}
 }
 @media print{:root .ch-topline,:root .ch-header,:root .ch-footer{display:none!important}}
+
+/* ---- Mega menu Ôn thi (19/10/2026): Luyện tập · Đánh giá + Học thêm ---- */
+:root .ch-nav-sub.ch-mega{min-width:min(640px,calc(100vw - 40px));padding:12px 10px 8px}
+:root .ch-mega-cols{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px}
+:root .ch-mega-h{margin:4px 8px 4px;font-size:12px;font-weight:bold;letter-spacing:.08em;text-transform:uppercase;color:#7a4511}
+:root .ch-nav-links .ch-nav-sub a.ch-mega-item{justify-content:flex-start;align-items:flex-start;gap:11px;padding:10px 12px;white-space:normal;margin:2px 0}
+:root .ch-mega-sym{flex:none;display:grid;place-items:center;width:32px;height:32px;border-radius:9px;background:linear-gradient(145deg,#fff0d2,#f4dfb4);box-shadow:inset 0 0 0 1px #e6cea0;color:#7a4511;font-size:16px;line-height:1}
+:root .ch-mega-txt{display:flex;flex-direction:column;gap:2px;min-width:0}
+:root .ch-mega-txt b{font-size:16px;color:#102b48;line-height:1.25}
+:root .ch-mega-txt small{font-size:13.5px;color:#3b4652;line-height:1.35}
+:root .ch-mega-more{display:flex;flex-wrap:wrap;align-items:center;gap:2px 4px;margin:8px 4px 2px;padding:9px 8px 2px;border-top:1px solid #e3e9ee;font-size:14px;color:#3b4652}
+:root .ch-mega-more>span{font-weight:bold;margin-right:4px}
+:root .ch-nav-links .ch-mega-more a{display:inline-flex;padding:5px 9px;margin:0;font-size:14.5px;border-radius:8px;white-space:nowrap}
+@media(max-width:1100px){
+ :root .ch-nav-sub.ch-mega{min-width:0;padding:0 0 6px 54px}
+ :root .ch-mega-cols{grid-template-columns:1fr;gap:2px}
+ :root .ch-mega-h{margin:8px 0 2px;font-size:11.5px}
+ :root .ch-nav-links .ch-nav-sub a.ch-mega-item{min-height:0;padding:8px 6px;border:0;gap:10px}
+ :root .ch-mega-sym{width:28px;height:28px;font-size:14px}
+ :root .ch-nav-links .ch-mega-item .ch-mega-txt b{font-size:15.5px}
+ :root .ch-nav-links .ch-mega-item>span:nth-child(2){font-size:inherit}
+ :root .ch-mega-more{margin:6px 0 0;padding:8px 0 0}
+ :root .ch-nav-links .ch-mega-more a{min-height:0;padding:6px 8px;border:0}
+}
+@media(max-width:420px){:root .ch-nav-sub.ch-mega{padding-left:12px}}

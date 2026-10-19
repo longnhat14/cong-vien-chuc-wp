@@ -111,6 +111,8 @@ function cvc_cat_filters( string $kind, array $src ): array {
 			'type'        => $types,
 			'max_minutes' => in_array( (int) $s( 'max_minutes' ), array( 30, 40, 60, 90 ), true ) ? (int) $s( 'max_minutes' ) : 0,
 			'not_done'    => $b( 'not_done' ),
+			// Chế độ chọn từ menu Ôn thi (19/10/2026): thẻ đề mở thẳng phòng làm bài đúng chế độ.
+			'che-do'      => in_array( $s( 'che-do' ), array( 'thi-that', 'on-tap' ), true ) ? $s( 'che-do' ) : '',
 		);
 	} elseif ( 'topics' === $kind ) {
 		$f += array(
@@ -153,7 +155,7 @@ function cvc_cat_args( array $f ): array {
 function cvc_cat_filter_count( array $f ): int {
 	$n = 0;
 	foreach ( cvc_cat_args( $f ) as $k => $v ) {
-		if ( 'sort' !== $k ) {
+		if ( 'sort' !== $k && 'che-do' !== $k ) {
 			$n += is_array( $v ) ? count( $v ) : 1;
 		}
 	}
@@ -169,7 +171,7 @@ function cvc_cat_url( string $kind, array $f, int $page = 1 ): string {
 }
 
 function cvc_cat_fetch( string $kind, array $f, int $page, ?string $token ): array {
-	$q = cvc_cat_args( $f ) + array( 'page' => $page, 'per_page' => 10 );
+	$q = array_diff_key( cvc_cat_args( $f ), array( 'che-do' => 1 ) ) + array( 'page' => $page, 'per_page' => 10 );
 
 	return cvc_ci_api( '/api/catalog/' . $kind, $q, $token, 15, 120 );
 }
@@ -219,6 +221,11 @@ function cvc_cat_card_exam( array $e, int $no ): void {
 	$open  = $a && ! empty( $a['in_progress'] );
 	$url   = cvc_exam_url( (string) ( $e['slug'] ?? '' ) );
 	$label = $open ? 'Làm tiếp' : ( $done ? 'Làm lại' : 'Làm bài' );
+	$mode  = (string) ( $GLOBALS['cvc_cat_mode'] ?? '' );
+	if ( '' !== $mode ) {
+		$url   = add_query_arg( 'che-do', $mode, $url );
+		$label = $open ? 'Làm tiếp' : ( 'on-tap' === $mode ? 'Ôn tập đề này' : 'Thi thử đề này' );
+	}
 	$desc  = trim( (string) ( $e['description'] ?? '' ) );
 	$doc   = cvc_cat_legal_line( is_array( $e['legal_document'] ?? null ) ? $e['legal_document'] : null );
 	?>
@@ -512,6 +519,7 @@ function cvc_cat_render_page( string $kind ): void {
 	$logged_in = null !== $token;
 	$page      = max( 1, absint( get_query_var( 'cvc_paged' ) ) );
 	$f         = cvc_cat_filters( $kind, $_GET ); // phpcs:ignore WordPress.Security.NonceVerification
+	$GLOBALS['cvc_cat_mode'] = (string) ( $f['che-do'] ?? '' );
 	$sr        = cvc_ci_api( '/api/catalog/stats', array( 'kind' => $kind ), $token, 12, 600 );
 	$st        = $sr['ok'] ? (array) ( $sr['data']['data'] ?? array() ) : array();
 	$mine      = is_array( $st['mine'] ?? null ) ? $st['mine'] : null;
@@ -589,6 +597,17 @@ function cvc_cat_render_page( string $kind ): void {
 		</section>
 
 		<div class="ec-wrap ec-main">
+			<?php if ( 'exams' === $kind ) : $md = (string) ( $f['che-do'] ?? '' ); ?>
+				<section class="ec-modebar<?php echo '' !== $md ? ' is-' . esc_attr( $md ) : ''; ?>" aria-label="Chế độ làm bài">
+					<div><b><?php echo 'on-tap' === $md ? 'Ôn tập kiến thức' : ( 'thi-that' === $md ? 'Thi thử như thi thật' : 'Chọn chế độ làm bài' ); ?></b>
+						<span><?php echo 'on-tap' === $md ? 'Chọn đề để ôn: trả lời xong mỗi câu là thấy ngay đáp án, giải thích và căn cứ pháp luật. Không tính giờ.' : ( 'thi-that' === $md ? 'Chọn đề để thi: tính giờ do máy chủ kiểm soát, đáp án và giải thích hiện sau khi nộp bài.' : 'Thi thật tính giờ như phòng thi; Ôn tập xem đáp án ngay sau mỗi câu.' ); ?></span></div>
+					<nav class="ec-modes">
+						<a class="ec-btn<?php echo 'on-tap' === $md ? ' is-primary' : ''; ?>" href="<?php echo esc_url( cvc_cat_url( $kind, array_merge( $f, array( 'che-do' => 'on-tap' ) ) ) ); ?>"<?php echo 'on-tap' === $md ? ' aria-current="page"' : ''; ?>>✎ Ôn tập</a>
+						<a class="ec-btn<?php echo 'thi-that' === $md ? ' is-primary' : ''; ?>" href="<?php echo esc_url( cvc_cat_url( $kind, array_merge( $f, array( 'che-do' => 'thi-that' ) ) ) ); ?>"<?php echo 'thi-that' === $md ? ' aria-current="page"' : ''; ?>>◷ Thi thử</a>
+						<a class="ec-btn" href="<?php echo esc_url( cvc_question_bank_url() ); ?>">▤ Ngân hàng câu hỏi</a>
+					</nav>
+				</section>
+			<?php endif; ?>
 			<section class="ec-stats" aria-label="Số liệu">
 				<?php foreach ( $cards as $c ) : ?>
 					<div class="ec-stat"><div class="ec-stat-icon" aria-hidden="true"><?php echo esc_html( $c[0] ); ?></div><div><strong><?php echo esc_html( (string) $c[1] ); ?></strong><small><?php echo esc_html( $c[2] ); ?></small></div></div>
@@ -598,6 +617,7 @@ function cvc_cat_render_page( string $kind ): void {
 			<div class="ec-layout">
 				<aside class="ec-side">
 					<form class="ec-panel" id="ec-form" method="get" action="<?php echo esc_url( $base ); ?>" data-ec-form role="search">
+						<?php if ( ! empty( $f['che-do'] ) ) : ?><input type="hidden" name="che-do" value="<?php echo esc_attr( (string) $f['che-do'] ); ?>"><?php endif; ?>
 						<div class="ec-panel-head"><h2><?php echo esc_html( $cfg['filter_h'] ); ?></h2><span class="ec-fcount" data-ec-fcount><?php echo (int) cvc_cat_filter_count( $f ); ?> bộ lọc</span><button type="button" class="ec-ftoggle" data-ec-ftoggle aria-expanded="false" aria-controls="ec-form">Mở bộ lọc ▾</button></div>
 						<div class="ec-panel-body">
 							<div class="ec-search-area">
@@ -760,6 +780,7 @@ function cvc_cat_ajax_view(): void {
 		wp_send_json_error( array( 'message' => 'Không hợp lệ.' ), 400 );
 	}
 	$f     = cvc_cat_filters( $kind, $_REQUEST ); // phpcs:ignore WordPress.Security.NonceVerification
+	$GLOBALS['cvc_cat_mode'] = (string) ( $f['che-do'] ?? '' );
 	$page  = max( 1, min( 500, absint( $_REQUEST['page'] ?? 1 ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
 	$token = cvc_auth_token();
 	$res   = cvc_cat_fetch( $kind, $f, $page, $token );

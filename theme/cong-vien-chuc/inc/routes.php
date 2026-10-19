@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Tăng số này khi thêm/sửa rewrite rule để buộc flush lại đúng 1 lần.
-const CVC_REWRITE_VERSION = '14';
+const CVC_REWRITE_VERSION = '15';
 
 /**
  * Section hợp lệ của /tai-khoan/{section}/ (Phase 10) - map slug tiếng
@@ -181,6 +181,10 @@ function cvc_register_rewrite_rules(): void {
 	 * có sẵn trong $_GET dù path đã bị rewrite, không cần capture group
 	 * hay đăng ký thêm query var.
 	 */
+	// Menu Ôn thi (19/10/2026): Ngân hàng câu hỏi + Câu hỏi đã lưu.
+	add_rewrite_rule( '^ngan-hang-cau-hoi/?$', 'index.php?cvc_page=question-bank', 'top' );
+	add_rewrite_rule( '^cau-hoi-da-luu/?$', 'index.php?cvc_page=saved-questions', 'top' );
+
 	// Công cụ ước tính lương & lương hưu (trước nằm trên trang chủ, 16/10/2026).
 	add_rewrite_rule(
 		'^tinh-luong/?$',
@@ -455,6 +459,8 @@ function cvc_template_include( string $template ): string {
 		'salary'                => 'template-salary.php',
 		'recruitment-round'     => 'template-recruitment-round.php',
 		'exam-result'           => 'template-exam-result.php',
+		'question-bank'         => 'template-question-bank.php',
+		'saved-questions'       => 'template-saved-questions.php',
 	);
 
 	if ( isset( $map[ $page ] ) ) {
@@ -591,6 +597,23 @@ function cvc_search_url( string $q = '', string $type = 'all', int $page = 1 ): 
  * Fallback về 'tong-quan' nếu key không tồn tại (không bao giờ tạo link
  * hỏng dù truyền nhầm key).
  */
+function cvc_question_bank_url( array $args = array() ): string {
+	$url = home_url( '/ngan-hang-cau-hoi/' );
+
+	return $args ? add_query_arg( $args, $url ) : $url;
+}
+
+function cvc_saved_questions_url( string $type = '' ): string {
+	$url = home_url( '/cau-hoi-da-luu/' );
+
+	return '' !== $type ? add_query_arg( 'loai', $type, $url ) : $url;
+}
+
+/** Danh sách đề ở chế độ đã chọn: thi-that | on-tap (thẻ đề mở thẳng đúng chế độ). */
+function cvc_exams_mode_url( string $mode ): string {
+	return add_query_arg( 'che-do', $mode, cvc_exams_url() );
+}
+
 function cvc_account_url( string $section = 'overview' ): string {
 	$slug = array_search( $section, cvc_account_sections(), true );
 
@@ -672,13 +695,21 @@ function cvc_main_nav_items(): array {
 		array(
 			'key'      => 'exams',
 			'label'    => 'Ôn thi',
-			'hint'     => 'Đề thi, chủ đề, kiến thức',
+			'hint'     => 'Luyện tập và thi thử',
 			'url'      => cvc_exams_url(),
+			/*
+			 * 19/10/2026 - chia theo mục đích: Luyện tập / Đánh giá (mega menu 2 cột trên máy tính,
+			 * danh sách dọc trên điện thoại); 'more' = hàng "Học thêm" dưới cùng.
+			 */
 			'children' => array(
-				array( 'label' => 'Đề thi thử miễn phí', 'url' => cvc_exams_url(), 'icon' => 'fa-pen-to-square' ),
-				array( 'label' => 'Chủ đề ôn thi', 'url' => cvc_topics_url(), 'icon' => 'fa-layer-group' ),
-				array( 'label' => 'Kiến thức trọng tâm', 'url' => cvc_knowledge_url(), 'icon' => 'fa-lightbulb' ),
-				array( 'label' => 'Khóa học', 'url' => cvc_courses_url(), 'icon' => 'fa-graduation-cap', 'badge' => $has_courses ? '' : 'Sắp mở' ),
+				array( 'group' => 'practice', 'label' => 'Ngân hàng câu hỏi', 'desc' => 'Luyện theo môn, chủ đề và điều khoản pháp luật', 'url' => cvc_question_bank_url(), 'sym' => '▤' ),
+				array( 'group' => 'practice', 'label' => 'Ôn tập kiến thức', 'desc' => 'Làm câu hỏi, xem giải thích và học căn cứ pháp lý', 'url' => cvc_exams_mode_url( 'on-tap' ), 'sym' => '✎' ),
+				array( 'group' => 'practice', 'label' => 'Câu hỏi đã lưu', 'desc' => 'Câu đánh dấu, câu sai và câu cần ôn lại', 'url' => cvc_saved_questions_url(), 'sym' => '⚑' ),
+				array( 'group' => 'assess', 'label' => 'Thi thử như thi thật', 'desc' => 'Làm đề có thời gian, nộp bài và xem điểm', 'url' => cvc_exams_mode_url( 'thi-that' ), 'sym' => '◷' ),
+				array( 'group' => 'assess', 'label' => 'Kết quả & tiến độ', 'desc' => 'Lịch sử làm bài, điểm số và chủ đề còn yếu', 'url' => cvc_account_url( 'exam-history' ), 'sym' => '↗' ),
+				array( 'group' => 'more', 'label' => 'Chủ đề ôn thi', 'url' => cvc_topics_url() ),
+				array( 'group' => 'more', 'label' => 'Kiến thức trọng tâm', 'url' => cvc_knowledge_url() ),
+				array( 'group' => 'more', 'label' => 'Khóa học', 'url' => cvc_courses_url(), 'badge' => $has_courses ? '' : 'Sắp mở' ),
 			),
 		),
 		array( 'key' => 'rec', 'label' => 'Tuyển dụng', 'hint' => 'Cơ hội mới nhất', 'url' => cvc_recruitments_url() ),
