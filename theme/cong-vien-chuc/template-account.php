@@ -94,6 +94,12 @@ if ( 'conquest' === $section ) {
 	return;
 }
 
+// Tổng quan tài khoản v1 (19/10/2026): trang riêng toàn chiều rộng theo thiết kế congvienchuc-account-dashboard-v1.
+if ( 'overview' === $section ) {
+	require get_theme_file_path( '/inc/account-sections/overview-page.php' );
+	return;
+}
+
 get_header();
 ?>
 
