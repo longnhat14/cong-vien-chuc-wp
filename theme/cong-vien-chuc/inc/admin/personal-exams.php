@@ -26,7 +26,14 @@ function cvc_admin_handle_personal_exams(): void {
 		}
 		$scope  = array_values( array_intersect( array( 'public_employee', 'civil_servant', 'other' ), array_map( 'sanitize_key', (array) wp_unslash( $_POST['scope'] ?? array() ) ) ) );
 		$budget = isset( $_POST['budget'] ) && '' !== $_POST['budget'] ? absint( $_POST['budget'] ) : null;
-		$result = $api->put( '/api/admin/personal-exams/settings', array( 'scope' => $scope, 'budget' => $budget ), $token );
+		$body   = array( 'scope' => $scope, 'budget' => $budget );
+		foreach ( array( 'price_pack', 'price_pass' ) as $k ) {
+			if ( isset( $_POST[ $k ] ) && '' !== $_POST[ $k ] ) {
+				$body[ $k ] = absint( $_POST[ $k ] );
+			}
+		}
+		$body['paywall'] = ! empty( $_POST['paywall'] ) ? '1' : '0';
+		$result = $api->put( '/api/admin/personal-exams/settings', $body, $token );
 		if ( ! $result['ok'] ) {
 			cvc_admin_redirect( $back, 'error', cvc_admin_error_message( $result ) );
 			return;

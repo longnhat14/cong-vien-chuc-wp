@@ -69,6 +69,13 @@ if ( $is_found && null !== $token && '' !== $start_mode && (int) ( $exam['questi
 	}
 }
 
+// Đề cá nhân hóa theo tin (RP-, có phí - 20/10/2026): quyền làm đề / gói bán.
+$pe_acc = $is_found ? cvc_pe_access( $exam, $token ) : null;
+if ( is_array( $pe_acc ) && null !== $token ) {
+	nocache_headers();
+	do_action( 'litespeed_control_set_nocache', 'cvc: quyền làm đề / kết quả thanh toán theo người dùng' );
+}
+
 cvc_seo_set_title( $is_found ? (string) $exam['title'] : 'Chi tiết đề thi trắc nghiệm' );
 
 $breadcrumb_items = array(
@@ -219,6 +226,8 @@ get_header();
 				<!-- RIGHT SIDEBAR (3 COLS — LAUNCH EXAM OS X CTA + UPSELL) -->
 			<aside class="lg:col-span-3 space-y-4 sticky top-[80px]">
 
+				<?php if ( is_array( $pe_acc ) ) { cvc_pe_render_paybox( $exam, $pe_acc, $token, cvc_exam_url( $slug ) ); } ?>
+
 				<!-- PRIMARY CTA: BẮT ĐẦU THI -->
 				<div class="border-2 border-acc-line p-6 rounded-3xl space-y-4 text-center">
 					<div class="w-14 h-14 mx-auto rounded-2xl bg-acc text-white flex items-center justify-center font-black text-2xl">
@@ -238,7 +247,7 @@ get_header();
 						<a href="<?php echo esc_url( cvc_login_url( cvc_exam_url( $slug ) ) ); ?>" rel="nofollow" class="block w-full py-3.5 text-white font-black text-sm rounded-2xl bg-acc hover:bg-acc-deep">
 							Đăng nhập để vào thi &rarr;
 						</a>
-						<p class="text-[10px] text-ink-muted">Miễn phí. Cần tài khoản để lưu kết quả và xem giải thích từng câu.</p>
+						<p class="text-[10px] text-ink-muted"><?php echo is_array( $pe_acc ) && ! empty( $pe_acc['locked'] ) ? esc_html( 'Làm thử ' . (int) ( $pe_acc['preview'] ?? 10 ) . ' câu đầu miễn phí; cần tài khoản để lưu kết quả.' ) : 'Miễn phí. Cần tài khoản để lưu kết quả và xem giải thích từng câu.'; ?></p>
 					<?php else : ?>
 						<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="cvc-startmodes">
 							<?php wp_nonce_field( 'cvc_exam_start' ); ?>
@@ -253,7 +262,7 @@ get_header();
 								<span class="block text-[11px] font-normal">Không tính giờ, xem đáp án, giải thích và căn cứ pháp luật ngay sau mỗi câu</span>
 							</button>
 						</form>
-						<p class="text-[10px] text-ink-muted">Đáp án được lưu lên máy chủ ngay khi chọn và khôi phục khi tải lại trang.</p>
+						<p class="text-[10px] text-ink-muted"><?php echo is_array( $pe_acc ) && ! empty( $pe_acc['locked'] ) ? esc_html( 'Chưa mua: mở lượt làm thử ' . (int) ( $pe_acc['preview'] ?? 10 ) . ' câu đầu.' ) : 'Đáp án được lưu lên máy chủ ngay khi chọn và khôi phục khi tải lại trang.'; ?></p>
 					<?php endif; ?>
 				</div>
 

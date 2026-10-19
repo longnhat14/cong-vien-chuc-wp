@@ -886,7 +886,7 @@ get_header();
 	}
 
 	if ( $personal ) {
-		cvc_rd_render_personal_exams( $personal, is_array( $position ) ? (string) ( $position['name'] ?? '' ) : '', mb_strtolower( $type_lbl ) );
+		cvc_rd_render_personal_exams( $personal, is_array( $position ) ? (string) ( $position['name'] ?? '' ) : '', mb_strtolower( $type_lbl ), (array) ( $recruitment['personal_exams_pricing'] ?? array() ) );
 	}
 	?>
 

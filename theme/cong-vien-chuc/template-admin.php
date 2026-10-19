@@ -227,6 +227,9 @@ get_header();
 			$cvc_ing_view = sanitize_key( wp_unslash( $_GET['xem'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
 			if ( ctype_digit( $item_param ) ) {
 				cvc_admin_render_ingestion_detail( (int) $item_param );
+			} elseif ( 'nhap-tep' === $cvc_ing_view ) {
+				$cvc_imp_id = absint( $_GET['id'] ?? 0 ); // phpcs:ignore WordPress.Security.NonceVerification
+				$cvc_imp_id ? cvc_admin_render_import_detail( $cvc_imp_id ) : cvc_admin_render_imports_index();
 			} elseif ( 'nguon' === $cvc_ing_view ) {
 				cvc_admin_render_ingestion_sources();
 			} elseif ( 'kiem-tra' === $cvc_ing_view ) {

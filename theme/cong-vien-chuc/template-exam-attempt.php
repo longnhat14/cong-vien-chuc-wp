@@ -309,6 +309,7 @@ $doc_icon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H
 
 		<main class="sx-panel sx-mainpanel" id="sx-mainpanel">
 			<?php cvc_render_notice(); ?>
+			<?php if ( ! empty( $attempt_data['is_preview'] ) ) : ?><p class="sx-banner">Bạn đang làm thử <?php echo (int) $total_q; ?> câu đầu của đề có phí. <a href="<?php echo esc_url( cvc_exam_url( (string) ( $exam_info['slug'] ?? '' ) ) . '#mua-bo-de' ); ?>"><b>Mua bộ đề</b></a> để làm đủ đề và mọi đề trong bộ.</p><?php endif; ?>
 			<?php if ( $is_submitted && 'timeout' === $submitted_by ) : ?><p class="sx-banner">Hết giờ làm bài - hệ thống đã tự nộp với các đáp án đã lưu trước hạn chót.</p><?php endif; ?>
 
 			<section class="sx-main sx-single-only" id="sx-single">

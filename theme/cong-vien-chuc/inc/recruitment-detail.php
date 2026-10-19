@@ -334,7 +334,7 @@ function cvc_rd_near_html( array $d, bool $detail ): string {
  *
  * @param array<int, array<string, mixed>> $groups
  */
-function cvc_rd_render_personal_exams( array $groups, string $focus_position = '', string $track_label = '' ): void {
+function cvc_rd_render_personal_exams( array $groups, string $focus_position = '', string $track_label = '', array $pricing = array() ): void {
 	if ( empty( $groups ) ) {
 		return;
 	}
@@ -359,6 +359,9 @@ function cvc_rd_render_personal_exams( array $groups, string $focus_position = '
 	<section class="rd-card" id="de-rieng" aria-labelledby="rd-pe-h">
 		<div class="rd-card-head"><h2 id="rd-pe-h"><span class="rd-ico" aria-hidden="true">✎</span>Đề thi trắc nghiệm dành riêng cho tin này</h2></div>
 		<div class="rd-card-body">
+			<?php if ( ! empty( $pricing['active'] ) ) : ?>
+				<p class="rd-pe-price"><b>Làm thử <?php echo (int) ( $pricing['preview'] ?? 10 ); ?> câu đầu mỗi đề miễn phí</b> · Bộ đề của nhóm vị trí <?php echo esc_html( number_format( (float) ( $pricing['prices']['pack'] ?? 0 ), 0, ',', '.' ) ); ?> ₫ · Gói <?php echo (int) ( $pricing['pass_days'] ?? 30 ); ?> ngày <?php echo esc_html( number_format( (float) ( $pricing['prices']['pass'] ?? 0 ), 0, ',', '.' ) ); ?> ₫ mở mọi đề cá nhân hóa</p>
+			<?php endif; ?>
 			<p class="rd-muted"><?php echo esc_html( $total . ' đề luyện tập mô phỏng vòng 1' . ( '' !== $track_label ? ' thi tuyển ' . $track_label : '' ) . ', Công Viên Chức biên soạn từ căn cứ của thông báo và yêu cầu vị trí. Mỗi câu dẫn chiếu Điều cụ thể; đây không phải đề thi chính thức của Hội đồng tuyển dụng.' ); ?></p>
 			<?php foreach ( $groups as $gi => $g ) : ?>
 				<?php

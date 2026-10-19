@@ -13,9 +13,13 @@ $status = sanitize_key( (string) ( $_GET['status'] ?? '' ) );
 $order  = sanitize_text_field( (string) ( $_GET['order'] ?? '' ) );
 
 $is_success = 'success' === $status;
+// Mua đề cá nhân hóa (20/10/2026): quay lại trang đề đã mua.
+$exam_back = function_exists( 'cvc_pe_buy_back_url' ) ? cvc_pe_buy_back_url() : '';
 
 cvc_seo_set_title( $is_success ? 'Thanh toán thành công' : 'Kết quả thanh toán' );
 cvc_seo_set_noindex();
+nocache_headers();
+do_action( 'litespeed_control_set_nocache', 'cvc: kết quả thanh toán theo người dùng' );
 
 get_header();
 ?>
@@ -43,7 +47,14 @@ get_header();
 			<?php endif; ?>
 
 			<div class="flex flex-col sm:flex-row gap-3 pt-3">
-				<?php if ( $is_success ) : ?>
+				<?php if ( '' !== $exam_back ) : ?>
+					<a href="<?php echo esc_url( $exam_back ); ?>" class="flex-1 py-3 text-white font-black text-sm rounded-xl text-center bg-acc hover:bg-acc-deep">
+						<?php echo $is_success ? 'Vào Làm Đề' : 'Quay Lại Trang Đề'; ?>
+					</a>
+					<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="flex-1 py-3 bg-white hover:bg-acc-soft text-ink font-bold text-sm rounded-xl text-center">
+						Về Trang Chủ
+					</a>
+				<?php elseif ( $is_success ) : ?>
 					<a href="<?php echo esc_url( cvc_account_url( 'my-documents' ) ); ?>" class="flex-1 py-3 text-white font-black text-sm rounded-xl text-center bg-acc hover:bg-acc-deep">
 						Vào Tài Liệu Đã Mua
 					</a>

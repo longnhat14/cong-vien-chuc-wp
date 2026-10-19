@@ -40,6 +40,7 @@ function cvc_ingestion_date( $value ): string {
 function cvc_ingestion_tabs( string $active ): void {
 	$tabs = array(
 		'queue'  => array( 'Hàng chờ', cvc_admin_url( 'thu-thap' ) ),
+		'nhap-tep' => array( 'Tạo tin từ tệp', cvc_admin_url( 'thu-thap', null, array( 'xem' => 'nhap-tep' ) ) ),
 		'nguon'  => array( 'Nguồn & chỉ số', cvc_admin_url( 'thu-thap', null, array( 'xem' => 'nguon' ) ) ),
 		'kiem-tra' => array( 'Kiểm tra mẫu', cvc_admin_url( 'thu-thap', null, array( 'xem' => 'kiem-tra' ) ) ),
 		'on-tap'   => array( 'Ôn tập & văn bản', cvc_admin_url( 'thu-thap', null, array( 'xem' => 'on-tap' ) ) ),

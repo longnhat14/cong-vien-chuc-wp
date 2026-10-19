@@ -121,10 +121,18 @@ $tracks = array( 'public_employee' => 'Viên chức', 'civil_servant' => 'Công 
 					<label class="flex items-center gap-2"><input type="checkbox" name="scope[]" value="<?php echo esc_attr( $k ); ?>" class="accent-acc-2" <?php checked( in_array( $k, (array) ( $s['scope'] ?? array() ), true ) ); ?>> <?php echo esc_html( $lbl ); ?></label>
 				<?php endforeach; ?>
 				<label class="flex items-center gap-2 text-xs text-ink-muted">Ngân sách/tin <input type="number" name="budget" min="0" step="1000" value="<?php echo (int) ( $s['budget'] ?? 20000 ); ?>" class="w-28 px-2 py-1 rounded-lg border border-slate-300"> ₫</label>
+			</fieldset>
+			<p class="text-sm font-bold text-ink pt-2">Thu phí</p>
+			<fieldset class="flex flex-wrap items-center gap-3 text-sm" <?php disabled( ! cvc_admin_can( 'settings.update' ) ); ?>>
+				<legend class="sr-only">Thu phí đề cá nhân hóa</legend>
+				<label class="flex items-center gap-2"><input type="checkbox" name="paywall" value="1" class="accent-acc-2" <?php checked( '0' !== (string) ( $s['paywall'] ?? '1' ) ); ?>> Thu phí (làm thử 10 câu)</label>
+				<label class="flex items-center gap-2 text-xs text-ink-muted">Bộ đề theo tin <input type="number" name="price_pack" min="0" step="1000" value="<?php echo (int) ( $s['prices']['pack'] ?? 29000 ); ?>" class="w-28 px-2 py-1 rounded-lg border border-slate-300"> ₫</label>
+				<label class="flex items-center gap-2 text-xs text-ink-muted">Gói 30 ngày <input type="number" name="price_pass" min="0" step="1000" value="<?php echo (int) ( $s['prices']['pass'] ?? 79000 ); ?>" class="w-28 px-2 py-1 rounded-lg border border-slate-300"> ₫</label>
 				<?php if ( cvc_admin_can( 'settings.update' ) ) : ?>
-					<button type="submit" class="px-3 py-1.5 bg-white hover:bg-acc-soft border border-slate-300 text-ink font-bold text-xs rounded-lg">Lưu phạm vi</button>
+					<button type="submit" class="px-3 py-1.5 bg-white hover:bg-acc-soft border border-slate-300 text-ink font-bold text-xs rounded-lg">Lưu cấu hình</button>
 				<?php endif; ?>
 			</fieldset>
+			<p class="text-xs <?php echo ! empty( $s['paywall_active'] ) ? 'text-emerald-800' : 'text-amber-800'; ?>"><?php echo esc_html( ! empty( $s['paywall_active'] ) ? 'Đang thu phí. Đã bán ' . (int) ( $s['sales']['orders'] ?? 0 ) . ' gói, doanh thu ' . $money( $s['sales']['revenue'] ?? 0 ) . '.' : ( '0' === (string) ( $s['paywall'] ?? '1' ) ? 'Đang tắt thu phí: mọi người làm đủ đề miễn phí.' : 'Chưa thu phí vì cổng VNPay chưa cấu hình (Quản trị → Thanh toán). Đề đang mở miễn phí; thu phí tự bật khi VNPay sẵn sàng.' ) ); ?></p>
 			<p class="text-xs text-ink-muted"><?php echo esc_html( 'Tin xét tuyển và tin đã có danh mục ôn tập chính thức được bỏ qua (trừ khi bật riêng). Hạn mức tháng dùng chung với lộ trình ôn tự động: đã dùng ' . $money( $s['month_spent'] ?? 0 ) . ' / ' . $money( $s['monthly_cap'] ?? 0 ) . ' · ' . (int) ( $s['templates'] ?? 0 ) . ' mẫu đề, ' . (int) ( $s['reuses'] ?? 0 ) . ' lần nhân bản.' ); ?></p>
 		</form>
 	<?php endif; ?>
