@@ -591,55 +591,7 @@ section:nth-of-type(even):not(.hero):not(.feature-band):not(.materials){backgrou
 @media(max-width:600px){section{padding-top:48px;padding-bottom:48px}}
 
 
-/* AI companion widget — homepage prototype */
-.ai-chat-launcher{position:fixed;right:24px;bottom:92px;z-index:80;display:flex;align-items:center;gap:11px;border:0;border-radius:999px;padding:9px 17px 9px 9px;background:linear-gradient(135deg,#12385b,#0b223b);color:#fff;box-shadow:0 12px 32px rgba(8,25,44,.25);cursor:pointer;font:inherit;transition:transform .2s,box-shadow .2s}
-.ai-chat-launcher:hover{transform:translateY(-3px);box-shadow:0 17px 38px rgba(8,25,44,.32)}
-.ai-chat-orb{position:relative;display:grid;place-items:center;width:43px;height:43px;border-radius:50%;color:#12334f;background:linear-gradient(145deg,#ffe2a7,#e9b75f);box-shadow:inset 0 0 0 1px #fff7d8;flex:none}
-.ai-chat-orb:after{content:"";position:absolute;inset:-4px;border:1px solid #f2c46f;border-radius:50%;opacity:.65;animation:aiOrbPulse 2.4s ease-out infinite}
-.ai-chat-orb svg{width:23px;height:23px}
-.ai-chat-launcher-copy{display:grid;text-align:left;gap:2px}
-.ai-chat-launcher-copy strong{font-size:14px;line-height:1.1}
-.ai-chat-launcher-copy small{font-size:11px;color:#c9d9e8}
-.ai-chat-status{width:7px;height:7px;display:inline-block;border-radius:50%;background:#62d4a5;margin-right:4px}
-.ai-chat-panel{position:fixed;right:24px;bottom:153px;z-index:81;width:min(390px,calc(100vw - 28px));height:min(570px,calc(100dvh - 190px));min-height:420px;display:none;flex-direction:column;overflow:hidden;border:1px solid #d9e2e9;border-radius:23px;background:#fbfaf7;box-shadow:0 24px 70px rgba(8,25,44,.28);transform-origin:bottom right}
-.ai-chat-panel.open{display:flex;animation:aiPanelIn .22s ease-out}
-.ai-chat-head{display:flex;align-items:center;gap:11px;padding:16px 17px;background:linear-gradient(135deg,#102846,#174568);color:#fff}
-.ai-chat-head .ai-chat-orb{width:39px;height:39px}
-.ai-chat-head-copy{flex:1;min-width:0}
-.ai-chat-head-copy strong{display:block;font-size:16px}
-.ai-chat-head-copy small{display:block;color:#c9d9e8;font-size:12px;margin-top:3px}
-.ai-chat-close{display:grid;place-items:center;width:35px;height:35px;border:1px solid #ffffff30;border-radius:50%;background:#ffffff0e;color:#fff;cursor:pointer;font-size:22px}
-.ai-chat-close:hover{background:#ffffff22}
-.ai-chat-context{padding:9px 15px;background:#eef3f4;border-bottom:1px solid #dfe7e8;color:#2c3741;font-size:11px;line-height:1.45}
-.ai-chat-messages{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:12px;padding:15px 13px 10px;scroll-behavior:smooth}
-.ai-msg{max-width:91%;padding:11px 13px;border-radius:15px;font-size:14px;line-height:1.48;overflow-wrap:anywhere}
-.ai-msg.bot{align-self:flex-start;background:#fff;border:1px solid #e4e9eb;color:#182836;border-bottom-left-radius:5px}
-.ai-msg.user{align-self:flex-end;background:#173d5e;color:#fff;border-bottom-right-radius:5px}
-.ai-msg a{color:#066367;font-weight:bold;text-decoration:underline}
-.ai-chat-chips{display:flex;flex-wrap:wrap;gap:7px;padding:0 13px 12px}
-.ai-chat-chip{border:1px solid #cbd9df;background:#fff;color:#23465e;border-radius:999px;padding:7px 10px;font:inherit;font-size:12px;cursor:pointer;transition:background .15s,border-color .15s}
-.ai-chat-chip:hover{background:#e6f3f0;border-color:#93c8bf}
-.ai-chat-compose{display:flex;gap:8px;padding:11px;border-top:1px solid #e0e6e8;background:#fff}
-.ai-chat-input{flex:1;min-width:0;border:1px solid #d6e0e5;border-radius:13px;padding:11px 12px;font:inherit;font-size:14px;outline:none;background:#fbfcfc}
-.ai-chat-input:focus{border-color:#4a9e9a;box-shadow:0 0 0 3px #4a9e9a20}
-.ai-chat-send{width:43px;flex:none;border:0;border-radius:12px;background:#e9b75f;color:#142f47;font-size:20px;cursor:pointer}
-.ai-chat-send:hover{background:#f3c979}
-.ai-chat-disclaimer{padding:0 13px 10px;background:#fff;color:#424a53;font-size:10px;line-height:1.35}
-.ai-chat-link{display:inline-flex;align-items:center;gap:5px;margin-top:8px;padding:7px 10px;border-radius:9px;background:#e8f3f0;color:#166362!important;text-decoration:none!important;font-size:12px}
-.ai-chat-typing{display:inline-flex;gap:4px;padding:5px 2px}
-.ai-chat-typing span{width:5px;height:5px;background:#7b98a8;border-radius:50%;animation:aiTyping 1s infinite}
-.ai-chat-typing span:nth-child(2){animation-delay:.15s}.ai-chat-typing span:nth-child(3){animation-delay:.3s}
-@keyframes aiOrbPulse{0%{transform:scale(.95);opacity:.7}75%,100%{transform:scale(1.28);opacity:0}}
-@keyframes aiPanelIn{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
-@keyframes aiTyping{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-4px)}}
-@media(max-width:600px){
- .ai-chat-launcher{right:13px;bottom:83px;padding:7px 13px 7px 7px;gap:8px}
- .ai-chat-orb{width:40px;height:40px}
- .ai-chat-launcher-copy strong{font-size:13px}
- .ai-chat-launcher-copy small{font-size:10px}
- .ai-chat-panel{right:8px;bottom:137px;width:calc(100vw - 16px);height:min(600px,calc(100dvh - 155px));min-height:390px;border-radius:20px}
-}
-@media(prefers-reduced-motion:reduce){.ai-chat-orb:after,.ai-chat-panel.open,.ai-chat-typing span{animation:none!important}}
+/* AI companion widget: chuyển sang assets/css/ai-coach.css (dùng chung mọi trang, 19/10/2026) */
 
 
 /* Three clear starting paths: personalized-feeling utility without requiring login */
@@ -913,17 +865,10 @@ a:focus-visible,button:focus-visible{
 .side-loading{font-size:14px;color:var(--muted);padding:10px 0}
 /* Đếm tài liệu theo định dạng */
 .format-count{display:block;font-size:13px;color:#232d3a;margin-top:2px}
-/* Trợ lý AI: danh sách liên kết nội dung thật */
-.ai-chat-links{display:flex;flex-direction:column;gap:5px;margin-top:8px}
-.ai-chat-link{display:block;color:#066367;font-weight:bold;text-decoration:underline;font-size:13.5px;line-height:1.35}
-.ai-msg.typing{color:#3e4955;font-style:italic}
 /* Tin tuyển dụng: thẻ dữ liệu thật dùng chung kiểu .job-card */
 .job-card h3 a{color:inherit}
 .job-card .job-meta{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:15px;color:#232d3a;margin:-4px 0 12px}
 
-/* AI Coach: giu xuong dong trong cau tra loi (ý gạch đầu dòng, trích dẫn) */
-.ai-msg.bot{white-space:pre-line}
-.ai-chat-link{white-space:normal}
 
 /* Menu "Ôn thi" có mục con - đồng nhất với header các trang (18/10/2026) */
 .nav-group{position:relative;display:flex}

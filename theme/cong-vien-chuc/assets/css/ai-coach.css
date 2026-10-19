@@ -1,0 +1,74 @@
+/*
+ * AI Coach - khung chat nổi dùng chung mọi trang (19/10/2026). Tách từ home-v17.css (AI companion widget).
+ * Mọi lớp dưới .aic (#cvcAic), tự đặt font/màu để không phụ thuộc CSS của từng trang.
+ */
+.aic{--aic-ink:#182836;--aic-navy:#173d5e;--aic-teal:#066367;font-family:"Times New Roman",Times,"Liberation Serif",serif;font-size:16px;line-height:1.45;color:var(--aic-ink);letter-spacing:normal;text-transform:none}
+.aic *,.aic *:before,.aic *:after{box-sizing:border-box}
+.aic [hidden]{display:none!important}
+.aic button,.aic input{font-family:inherit;letter-spacing:normal;text-transform:none;margin:0;line-height:1.2}
+.aic p{margin:0}
+.aic .screen-reader-text{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(1px,1px,1px,1px);white-space:nowrap}
+.aic :focus-visible{outline:2px solid #e9b75f;outline-offset:2px}
+
+.aic-launcher{position:fixed;right:24px;bottom:24px;z-index:80;display:flex;align-items:center;gap:11px;min-height:0;border:0;border-radius:999px;padding:9px 17px 9px 9px;background:linear-gradient(135deg,#12385b,#0b223b);color:#fff;box-shadow:0 12px 32px rgba(8,25,44,.25);cursor:pointer;transition:transform .2s,box-shadow .2s}
+.aic-launcher:hover{transform:translateY(-3px);box-shadow:0 17px 38px rgba(8,25,44,.32)}
+.aic-orb{position:relative;display:grid;place-items:center;width:43px;height:43px;border-radius:50%;color:#12334f;background:linear-gradient(145deg,#ffe2a7,#e9b75f);box-shadow:inset 0 0 0 1px #fff7d8;flex:none}
+.aic-launcher .aic-orb:after{content:"";position:absolute;inset:-4px;border:1px solid #f2c46f;border-radius:50%;opacity:.65;animation:aicPulse 2.4s ease-out infinite}
+.aic-orb svg{width:23px;height:23px}
+.aic-launcher-copy{display:grid;text-align:left;gap:2px}
+.aic-launcher-copy strong{font-size:14.5px;line-height:1.1;color:#fff}
+.aic-launcher-copy small{font-size:12px;color:#d6e3ee}
+.aic-status{width:7px;height:7px;display:inline-block;border-radius:50%;background:#62d4a5;margin-right:4px;vertical-align:1px}
+
+.aic-panel{position:fixed;right:24px;bottom:92px;z-index:81;width:min(390px,calc(100vw - 28px));height:min(570px,calc(100dvh - 130px));min-height:380px;display:flex;flex-direction:column;overflow:hidden;border:1px solid #d9e2e9;border-radius:23px;background:#fbfaf7;box-shadow:0 24px 70px rgba(8,25,44,.28);transform-origin:bottom right;animation:aicIn .22s ease-out}
+.aic-head{display:flex;align-items:center;gap:10px;padding:14px 15px;background:linear-gradient(135deg,#102846,#174568);color:#fff}
+.aic-head .aic-orb{width:39px;height:39px}
+.aic-head-copy{flex:1;min-width:0}
+.aic-head-copy strong{display:block;font-size:17px;color:#fff}
+.aic-head-copy small{display:block;color:#d6e3ee;font-size:13px;margin-top:2px}
+.aic-icon{display:grid;place-items:center;width:35px;height:35px;padding:0;border:1px solid #ffffff40;border-radius:50%;background:#ffffff12;color:#fff;cursor:pointer;font-size:21px;flex:none}
+.aic-icon:hover{background:#ffffff26}
+#aiChatReset{font-size:17px}
+.aic-context{padding:9px 15px;background:#eef3f4;border-bottom:1px solid #dfe7e8;color:#26323c;font-size:13px;line-height:1.45}
+.aic-messages{flex:1;overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:11px;padding:14px 13px 10px;scroll-behavior:smooth}
+.aic-msg{max-width:91%;padding:10px 13px;border-radius:15px;font-size:15px;line-height:1.5;overflow-wrap:anywhere}
+.aic-msg.bot{align-self:flex-start;background:#fff;border:1px solid #e1e7ea;color:var(--aic-ink);border-bottom-left-radius:5px;white-space:pre-line}
+.aic-msg.user{align-self:flex-end;background:var(--aic-navy);color:#fff;border-bottom-right-radius:5px}
+.aic-msg.typing{color:#3e4955;font-style:italic}
+.aic-links{display:flex;flex-direction:column;gap:5px;margin-top:8px;white-space:normal}
+.aic-link{display:block;color:var(--aic-teal);font-weight:bold;text-decoration:underline;font-size:14.5px;line-height:1.35}
+.aic-link:hover{color:#044a4d}
+.aic-chips{display:flex;flex-wrap:wrap;gap:7px;padding:0 13px 11px}
+.aic-chip{border:1px solid #c3d3da;background:#fff;color:#1d3e55;border-radius:999px;padding:7px 11px;font-size:13.5px;cursor:pointer;transition:background .15s,border-color .15s}
+.aic-chip:hover{background:#e6f3f0;border-color:#93c8bf}
+.aic-compose{display:flex;gap:8px;padding:10px 11px;border-top:1px solid #e0e6e8;background:#fff;margin:0}
+.aic-input{flex:1;min-width:0;height:auto;border:1px solid #cfdae0;border-radius:13px;padding:10px 12px;font-size:15.5px;color:var(--aic-ink);outline:none;background:#fbfcfc;box-shadow:none}
+.aic-input:focus{border-color:#4a9e9a;box-shadow:0 0 0 3px #4a9e9a24}
+.aic-send{width:44px;flex:none;padding:0;border:0;border-radius:12px;background:#e9b75f;color:#142f47;font-size:19px;cursor:pointer}
+.aic-send:hover{background:#f3c979}
+.aic-send:disabled{opacity:.6;cursor:wait}
+.aic-disclaimer{padding:0 13px 10px;background:#fff;color:#3f4851;font-size:12px;line-height:1.4}
+
+@keyframes aicPulse{0%{transform:scale(.95);opacity:.7}75%,100%{transform:scale(1.28);opacity:0}}
+@keyframes aicIn{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:none}}
+
+/* Ẩn nút khi menu di động đang mở hoặc khi khung giải thích của phòng thi đang mở */
+body:has(#chNavLinks.open) .aic-launcher,body:has(.sx-support.open) .aic-launcher{display:none}
+
+@media(max-width:760px){
+	/* Chừa chỗ cho nút nổi ở cuối chân trang */
+	body:has(.aic) .ch-footer{padding-bottom:84px}
+	.aic.is-home .aic-launcher{bottom:83px}
+	.aic.is-home .aic-panel{bottom:146px;height:min(600px,calc(100dvh - 160px))}
+}
+@media(max-width:600px){
+	.aic-launcher{right:12px;bottom:calc(14px + env(safe-area-inset-bottom,0px));padding:6px 14px 6px 6px;gap:8px}
+	.aic-orb{width:40px;height:40px}
+	.aic-launcher-copy strong{font-size:14px}
+	.aic-launcher-copy small{font-size:11.5px}
+	.aic:not(.is-home) .aic-long{display:none}
+	.aic-panel{right:8px;bottom:calc(72px + env(safe-area-inset-bottom,0px));width:calc(100vw - 16px);height:min(600px,calc(100dvh - 92px));min-height:360px;border-radius:20px}
+	.aic-context{font-size:12.5px}
+}
+@media print{.aic{display:none!important}}
+@media(prefers-reduced-motion:reduce){.aic-launcher .aic-orb:after,.aic-panel{animation:none!important}.aic-launcher,.aic-messages{transition:none;scroll-behavior:auto}}

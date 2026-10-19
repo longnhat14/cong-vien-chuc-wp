@@ -4,7 +4,7 @@
  * - "Việc làm quanh bạn": tỉnh/thành lấy từ backend (34 tỉnh), ước lượng theo IP
  *   (ipapi.co, như thiết kế) + quy đổi tên tỉnh cũ sang tỉnh mới sau sáp nhập,
  *   tải tin đang nhận hồ sơ của tỉnh qua admin-ajax (cvc_home_jobs).
- * - AI Coach: hỏi đáp thật qua admin-ajax (cvc_ai_coach) -> API /api/ai/coach.
+ * - AI Coach: chuyển sang assets/js/ai-coach.js (khung chat nổi mọi trang).
  */
 (function(){
  const CFG=window.CVC_HOME||{};
@@ -71,45 +71,7 @@
  function showToast(msg){toast.textContent=msg;toast.classList.add('show');window.setTimeout(()=>toast.classList.remove('show'),2600)}
  if(form){form.addEventListener('submit',e=>{const q=(input.value||'').trim();if(!q){e.preventDefault();input.focus();showToast('Hãy nhập từ khóa bạn muốn tìm.');}});}
 
- /* ---------- AI Coach (hỏi đáp thật) ---------- */
- const aiLauncher=document.getElementById('aiChatLauncher');
- const aiPanel=document.getElementById('aiChatPanel');
- const aiClose=document.getElementById('aiChatClose');
- const aiMessages=document.getElementById('aiChatMessages');
- const aiForm=document.getElementById('aiChatForm');
- const aiInput=document.getElementById('aiChatInput');
- const history=[];let busy=false;
- function aiAddMessage(text,who,links){
-  const bubble=document.createElement('div');bubble.className='ai-msg '+(who||'bot');
-  bubble.textContent=text;
-  if(links&&links.length){
-   const box=document.createElement('div');box.className='ai-chat-links';
-   links.forEach(l=>{const a=document.createElement('a');a.className='ai-chat-link';a.href=(l.url||'').indexOf('http')===0?l.url:(CFG.homeUrl||'/').replace(/\/$/,'')+l.url;a.textContent=l.label+' →';box.appendChild(a);});
-   bubble.appendChild(box);
-  }
-  aiMessages.appendChild(bubble);aiMessages.scrollTop=aiMessages.scrollHeight;return bubble;
- }
- function aiSend(text){
-  const value=(text||'').trim();if(!value||busy)return;
-  aiAddMessage(value,'user');aiInput.value='';busy=true;
-  const typing=aiAddMessage('AI Coach đang soạn câu trả lời…','bot typing');
-  post('cvc_ai_coach',{message:value,history:history.slice(-4)}).then(res=>{
-   typing.remove();
-   if(!res||!res.success){aiAddMessage((res&&res.data&&res.data.message)||'Chưa trả lời được lúc này, vui lòng thử lại sau.','bot');return;}
-   const d=res.data||{};aiAddMessage(d.answer||'','bot',d.links||[]);
-   history.push({role:'user',text:value});history.push({role:'bot',text:(d.answer||'').slice(0,600)});
-  }).catch(()=>{typing.remove();aiAddMessage('Lỗi kết nối, vui lòng thử lại.','bot');}).finally(()=>{busy=false;});
- }
- function aiOpen(){aiPanel.classList.add('open');aiLauncher.setAttribute('aria-expanded','true');aiInput.focus();}
- function aiDismiss(){aiPanel.classList.remove('open');aiLauncher.setAttribute('aria-expanded','false');aiLauncher.focus();}
- if(aiLauncher&&aiPanel){
-  aiLauncher.addEventListener('click',()=>aiPanel.classList.contains('open')?aiDismiss():aiOpen());
-  aiClose.addEventListener('click',aiDismiss);
-  aiForm.addEventListener('submit',e=>{e.preventDefault();aiSend(aiInput.value)});
-  document.querySelectorAll('[data-prompt]').forEach(b=>b.addEventListener('click',()=>aiSend(b.getAttribute('data-prompt'))));
-  document.querySelectorAll('[data-open-ai]').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();aiOpen();}));
-  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&aiPanel.classList.contains('open'))aiDismiss()});
- }
+ /* AI Coach: assets/js/ai-coach.js (dùng chung mọi trang, kể cả nút data-open-ai). */
 
  /* ---------- Số liệu chạy số khi xuất hiện ---------- */
  const statCounters=[...document.querySelectorAll('.stat-counter[data-target]')];

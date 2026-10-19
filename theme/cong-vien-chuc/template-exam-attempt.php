@@ -166,6 +166,8 @@ $exam_code      = (string) ( $exam_info['code'] ?? '' );
 $exam_duration  = (int) ( $exam_info['duration_minutes'] ?? 0 );
 $started_ts     = ! empty( $attempt_data['started_at'] ) ? strtotime( (string) $attempt_data['started_at'] ) : false;
 $is_submitted   = '' !== $attempt_status && 'in_progress' !== $attempt_status;
+// AI Coach nổi (inc/ai-coach.php): ẩn khi đang Thi thật và chưa nộp bài.
+$GLOBALS['cvc_aic_hide'] = ! $is_practice && ! $is_submitted;
 if ( $api_clock ) {
 	// Đồng hồ do máy chủ kiểm soát (hạn chót expires_at); trình duyệt chỉ hiển thị và đồng bộ lại mỗi phút.
 	$timer_mode    = $is_submitted ? 'done' : ( 'countdown' === ( $api_clock['mode'] ?? '' ) ? 'countdown' : 'elapsed' );

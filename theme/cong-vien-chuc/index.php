@@ -558,32 +558,7 @@ $GLOBALS['cvc_home17_cfg'] = array(
 <?php cvc_chrome_footer(); ?>
 <div class="mobile-cta"><a class="btn btn-primary" href="<?php $a( $u['exams'] ); ?>">Luyện đề miễn phí</a><a class="btn btn-gold" href="<?php $a( $u['docs'] ); ?>">Xem tài liệu</a></div>
 
-<button class="ai-chat-launcher" id="aiChatLauncher" type="button" aria-expanded="false" aria-controls="aiChatPanel">
- <span class="ai-chat-orb" aria-hidden="true"><?php echo $ico_spark; // phpcs:ignore ?></span>
- <span class="ai-chat-launcher-copy"><strong>AI Coach · Huấn luyện viên ôn thi</strong><small><span class="ai-chat-status"></span>Cá nhân hóa lộ trình học</small></span>
-</button>
-<section class="ai-chat-panel" id="aiChatPanel" role="dialog" aria-label="AI Coach — Huấn luyện viên ôn thi" aria-modal="false">
- <div class="ai-chat-head">
-  <span class="ai-chat-orb" aria-hidden="true"><?php echo $ico_spark; // phpcs:ignore ?></span>
-  <div class="ai-chat-head-copy"><strong>AI Coach</strong><small>Huấn luyện viên ôn thi cá nhân</small></div>
-  <button class="ai-chat-close" id="aiChatClose" type="button" aria-label="Đóng trợ lý">×</button>
- </div>
- <div class="ai-chat-context">Bạn có thể hỏi về cách ôn thi, chọn đề, tra cứu văn bản hoặc tìm thông báo tuyển dụng.</div>
- <div class="ai-chat-messages" id="aiChatMessages" aria-live="polite">
-  <div class="ai-msg bot">Xin chào! Tôi là AI Coach — huấn luyện viên ôn thi của bạn. Tôi có thể giúp xác định phần kiến thức cần củng cố, gợi ý đề luyện tập và xây dựng lộ trình ôn thi phù hợp. Bạn muốn bắt đầu từ đâu?</div>
- </div>
- <div class="ai-chat-chips" id="aiChatChips">
-  <button class="ai-chat-chip" type="button" data-prompt="Tôi nên bắt đầu ôn thi từ đâu?">📚 Bắt đầu ôn thi</button>
-  <button class="ai-chat-chip" type="button" data-prompt="Giúp tôi chọn đề thi thử phù hợp">📝 Chọn đề thi</button>
-  <button class="ai-chat-chip" type="button" data-prompt="Tôi muốn tìm văn bản pháp luật mới">⚖️ Tra cứu pháp luật</button>
-  <button class="ai-chat-chip" type="button" data-prompt="Tìm tin tuyển dụng công chức, viên chức">🔎 Tìm tuyển dụng</button>
- </div>
- <form class="ai-chat-compose" id="aiChatForm">
-  <input class="ai-chat-input" id="aiChatInput" type="text" maxlength="500" placeholder="Nhập câu hỏi của bạn..." aria-label="Nhập câu hỏi cho trợ lý AI" autocomplete="off">
-  <button class="ai-chat-send" type="submit" aria-label="Gửi câu hỏi">➤</button>
- </form>
- <div class="ai-chat-disclaimer">AI Coach trả lời dựa trên dữ liệu đề thi, văn bản và tin tuyển dụng trên hệ thống, có thể chưa chính xác tuyệt đối — hãy đối chiếu văn bản và thông báo gốc trước khi quyết định.</div>
-</section>
+<?php /* AI Coach: khung chat nổi dùng chung mọi trang - inc/ai-coach.php (wp_footer). */ ?>
 
 <div class="toast<?php echo $cvc_notice ? ' show' : ''; ?>" id="toast" role="status" aria-live="polite"><?php echo $cvc_notice ? esc_html( $cvc_notice['message'] ) : ''; ?></div>
 <?php if ( $cvc_notice ) : ?>

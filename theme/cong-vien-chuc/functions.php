@@ -67,6 +67,7 @@ require_once __DIR__ . '/inc/course-purchase.php';
 require_once __DIR__ . '/inc/engagement.php';
 require_once __DIR__ . '/inc/homepage-nextgen.php';
 require_once __DIR__ . '/inc/home-v17.php';
+require_once __DIR__ . '/inc/ai-coach.php';
 require_once __DIR__ . '/inc/routes.php';
 require_once __DIR__ . '/inc/dev-tools.php';
 
