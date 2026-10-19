@@ -245,3 +245,38 @@ body.cvc-exam-legal{background:#fff!important;color:#111}
 @media(max-width:1100px){.sx-tipspanel{display:none}.sx-lefthead{display:none}}
 @media(max-width:850px){.sx-linkswrap{margin-top:0;padding:0 10px 20px}.sx-linkbtn{flex:1 1 auto;justify-content:center}.sx-linklist{grid-template-columns:1fr}}
 @media print{.sx-linkswrap{display:none!important}}
+
+/* 19/10/2026 - Thi thật / Ôn tập, lưu bài lên máy chủ, rà soát trước khi nộp */
+.sx-modebadge{display:inline-block;padding:1px 9px;border:1.5px solid var(--acc);color:var(--acc);font-weight:bold;font-size:14px;text-transform:uppercase;letter-spacing:.04em!important}
+.sx-modebadge.is-practice{border-color:var(--green-ink);color:var(--green-ink);background:#eef5ef}
+.sx-banner{margin:0;padding:10px clamp(14px,2vw,28px);background:var(--hl);border-bottom:1px solid var(--line);font-weight:bold}
+.sx-savebar{display:flex;align-items:flex-start;gap:8px;margin:10px 0 8px;padding:8px 10px;border:1px solid var(--line);background:var(--soft);font-size:14.5px;line-height:1.4;color:var(--ink2)}
+.sx-savedot{flex:none;width:9px;height:9px;margin-top:5px;border-radius:50%;background:#9a9a9a}
+.sx-savebar.is-ok .sx-savedot{background:var(--green)}
+.sx-savebar.is-busy .sx-savedot{background:var(--now);animation:sxPulse 1s infinite}
+.sx-savebar.is-warn{border-color:var(--red);background:#fbeeee;color:var(--red-ink);font-weight:bold}
+.sx-savebar.is-warn .sx-savedot{background:var(--red)}
+@keyframes sxPulse{50%{opacity:.35}}
+.sx-reviewbtn{margin-bottom:8px;font-weight:bold}
+.sx-reviewbtn small{font-weight:normal;color:var(--muted);font-size:13px}
+.sx-num.unsaved{outline:2px dashed var(--now);outline-offset:-4px}
+.sx-explain{margin:10px 0;line-height:1.6}
+.sx-learn{margin:6px 0 10px}
+.sx-learn a,.sx-citation small{color:var(--ink2)}
+.sx-feedback .sx-group{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+.sx-dialog.sx-review{width:min(640px,100%);max-height:calc(100vh - 40px);overflow:auto}
+.sx-review h3{margin:14px 0 6px;font-size:16px;text-transform:uppercase;letter-spacing:.03em!important}
+.sx-revstats{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-top:6px}
+.sx-revstats>div{border:1px solid var(--line);padding:8px 10px;text-align:center;background:var(--soft)}
+.sx-revstats strong{display:block;font-size:24px;line-height:1.2}
+.sx-revstats span{font-size:14px;color:var(--muted)}
+.sx-revstats .is-warn{border-color:var(--red);background:#fbeeee}.sx-revstats .is-warn strong{color:var(--red-ink)}
+.sx-revstats .is-ok strong{color:var(--green-ink)}
+.sx-revstats .is-flag strong{color:var(--flag)}
+.sx-chips{display:flex;flex-wrap:wrap;gap:5px}
+.sx-chip{min-width:40px;padding:5px 8px;border:1px solid var(--ink);background:#fff;font-weight:bold;font-size:15px}
+.sx-chip:hover{background:var(--accsoft)}
+.sx-revhint{margin:8px 0 0;font-size:14px}
+.sx-revwarn{margin:14px 0 0;padding:10px 12px;border-left:3px solid var(--red);background:#fbeeee;color:var(--red-ink)!important;font-weight:bold}
+.sx-revok{margin:14px 0 0;padding:10px 12px;border-left:3px solid var(--green);background:#eef5ef}
+@media(prefers-reduced-motion:reduce){.sx-savebar.is-busy .sx-savedot{animation:none}}

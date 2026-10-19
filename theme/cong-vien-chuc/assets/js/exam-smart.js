@@ -1,9 +1,12 @@
 /**
- * Trang làm bài - giao diện văn bản (16/10/2026). Thi tập trung / Danh sách câu / Bản đồ đề,
- * bản đồ câu hỏi, đồng hồ, nộp bài, xem lại đáp án + giải thích (sau khi nộp).
- * Dữ liệu: window.CVC_SMART_EXAM (lượt thi thật). Đáp án lưu lên máy chủ ngay khi chọn
- * (cvc_exam_answer, theo question_option_id); đánh dấu: cvc_exam_meta; nộp: cvc_exam_submit;
- * giải thích: cvc_exam_ai_explain. Ghi chú cá nhân + cỡ chữ chỉ lưu trên trình duyệt.
+ * Trang làm bài - giao diện văn bản (16/10/2026; chế độ + lưu bài + rà soát 19/10/2026).
+ * Hai chế độ: Thi thật (ẩn đáp án tới khi nộp, đồng hồ do máy chủ kiểm soát) và Ôn tập (đáp án,
+ * giải thích, căn cứ pháp luật hiện ngay sau mỗi câu; câu đã chấm khóa lại).
+ * Lưu bài: mọi thay đổi vào hàng đợi (localStorage) rồi gửi lên máy chủ theo thứ tự; mất mạng thì tự
+ * gửi lại khi có kết nối, tải lại trang vẫn khôi phục. Đồng hồ hiển thị theo số giây máy chủ trả về
+ * (đồng bộ mỗi phút), không phụ thuộc giờ của máy người dùng.
+ * AJAX: cvc_exam_answer, cvc_exam_meta, cvc_exam_clock, cvc_exam_submit, cvc_exam_ai_explain.
+ * Ghi chú cá nhân + cỡ chữ chỉ lưu trên trình duyệt.
  */
 (function () {
   'use strict';
@@ -13,19 +16,23 @@
 
   var Q = D.questions || [];
   var TOTAL = Q.length;
+  var PRACTICE = D.mode === 'practice';
   var $ = function (s) { return root.querySelector(s) || document.querySelector(s); };
   var $$ = function (s) { return Array.prototype.slice.call(root.querySelectorAll(s)); };
   var noteKey = 'cvc-sx-notes-' + D.attempt_id;
   var fsKey = 'cvc-sx-fontsize';
   var resultKey = 'cvc-sx-result-' + D.attempt_id;
+  var pendKey = 'cvc-sx-pending-' + D.attempt_id;
 
-  var current = 0, mode = 'focus', filter = 'all', submitted = !!D.submitted, busy = false;
+  var current = 0, mode = 'focus', filter = 'all', submitted = !!D.submitted, busy = false, ended = false;
   var notes = {};
   try { notes = JSON.parse(localStorage.getItem(noteKey) || '{}') || {}; } catch (e) { notes = {}; }
+  var byId = {};
+  Q.forEach(function (q) { byId[q.id] = q; q.saved = q.selected || null; });
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function count() { return Q.filter(function (q) { return !!q.selected; }).length; }
-  function toast(s) { var t = $('#sx-toast'); t.textContent = s; t.classList.add('show'); clearTimeout(toast.id); toast.id = setTimeout(function () { t.classList.remove('show'); }, 2600); }
+  function toast(s) { var t = $('#sx-toast'); t.textContent = s; t.classList.add('show'); clearTimeout(toast.id); toast.id = setTimeout(function () { t.classList.remove('show'); }, 3200); }
   function saveStatus(s) { var el = $('#sx-saveStatus'); if (el) el.textContent = s; }
   function post(action, fields) {
     var fd = new FormData();
@@ -38,55 +45,133 @@
     if (filter === 'answered') return !q.selected;
     if (filter === 'unanswered') return !!q.selected;
     if (filter === 'flagged') return !q.flagged;
-    if (filter === 'wrong') return q.is_correct !== false;
+    if (filter === 'wrong') return q.is_correct !== false && !(PRACTICE && q.feedback && q.feedback.is_correct === false);
     return false;
   }
-  function correctKey(q) { var o = (q.options || []).filter(function (x) { return x.correct === true; })[0]; return o ? o.key : null; }
+  /* Đáp án đúng: sau khi nộp lấy từ options; chế độ Ôn tập lấy từ phản hồi của câu đã chấm. */
+  function correctKey(q) {
+    if (PRACTICE && q.feedback) {
+      var f = (q.options || []).filter(function (x) { return x.id === q.feedback.correct_option_id; })[0];
+      return f ? f.key : (q.feedback.correct_option_key || null);
+    }
+    var o = (q.options || []).filter(function (x) { return x.correct === true; })[0]; return o ? o.key : null;
+  }
+  function revealed(q) { return submitted || (PRACTICE && !!q.feedback); }
+  function verdictOf(q) {
+    if (submitted) return q.is_correct;
+    if (PRACTICE && q.feedback) return q.feedback.is_correct;
+    return null;
+  }
+
+  /* --- Lưu bài: hàng đợi gửi lên máy chủ, khôi phục khi tải lại / mất mạng --- */
+  var pending = {};
+  try { pending = JSON.parse(localStorage.getItem(pendKey) || '{}') || {}; } catch (e) { pending = {}; }
+  var lastSaved = D.last_saved_at ? new Date(D.last_saved_at) : null;
+  var offline = false, flushing = false, retryT = null, retryDelay = 4000;
+  function persistPending() { try { if (Object.keys(pending).length) localStorage.setItem(pendKey, JSON.stringify(pending)); else localStorage.removeItem(pendKey); } catch (e) {} }
+  function pendingCount(kind) { return Object.keys(pending).filter(function (k) { return !kind || k.charAt(0) === kind; }).length; }
+  function hhmmss(d) { try { return d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }); } catch (e) { return ''; } }
+  function paintSave() {
+    if (submitted) return;
+    var n = pendingCount(), txt, cls = '';
+    if (n && offline) { txt = 'Mất kết nối - ' + n + ' thay đổi đang chờ, sẽ tự gửi lại khi có mạng'; cls = 'is-warn'; }
+    else if (n) { txt = 'Đang lưu ' + n + ' thay đổi lên máy chủ…'; cls = 'is-busy'; }
+    else { txt = lastSaved ? 'Đã lưu lên máy chủ lúc ' + hhmmss(lastSaved) : 'Đáp án được lưu lên máy chủ ngay khi chọn'; cls = lastSaved ? 'is-ok' : ''; }
+    saveStatus(txt);
+    var side = $('#sx-sideSave'); if (side) side.textContent = txt;
+    var bar = $('#sx-savebar'); if (bar) { bar.className = 'sx-savebar ' + cls; }
+  }
+  function queue(key, item) {
+    item.t = Date.now();
+    pending[key] = item;
+    persistPending(); paintSave(); flush();
+  }
+  function flush() {
+    if (flushing || ended) return Promise.resolve();
+    var keys = Object.keys(pending);
+    if (!keys.length) { paintSave(); return Promise.resolve(); }
+    flushing = true; clearTimeout(retryT); paintSave();
+    var key = keys[0], it = pending[key], isAns = key.charAt(0) === 'a';
+    var req = isAns
+      ? post('cvc_exam_answer', it.opt ? { question_id: it.qid, question_option_id: it.opt } : { question_id: it.qid })
+      : post('cvc_exam_meta', { question_id: it.qid, is_flagged: it.flag ? '1' : '0' });
+    return req.then(function (res) {
+      flushing = false; offline = false; retryDelay = 4000;
+      var changed = !pending[key] || pending[key].t !== it.t;
+      if (!changed) delete pending[key];
+      var q = byId[it.qid];
+      if (res && res.success) {
+        var d = res.data || {};
+        lastSaved = d.saved_at ? new Date(d.saved_at) : new Date();
+        if (d.clock) syncClock(d.clock);
+        if (isAns && q) { q.saved = it.key || null; if (PRACTICE && d.feedback) { q.feedback = d.feedback; } }
+      } else {
+        var e = (res && res.data) || {};
+        if (e.expired || e.ended) { persistPending(); onEnded(e.message); return; }
+        if (isAns && q && !changed) { q.selected = q.saved; }
+        toast(e.message || 'Chưa lưu được thay đổi, vui lòng thử lại.');
+      }
+      persistPending(); render();
+      return flush();
+    }).catch(function () {
+      flushing = false; offline = true; paintSave();
+      clearTimeout(retryT); retryT = setTimeout(flush, retryDelay); retryDelay = Math.min(60000, retryDelay * 2);
+    });
+  }
+  /* Khôi phục thay đổi chưa kịp lưu từ lần mở trước (mất mạng / đóng tab). */
+  if (!submitted) {
+    Object.keys(pending).forEach(function (k) {
+      var it = pending[k], q = byId[it && it.qid];
+      if (!q) { delete pending[k]; return; }
+      if (k.charAt(0) === 'a') { if (PRACTICE && q.feedback) { delete pending[k]; return; } q.selected = it.key || null; }
+      else { q.flagged = !!it.flag; }
+    });
+    persistPending();
+  } else { pending = {}; persistPending(); }
+  window.addEventListener('online', function () { offline = false; flush(); });
+  window.addEventListener('beforeunload', function (e) { if (!submitted && pendingCount()) { flush(); e.preventDefault(); e.returnValue = ''; } });
 
   /* --- Đáp án --- */
   function choose(i, key) {
-    if (submitted || busy) return;
+    if (submitted || busy || ended) return;
     var q = Q[i];
+    if (PRACTICE && (q.feedback || pending['a' + q.id])) { if (q.feedback) toast('Câu này đã chấm - xem đáp án và giải thích bên dưới.'); return; }
     if (q.selected === key) return;
-    var prev = q.selected;
     var opt = (q.options || []).filter(function (o) { return o.key === key; })[0];
     if (!opt) return;
     q.selected = key;
     render();
-    saveStatus('Đang lưu…');
-    post('cvc_exam_answer', { question_id: q.id, question_option_id: opt.id }).then(function (res) {
-      if (res && res.success) { saveStatus('Đã lưu ' + new Date().toLocaleTimeString('vi-VN')); return; }
-      q.selected = prev; render();
-      toast((res && res.data && res.data.message) || 'Chưa lưu được đáp án, vui lòng chọn lại.');
-      saveStatus('Chưa lưu được');
-    }).catch(function () { q.selected = prev; render(); toast('Mất kết nối - đáp án chưa được lưu.'); saveStatus('Chưa lưu được'); });
+    queue('a' + q.id, { qid: q.id, opt: opt.id, key: key });
   }
   function clearAnswer(i) {
-    if (submitted) return;
+    if (submitted || ended || PRACTICE) return;
     var q = Q[i]; if (!q.selected) return;
-    var prev = q.selected; q.selected = null; render();
-    post('cvc_exam_answer', { question_id: q.id }).then(function (res) {
-      if (res && res.success) { saveStatus('Đã bỏ chọn'); return; }
-      q.selected = prev; render(); toast('Chưa bỏ chọn được, vui lòng thử lại.');
-    }).catch(function () { q.selected = prev; render(); toast('Mất kết nối.'); });
+    q.selected = null; render();
+    queue('a' + q.id, { qid: q.id, opt: null, key: null });
   }
   function toggleFlag(i, val) {
     var q = Q[i];
     q.flagged = typeof val === 'boolean' ? val : !q.flagged;
     render();
-    if (!submitted) post('cvc_exam_meta', { question_id: q.id, is_flagged: q.flagged ? '1' : '0' }).catch(function () {});
+    if (!submitted && !ended) queue('f' + q.id, { qid: q.id, flag: q.flagged });
+  }
+  function onEnded(msg) {
+    if (ended) return;
+    ended = true; clearInterval(timer);
+    toast(msg || 'Lượt thi đã kết thúc - đang mở kết quả…');
+    setTimeout(function () { if (D.result_url) location.href = D.result_url; else location.reload(); }, 1800);
   }
 
   function answerButtons(el, i) {
     var q = Q[i]; el.innerHTML = '';
-    var ck = submitted ? correctKey(q) : null;
+    var show = revealed(q), ck = show ? correctKey(q) : null;
     (q.options || []).forEach(function (o) {
       var b = document.createElement('button');
       b.type = 'button';
       var cls = 'sx-answer';
       if (q.selected === o.key) cls += ' sel';
       var tag = '';
-      if (submitted && ck) {
+      if (show && ck) {
         if (o.key === ck) { cls += ' right'; tag = q.selected === o.key ? 'Bạn chọn · Đúng' : 'Đáp án đúng'; }
         else if (q.selected === o.key) { cls += ' wrong'; tag = 'Bạn chọn · Sai'; }
       }
@@ -94,8 +179,8 @@
       b.setAttribute('aria-pressed', q.selected === o.key ? 'true' : 'false');
       b.innerHTML = '<span class="sx-letter">' + esc(o.key) + '</span><span class="sx-copy"></span>' + (tag ? '<span class="sx-tag">' + esc(tag) + '</span>' : '<span class="sx-radio"></span>');
       b.querySelector('.sx-copy').textContent = o.text;
-      if (submitted) b.disabled = false;
-      b.onclick = function () { if (submitted) { openExplain(i); return; } choose(i, o.key); };
+      if (PRACTICE && !submitted && pending['a' + q.id] && q.selected === o.key) { tag = offline ? 'Chờ kết nối để chấm' : 'Đang chấm…'; b.innerHTML = '<span class="sx-letter">' + esc(o.key) + '</span><span class="sx-copy"></span><span class="sx-tag">' + esc(tag) + '</span>'; b.querySelector('.sx-copy').textContent = o.text; }
+      b.onclick = function () { if (show) { if (submitted) { openExplain(i); } else { toast('Câu này đã chấm - xem đáp án và giải thích bên dưới.'); } return; } choose(i, o.key); };
       el.appendChild(b);
     });
   }
@@ -106,14 +191,16 @@
       var b = document.createElement('button');
       b.type = 'button';
       var cls = 'sx-num';
-      if (submitted && q.is_correct === true) cls += ' right';
-      else if (submitted && q.is_correct === false) cls += ' wrong';
+      var v = verdictOf(q);
+      if (v === true) cls += ' right';
+      else if (v === false) cls += ' wrong';
       else if (q.selected) cls += ' done';
+      if (!submitted && pending['a' + q.id]) cls += ' unsaved';
       if (i === current) cls += ' now';
       if (q.flagged) cls += ' flag';
       b.className = cls;
       b.textContent = i + 1;
-      b.title = 'Câu ' + (i + 1) + ': ' + (q.selected ? 'đã trả lời' : 'chưa trả lời') + (q.flagged ? ', đánh dấu xem lại' : '') + (submitted && q.is_correct === true ? ', đúng' : (submitted && q.is_correct === false ? ', sai' : ''));
+      b.title = 'Câu ' + (i + 1) + ': ' + (q.selected ? 'đã trả lời' : 'chưa trả lời') + (q.flagged ? ', đánh dấu xem lại' : '') + (v === true ? ', đúng' : (v === false ? ', sai' : '')) + (!submitted && pending['a' + q.id] ? ', chưa lưu lên máy chủ' : '');
       b.onclick = function () { current = i; if (mode !== 'focus') setMode('focus'); else render(); };
       if (hidden(i)) b.classList.add('sx-hidden');
       el.appendChild(b);
@@ -134,16 +221,33 @@
       var cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = !!q.flagged; cb.onchange = function () { toggleFlag(i, cb.checked); };
       l.appendChild(cb); l.appendChild(document.createTextNode(' Đánh dấu xem lại'));
       var g = document.createElement('div'); g.className = 'sx-group';
-      if (submitted) { var ex = document.createElement('button'); ex.type = 'button'; ex.className = 'sx-btn'; ex.textContent = 'Đáp án & căn cứ'; ex.onclick = function () { openExplain(i); }; g.appendChild(ex); }
+      if (revealed(q)) { var ex = document.createElement('button'); ex.type = 'button'; ex.className = 'sx-btn'; ex.textContent = 'Đáp án & căn cứ'; ex.onclick = function () { openExplain(i); }; g.appendChild(ex); }
       var go = document.createElement('button'); go.type = 'button'; go.className = 'sx-btn sx-primary'; go.textContent = 'Mở câu'; go.onclick = function () { current = i; setMode('focus'); };
       g.appendChild(go); f.appendChild(l); f.appendChild(g); c.appendChild(f); el.appendChild(c);
     });
     if (!shown) el.innerHTML = '<p class="sx-muted">Không có câu nào khớp bộ lọc.</p>';
   }
 
+  function linkTo(u) { return (D.home_url || '/').replace(/\/$/, '') + u; }
+  function practiceFeedback(fb, q) {
+    var f = q.feedback, ok = f.is_correct === true;
+    fb.classList.add('show', ok ? 'ok' : 'no');
+    var html = '<h3>' + (ok ? 'Chính xác' : 'Chưa đúng') + '</h3>' +
+      '<p>' + (f.correct_option_key || correctKey(q) ? 'Đáp án đúng: <strong>' + esc(correctKey(q) || f.correct_option_key) + '</strong>. ' : '') + (ok ? '' : 'Bạn chọn ' + esc(q.selected || '') + '.') + '</p>';
+    if (f.explanation) html += '<div class="sx-explain">' + esc(f.explanation).replace(/\n/g, '<br>') + '</div>';
+    if (f.article) html += '<div class="sx-citation"><strong>Căn cứ pháp luật</strong><p><a href="' + esc(linkTo(f.article.url)) + '" target="_blank" rel="noopener">' + esc(f.article.label) + '</a><br><small>' + esc(f.article.document) + '</small></p></div>';
+    if (f.knowledge) html += '<p class="sx-learn">Học lại: <a href="' + esc(linkTo(f.knowledge.url)) + '" target="_blank" rel="noopener">' + esc(f.knowledge.title) + '</a></p>';
+    if (!f.explanation && !f.article) html += '<p class="sx-muted">Câu hỏi này chưa có giải thích sẵn - bấm "Giải thích chi tiết" để xem diễn giải.</p>';
+    html += '<div class="sx-group"><button type="button" class="sx-btn" data-act="explain">▤ Giải thích chi tiết</button>' + (current < TOTAL - 1 ? '<button type="button" class="sx-btn sx-primary" data-act="next">Câu tiếp theo →</button>' : '') + '</div>';
+    fb.innerHTML = html;
+    fb.querySelector('[data-act="explain"]').onclick = function () { openExplain(current); };
+    var nx = fb.querySelector('[data-act="next"]'); if (nx) nx.onclick = function () { current = Math.min(TOTAL - 1, current + 1); render(); };
+  }
   function feedback() {
     var fb = $('#sx-feedback'), q = Q[current];
     fb.className = 'sx-feedback';
+    if (!submitted && PRACTICE && q.feedback) { practiceFeedback(fb, q); return; }
+    if (!submitted && PRACTICE && pending['a' + q.id]) { fb.classList.add('show', 'x'); fb.innerHTML = '<p>' + (offline ? 'Mất kết nối - đáp án sẽ được chấm ngay khi có mạng trở lại.' : 'Đang chấm đáp án…') + '</p>'; return; }
     if (!submitted) { fb.innerHTML = ''; return; }
     var ck = correctKey(q);
     var ok = q.is_correct === true, no = q.is_correct === false;
@@ -170,14 +274,15 @@
     $('#sx-counter').textContent = 'Câu ' + (current + 1) + '/' + TOTAL;
     $('#sx-topic').textContent = topicLabel(q.topic);
     $('#sx-qtext').textContent = q.text;
-    $('#sx-hintline').textContent = submitted ? 'Bài đã nộp - chọn một phương án để xem giải thích.' : 'Chọn một đáp án đúng nhất.';
+    $('#sx-hintline').textContent = submitted ? 'Bài đã nộp - chọn một phương án để xem giải thích.' : (PRACTICE ? (q.feedback ? 'Câu đã chấm - đáp án đã khóa.' : 'Chọn một đáp án - đáp án đúng, giải thích và căn cứ pháp luật hiện ngay (câu đã chọn không đổi được).') : 'Chọn một đáp án đúng nhất.');
     $('#sx-flag').checked = !!q.flagged;
     $('#sx-note').value = notes[q.id] || '';
     answerButtons($('#sx-answers'), current);
     feedback();
     $('#sx-prev').disabled = current === 0;
     $('#sx-next').disabled = current === TOTAL - 1;
-    $('#sx-clear').disabled = submitted || !q.selected;
+    $('#sx-clear').disabled = submitted || PRACTICE || !q.selected;
+    if (PRACTICE) $('#sx-clear').title = 'Chế độ ôn tập: câu đã chọn không đổi được';
     $('#sx-flagBtn').textContent = q.flagged ? '⚑ Bỏ đánh dấu' : '⚑ Đánh dấu';
     grid($('#sx-grid')); grid($('#sx-largeGrid'), true);
     if (mode === 'list') list();
@@ -185,7 +290,11 @@
     $('#sx-answered').textContent = n; $('#sx-sideAnswered').textContent = n;
     $('#sx-mapcount').textContent = n + '/' + TOTAL;
     $('#sx-progress').style.width = pct + '%'; $('#sx-percent').textContent = pct + '%';
-    $('#sx-sidePercent').textContent = pct + '% hoàn thành';
+    var right = PRACTICE ? Q.filter(function (x) { return x.feedback && x.feedback.is_correct; }).length : 0;
+    $('#sx-sidePercent').textContent = pct + '% hoàn thành' + (PRACTICE && n ? ' · đúng ' + right + '/' + n : '');
+    var un = TOTAL - n, fl = Q.filter(function (x) { return x.flagged; }).length, rh = $('#sx-reviewHint');
+    if (rh) rh.textContent = '(' + un + ' bỏ trống · ' + fl + ' đánh dấu)';
+    paintSave();
     $$('[data-filter]').forEach(function (b) { b.classList.toggle('active', b.dataset.filter === filter); });
   }
 
@@ -208,8 +317,10 @@
     $('#sx-kicker').textContent = 'CÂU ' + (i + 1) + ' · ĐÁP ÁN VÀ CĂN CỨ';
     $('#sx-supportTitle').textContent = 'Giải thích đáp án';
     $('#sx-support').classList.add('open');
-    if (!submitted) {
-      box.innerHTML = '<p>Đáp án, giải thích và căn cứ pháp lý hiển thị sau khi bạn nộp bài - để kết quả thi thử phản ánh đúng năng lực.</p>';
+    if (!revealed(q)) {
+      box.innerHTML = PRACTICE
+        ? '<p>Chọn một đáp án cho câu này - đáp án đúng, giải thích và căn cứ pháp luật sẽ hiện ngay.</p>'
+        : '<p>Chế độ <strong>Thi thật</strong>: đáp án, giải thích và căn cứ pháp lý hiển thị sau khi bạn nộp bài - để kết quả phản ánh đúng năng lực. Muốn xem đáp án ngay sau mỗi câu, hãy chọn chế độ <strong>Ôn tập</strong> ở trang đề thi.</p>';
       return;
     }
     box.innerHTML = '<p class="sx-muted">Đang tải giải thích…</p>';
@@ -232,28 +343,56 @@
     }).catch(function () { box.innerHTML = '<p>Lỗi kết nối, vui lòng thử lại.</p>'; });
   }
 
-  /* --- Nộp bài --- */
-  function submitDialog(lead) {
-    if (submitted || busy) return;
-    var n = count(), fl = Q.filter(function (q) { return q.flagged; }).length;
-    $('#sx-submitMessage').textContent = (lead || '') + 'Đã trả lời ' + n + '/' + TOTAL + ' câu. Còn ' + (TOTAL - n) + ' câu chưa trả lời và ' + fl + ' câu đánh dấu xem lại. Sau khi nộp sẽ không sửa được đáp án. Bạn có muốn nộp bài không?';
-    $('#sx-submitDialog').classList.add('show');
-    $('#sx-confirm').focus();
+  /* --- Rà soát & nộp bài --- */
+  function chips(list) {
+    return '<div class="sx-chips">' + list.map(function (i) { return '<button type="button" class="sx-chip" data-go="' + i + '">' + (i + 1) + '</button>'; }).join('') + '</div>';
   }
+  function reviewDialog() {
+    if (submitted || busy || ended) return;
+    var un = [], fl = [];
+    Q.forEach(function (q, i) { if (!q.selected) un.push(i); if (q.flagged) fl.push(i); });
+    var n = TOTAL - un.length, pend = pendingCount();
+    var right = PRACTICE ? Q.filter(function (x) { return x.feedback && x.feedback.is_correct; }).length : 0;
+    var html = '<div class="sx-revstats">' +
+      '<div><strong>' + n + '/' + TOTAL + '</strong><span>Đã trả lời</span></div>' +
+      '<div class="' + (un.length ? 'is-warn' : 'is-ok') + '"><strong>' + un.length + '</strong><span>Bỏ trống</span></div>' +
+      '<div class="' + (fl.length ? 'is-flag' : '') + '"><strong>' + fl.length + '</strong><span>Đánh dấu xem lại</span></div>' +
+      (PRACTICE ? '<div class="is-ok"><strong>' + right + '/' + n + '</strong><span>Đúng (ôn tập)</span></div>' : '') +
+      (pend ? '<div class="is-warn"><strong>' + pend + '</strong><span>Chưa lưu lên máy chủ</span></div>' : '') +
+      '</div>';
+    html += '<h3>Câu bỏ trống</h3>' + (un.length ? chips(un) : '<p class="sx-muted">Không còn câu bỏ trống.</p>');
+    html += '<h3>Câu đánh dấu xem lại</h3>' + (fl.length ? chips(fl) : '<p class="sx-muted">Không có câu đánh dấu.</p>');
+    html += '<p class="sx-muted sx-revhint">Bấm số câu để mở thẳng câu đó.</p>';
+    $('#sx-reviewBody').innerHTML = html;
+    $$('#sx-reviewBody [data-go]').forEach(function (c) {
+      c.onclick = function () { $('#sx-submitDialog').classList.remove('show'); current = Number(c.getAttribute('data-go')); if (mode !== 'focus') setMode('focus'); else render(); $('#sx-mainpanel').scrollIntoView({ block: 'start', behavior: 'smooth' }); };
+    });
+    var msg = $('#sx-submitMessage');
+    msg.className = un.length || pend ? 'sx-revwarn' : 'sx-revok';
+    msg.textContent = (pend ? 'Còn ' + pend + ' thay đổi chưa lưu lên máy chủ (đang ' + (offline ? 'mất kết nối' : 'gửi') + ') - nộp bây giờ thì các thay đổi này không được tính. ' : '') +
+      (un.length ? 'Còn ' + un.length + ' câu chưa trả lời. Nếu nộp bây giờ, các câu này được tính 0 điểm và bạn không sửa được nữa.' : 'Bạn đã trả lời tất cả ' + TOTAL + ' câu. Sau khi nộp sẽ không sửa được đáp án.');
+    $('#sx-confirm').textContent = un.length ? 'Vẫn nộp bài (' + un.length + ' câu bỏ trống)' : 'Nộp bài';
+    $('#sx-submitDialog').classList.add('show');
+    (un.length || pend ? $('#sx-cancel') : $('#sx-confirm')).focus();
+  }
+  function submitDialog() { flush(); reviewDialog(); }
   function submit(auto) {
     if (submitted || busy) return;
     busy = true;
     $('#sx-submitDialog').classList.remove('show');
     $('#sx-submitTop').disabled = true;
-    $('#sx-submitTop').textContent = 'Đang nộp bài…';
-    post('cvc_exam_submit', {}).then(function (res) {
+    $('#sx-submitTop').textContent = auto ? 'Hết giờ - đang nộp bài…' : 'Đang nộp bài…';
+    // Gửi nốt các thay đổi đang chờ trước khi chấm (tối đa 6 giây).
+    var wait = pendingCount() && !offline ? Promise.race([flush(), new Promise(function (r) { setTimeout(r, 6000); })]) : Promise.resolve();
+    wait.then(function () { return post('cvc_exam_submit', {}); }).then(function (res) {
       busy = false;
       if (!res || !res.success) {
-        if (res && res.data && res.data.already_submitted) { if (D.result_url) { location.href = D.result_url; return; } location.reload(); return; }
+        if (res && res.data && res.data.already_submitted) { ended = true; pending = {}; persistPending(); if (D.result_url) { location.href = D.result_url; return; } location.reload(); return; }
         $('#sx-submitTop').disabled = false; $('#sx-submitTop').textContent = '▤ Nộp bài';
         toast((res && res.data && res.data.message) || 'Nộp bài thất bại, vui lòng thử lại.');
         return;
       }
+      ended = true; pending = {}; persistPending();
       var p = res.data || {};
       try { sessionStorage.setItem(resultKey, JSON.stringify({ topic_stats: p.topic_stats || [], recommendations: p.recommendations || [] })); } catch (e) {}
       // Nộp xong -> mở thẳng trang Kết quả & Phân tích (/ket-qua-thi/{id}/).
@@ -261,7 +400,8 @@
       showResult(p.data || {}, true);
     }).catch(function () {
       busy = false; $('#sx-submitTop').disabled = false; $('#sx-submitTop').textContent = '▤ Nộp bài';
-      toast('Lỗi kết nối khi nộp bài. Vui lòng kiểm tra mạng và thử lại.');
+      toast(auto ? 'Mất kết nối khi tự nộp - máy chủ vẫn tự nộp bài với các đáp án đã lưu khi hết giờ.' : 'Lỗi kết nối khi nộp bài. Vui lòng kiểm tra mạng và thử lại.');
+      if (auto) { setTimeout(pollClock, 15000); }
     });
   }
   function fmt(x) { if (x === null || x === undefined || x === '') return '--'; var n = Number(x); return isNaN(n) ? String(x) : (Math.round(n * 100) / 100).toLocaleString('vi-VN'); }
@@ -307,23 +447,40 @@
     }
   }
 
-  /* --- Đồng hồ --- */
-  var remaining = (D.timer && D.timer.seconds) || 0, tmode = (D.timer && D.timer.mode) || 'done', duration = (D.timer && D.timer.duration) || 0, timer = null;
+  /* --- Đồng hồ: số giây do máy chủ tính, trình duyệt chỉ đếm theo performance.now() và đồng bộ mỗi phút --- */
+  var tmode = (D.timer && D.timer.mode) || 'done', duration = (D.timer && D.timer.duration) || 0, timer = null;
+  var clockBase = (D.timer && D.timer.seconds) || 0, clockAt = (window.performance && performance.now) ? performance.now() : Date.now();
+  var autoSubmitting = false;
+  function nowMs() { return (window.performance && performance.now) ? performance.now() : Date.now(); }
+  function clockValue() { var dt = Math.floor((nowMs() - clockAt) / 1000); return tmode === 'countdown' ? Math.max(0, clockBase - dt) : clockBase + dt; }
+  function syncClock(c) {
+    if (!c || submitted) return;
+    if (c.status && c.status !== 'in_progress') { onEnded('Lượt thi đã kết thúc - đang mở kết quả…'); return; }
+    if (c.mode === 'countdown' && c.remaining_seconds !== null && c.remaining_seconds !== undefined) { tmode = 'countdown'; clockBase = Number(c.remaining_seconds) || 0; clockAt = nowMs(); }
+    else if (c.mode === 'elapsed') { tmode = 'elapsed'; clockBase = Number(c.elapsed_seconds) || 0; clockAt = nowMs(); }
+    paintClock();
+  }
+  function pollClock() { if (submitted || ended) return; post('cvc_exam_clock', {}).then(function (r) { if (r && r.success) syncClock(r.data); }).catch(function () {}); }
   function clock(t) { t = Math.max(0, t); var h = Math.floor(t / 3600), m = Math.floor(t % 3600 / 60), s = t % 60; return (h ? h + ':' : '') + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0'); }
   function paintClock() {
     var el = $('#sx-timer');
     if (tmode === 'done') { el.textContent = 'Đã nộp'; $('#sx-sideProgress').style.width = '0%'; return; }
-    if (tmode === 'over') { el.textContent = 'Hết giờ'; el.classList.add('warn'); $('#sx-sideProgress').style.width = '0%'; return; }
-    el.textContent = clock(remaining);
-    el.classList.toggle('warn', tmode === 'countdown' && remaining <= 300);
-    $('#sx-sideProgress').style.width = (tmode === 'countdown' && duration ? Math.max(0, remaining / duration * 100) : 100) + '%';
+    var v = clockValue();
+    el.textContent = tmode === 'countdown' && v <= 0 ? 'Hết giờ' : clock(v);
+    el.classList.toggle('warn', tmode === 'countdown' && v <= 300);
+    $('#sx-sideProgress').style.width = (tmode === 'countdown' && duration ? Math.max(0, v / duration * 100) : 100) + '%';
   }
+  var warned5 = false;
   function tick() {
-    if (submitted) { clearInterval(timer); return; }
-    remaining += tmode === 'countdown' ? -1 : 1;
+    if (submitted || ended) { clearInterval(timer); return; }
     paintClock();
-    if (tmode === 'countdown' && remaining <= 0) { clearInterval(timer); toast('Đã hết giờ - hệ thống tự nộp bài.'); submit(true); }
+    if (tmode !== 'countdown') return;
+    var v = clockValue();
+    if (v <= 300 && v > 0 && !warned5) { warned5 = true; toast('Còn 5 phút - hãy rà soát các câu bỏ trống.'); }
+    if (v <= 0 && !autoSubmitting) { autoSubmitting = true; clearInterval(timer); toast('Hết giờ - hệ thống tự nộp bài với các đáp án đã lưu.'); submit(true); }
   }
+  setInterval(pollClock, 60000);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) { pollClock(); flush(); } });
 
   /* --- Sự kiện --- */
   $('#sx-prev').onclick = function () { current = Math.max(0, current - 1); render(); };
@@ -335,6 +492,7 @@
   $('#sx-note').oninput = function (e) { notes[Q[current].id] = e.target.value; try { localStorage.setItem(noteKey, JSON.stringify(notes)); } catch (x) {} };
   $('#sx-explainbtn').onclick = function () { openExplain(current); };
   $('#sx-submitTop').onclick = submitDialog;
+  if ($('#sx-reviewTop')) $('#sx-reviewTop').onclick = submitDialog;
   $('#sx-cancel').onclick = function () { $('#sx-submitDialog').classList.remove('show'); };
   $('#sx-confirm').onclick = function () { submit(false); };
   $('#sx-closeSupport').onclick = function () { $('#sx-support').classList.remove('open'); };
@@ -384,17 +542,9 @@
   current = submitted ? 0 : (firstOpen > -1 ? firstOpen : 0);
   render();
   paintClock();
-  /* Lượt thi đã quá giờ từ trước khi mở trang (ví dụ bỏ dở rồi quay lại): KHÔNG tự nộp
-     ngay khi tải trang - báo hết giờ, cho người dùng chọn nộp bài hoặc luyện tiếp. */
-  if (!submitted && tmode === 'countdown' && remaining <= 0) {
-    tmode = 'over';
-    paintClock();
-    setTimeout(function () {
-      submitDialog('Lượt thi này đã hết thời gian làm bài (' + Math.round(duration / 60) + ' phút). Bạn có thể nộp bài để xem kết quả, hoặc tiếp tục luyện tập không tính giờ. ');
-      $('#sx-submitTitle').textContent = 'Đã hết giờ làm bài';
-      $('#sx-cancel').textContent = 'Luyện tập tiếp';
-    }, 300);
-  }
+  // Hết giờ trong khoảng gia hạn khi vừa mở trang: tự nộp (máy chủ đã tự nộp nếu quá gia hạn).
+  if (!submitted && tmode === 'countdown' && clockValue() <= 0) { autoSubmitting = true; setTimeout(function () { submit(true); }, 400); }
+  if (!submitted) { paintSave(); flush(); }
   if (!submitted && (tmode === 'countdown' || tmode === 'elapsed')) timer = setInterval(tick, 1000);
   if (submitted) {
     renderAnalysis();

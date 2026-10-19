@@ -59,6 +59,11 @@ final class CVC_Exam_Attempt_Service extends CVC_Api_Service {
 		);
 	}
 
+	/** Đồng hồ do máy chủ kiểm soát (còn bao nhiêu giây, trạng thái lượt thi). */
+	public function clock( int $attemptId, string $token ): array {
+		return $this->client->get( $this->endpoint() . '/' . $attemptId . '/clock', array(), $token );
+	}
+
 	public function submit( int $attemptId, string $token ): array {
 		return $this->client->post( $this->endpoint() . '/' . $attemptId . '/submit', array(), $token );
 	}

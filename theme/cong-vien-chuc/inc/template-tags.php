@@ -1617,8 +1617,8 @@ function cvc_render_exam_start_cta( int $examId ): void {
 		<?php wp_nonce_field( 'cvc_exam_start' ); ?>
 		<input type="hidden" name="action" value="cvc_exam_start">
 		<input type="hidden" name="exam_id" value="<?php echo esc_attr( (string) $examId ); ?>">
-		<input type="hidden" name="mode" value="mock">
-		<button type="submit" class="cvc-btn cvc-btn--primary">Bắt đầu làm bài</button>
+		<button type="submit" name="mode" value="exam" class="cvc-btn cvc-btn--primary" title="Tính giờ, đáp án hiện sau khi nộp bài">Thi thật</button>
+		<button type="submit" name="mode" value="practice" class="cvc-btn cvc-btn--secondary" title="Xem đáp án và giải thích ngay sau mỗi câu">Ôn tập</button>
 	</form>
 	<?php
 }

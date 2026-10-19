@@ -48,10 +48,42 @@ function cvc_handle_exam_answer_ajax(): void {
 	$result = ( new CVC_Exam_Attempt_Service() )->answer( $attemptId, $payload, $token );
 
 	if ( ! $result['ok'] ) {
-		wp_send_json_error( array( 'message' => cvc_api_error_message( $result ) ), $result['status'] ?: 500 );
+		$body = is_array( $result['data'] ?? null ) ? $result['data'] : array();
+		wp_send_json_error(
+			array(
+				'message' => cvc_api_error_message( $result ),
+				// Trang làm bài xử lý riêng: hết giờ (máy chủ đã tự nộp), câu ôn tập đã khóa, lượt đã kết thúc.
+				'expired' => ! empty( $body['expired'] ),
+				'locked'  => ! empty( $body['locked'] ),
+				'ended'   => 422 === (int) $result['status'] && false !== mb_strpos( (string) ( $body['message'] ?? '' ), 'kết thúc' ),
+			),
+			$result['status'] ?: 500
+		);
 	}
 
 	wp_send_json_success( $result['data'] );
+}
+
+/* --- AJAX: ĐỒNG HỒ THI (máy chủ kiểm soát, đồng bộ mỗi phút) --- */
+add_action( 'wp_ajax_cvc_exam_clock', 'cvc_handle_exam_clock_ajax' );
+add_action( 'wp_ajax_nopriv_cvc_exam_clock', 'cvc_handle_exam_clock_ajax' );
+
+function cvc_handle_exam_clock_ajax(): void {
+	check_ajax_referer( 'cvc_exam_attempt', 'nonce' );
+	nocache_headers();
+	$token = cvc_auth_token();
+	if ( null === $token ) {
+		wp_send_json_error( array( 'message' => 'Phiên đăng nhập đã hết hạn.' ), 401 );
+	}
+	$attemptId = absint( $_POST['attempt_id'] ?? 0 );
+	if ( 0 === $attemptId ) {
+		wp_send_json_error( array( 'message' => 'Dữ liệu không hợp lệ.' ), 422 );
+	}
+	$result = ( new CVC_Exam_Attempt_Service() )->clock( $attemptId, $token );
+	if ( ! $result['ok'] ) {
+		wp_send_json_error( array( 'message' => cvc_api_error_message( $result ) ), $result['status'] ?: 500 );
+	}
+	wp_send_json_success( $result['data']['data'] ?? array() );
 }
 
 /* --- AJAX: NỘP BÀI THI & CHẤM ĐIỂM --- */
@@ -178,7 +210,8 @@ function cvc_handle_exam_meta_ajax(): void {
 	$result = ( new CVC_Exam_Attempt_Service() )->updateMeta( $attemptId, $questionId, $payload, $token );
 
 	if ( ! $result['ok'] ) {
-		wp_send_json_error( array( 'message' => cvc_api_error_message( $result ) ), $result['status'] ?: 500 );
+		$body = is_array( $result['data'] ?? null ) ? $result['data'] : array();
+		wp_send_json_error( array( 'message' => cvc_api_error_message( $result ), 'expired' => ! empty( $body['expired'] ) ), $result['status'] ?: 500 );
 	}
 
 	wp_send_json_success( $result['data'] );

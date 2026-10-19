@@ -36,9 +36,27 @@ if ( ! $is_found ) {
  */
 $start_error = '';
 $token       = cvc_auth_token();
-if ( $is_found && null !== $token && (int) ( $exam['questions_count'] ?? count( (array) ( $exam['questions'] ?? array() ) ) ) > 0 ) {
+/*
+ * 19/10/2026 - hai chế độ Thi thật / Ôn tập: đồng hồ thi thật do máy chủ đếm ngay khi bắt đầu, nên KHÔNG
+ * tự mở lượt mới khi chỉ xem đề. Có lượt đang làm dở -> mở lại ngay; có ?che-do=thi-that|on-tap -> bắt đầu
+ * đúng chế độ đó; còn lại hiện trang đề với 2 nút chọn chế độ.
+ */
+$start_mode = array( 'thi-that' => 'exam', 'on-tap' => 'practice' )[ sanitize_key( (string) ( $_GET['che-do'] ?? '' ) ) ] ?? '';
+if ( $is_found && null !== $token && '' === $start_mode ) {
 	nocache_headers();
-	$started = ( new CVC_Exam_Attempt_Service() )->start( (int) ( $exam['id'] ?? 0 ), 'mock', $token );
+	$open = ( new CVC_Api_Client( null, 8 ) )->get( '/api/my-exam-attempts', array( 'status' => 'in_progress', 'exam_id' => (int) ( $exam['id'] ?? 0 ), 'per_page' => 1 ), $token );
+	$open_id = (int) ( $open['data']['data']['data'][0]['id'] ?? ( $open['data']['data'][0]['id'] ?? 0 ) );
+	if ( $open['ok'] && $open_id > 0 ) {
+		wp_safe_redirect( cvc_exam_attempt_url( $open_id ) );
+		exit;
+	}
+	if ( 401 === (int) ( $open['status'] ?? 0 ) ) {
+		$token = null;
+	}
+}
+if ( $is_found && null !== $token && '' !== $start_mode && (int) ( $exam['questions_count'] ?? count( (array) ( $exam['questions'] ?? array() ) ) ) > 0 ) {
+	nocache_headers();
+	$started = ( new CVC_Exam_Attempt_Service() )->start( (int) ( $exam['id'] ?? 0 ), $start_mode, $token );
 	$att_id  = (int) ( $started['data']['data']['id'] ?? 0 );
 	if ( $started['ok'] && $att_id > 0 ) {
 		wp_safe_redirect( cvc_exam_attempt_url( $att_id ) );
@@ -162,17 +180,36 @@ get_header();
 				<!-- CENTER MAIN COLUMN (6 COLS — HƯỚNG DẪN; đã bỏ phần xem trước câu hỏi 18/10/2026) -->
 				<div class="lg:col-span-6 space-y-4">
 					<div class="dz-panel space-y-4 text-sm text-ink-2">
-						<h2 class="text-base font-black text-ink flex items-center gap-2"><i class="fa-solid fa-circle-play text-acc"></i> Vào thi ngay</h2>
+						<h2 class="text-base font-black text-ink flex items-center gap-2"><i class="fa-solid fa-circle-play text-acc"></i> Chọn chế độ làm bài</h2>
 						<?php if ( '' !== $start_error ) : ?>
 							<p class="text-red-700 font-bold"><?php echo esc_html( $start_error ); ?></p>
 						<?php endif; ?>
 						<?php if ( empty( $questions ) && 0 === $total_q ) : ?>
 							<?php cvc_render_empty_state( 'Đề thi này chưa có câu hỏi được công bố.' ); ?>
 						<?php else : ?>
-							<p>Đề gồm <strong><?php echo esc_html( (string) $total_q ); ?> câu</strong><?php echo $duration > 0 ? ', làm trong <strong>' . esc_html( (string) $duration ) . ' phút</strong>' : ''; ?>. Bấm vào thi là đồng hồ bắt đầu chạy; câu hỏi chỉ hiện khi bạn làm bài.</p>
-							<ul class="list-disc pl-5 space-y-1">
-								<li>Đáp án được lưu tự động vào tài khoản sau mỗi lần chọn.</li>
-								<li>Có thể đánh dấu câu để xem lại và nộp bài bất cứ lúc nào; hết giờ hệ thống tự nộp.</li>
+							<p>Đề gồm <strong><?php echo esc_html( (string) $total_q ); ?> câu</strong><?php echo $duration > 0 ? ', thời gian <strong>' . esc_html( (string) $duration ) . ' phút</strong>' : ''; ?>. Câu hỏi chỉ hiện khi bạn bắt đầu làm bài.</p>
+							<div class="grid sm:grid-cols-2 gap-3 my-3">
+								<div class="border border-line p-3">
+									<p class="font-black text-ink">Thi thật</p>
+									<p class="text-ink-2">Mô phỏng phòng thi: đồng hồ <?php echo $duration > 0 ? esc_html( (string) $duration ) . ' phút ' : ''; ?>do máy chủ kiểm soát, hết giờ tự nộp. Đáp án, giải thích và căn cứ pháp luật chỉ hiện sau khi nộp bài.</p>
+								</div>
+								<div class="border border-line p-3">
+									<p class="font-black text-ink">Ôn tập</p>
+									<p class="text-ink-2">Không tính giờ. Trả lời xong từng câu là thấy ngay đáp án đúng, giải thích và Điều luật làm căn cứ; câu đã chấm không đổi được.</p>
+								</div>
+							</div>
+							<?php if ( null !== $token ) : ?>
+								<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="flex flex-wrap gap-2">
+									<?php wp_nonce_field( 'cvc_exam_start' ); ?>
+									<input type="hidden" name="action" value="cvc_exam_start">
+									<input type="hidden" name="exam_id" value="<?php echo esc_attr( (string) (int) ( $exam['id'] ?? 0 ) ); ?>">
+									<button type="submit" name="mode" value="exam" class="px-5 py-2.5 text-white font-black rounded-xl bg-acc hover:bg-acc-deep">Thi thật &rarr;</button>
+									<button type="submit" name="mode" value="practice" class="px-5 py-2.5 font-black rounded-xl bg-white text-acc border border-acc-line hover:bg-acc-soft">Ôn tập &rarr;</button>
+								</form>
+							<?php endif; ?>
+							<ul class="list-disc pl-5 space-y-1 mt-3">
+								<li>Mỗi đáp án được lưu lên máy chủ ngay khi chọn; mất mạng hay tải lại trang vẫn khôi phục được bài làm.</li>
+								<li>Trước khi nộp có bảng rà soát câu bỏ trống, câu đánh dấu - bấm số câu để mở lại.</li>
 								<li>Nộp bài xong mở ngay trang Kết quả &amp; Phân tích: điểm, câu sai, căn cứ văn bản và bài luyện đề xuất.</li>
 							</ul>
 						<?php endif; ?>
@@ -191,7 +228,7 @@ get_header();
 					<div class="space-y-1">
 						<h3 class="text-lg font-black text-ink">Sẵn Sàng Làm Bài Thi?</h3>
 						<p class="text-xs text-ink-2">
-							Có đồng hồ đếm giờ, đánh dấu câu hỏi và chấm điểm ngay khi nộp bài.
+							Thi thật tính giờ như phòng thi; Ôn tập xem đáp án ngay sau mỗi câu.
 						</p>
 					</div>
 
@@ -203,16 +240,20 @@ get_header();
 						</a>
 						<p class="text-[10px] text-ink-muted">Miễn phí. Cần tài khoản để lưu kết quả và xem giải thích từng câu.</p>
 					<?php else : ?>
-						<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+						<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="cvc-startmodes">
 							<?php wp_nonce_field( 'cvc_exam_start' ); ?>
 							<input type="hidden" name="action" value="cvc_exam_start">
 							<input type="hidden" name="exam_id" value="<?php echo esc_attr( (string) (int) ( $exam['id'] ?? 0 ) ); ?>">
-							<input type="hidden" name="mode" value="mock">
-							<button type="submit" class="block w-full py-3.5 text-white font-black text-sm rounded-2xl bg-acc hover:bg-acc-deep">
-								Vào thi &rarr;
+							<button type="submit" name="mode" value="exam" class="block w-full py-3 text-white font-black text-sm rounded-2xl bg-acc hover:bg-acc-deep">
+								Thi thật &rarr;
+								<span class="block text-[11px] font-normal opacity-90">Tính giờ, đáp án và giải thích hiện sau khi nộp bài</span>
+							</button>
+							<button type="submit" name="mode" value="practice" class="block w-full mt-2 py-3 font-black text-sm rounded-2xl bg-white text-acc border border-acc-line hover:bg-acc-soft">
+								Ôn tập &rarr;
+								<span class="block text-[11px] font-normal">Không tính giờ, xem đáp án, giải thích và căn cứ pháp luật ngay sau mỗi câu</span>
 							</button>
 						</form>
-						<p class="text-[10px] text-ink-muted">Bài làm được lưu tự động; nộp bài để xem điểm và giải thích.</p>
+						<p class="text-[10px] text-ink-muted">Đáp án được lưu lên máy chủ ngay khi chọn và khôi phục khi tải lại trang.</p>
 					<?php endif; ?>
 				</div>
 

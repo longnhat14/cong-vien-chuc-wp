@@ -150,17 +150,29 @@ $total_q = count( $questions );
 $exam_info      = is_array( $attempt_data['exam'] ?? null ) ? $attempt_data['exam'] : array();
 // "Liên kết kiến thức" (backend ExamLinks): văn bản các câu dẫn chiếu, bài học theo Điều, tin tuyển dụng của đề.
 $exam_links     = is_array( $attempt_res['data']['links'] ?? null ) ? $attempt_res['data']['links'] : array();
+// 19/10/2026: chế độ Thi thật / Ôn tập, đồng hồ do máy chủ tính, phản hồi ôn tập, thời điểm lưu gần nhất.
+$is_practice    = 'practice' === (string) ( $attempt_data['mode'] ?? '' );
+$api_clock      = is_array( $attempt_res['data']['clock'] ?? null ) ? $attempt_res['data']['clock'] : array();
+$fb_by_q        = array();
+foreach ( (array) ( $attempt_res['data']['practice_feedback'] ?? array() ) as $fb ) {
+	if ( is_array( $fb ) && ! empty( $fb['question_id'] ) ) {
+		$fb_by_q[ (int) $fb['question_id'] ] = $fb;
+	}
+}
+$last_saved_at  = (string) ( $attempt_res['data']['last_saved_at'] ?? '' );
+$submitted_by   = (string) ( $attempt_data['submitted_by'] ?? '' );
 $exam_title     = trim( (string) ( $exam_info['title'] ?? '' ) ) ?: 'Bài thi trắc nghiệm';
 $exam_code      = (string) ( $exam_info['code'] ?? '' );
 $exam_duration  = (int) ( $exam_info['duration_minutes'] ?? 0 );
 $started_ts     = ! empty( $attempt_data['started_at'] ) ? strtotime( (string) $attempt_data['started_at'] ) : false;
 $is_submitted   = '' !== $attempt_status && 'in_progress' !== $attempt_status;
-$timer_mode     = $is_submitted ? 'done' : ( $exam_duration > 0 && $started_ts ? 'countdown' : 'elapsed' );
-$timer_seconds  = 0;
-if ( 'countdown' === $timer_mode ) {
-	$timer_seconds = max( 0, $exam_duration * 60 - ( time() - (int) $started_ts ) );
-} elseif ( 'elapsed' === $timer_mode && $started_ts ) {
-	$timer_seconds = max( 0, time() - (int) $started_ts );
+if ( $api_clock ) {
+	// Đồng hồ do máy chủ kiểm soát (hạn chót expires_at); trình duyệt chỉ hiển thị và đồng bộ lại mỗi phút.
+	$timer_mode    = $is_submitted ? 'done' : ( 'countdown' === ( $api_clock['mode'] ?? '' ) ? 'countdown' : 'elapsed' );
+	$timer_seconds = 'countdown' === $timer_mode ? (int) ( $api_clock['remaining_seconds'] ?? 0 ) : (int) ( $api_clock['elapsed_seconds'] ?? 0 );
+} else {
+	$timer_mode    = $is_submitted ? 'done' : 'elapsed';
+	$timer_seconds = $started_ts ? max( 0, time() - (int) $started_ts ) : 0;
 }
 
 /*
@@ -198,6 +210,7 @@ foreach ( (array) ( $attempt_data['answers'] ?? array() ) as $answer ) {
 		'options'    => $opts,
 		'selected'   => $state['selected'] ?? null,
 		'flagged'    => ! empty( $state['is_flagged'] ),
+		'feedback'   => $fb_by_q[ $qid ] ?? null,
 	);
 	if ( $is_submitted && array_key_exists( 'is_correct', $answer ) ) {
 		// Câu bỏ trống: không tính là "sai" trên bản đồ câu hỏi.
@@ -217,6 +230,9 @@ $smart_payload = array(
 	'attempt_id' => (int) $real_attempt_id,
 	'home_url'   => home_url( '/' ),
 	'submitted'  => (bool) $is_submitted,
+	'mode'       => $is_practice ? 'practice' : 'exam',
+	'last_saved_at' => $last_saved_at,
+	'submitted_by'  => $submitted_by,
 	'result_url' => $real_attempt_id > 0 ? cvc_exam_result_url( (int) $real_attempt_id ) : '',
 	'timer'      => array( 'mode' => $timer_mode, 'seconds' => (int) $timer_seconds, 'duration' => $exam_duration * 60 ),
 	'exam'       => array(
@@ -251,6 +267,7 @@ $doc_icon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H
 	<nav class="sx-toolbar" aria-label="Đề thi và chế độ làm bài">
 		<div class="sx-examtitle" title="<?php echo esc_attr( $exam_title ); ?>"><?php echo $doc_icon; // phpcs:ignore WordPress.Security.EscapeOutput ?><span>Đề thi: <?php echo esc_html( $exam_title ); ?></span></div>
 		<div class="sx-meta">
+			<span class="sx-modebadge<?php echo $is_practice ? ' is-practice' : ''; ?>" title="<?php echo $is_practice ? 'Xem đáp án, giải thích và căn cứ pháp luật ngay sau mỗi câu' : 'Đáp án và giải thích ẩn đến khi nộp bài'; ?>"><?php echo $is_practice ? 'Ôn tập' : 'Thi thật'; ?></span>
 			<?php if ( '' !== $exam_code ) : ?><span><?php echo esc_html( $exam_code ); ?></span><?php endif; ?>
 			<span>☷ <?php echo (int) $total_q; ?> câu</span>
 			<span>◷ <?php echo $exam_duration > 0 ? (int) $exam_duration . ' phút' : 'Không giới hạn'; ?></span>
@@ -289,7 +306,8 @@ $doc_icon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H
 		</aside>
 
 		<main class="sx-panel sx-mainpanel" id="sx-mainpanel">
-			<!-- Đầu văn bản -->
+			<?php cvc_render_notice(); ?>
+			<?php if ( $is_submitted && 'timeout' === $submitted_by ) : ?><p class="sx-banner">Hết giờ làm bài - hệ thống đã tự nộp với các đáp án đã lưu trước hạn chót.</p><?php endif; ?>
 
 			<section class="sx-main sx-single-only" id="sx-single">
 				<div class="sx-qtop">
@@ -300,7 +318,7 @@ $doc_icon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H
 					</div>
 				</div>
 				<h2 class="sx-qtext" id="sx-qtext"></h2>
-				<p class="sx-hintline" id="sx-hintline">Chọn một đáp án đúng nhất.</p>
+				<p class="sx-hintline" id="sx-hintline"><?php echo $is_practice ? 'Chọn một đáp án - đáp án đúng, giải thích và căn cứ pháp luật hiện ngay (câu đã chọn không đổi được).' : 'Chọn một đáp án đúng nhất.'; ?></p>
 				<div class="sx-answers" id="sx-answers"></div>
 
 				<div class="sx-feedback" id="sx-feedback" aria-live="polite"></div>
@@ -339,12 +357,16 @@ $doc_icon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H
 				<div class="sx-head"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><h2>Thời gian &amp; nộp bài</h2></div>
 				<div class="sx-body">
 					<div class="sx-timer-row">
-						<div><span class="sx-muted" id="sx-timerlabel"><?php echo 'countdown' === $timer_mode ? 'Thời gian còn lại' : ( 'elapsed' === $timer_mode ? 'Thời gian đã làm' : 'Trạng thái' ); ?></span><div class="sx-timer-value" id="sx-timer"><?php echo 'done' === $timer_mode ? 'Đã nộp' : '--:--'; ?></div></div>
+						<div><span class="sx-muted" id="sx-timerlabel"><?php echo 'countdown' === $timer_mode ? 'Thời gian còn lại' : ( 'elapsed' === $timer_mode ? ( $is_practice ? 'Thời gian ôn tập' : 'Thời gian đã làm' ) : 'Trạng thái' ); ?></span><div class="sx-timer-value" id="sx-timer"><?php echo 'done' === $timer_mode ? 'Đã nộp' : '--:--'; ?></div></div>
 						<div class="sx-timer-progress"><span id="sx-sideProgress"></span></div>
 					</div>
 					<div class="sx-side-submit-meta"><span>Đã trả lời <strong><span id="sx-sideAnswered">0</span>/<?php echo (int) $total_q; ?></strong></span><span id="sx-sidePercent">0% hoàn thành</span></div>
+					<?php if ( ! $is_submitted ) : ?>
+						<div class="sx-savebar" id="sx-savebar" aria-live="polite"><span class="sx-savedot" aria-hidden="true"></span><span id="sx-sideSave">Đáp án được lưu lên máy chủ ngay khi chọn</span></div>
+						<button type="button" class="sx-btn sx-submit-wide sx-reviewbtn" id="sx-reviewTop">☑ Rà soát bài làm <small id="sx-reviewHint"></small></button>
+					<?php endif; ?>
 					<button type="button" class="sx-btn sx-danger sx-submit-wide" id="sx-submitTop"<?php echo $is_submitted ? ' disabled' : ''; ?>>▤ <?php echo $is_submitted ? 'Đã nộp bài' : 'Nộp bài'; ?></button>
-					<p class="sx-muted sx-submit-note"><?php echo $is_submitted ? 'Bài đã nộp - mở từng câu để xem đáp án và giải thích.' : 'Bạn có thể nộp bài bất cứ lúc nào, kể cả khi đang ở câu cuối.'; ?></p>
+					<p class="sx-muted sx-submit-note"><?php echo $is_submitted ? 'Bài đã nộp - mở từng câu để xem đáp án và giải thích.' : ( 'countdown' === $timer_mode ? 'Đồng hồ do máy chủ kiểm soát: hết giờ hệ thống tự nộp với các đáp án đã lưu.' : 'Bạn có thể nộp bài bất cứ lúc nào, kể cả khi đang ở câu cuối.' ); ?></p>
 				</div>
 			</section>
 
@@ -353,7 +375,7 @@ $doc_icon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H
 				<div class="sx-body">
 					<div class="sx-legend" id="sx-legend">
 						<span><i class="sx-swatch done"></i>Đã trả lời</span><span><i class="sx-swatch now"></i>Đang xem</span><span><i class="sx-swatch"></i>Chưa làm</span><span><i class="sx-swatch flag"></i>Đánh dấu</span>
-						<?php if ( $is_submitted ) : ?><span><i class="sx-swatch right"></i>Đúng</span><span><i class="sx-swatch wrong"></i>Sai</span><?php endif; ?>
+						<?php if ( $is_submitted || $is_practice ) : ?><span><i class="sx-swatch right"></i>Đúng</span><span><i class="sx-swatch wrong"></i>Sai</span><?php endif; ?>
 					</div>
 					<div class="sx-grid" id="sx-grid"></div>
 					<div class="sx-filters">
@@ -361,7 +383,7 @@ $doc_icon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H
 						<button type="button" class="sx-btn" data-filter="unanswered">Chưa làm</button>
 						<button type="button" class="sx-btn" data-filter="answered">Đã làm</button>
 						<button type="button" class="sx-btn" data-filter="flagged">Xem lại</button>
-						<?php if ( $is_submitted ) : ?><button type="button" class="sx-btn" data-filter="wrong">Làm sai</button><?php endif; ?>
+						<?php if ( $is_submitted || $is_practice ) : ?><button type="button" class="sx-btn" data-filter="wrong">Làm sai</button><?php endif; ?>
 					</div>
 					<p class="sx-maphint">Chọn số câu để di chuyển nhanh.</p>
 				</div>
@@ -374,6 +396,7 @@ $doc_icon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H
 						<?php if ( '' !== $exam_code ) : ?><tr><td>Mã đề</td><td><?php echo esc_html( $exam_code ); ?></td></tr><?php endif; ?>
 						<tr><td>Số câu</td><td><?php echo (int) $total_q; ?> câu</td></tr>
 						<tr><td>Thời gian</td><td><?php echo $exam_duration > 0 ? (int) $exam_duration . ' phút' : 'Không giới hạn'; ?></td></tr>
+						<tr><td>Chế độ</td><td><?php echo $is_practice ? 'Ôn tập - xem đáp án sau mỗi câu' : 'Thi thật - đáp án hiện sau khi nộp'; ?></td></tr>
 						<tr><td>Hình thức</td><td>Trắc nghiệm 1 đáp án</td></tr>
 						<?php if ( null !== $exam_passing_score && $exam_total_score ) : ?><tr><td>Điểm đạt</td><td><?php echo esc_html( rtrim( rtrim( number_format( $exam_passing_score, 2, ',', '' ), '0' ), ',' ) . '/' . rtrim( rtrim( number_format( $exam_total_score, 2, ',', '' ), '0' ), ',' ) ); ?></td></tr><?php endif; ?>
 						<tr><td>Trạng thái</td><td class="sx-status<?php echo $is_submitted ? '' : ' is-live'; ?>" id="sx-status"><?php echo $is_submitted ? 'Đã nộp bài' : 'Đang làm bài'; ?></td></tr>
@@ -453,7 +476,7 @@ $doc_icon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H
 		<div class="sx-supportcontent" id="sx-supportContent"></div>
 	</aside>
 
-	<div class="sx-overlay" id="sx-submitDialog"><div class="sx-dialog" role="alertdialog" aria-labelledby="sx-submitTitle"><h2 id="sx-submitTitle">Xác nhận nộp bài</h2><p id="sx-submitMessage"></p><div class="sx-dialogactions"><button type="button" class="sx-btn" id="sx-cancel">Tiếp tục làm bài</button><button type="button" class="sx-btn sx-danger" id="sx-confirm">Nộp bài</button></div></div></div>
+	<div class="sx-overlay" id="sx-submitDialog"><div class="sx-dialog sx-review" role="dialog" aria-modal="true" aria-labelledby="sx-submitTitle"><h2 id="sx-submitTitle">Rà soát trước khi nộp</h2><div id="sx-reviewBody"></div><p id="sx-submitMessage"></p><div class="sx-dialogactions"><button type="button" class="sx-btn" id="sx-cancel">Quay lại làm tiếp</button><button type="button" class="sx-btn sx-danger" id="sx-confirm">Nộp bài</button></div></div></div>
 	<div class="sx-overlay" id="sx-resultDialog"><div class="sx-dialog" role="dialog" aria-labelledby="sx-resultTitle"><h2 id="sx-resultTitle">Kết quả bài thi</h2><div id="sx-resultBody"></div><div class="sx-dialogactions"><button type="button" class="sx-btn" id="sx-closeResult">Xem lại bài làm</button><button type="button" class="sx-btn sx-primary" id="sx-showAnalysis">Xem phân tích</button></div></div></div>
 	<div class="sx-toast" id="sx-toast" role="status" aria-live="polite"></div>
 </div>

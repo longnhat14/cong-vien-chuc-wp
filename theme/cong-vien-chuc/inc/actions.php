@@ -370,7 +370,8 @@ function cvc_handle_exam_start(): void {
 	$token = cvc_require_token_or_die();
 
 	$examId = absint( $_POST['exam_id'] ?? 0 );
-	$mode   = sanitize_key( wp_unslash( $_POST['mode'] ?? 'mock' ) );
+	// Chế độ (19/10/2026): practice = Ôn tập (xem đáp án sau từng câu), còn lại = Thi thật (tính giờ, ẩn đáp án).
+	$mode   = 'practice' === sanitize_key( wp_unslash( $_POST['mode'] ?? '' ) ) ? 'practice' : 'exam';
 
 	if ( 0 === $examId ) {
 		wp_safe_redirect( home_url( '/' ) );
@@ -388,6 +389,13 @@ function cvc_handle_exam_start(): void {
 
 	if ( null === $attemptId ) {
 		cvc_redirect_with_notice( home_url( '/' ), 'error', 'Không thể bắt đầu làm bài, vui lòng thử lại.', null );
+		return;
+	}
+
+	// Đang có lượt làm dở ở chế độ khác: mở lại lượt đó kèm thông báo.
+	$message = (string) ( $result['data']['message'] ?? '' );
+	if ( false !== mb_strpos( $message, 'làm dở' ) ) {
+		cvc_redirect_with_notice( cvc_exam_attempt_url( (int) $attemptId ), 'info', $message, null );
 		return;
 	}
 
