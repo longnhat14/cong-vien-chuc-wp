@@ -9,9 +9,9 @@
 :root :where(.ch-header,.ch-footer) button{font:inherit;cursor:pointer}
 :root :where(.ch-header,.ch-footer) svg{display:inline-block}
 :root :is(.ch-topline,.ch-header,.ch-footer){--navy:#0a1d33;--navy2:#123456;--blue:#204f7c;--blue-soft:#eaf1f7;--orange:#f08a24;--orange-deep:#d96813;--teal:#168b88;
-  --gold:#f08a24;--gold-soft:#fff0df;--ink:#14263b;--muted:#42566d;
+  --gold:#f08a24;--gold-soft:#fff0df;--ink:#14263b;--muted:#232d3a;
   --paper:#fbfaf7;--white:#fff;--line:#e4e8ec;--green:#23765a;
-  --shadow:0 18px 50px rgba(16,40,70,.09);--radius:20px;--orange:#f07819;--orange-deep:#d45e0b;--teal:#168b88;--glass:rgba(255,255,255,.78);--navy:#0a1d33;--navy2:#123456;--ink:#14263b;--muted:#42566d;--orange:#f07819;--orange-deep:#c95108;--paper:#f6f5f1;--line:#dfe4e8;--surface-soft:#f0f1ee;--surface-warm:#f7f5ef;--motion-fast:160ms;
+  --shadow:0 18px 50px rgba(16,40,70,.09);--radius:20px;--orange:#f07819;--orange-deep:#d45e0b;--teal:#168b88;--glass:rgba(255,255,255,.78);--navy:#0a1d33;--navy2:#123456;--ink:#14263b;--muted:#232d3a;--orange:#f07819;--orange-deep:#c95108;--paper:#f6f5f1;--line:#dfe4e8;--surface-soft:#f0f1ee;--surface-warm:#f7f5ef;--motion-fast:160ms;
  --motion-standard:220ms;
  --motion-ease:cubic-bezier(.2,.75,.25,1);
  --accent-line:#d5a35e;
@@ -28,7 +28,7 @@
 :root .ch-brand-mark{width:46px;height:46px;border-radius:15px;background:linear-gradient(145deg,#193e64,#0b2039);display:grid;place-items:center;color:#f0cf91;box-shadow:0 8px 20px #10284625}
 :root .ch-brand-name{font-size:22px;font-weight:bold;line-height:1.05;color:var(--navy);letter-spacing:.2px}
 :root .ch-brand-sub{font-size:13px;color:var(--muted);margin-top:4px}
-:root .ch-nav-links{display:flex;align-items:center;gap:24px;font-size:17px;color:#3d5064}
+:root .ch-nav-links{display:flex;align-items:center;gap:24px;font-size:17px;color:#202a35}
 :root .ch-nav-links a:hover{color:var(--blue)}
 :root .ch-nav-actions{display:flex;align-items:center;gap:10px}
 :root .ch-btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;border:1px solid transparent;border-radius:12px;padding:12px 18px;font-weight:bold;line-height:1.2;cursor:pointer;transition:transform .18s,box-shadow .18s,background .18s}
@@ -99,13 +99,13 @@
 :root .ch-brand:hover .ch-brand-mark{transform:translateY(-2px);box-shadow:0 13px 28px #10284635,inset 0 1px 0 #ffffff30}
 :root .ch-brand:hover .ch-brand-mark:after{opacity:1;transform:scale(1)}
 :root .ch-brand-name{display:block;font-size:clamp(19px,1.65vw,23px);letter-spacing:.35px;white-space:nowrap}
-:root .ch-brand-sub{display:block;font-size:13px;line-height:1.2;letter-spacing:.15px;white-space:nowrap;color:#68798a;margin-top:5px}
+:root .ch-brand-sub{display:block;font-size:13px;line-height:1.2;letter-spacing:.15px;white-space:nowrap;color:#3e4853;margin-top:5px}
 :root .ch-nav-links{gap:clamp(3px,.7vw,10px);padding:6px;border:1px solid #e5e9ed;border-radius:17px;background:linear-gradient(180deg,#fffefa,#f7f6f2);box-shadow:0 4px 13px #10284608}
-:root .ch-nav-links a{position:relative;display:flex;align-items:center;justify-content:center;gap:7px;padding:12px 13px;border-radius:12px;color:#344a61;font-size:16px;font-weight:bold;white-space:nowrap;transition:color .22s,background .22s,transform .22s,box-shadow .22s}
+:root .ch-nav-links a{position:relative;display:flex;align-items:center;justify-content:center;gap:7px;padding:12px 13px;border-radius:12px;color:#1c2734;font-size:16px;font-weight:bold;white-space:nowrap;transition:color .22s,background .22s,transform .22s,box-shadow .22s}
 :root .ch-nav-links a:before{content:"";position:absolute;left:13px;right:13px;bottom:5px;height:2px;border-radius:9px;background:linear-gradient(90deg,#d9b66e,#e77822);transform:scaleX(0);transform-origin:left;transition:transform .25s}
 :root .ch-nav-links a:hover{color:#102b48;background:#eef3f7;transform:translateY(-1px);box-shadow:0 5px 12px #1028460d}
 :root .ch-nav-links a:hover:before{transform:scaleX(1)}
-:root .ch-nav-icon{display:grid;place-items:center;width:29px;height:29px;flex:none;border-radius:9px;color:#b46a20;background:linear-gradient(145deg,#fff1d6,#f7e4bd);box-shadow:inset 0 0 0 1px #e7d0a3}
+:root .ch-nav-icon{display:grid;place-items:center;width:29px;height:29px;flex:none;border-radius:9px;color:#824c17;background:linear-gradient(145deg,#fff1d6,#f7e4bd);box-shadow:inset 0 0 0 1px #e7d0a3}
 :root .ch-nav-icon svg{width:17px;height:17px}
 :root .ch-nav-links a>i,:root .ch-nav-links a>b{display:none}
 :root .ch-nav-actions{gap:9px;flex-shrink:0}
@@ -138,8 +138,8 @@
  :root .ch-nav-links a:hover .ch-nav-icon{transform:scale(1.05) rotate(-3deg)}
  :root .ch-nav-icon svg{width:21px;height:21px}
  :root .ch-nav-links a>span:nth-child(2){font-size:17px;color:#102b48;line-height:1.2}
- :root .ch-nav-links a>i{display:block;font-style:normal;font-size:13px;font-weight:normal;color:#7a8997;margin-top:4px}
- :root .ch-nav-links a>b{display:grid;place-items:center;margin-left:auto;width:28px;height:28px;border-radius:9px;background:#f5ead5;color:#a65d17;font-size:17px}
+ :root .ch-nav-links a>i{display:block;font-style:normal;font-size:13px;font-weight:normal;color:#424b54;margin-top:4px}
+ :root .ch-nav-links a>b{display:grid;place-items:center;margin-left:auto;width:28px;height:28px;border-radius:9px;background:#f5ead5;color:#854a12;font-size:17px}
  :root .ch-nav-links a:active{background:#eaf1f6}
 }
 @media(prefers-reduced-motion:reduce){
@@ -164,7 +164,7 @@
 :root .ch-nav-sub:before{content:"";position:absolute;inset:6px 0 0;border:1px solid #dce4eb;border-radius:14px;background:#fffefa;box-shadow:0 18px 40px rgba(9,31,53,.16);z-index:-1}
 :root .ch-nav-group:hover .ch-nav-sub,:root .ch-nav-group:focus-within .ch-nav-sub,:root .ch-nav-group.open .ch-nav-sub{display:block}
 :root .ch-nav-group:hover .ch-nav-caret,:root .ch-nav-group.open .ch-nav-caret{transform:rotate(180deg)}
-:root .ch-nav-links .ch-nav-sub a{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 14px;margin:2px 4px;border-radius:10px;font-size:16px;font-weight:normal;color:#253a50;white-space:nowrap;min-height:0}
+:root .ch-nav-links .ch-nav-sub a{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 14px;margin:2px 4px;border-radius:10px;font-size:16px;font-weight:normal;color:#192836;white-space:nowrap;min-height:0}
 :root .ch-nav-links .ch-nav-sub a:before{display:none}
 :root .ch-nav-links .ch-nav-sub a:hover{background:#eef3f7;color:#102b48;transform:none;box-shadow:none}
 :root .ch-nav-badge{font-size:12px;padding:2px 7px;border:1px solid #c8d5e1;border-radius:6px;color:#3c5874;background:#fff}
@@ -194,8 +194,8 @@
  :root .ch-nav-links a:hover .ch-nav-icon{transform:scale(1.05) rotate(-3deg)}
  :root .ch-nav-icon svg{width:21px;height:21px}
  :root .ch-nav-links a>span:nth-child(2){font-size:17px;color:#102b48;line-height:1.2}
- :root .ch-nav-links a>i{display:block;font-style:normal;font-size:13px;font-weight:normal;color:#7a8997;margin-top:4px}
- :root .ch-nav-links a>b{display:grid;place-items:center;margin-left:auto;width:28px;height:28px;border-radius:9px;background:#f5ead5;color:#a65d17;font-size:17px}
+ :root .ch-nav-links a>i{display:block;font-style:normal;font-size:13px;font-weight:normal;color:#424b54;margin-top:4px}
+ :root .ch-nav-links a>b{display:grid;place-items:center;margin-left:auto;width:28px;height:28px;border-radius:9px;background:#f5ead5;color:#854a12;font-size:17px}
  :root .ch-nav-links a:active{background:#eaf1f6}
  :root .ch-nav-group{display:block}
  :root .ch-nav-links .ch-nav-caret{display:none}

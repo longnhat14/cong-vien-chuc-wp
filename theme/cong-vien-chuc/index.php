@@ -193,7 +193,7 @@ $GLOBALS['cvc_home17_cfg'] = array(
     <div><div class="visual-kicker">LỘ TRÌNH CỦA BẠN</div><div class="visual-title">Học có định hướng.<br>Ôn thi có chiến lược.</div><p class="visual-sub">Bắt đầu từ kiến thức nền, luyện đề theo thời gian và nhận biết phần cần củng cố.</p></div>
     <div class="progress-card">
      <div class="progress-head"><strong><svg class="icon" style="vertical-align:middle;color:#b1843c" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19V5m0 14h16M8 15l3-4 3 2 5-7"/></svg> Tiến độ ôn tập</strong><span class="pill">Lộ trình mẫu</span></div>
-     <div style="font-size:16px;color:#42566d">Kiến thức chung · Vòng 1</div>
+     <div style="font-size:16px;color:#232d3a">Kiến thức chung · Vòng 1</div>
      <div class="progress-track"><span></span></div>
      <div class="progress-foot"><span>Ôn nền tảng → Luyện đề → Rà soát</span><strong style="color:#102846">3 chặng</strong></div>
     </div>
@@ -252,9 +252,9 @@ $GLOBALS['cvc_home17_cfg'] = array(
    <h2 style="font-size:32px;margin-bottom:10px">Mở đúng khu vực bạn cần</h2>
    <p style="color:var(--muted);font-size:18px;max-width:650px;margin-bottom:20px">Đặt các hành động quan trọng ngay cạnh nội dung: tìm việc theo địa phương, vào đề thi trắc nghiệm hoặc mở kho tài liệu mà không phải tìm lại trong menu.</p>
    <div class="quick-grid">
-    <a class="quick-card" href="<?php $a( $u['rec'] ); ?>"><span class="quick-icon" style="background:#fff0df;color:#c05d13"><?php echo $ico_job; // phpcs:ignore ?></span><h3>Tuyển dụng theo tỉnh</h3><p>Ưu tiên thông báo tại địa phương và khu vực lân cận.</p><span class="text-link">Tìm cơ hội <span>→</span></span></a>
+    <a class="quick-card" href="<?php $a( $u['rec'] ); ?>"><span class="quick-icon" style="background:#fff0df;color:#8d450e"><?php echo $ico_job; // phpcs:ignore ?></span><h3>Tuyển dụng theo tỉnh</h3><p>Ưu tiên thông báo tại địa phương và khu vực lân cận.</p><span class="text-link">Tìm cơ hội <span>→</span></span></a>
     <a class="quick-card" href="<?php $a( $u['exams'] ); ?>"><span class="quick-icon"><?php echo $ico_exam; // phpcs:ignore ?></span><h3>Đề thi trắc nghiệm</h3><p>Vào nhanh ngân hàng đề, luyện tập và tự đánh giá kiến thức.</p><span class="text-link">Chọn đề thi <span>→</span></span></a>
-    <a class="quick-card" href="<?php $a( $u['docs'] ); ?>"><span class="quick-icon" style="background:#e5f5f1;color:#14756e"><?php echo $ico_files; // phpcs:ignore ?></span><h3>Tài liệu ôn thi</h3><p>Tham khảo tài liệu, mẫu biểu và nội dung phục vụ ôn tập.</p><span class="text-link">Mở kho tài liệu <span>→</span></span></a>
+    <a class="quick-card" href="<?php $a( $u['docs'] ); ?>"><span class="quick-icon" style="background:#e5f5f1;color:#11635e"><?php echo $ico_files; // phpcs:ignore ?></span><h3>Tài liệu ôn thi</h3><p>Tham khảo tài liệu, mẫu biểu và nội dung phục vụ ôn tập.</p><span class="text-link">Mở kho tài liệu <span>→</span></span></a>
     <a class="quick-card" href="<?php $a( $u['legal'] ); ?>"><span class="quick-icon"><?php echo $ico_law; // phpcs:ignore ?></span><h3>Văn bản pháp luật</h3><p>Tra cứu quy định liên quan đến kỳ thi và vị trí tuyển dụng.</p><span class="text-link">Tra cứu ngay <span>→</span></span></a>
    </div>
 
@@ -434,9 +434,9 @@ $GLOBALS['cvc_home17_cfg'] = array(
     <?php else : ?>
     <h4>Trong lúc chờ khóa học</h4>
     <?php endif; ?>
-    <a class="course-soon-item" href="<?php $a( $u['exams'] ); ?>"><span class="quick-icon"><?php echo $ico_exam; // phpcs:ignore ?></span><strong>Đề thi thử miễn phí</strong><span class="free-tag" style="background:#e5f5f1;color:#14756e">Học ngay</span></a>
+    <a class="course-soon-item" href="<?php $a( $u['exams'] ); ?>"><span class="quick-icon"><?php echo $ico_exam; // phpcs:ignore ?></span><strong>Đề thi thử miễn phí</strong><span class="free-tag" style="background:#e5f5f1;color:#11635e">Học ngay</span></a>
     <?php if ( ! $soon ) : ?>
-    <a class="course-soon-item" href="<?php $a( $u['topics'] ); ?>"><span class="quick-icon"><?php echo $ico_law; // phpcs:ignore ?></span><strong>Chủ đề ôn thi theo văn bản</strong><span class="free-tag" style="background:#e5f5f1;color:#14756e">Học ngay</span></a>
+    <a class="course-soon-item" href="<?php $a( $u['topics'] ); ?>"><span class="quick-icon"><?php echo $ico_law; // phpcs:ignore ?></span><strong>Chủ đề ôn thi theo văn bản</strong><span class="free-tag" style="background:#e5f5f1;color:#11635e">Học ngay</span></a>
     <?php endif; ?>
    </div>
   </div>
@@ -457,7 +457,7 @@ $GLOBALS['cvc_home17_cfg'] = array(
 <section class="materials">
  <div class="container material-layout">
   <div class="material-art" aria-label="Minh họa tài liệu ôn thi">
-   <div class="paper-stack"><div class="paper back"></div><div class="paper"><span class="stamp">CÔNG VIÊN CHỨC</span><h3>TÀI LIỆU<br>ÔN THI &amp; HỒ SƠ</h3><div style="font-size:14px;color:#42566d">Tổng hợp theo nhu cầu thực tế</div><div class="rule"></div><div class="rule"></div><div class="rule short"></div><div style="margin-top:24px;color:#d66b17;font-size:14px;font-weight:bold">TRA CỨU · ÔN TẬP · CHUẨN BỊ</div></div></div>
+   <div class="paper-stack"><div class="paper back"></div><div class="paper"><span class="stamp">CÔNG VIÊN CHỨC</span><h3>TÀI LIỆU<br>ÔN THI &amp; HỒ SƠ</h3><div style="font-size:14px;color:#232d3a">Tổng hợp theo nhu cầu thực tế</div><div class="rule"></div><div class="rule"></div><div class="rule short"></div><div style="margin-top:24px;color:#8c460f;font-size:14px;font-weight:bold">TRA CỨU · ÔN TẬP · CHUẨN BỊ</div></div></div>
    <div class="material-bubble one"><strong>✓</strong> Dễ tìm theo nhu cầu</div><div class="material-bubble two"><strong>01</strong> Mẫu hồ sơ &amp; văn bản</div>
   </div>
   <div class="material-copy"><div class="section-label">KHO TÀI LIỆU</div><h2>Chuẩn bị hồ sơ chỉn chu. Ôn tập có trọng tâm.</h2><p>Đừng để thời gian bị tiêu hao bởi việc tìm tài liệu rời rạc. Bắt đầu từ kho tài liệu, mẫu biểu và văn bản liên quan để có nền tảng chuẩn bị rõ ràng hơn.</p>
@@ -549,7 +549,7 @@ $GLOBALS['cvc_home17_cfg'] = array(
    <article class="job-card"><div class="job-top"><span class="job-org">Chuẩn bị hồ sơ</span><span class="deadline" style="background:#edf3f8;color:#355b7f">Tham khảo</span></div><h3>Rà soát mẫu biểu trước khi nộp</h3><p>Tham khảo mẫu hồ sơ và đọc kỹ hướng dẫn trong thông báo của cơ quan tuyển dụng.</p><a class="text-link" href="<?php $a( $u['docs'] ); ?>">Xem mẫu hồ sơ →</a></article>
    <?php endif; ?>
    <?php if ( $shown < 3 ) : ?>
-   <article class="job-card"><div class="job-top"><span class="job-org">Sẵn sàng cho kỳ thi</span><span class="deadline" style="background:#e5f5f1;color:#14756e">Bắt đầu ngay</span></div><h3>Ôn tập kiến thức trước khi bước vào kỳ thi</h3><p>Chọn đề phù hợp, làm bài thử và xác định phần kiến thức cần dành thêm thời gian.</p><a class="text-link" href="<?php $a( $u['exams'] ); ?>">Chọn đề luyện tập →</a></article>
+   <article class="job-card"><div class="job-top"><span class="job-org">Sẵn sàng cho kỳ thi</span><span class="deadline" style="background:#e5f5f1;color:#11635e">Bắt đầu ngay</span></div><h3>Ôn tập kiến thức trước khi bước vào kỳ thi</h3><p>Chọn đề phù hợp, làm bài thử và xác định phần kiến thức cần dành thêm thời gian.</p><a class="text-link" href="<?php $a( $u['exams'] ); ?>">Chọn đề luyện tập →</a></article>
    <?php endif; ?>
   </div>
  </div>

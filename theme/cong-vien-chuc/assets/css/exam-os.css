@@ -386,5 +386,5 @@ html {
 }
 
 .cvc-breadcrumbs li:not(:last-child)::after {
-  color: #64748b !important;
+  color: #3e4755 !important;
 }

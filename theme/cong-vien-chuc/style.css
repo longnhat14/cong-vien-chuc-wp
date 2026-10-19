@@ -14,12 +14,12 @@ Version: 1.2.0
     --cvc-color-primary-tint: #eaf3fc;
     --cvc-color-primary-tint-strong: #d6e6f5;
     --cvc-color-accent-green: #16734f;
-    --cvc-color-accent-amber: #8a5300;
+    --cvc-color-accent-amber:#8a5300;--cvc-color-accent-amber-ink:#814d00;
     --cvc-color-accent-red: #b42318;
     --cvc-color-accent-purple: #1767aa;
     --cvc-color-text: #111111;
-    --cvc-color-text-muted: #333333;
-    --cvc-color-text-subtle: #5c5c5c;
+    --cvc-color-text-muted: #262626;
+    --cvc-color-text-subtle: #303030;
     --cvc-color-border: #d4d4d4;
     --cvc-color-border-strong: #9a9a9a;
     --cvc-color-bg: #ffffff;
@@ -779,7 +779,7 @@ p {
 
 .cvc-hero__trust svg {
     flex-shrink: 0;
-    color: #16a34a;
+    color: #0e672f;
 }
 
 /* Base (mobile/tablet): minh họa trong luồng bình thường, căn giữa, bo
@@ -903,17 +903,17 @@ p {
 
 .cvc-hero-feature-card__icon--green {
     background: #dcfce7;
-    color: #16a34a;
+    color: #0e672f;
 }
 
 .cvc-hero-feature-card__icon--amber {
     background: #fef3c7;
-    color: #d97706;
+    color: #864a04;
 }
 
 .cvc-hero-feature-card__icon--purple {
     background: #ede9fe;
-    color: #7c3aed;
+    color: #6a1fea;
 }
 
 /* --- Homepage / domain page sections - nhịp nền (Phần 12 SECTION RHYTHM):
@@ -1093,22 +1093,22 @@ p {
    KHÔNG đồng loạt xanh). Chỉ trang trí, không gắn ý nghĩa dữ liệu. */
 .cvc-value-strip__icon--green {
     background: #dcfce7;
-    color: #16a34a;
+    color: #0e672f;
 }
 
 .cvc-value-strip__icon--amber {
     background: #fef3c7;
-    color: #d97706;
+    color: #864a04;
 }
 
 .cvc-value-strip__icon--purple {
     background: #ede9fe;
-    color: #7c3aed;
+    color: #6a1fea;
 }
 
 .cvc-value-strip__icon--pink {
     background: #fce7f3;
-    color: #db2777;
+    color: #a81c5a;
 }
 
 /* Phase 10A.16 - biến thể dùng asset PNG thật (Homepage V2 cut assets):
@@ -1183,12 +1183,12 @@ p {
    Cẩm nang/Thi nâng ngạch/Tin tức mỗi cái 1 màu khác nhau). */
 .cvc-resource-card__icon--purple {
     background: #ede9fe;
-    color: #7c3aed;
+    color: #6a1fea;
 }
 
 .cvc-resource-card__icon--green {
     background: #dcfce7;
-    color: #16a34a;
+    color: #0e672f;
 }
 
 .cvc-resource-grid--footer {
@@ -1323,12 +1323,12 @@ p {
 
 .cvc-recruitment-row__avatar--teal {
     background: #ccfbf1;
-    color: #0f766e;
+    color: #0d645d;
 }
 
 .cvc-recruitment-row__avatar--amber {
     background: #fef3c7;
-    color: #b45309;
+    color: #904307;
 }
 
 .cvc-recruitment-row__avatar--purple {
@@ -1784,7 +1784,7 @@ p {
 }
 
 .cvc-page-header__lead {
-    color: #4b5563;
+    color: #282d34;
     font-size: 1.05rem;
 }
 
@@ -1831,7 +1831,7 @@ p {
 }
 
 .cvc-page-header__meta {
-    color: #6b7280;
+    color: #42464f;
     font-size: 0.9rem;
 }
 
@@ -1862,7 +1862,7 @@ p {
 .cvc-breadcrumbs li:not(:last-child)::after {
     content: '/';
     margin-left: 0.35rem;
-    color: #64748b;
+    color: #3e4755;
     font-weight: 700;
 }
 
@@ -2053,7 +2053,7 @@ body.bg-navy-950 .cvc-breadcrumbs [aria-current='page'] {
    hiển thị ra trang, không đánh lừa người xem là dữ liệu thật. */
 .cvc-badge--demo {
     background: #f3f4f6;
-    color: #6b7280;
+    color: #42464f;
     border: 1px dashed #d1d5db;
 }
 
@@ -2145,7 +2145,7 @@ body.bg-navy-950 .cvc-breadcrumbs [aria-current='page'] {
 }
 
 .cvc-card__deadline strong {
-    color: var(--cvc-color-accent-amber);
+    color: var(--cvc-color-accent-amber-ink);
 }
 
 /* --- Exam card: accent bar + icon riêng (Phần 8 EXAMS "accent mạnh") --- */
@@ -2272,7 +2272,7 @@ body.bg-navy-950 .cvc-breadcrumbs [aria-current='page'] {
 }
 
 .cvc-pagination__status {
-    color: #6b7280;
+    color: #42464f;
 }
 
 /* --- Lesson list / navigation --- */
@@ -2309,7 +2309,7 @@ body.bg-navy-950 .cvc-breadcrumbs [aria-current='page'] {
 }
 
 .cvc-lesson-list__duration {
-    color: #6b7280;
+    color: #42464f;
     font-size: 0.85rem;
 }
 
@@ -2343,7 +2343,7 @@ body.bg-navy-950 .cvc-breadcrumbs [aria-current='page'] {
     flex-wrap: wrap;
     gap: 0.4rem 0.75rem;
     font-size: 0.9rem;
-    color: #4b5563;
+    color: #282d34;
 }
 
 /* --- Recruitment position card --- */
@@ -2373,7 +2373,7 @@ body.bg-navy-950 .cvc-breadcrumbs [aria-current='page'] {
 .cvc-question-list__options {
     margin: 0;
     padding-left: 1.25rem;
-    color: #4b5563;
+    color: #282d34;
 }
 
 /* --- State: not found / locked --- */
@@ -2946,7 +2946,7 @@ button.cvc-btn:disabled {
 .cvc-badge--status-draft,
 .cvc-badge--status-new {
     background: #e5e7eb;
-    color: #374151;
+    color: #212731;
 }
 
 .cvc-badge--status-active,
@@ -2969,7 +2969,7 @@ button.cvc-btn:disabled {
 .cvc-badge--status-archived,
 .cvc-badge--status-dismissed {
     background: #f3f4f6;
-    color: #6b7280;
+    color: #42464f;
 }
 
 .cvc-badge--expired {
@@ -3993,7 +3993,7 @@ button.cvc-btn:disabled {
     font-style: italic;
     font-weight: 700;
     font-size: 1.02rem;
-    color: #0284c7;
+    color: #015e8e;
     letter-spacing: -0.01em;
     white-space: nowrap;
 }
@@ -4042,7 +4042,7 @@ button.cvc-btn:disabled {
 /* Recruitment Status Badges & Emblems */
 .cvc-badge--status-active {
     background: #dcfce7;
-    color: #15803d;
+    color: #116631;
     border: 1px solid #bbf7d0;
     font-size: 0.75rem;
     font-weight: 600;
@@ -4052,7 +4052,7 @@ button.cvc-btn:disabled {
 
 .cvc-badge--status-expired {
     background: #f1f5f9;
-    color: #64748b;
+    color: #3e4755;
     border: 1px solid #e2e8f0;
     font-size: 0.75rem;
     font-weight: 500;
@@ -4103,13 +4103,13 @@ button.cvc-btn:disabled {
 }
 
 .cvc-community-panel__icon {
-    color: #0284c7;
+    color: #015e8e;
     display: inline-flex;
 }
 
 .cvc-community-panel__subtitle {
     font-size: 0.85rem;
-    color: var(--cvc-color-text-muted, #64748b);
+    color: var(--cvc-color-text-muted, #3e4755);
     margin: 0 0 16px 0;
 }
 
@@ -4165,18 +4165,18 @@ button.cvc-btn:disabled {
 }
 
 .cvc-community-item__title a {
-    color: var(--cvc-color-heading, #1e293b);
+    color: var(--cvc-color-heading, #1d2738);
     text-decoration: none;
     transition: color 0.15s ease;
 }
 
 .cvc-community-item__title a:hover {
-    color: #0284c7;
+    color: #015e8e;
 }
 
 .cvc-community-item__meta {
     font-size: 0.78rem;
-    color: #64748b;
+    color: #3e4755;
     margin: 0;
     display: flex;
     align-items: center;
@@ -4190,7 +4190,7 @@ button.cvc-btn:disabled {
 
 .cvc-section-subtitle {
     font-size: 0.92rem;
-    color: #64748b;
+    color: #3e4755;
     margin: 4px 0 0 0;
 }
 
@@ -4352,13 +4352,13 @@ button.cvc-btn:disabled {
     height: 38px;
     border-radius: 50%;
     background: #f1f5f9;
-    color: #334155;
+    color: #1f2734;
     transition: background-color 0.15s ease;
 }
 
 .site-header__bell:hover {
     background: #e2e8f0;
-    color: #0284c7;
+    color: #015e8e;
 }
 
 .cvc-notification-badge {
@@ -4383,7 +4383,7 @@ button.cvc-btn:disabled {
 .cvc-btn--outline {
     background: transparent;
     border: 1.5px solid #0284c7;
-    color: #0284c7;
+    color: #015e8e;
     border-radius: 20px;
     font-weight: 600;
     padding: 0.4rem 1.2rem;
@@ -4408,7 +4408,7 @@ button.cvc-btn:disabled {
 .cvc-section__header-subtitle {
     font-size: 0.88rem;
     font-weight: 400;
-    color: #64748b;
+    color: #3e4755;
     margin-left: 10px;
     display: inline-block;
 }
@@ -4429,7 +4429,7 @@ button.cvc-btn:disabled {
     align-items: center;
     gap: 14px;
     font-size: 0.82rem;
-    color: #64748b;
+    color: #3e4755;
     margin: 10px 0 16px;
 }
 
@@ -4546,7 +4546,7 @@ button.cvc-btn:disabled {
     font-size: 0.75rem;
     font-weight: 700;
     letter-spacing: 0.08em;
-    color: #64748b;
+    color: #3e4755;
     text-align: center;
     margin-bottom: 12px;
 }
@@ -4582,7 +4582,7 @@ button.cvc-btn:disabled {
     gap: 8px;
     font-size: 0.82rem;
     font-weight: 700;
-    color: #334155;
+    color: #1f2734;
     background: #ffffff;
     padding: 6px 16px;
     border-radius: 20px;
@@ -4731,7 +4731,7 @@ button.cvc-btn:disabled {
 
 .cvc-badge--azure {
     background: #e0f2fe;
-    color: #0284c7;
+    color: #015e8e;
     font-weight: 700;
     padding: 4px 12px;
     border-radius: 12px;
@@ -4748,7 +4748,7 @@ button.cvc-btn:disabled {
 .cvc-quiz-card__features li {
     font-size: 0.9rem;
     font-weight: 600;
-    color: #334155;
+    color: #1f2734;
     margin-bottom: 8px;
 }
 
@@ -4766,7 +4766,7 @@ button.cvc-btn:disabled {
     align-items: center;
     font-size: 0.78rem;
     font-weight: 600;
-    color: #64748b;
+    color: #3e4755;
     margin-bottom: 12px;
     padding-bottom: 8px;
     border-bottom: 1px solid #f1f5f9;
@@ -4794,7 +4794,7 @@ button.cvc-btn:disabled {
     border-radius: 10px;
     font-size: 0.9rem;
     font-weight: 500;
-    color: #334155;
+    color: #1f2734;
     cursor: pointer;
     transition: all 0.2s ease;
     width: 100%;
@@ -4808,14 +4808,14 @@ button.cvc-btn:disabled {
 .cvc-quiz-option.correct {
     background: #f0fdf4 !important;
     border-color: #22c55e !important;
-    color: #15803d !important;
+    color: #116631 !important;
     font-weight: 700;
 }
 
 .cvc-quiz-option.incorrect {
     background: #fef2f2 !important;
     border-color: #ef4444 !important;
-    color: #b91c1c !important;
+    color: #af1b1b !important;
 }
 
 .cvc-quiz-feedback {
@@ -4847,7 +4847,7 @@ button.cvc-btn:disabled {
     justify-content: space-between;
     align-items: center;
     font-size: 0.78rem;
-    color: #64748b;
+    color: #3e4755;
     margin-top: 16px;
     padding-top: 12px;
     border-top: 1px solid #f1f5f9;
@@ -4856,7 +4856,7 @@ button.cvc-btn:disabled {
 .cvc-btn-link {
     background: none;
     border: none;
-    color: #0284c7;
+    color: #015e8e;
     font-weight: 600;
     cursor: pointer;
     padding: 0;
@@ -4927,7 +4927,7 @@ button.cvc-btn:disabled {
     border-radius: 50%;
     font-size: 1.4rem;
     line-height: 1;
-    color: #64748b;
+    color: #3e4755;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -4954,7 +4954,7 @@ button.cvc-btn:disabled {
     width: 56px;
     height: 56px;
     background: #dcfce7;
-    color: #16a34a;
+    color: #0e672f;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -4973,7 +4973,7 @@ button.cvc-btn:disabled {
 
 .cvc-modal__header p {
     font-size: 0.88rem;
-    color: #64748b;
+    color: #3e4755;
     margin: 0;
 }
 
@@ -4985,7 +4985,7 @@ button.cvc-btn:disabled {
     display: block;
     font-size: 0.85rem;
     font-weight: 600;
-    color: #334155;
+    color: #1f2734;
     margin-bottom: 6px;
 }
 
@@ -5039,7 +5039,7 @@ button.cvc-btn:disabled {
 
 .cvc-modal__quick-tags p {
     font-size: 0.82rem;
-    color: #64748b;
+    color: #3e4755;
     margin: 0 0 10px;
     font-weight: 600;
 }
@@ -5052,7 +5052,7 @@ button.cvc-btn:disabled {
 
 .cvc-tag {
     background: #f1f5f9;
-    color: #334155;
+    color: #1f2734;
     font-size: 0.8rem;
     font-weight: 500;
     padding: 5px 12px;
@@ -5063,7 +5063,7 @@ button.cvc-btn:disabled {
 
 .cvc-tag:hover {
     background: #e2e8f0;
-    color: #0284c7;
+    color: #015e8e;
     text-decoration: none;
 }
 
