@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Tăng số này khi thêm/sửa rewrite rule để buộc flush lại đúng 1 lần.
-const CVC_REWRITE_VERSION = '15';
+const CVC_REWRITE_VERSION = '16';
 
 /**
  * Section hợp lệ của /tai-khoan/{section}/ (Phase 10) - map slug tiếng
@@ -47,6 +47,8 @@ function cvc_account_primary_sections(): array {
 add_action( 'init', 'cvc_register_rewrite_rules' );
 
 function cvc_register_rewrite_rules(): void {
+	// 19/10/2026: sitemap tin tuyển dụng + vị trí (inc/sitemap.php), gắn vào sitemap_index của Rank Math.
+	add_rewrite_rule( '^sitemap-tuyen-dung\.xml$', 'index.php?cvc_sitemap=tuyen-dung', 'top' );
 	add_rewrite_rule(
 		'^khoa-hoc/page/([0-9]+)/?$',
 		'index.php?cvc_page=courses&cvc_paged=$matches[1]',
@@ -355,6 +357,7 @@ function cvc_register_query_vars( array $vars ): array {
 	$vars[] = 'cvc_topic_slug';
 	$vars[] = 'cvc_recruitment_slug';
 	$vars[] = 'cvc_position_slug';
+	$vars[] = 'cvc_sitemap';
 	$vars[] = 'cvc_round_slug';
 	$vars[] = 'cvc_knowledge_slug';
 	$vars[] = 'cvc_exam_slug';

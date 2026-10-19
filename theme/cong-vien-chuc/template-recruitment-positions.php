@@ -174,7 +174,7 @@ get_header();
 					<h2><a href="<?php echo esc_url( $url ); ?>"><?php echo esc_html( (string) $it['name'] ); ?></a><?php echo ! empty( $it['code'] ) ? ' <small>' . esc_html( (string) $it['code'] ) . '</small>' : ''; ?></h2>
 					<p class="rd-pcard-org"><?php echo esc_html( implode( ' · ', array_filter( array( (string) ( $r['agency'] ?? '' ), (string) ( $r['province'] ?? '' ) ) ) ) ); ?></p>
 					<dl class="rd-pcard-facts">
-						<div><dt>Chỉ tiêu</dt><dd><?php echo null !== ( $it['quantity'] ?? null ) ? (int) $it['quantity'] : '—'; ?></dd></div>
+						<div><dt>Chỉ tiêu</dt><dd><?php echo ! empty( $it['quantity'] ) ? (int) $it['quantity'] : 'Xem văn bản gốc'; ?></dd></div>
 						<div><dt>Hạn nộp</dt><dd><?php echo ! empty( $st['deadline'] ) ? esc_html( cvc_format_date_vn( (string) $st['deadline'] ) ) : 'Chưa rõ hạn nộp'; ?></dd></div>
 						<div class="is-wide"><dt>Trình độ, chuyên ngành</dt><dd><?php echo esc_html( implode( ' · ', array_filter( array( ! empty( $it['education_level'] ) ? cvc_rd_clip( (string) $it['education_level'], 60 ) : '', ! empty( $it['major_requirements'] ) ? cvc_rd_clip( (string) $it['major_requirements'], 120 ) : '' ) ) ) ?: 'Theo thông báo gốc' ); ?></dd></div>
 					</dl>

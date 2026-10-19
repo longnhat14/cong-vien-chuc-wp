@@ -22,7 +22,7 @@ $pos_id   = 0;
 $pos_slug = '';
 
 if ( 'position' === $rd_mode ) {
-	$pos_slug = sanitize_title( (string) get_query_var( 'cvc_position_slug' ) );
+	$pos_slug = cvc_rd_slug( (string) get_query_var( 'cvc_position_slug' ) );
 	$pr       = ( new CVC_Api_Client( null, 10 ) )->get( '/api/recruitment-positions/' . rawurlencode( $pos_slug ) );
 	if ( ! $pr['ok'] && 404 !== (int) ( $pr['status'] ?? 0 ) ) {
 		$pr = ( new CVC_Api_Client( null, 20 ) )->get( '/api/recruitment-positions/' . rawurlencode( $pos_slug ) );
@@ -36,7 +36,7 @@ if ( 'position' === $rd_mode ) {
 		return;
 	}
 	$pos_id = (int) ( $pr['data']['data']['position_id'] ?? 0 );
-	$slug   = sanitize_title( (string) ( $pr['data']['data']['recruitment_slug'] ?? '' ) );
+	$slug   = cvc_rd_slug( (string) ( $pr['data']['data']['recruitment_slug'] ?? '' ) );
 }
 
 $result = ( new CVC_Recruitment_Service() )->find( $slug );
@@ -131,6 +131,9 @@ $days_left = '' !== $deadline ? cvc_rd_days_left( $deadline ) : null;
 $dl_unver  = in_array( 'deadline_unverified', (array) ( $ver['warnings'] ?? array() ), true );
 $countdown = $is_open && '' !== $deadline && null !== $days_left && $days_left >= 0 && ( $ver ? ! empty( $ver['allow_deadline_reminder'] ) : ! $collected );
 $multi     = count( $positions ) > 1;
+// SEO (19/10/2026): chỉ vị trí cụ thể mới có trang riêng + JobPosting; vị trí chung không phát JobPosting.
+$specific  = cvc_rd_specific_positions( $positions );
+$seo_multi = count( $specific ) >= 2;
 $here_url  = 'position' === $rd_mode ? cvc_position_url( (string) $position['slug'] ) : cvc_recruitment_url( $slug );
 $rec_url   = cvc_recruitment_url( $slug );
 $has_pdf   = (bool) array_filter( $attachments, fn ( $a ) => 'pdf' === strtolower( (string) ( $a['extension'] ?? '' ) ) );
@@ -173,9 +176,10 @@ if ( 'position' === $rd_mode ) {
 	);
 	cvc_seo_set_title( $seo_title );
 	cvc_seo_set_description( cvc_seo_trim( $seo_desc, 160 ) );
-	// Thông báo chỉ có 1 vị trí: trang vị trí trùng nội dung -> canonical về trang thông báo.
-	cvc_seo_set_canonical( $multi ? $here_url : $rec_url );
-	if ( $multi ) {
+	// Thông báo chỉ có 1 vị trí cụ thể / vị trí chung: trang vị trí trùng nội dung -> canonical về trang thông báo.
+	$pos_own = $seo_multi && empty( $position['is_generic'] );
+	cvc_seo_set_canonical( $pos_own ? $here_url : $rec_url );
+	if ( $pos_own ) {
 		$jp = cvc_rd_position_jsonld( $recruitment, $position, $here_url );
 		if ( null !== $jp ) {
 			cvc_seo_add_json_ld( $jp );
@@ -193,10 +197,10 @@ if ( 'position' === $rd_mode ) {
 	}
 	cvc_seo_set_description( $seo_desc );
 	cvc_seo_set_canonical( $rec_url );
-	if ( $multi ) {
+	if ( $seo_multi ) {
 		// Nhiều vị trí: mỗi vị trí là 1 JobPosting ở trang riêng; trang thông báo khai báo danh sách.
 		$list = array();
-		foreach ( $positions as $i => $p ) {
+		foreach ( $specific as $i => $p ) {
 			if ( ! empty( $p['slug'] ) ) {
 				$list[] = array( '@type' => 'ListItem', 'position' => $i + 1, 'url' => cvc_position_url( (string) $p['slug'] ), 'name' => (string) ( $p['name'] ?? '' ) );
 			}
@@ -204,12 +208,14 @@ if ( 'position' === $rd_mode ) {
 		if ( $list ) {
 			cvc_seo_add_json_ld( array( '@context' => 'https://schema.org', '@type' => 'ItemList', 'name' => 'Vị trí tuyển dụng: ' . $title, 'numberOfItems' => count( $list ), 'itemListElement' => $list ) );
 		}
-	} else {
-		$job_posting = cvc_build_recruitment_job_posting_jsonld( $recruitment );
+	} elseif ( 1 === count( $specific ) ) {
+		// 1 vị trí cụ thể: JobPosting ở trang thông báo, tên việc = tên vị trí (Google: title là tên việc làm).
+		$job_posting = cvc_rd_position_jsonld( $recruitment, $specific[0], $rec_url );
 		if ( null !== $job_posting ) {
 			cvc_seo_add_json_ld( $job_posting );
 		}
 	}
+	// Chỉ có vị trí chung (chưa tách): không phát JobPosting gộp nhiều việc - recruitment:split-positions tách sau.
 }
 cvc_seo_set_og( array( 'type' => 'website' ) );
 cvc_seo_add_breadcrumb_jsonld( $breadcrumb_items );

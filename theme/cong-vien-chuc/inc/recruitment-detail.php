@@ -55,6 +55,23 @@ function cvc_rd_verify_view( ?array $v ): array {
 	return array( 'class' => $map[ $v['level'] ] ?? 'is-low', 'score' => (int) $v['score'], 'label' => (string) $v['label'], 'copy' => $copy[ $v['level'] ] ?? '' );
 }
 
+/**
+ * Slug từ URL: chỉ a-z 0-9 '-' (không dùng sanitize_title() vì nó cắt chuỗi còn 200 ký tự -> slug vị trí dài bị 404).
+ */
+function cvc_rd_slug( string $raw ): string {
+	return strtolower( (string) preg_replace( '/[^A-Za-z0-9\-]/', '', rawurldecode( $raw ) ) );
+}
+
+/**
+ * Vị trí cụ thể (không phải vị trí chung "Các vị trí việc làm theo thông báo", "Công chức"...) - chỉ vị trí
+ * cụ thể mới có JobPosting / trang riêng trên Google (19/10/2026).
+ *
+ * @return array<int, array>
+ */
+function cvc_rd_specific_positions( array $positions ): array {
+	return array_values( array_filter( $positions, static fn ( $p ) => is_array( $p ) && empty( $p['is_generic'] ) && ! empty( $p['name'] ) ) );
+}
+
 /** JobPosting cho TRANG VỊ TRÍ (mỗi trang 1 việc làm - đúng khuyến nghị dữ liệu có cấu trúc). */
 function cvc_rd_position_jsonld( array $rec, array $pos, string $url ): ?array {
 	$agency = is_array( $rec['agency'] ?? null ) ? $rec['agency'] : null;
@@ -85,8 +102,10 @@ function cvc_rd_position_jsonld( array $rec, array $pos, string $url ): ?array {
 	if ( ! empty( $pos['quantity'] ) ) {
 		$s['totalJobOpenings'] = (int) $pos['quantity'];
 	}
-	if ( ! empty( $dates['announcement_date'] ) ) {
-		$s['datePosted'] = (string) $dates['announcement_date'];
+	// datePosted là trường bắt buộc: ngày ban hành, không có thì ngày đăng trên hệ thống.
+	$posted = (string) ( $dates['announcement_date'] ?? '' ) ?: (string) ( $dates['published_at'] ?? '' );
+	if ( '' !== $posted ) {
+		$s['datePosted'] = $posted;
 	}
 	if ( ! empty( $dates['application_deadline'] ) ) {
 		$s['validThrough'] = (string) $dates['application_deadline'] . 'T23:59:59+07:00';
