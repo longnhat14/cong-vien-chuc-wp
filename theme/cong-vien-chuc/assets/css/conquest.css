@@ -147,6 +147,7 @@
 .cq-row small.cq-tier{font-size:12px;font-weight:bold;color:#434c52}
 .cq-row small.cq-tier.is-official{color:#13645a}
 .cq-row small.cq-tier.is-curated{color:#71541e}
+.cq-row small.cq-tier.is-personal{color:#1d4f8f}
 .cq-end{text-align:right;display:grid;justify-items:end;gap:5px}
 .cq-tinybar{width:76px;height:5px;border-radius:99px;background:#e7eeec;overflow:hidden}
 .cq-tinybar span{display:block;height:100%;background:var(--teal)}

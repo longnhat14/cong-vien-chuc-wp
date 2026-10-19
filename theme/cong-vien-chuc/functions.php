@@ -44,6 +44,7 @@ require_once __DIR__ . '/inc/admin/ingestion.php';
 require_once __DIR__ . '/inc/admin/syllabus.php';
 require_once __DIR__ . '/inc/admin/official-domains.php';
 require_once __DIR__ . '/inc/admin/rounds.php';
+require_once __DIR__ . '/inc/admin/personal-exams.php';
 require_once __DIR__ . '/inc/recruitment-fulltext.php';
 require_once __DIR__ . '/inc/ingestion-cron.php';
 require_once __DIR__ . '/inc/seo.php';

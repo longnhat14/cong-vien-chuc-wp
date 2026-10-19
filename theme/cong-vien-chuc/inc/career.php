@@ -209,6 +209,7 @@ function cvc_ci_tier_pill( string $tier, string $label = '' ): string {
 	$map = array(
 		'official'  => array( '', 'Chính thức' ),
 		'curated'   => array( ' is-blue', 'Đã biên tập' ),
+		'personal'  => array( ' is-blue', 'Riêng cho tin' ),
 		'suggested' => array( ' is-gold', 'Tham khảo' ),
 	);
 	$m   = $map[ $tier ] ?? array( ' is-gray', 'Liên quan' );

@@ -101,6 +101,7 @@ function cvc_admin_resources(): array {
 				array( 'action' => 'publish', 'label' => 'Xuất bản', 'perm' => 'recruitment.publish', 'when' => array( 'review' ) ),
 				array( 'action' => 'expire', 'label' => 'Đánh dấu hết hạn', 'perm' => 'recruitment.expire', 'when' => array( 'published' ), 'confirm' => 'Chuyển tin này sang Hết hạn?' ),
 			),
+			'panels'   => array( 'personal_exams' ),
 			'children' => array(
 				array( 'resource' => 'positions', 'fk' => 'recruitment_id', 'label' => 'Vị trí tuyển dụng' ),
 			),

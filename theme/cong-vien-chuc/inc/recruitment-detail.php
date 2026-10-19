@@ -327,3 +327,81 @@ function cvc_rd_near_html( array $d, bool $detail ): string {
 
 	return (string) ob_get_clean();
 }
+
+/**
+ * Đề trắc nghiệm cá nhân hóa theo tin (20/10/2026): nhóm vị trí → đề RP + văn bản dùng để dựng đề.
+ * Trang vị trí: đưa nhóm chứa vị trí đang xem lên đầu.
+ *
+ * @param array<int, array<string, mixed>> $groups
+ */
+function cvc_rd_render_personal_exams( array $groups, string $focus_position = '', string $track_label = '' ): void {
+	if ( empty( $groups ) ) {
+		return;
+	}
+	// Tên vị trí trong API bị cắt ~120 ký tự -> so khớp theo 100 ký tự đầu.
+	$head = mb_substr( trim( $focus_position ), 0, 100 );
+	$has  = static function ( array $g ) use ( $head ): bool {
+		if ( '' === $head ) {
+			return false;
+		}
+		foreach ( (array) ( $g['positions'] ?? array() ) as $p ) {
+			if ( 0 === strpos( (string) $p, $head ) ) {
+				return true;
+			}
+		}
+		return false;
+	};
+	if ( '' !== $head ) {
+		usort( $groups, static fn ( $a, $b ) => ( $has( $a ) ? 0 : 1 ) <=> ( $has( $b ) ? 0 : 1 ) );
+	}
+	$total = array_sum( array_map( static fn ( $g ) => count( (array) ( $g['exams'] ?? array() ) ), $groups ) );
+	?>
+	<section class="rd-card" id="de-rieng" aria-labelledby="rd-pe-h">
+		<div class="rd-card-head"><h2 id="rd-pe-h"><span class="rd-ico" aria-hidden="true">✎</span>Đề thi trắc nghiệm dành riêng cho tin này</h2></div>
+		<div class="rd-card-body">
+			<p class="rd-muted"><?php echo esc_html( $total . ' đề luyện tập mô phỏng vòng 1' . ( '' !== $track_label ? ' thi tuyển ' . $track_label : '' ) . ', Công Viên Chức biên soạn từ căn cứ của thông báo và yêu cầu vị trí. Mỗi câu dẫn chiếu Điều cụ thể; đây không phải đề thi chính thức của Hội đồng tuyển dụng.' ); ?></p>
+			<?php foreach ( $groups as $gi => $g ) : ?>
+				<?php
+				$exams     = (array) ( $g['exams'] ?? array() );
+				$label     = (string) ( $g['label'] ?? '' );
+				$is_focus  = $has( $g );
+				$sections  = (array) ( $g['sections'] ?? array() );
+				$positions = (array) ( $g['positions'] ?? array() );
+				?>
+				<div class="rd-block rd-pe-group">
+					<?php if ( '' !== $label || count( $groups ) > 1 ) : ?>
+						<h3><?php echo esc_html( '' !== $label ? $label : 'Đề chung của tin' ); ?><?php if ( $is_focus ) : ?> <span class="rd-tag is-ok">Phù hợp vị trí đang xem</span><?php endif; ?></h3>
+						<?php if ( $positions ) : ?>
+							<p class="rd-muted rd-pe-pos"><?php echo esc_html( 'Áp dụng cho: ' . implode( '; ', array_slice( $positions, 0, 4 ) ) . ( count( $positions ) > 4 ? ' và ' . ( count( $positions ) - 4 ) . ' vị trí khác' : '' ) ); ?></p>
+						<?php endif; ?>
+					<?php endif; ?>
+					<div class="rd-linkgrid">
+						<?php foreach ( $exams as $e ) : ?>
+							<a href="<?php echo esc_url( cvc_exam_url( (string) ( $e['slug'] ?? '' ) ) ); ?>"><b><?php echo esc_html( (string) ( $e['title'] ?? '' ) ); ?></b>
+								<small><?php echo esc_html( (int) ( $e['total_questions'] ?? 0 ) . ' câu · ' . (int) ( $e['duration_minutes'] ?? 0 ) . ' phút' ); ?></small></a>
+						<?php endforeach; ?>
+					</div>
+					<?php if ( $sections ) : ?>
+						<details class="rd-doctext rd-pe-docs">
+							<summary>Văn bản dùng để dựng đề <small>(tỷ trọng câu hỏi)</small></summary>
+							<?php foreach ( $sections as $s ) : ?>
+								<h4><?php echo esc_html( (string) ( $s['label'] ?? '' ) . ( ! empty( $s['weight'] ) ? ' · ~' . (int) $s['weight'] . '%' : '' ) ); ?></h4>
+								<p class="rd-tags">
+									<?php foreach ( (array) ( $s['documents'] ?? array() ) as $d ) : ?>
+										<?php $dl = trim( (string) ( $d['number'] ?? '' ) ); ?>
+										<?php if ( ! empty( $d['slug'] ) ) : ?>
+											<a class="rd-tag is-link" href="<?php echo esc_url( cvc_legal_document_url( (string) $d['slug'] ) ); ?>" title="<?php echo esc_attr( (string) ( $d['title'] ?? '' ) ); ?>"><?php echo esc_html( $dl ); ?></a>
+										<?php else : ?>
+											<span class="rd-tag" title="<?php echo esc_attr( (string) ( $d['title'] ?? '' ) ); ?>"><?php echo esc_html( $dl ); ?></span>
+										<?php endif; ?>
+									<?php endforeach; ?>
+								</p>
+							<?php endforeach; ?>
+						</details>
+					<?php endif; ?>
+				</div>
+			<?php endforeach; ?>
+		</div>
+	</section>
+	<?php
+}

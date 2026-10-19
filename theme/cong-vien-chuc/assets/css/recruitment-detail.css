@@ -486,3 +486,9 @@
 .rd-hubnear .rd-near-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:18px}
 .rd-hubnear .rd-near-list li:nth-child(2){border-top:0}
 @media (max-width:760px){.rd-hubnear{grid-template-columns:1fr}.rd-hubnear .rd-near-list{grid-template-columns:1fr}.rd-hubnear .rd-near-list li:nth-child(2){border-top:1px solid #edf1f2}}
+/* Đề cá nhân hóa theo tin (20/10/2026) */
+.rd-pe-group + .rd-pe-group{border-top:1px solid var(--line);padding-top:14px}
+.rd-pe-group h3 .rd-tag{font-size:12px;vertical-align:middle;margin-left:6px}
+.rd-pe-pos{font-size:13px;margin:-2px 0 8px}
+.rd-pe-docs{margin-top:10px}
+.rd-pe-docs h4{font-size:13px;margin:10px 0 6px;color:var(--m)}

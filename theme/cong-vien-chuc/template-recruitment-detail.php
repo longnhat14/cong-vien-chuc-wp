@@ -121,6 +121,9 @@ $type_lbl  = ! empty( $recruitment['recruitment_type'] ) && 'other' !== $recruit
 if ( ! empty( $study_plan ) ) {
 	$exams = array_values( array_filter( $exams, fn ( $e ) => 0 !== strpos( (string) ( $e['code'] ?? '' ), 'RS-' ) ) );
 }
+// Đề cá nhân hóa theo tin (RP-) hiển thị ở khối riêng.
+$personal = array_values( array_filter( (array) ( $recruitment['personal_exams'] ?? array() ), 'is_array' ) );
+$exams    = array_values( array_filter( $exams, fn ( $e ) => 0 !== strpos( (string) ( $e['code'] ?? '' ), 'RP-' ) ) );
 $in_progress = ! $is_open && in_array( $stage, array( 'examining', 'result' ), true );
 if ( 0 === $total ) {
 	$total = array_sum( array_map( fn ( $p ) => (int) ( $p['quantity'] ?? 0 ), $positions ) );
@@ -881,6 +884,10 @@ get_header();
 		cvc_render_recruitment_study_plan( $study_plan );
 		echo '</div>';
 	}
+
+	if ( $personal ) {
+		cvc_rd_render_personal_exams( $personal, is_array( $position ) ? (string) ( $position['name'] ?? '' ) : '', mb_strtolower( $type_lbl ) );
+	}
 	?>
 
 	<?php if ( $exams || $subjects || $legal_docs ) : ?>
@@ -1010,6 +1017,7 @@ get_header();
 			<h2><span class="rd-ico" aria-hidden="true">▣</span>Liên quan đến ôn thi</h2>
 			<a class="rd-navitem" href="#tai-lieu"><span aria-hidden="true">▤</span><b>Tài liệu cần đọc<small>Thông báo và <?php echo count( $attachments ); ?> tệp đính kèm</small></b></a>
 			<a class="rd-navitem" href="#vi-tri"><span aria-hidden="true">☷</span><b>Danh sách vị trí<small><?php echo esc_html( count( $positions ) . ' vị trí · lọc theo mã, chuyên ngành' ); ?></small></b></a>
+			<?php if ( $personal ) : ?><a class="rd-navitem" href="#de-rieng"><span aria-hidden="true">✎</span><b>Đề trắc nghiệm riêng cho tin<small><?php echo esc_html( array_sum( array_map( fn ( $g ) => count( (array) ( $g['exams'] ?? array() ) ), $personal ) ) . ' đề mô phỏng vòng 1' ); ?></small></b></a><?php endif; ?>
 			<?php if ( $study_plan ) : ?><a class="rd-navitem" href="#lo-trinh-on"><span aria-hidden="true">◎</span><b>Lộ trình ôn của đợt<small>Theo danh mục tài liệu của Hội đồng</small></b></a><?php endif; ?>
 			<a class="rd-navitem" href="#chuan-bi"><span aria-hidden="true">✓</span><b>Lộ trình chuẩn bị<small>Ba bước trước khi luyện đề</small></b></a>
 			<?php if ( ! empty( $province['slug'] ) ) : ?>
