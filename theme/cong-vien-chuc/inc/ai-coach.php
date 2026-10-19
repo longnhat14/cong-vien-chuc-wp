@@ -8,6 +8,9 @@
  *  - Ẩn trong phòng thi chế độ Thi thật khi bài chưa nộp ($GLOBALS['cvc_aic_hide'] do
  *    template-exam-attempt.php đặt) để giữ tính nghiêm túc của bài thi; bộ lọc cvc_ai_coach_enabled.
  *  - Nút/link có thuộc tính data-open-ai ở bất kỳ trang nào sẽ mở khung chat.
+ *  - Chọn AI trả lời (DeepSeek, Meta Muse, ...) bất cứ lúc nào: danh sách GET /api/ai/coach/engines
+ *    (nhà cung cấp có key, admin bật - cache 10 phút, xóa khi lưu Cấu hình AI), JS dựng nút chọn
+ *    khi có từ 2 AI trở lên; lựa chọn gửi kèm câu hỏi (engine).
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -28,8 +31,40 @@ function cvc_aic_enabled(): bool {
 	return (bool) apply_filters( 'cvc_ai_coach_enabled', true );
 }
 
+/**
+ * AI người dùng được chọn (không lộ model/key).
+ *
+ * @return array<int, array{code: string, label: string, default: bool}>
+ */
+function cvc_aic_engines(): array {
+	$cached = get_transient( 'cvc_aic_engines' );
+	if ( is_array( $cached ) ) {
+		return $cached;
+	}
+	$res  = ( new CVC_Api_Client( null, 5 ) )->get( '/api/ai/coach/engines' );
+	$list = array();
+	if ( ! empty( $res['ok'] ) ) {
+		foreach ( (array) ( $res['data']['data']['engines'] ?? array() ) as $e ) {
+			$code = is_array( $e ) ? (string) ( $e['code'] ?? '' ) : '';
+			if ( preg_match( '/^[a-z]{2,20}$/', $code ) ) {
+				$list[] = array(
+					'code'    => $code,
+					'label'   => mb_substr( (string) ( $e['label'] ?? $code ), 0, 30 ),
+					'default' => ! empty( $e['default'] ),
+				);
+			}
+		}
+	}
+	set_transient( 'cvc_aic_engines', $list, ! empty( $res['ok'] ) ? 10 * MINUTE_IN_SECONDS : MINUTE_IN_SECONDS );
+
+	return $list;
+}
+
 function cvc_aic_assets(): void {
 	if ( is_admin() ) {
+		return;
+	}
+	if ( ! cvc_aic_enabled() ) {
 		return;
 	}
 	$css = get_theme_file_path( '/assets/css/ai-coach.css' );
@@ -40,8 +75,9 @@ function cvc_aic_assets(): void {
 		'cvc-ai-coach',
 		'window.CVC_AIC=' . wp_json_encode(
 			array(
-				'ajax' => admin_url( 'admin-ajax.php' ),
-				'home' => home_url( '/' ),
+				'ajax'    => admin_url( 'admin-ajax.php' ),
+				'home'    => home_url( '/' ),
+				'engines' => cvc_aic_engines(),
 			)
 		) . ';',
 		'before'
@@ -73,6 +109,7 @@ function cvc_aic_render(): void {
 			<button class="aic-icon" id="aiChatReset" type="button" aria-label="Bắt đầu cuộc trò chuyện mới" title="Cuộc trò chuyện mới" hidden>↺</button>
 			<button class="aic-icon" id="aiChatClose" type="button" aria-label="Đóng trợ lý">×</button>
 		</div>
+		<div class="aic-engines" id="aiChatEngines" role="radiogroup" aria-label="Chọn AI trả lời" hidden></div>
 		<div class="aic-context">Bạn có thể hỏi về cách ôn thi, chọn đề, tra cứu văn bản hoặc tìm thông báo tuyển dụng. Cuộc trò chuyện được giữ khi bạn chuyển trang.</div>
 		<div class="aic-messages" id="aiChatMessages" aria-live="polite">
 			<div class="aic-msg bot">Xin chào! Tôi là AI Coach - huấn luyện viên ôn thi của bạn. Tôi có thể giúp xác định phần kiến thức cần củng cố, gợi ý đề luyện tập và xây dựng lộ trình ôn thi phù hợp. Bạn muốn bắt đầu từ đâu?</div>

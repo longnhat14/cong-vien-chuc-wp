@@ -212,9 +212,13 @@ function cvc_home17_ajax_coach(): void {
 
 	$result = ( new CVC_Api_Client( null, 45 ) )->post(
 		'/api/ai/coach',
-		array(
-			'message' => mb_substr( $message, 0, 500 ),
-			'history' => $history,
+		array_filter(
+			array(
+				'message' => mb_substr( $message, 0, 500 ),
+				'history' => $history,
+				'engine'  => isset( $_POST['engine'] ) ? sanitize_key( wp_unslash( $_POST['engine'] ) ) : '',
+			),
+			static fn( $v ) => '' !== $v
 		),
 		cvc_auth_token()
 	);
@@ -250,8 +254,10 @@ function cvc_home17_ajax_coach(): void {
 
 	wp_send_json_success(
 		array(
-			'answer' => (string) ( $data['answer'] ?? '' ),
-			'links'  => array_slice( $links, 0, 4 ),
+			'answer'        => (string) ( $data['answer'] ?? '' ),
+			'links'         => array_slice( $links, 0, 4 ),
+			'engine'        => is_array( $data['engine'] ?? null ) ? array( 'code' => sanitize_key( (string) ( $data['engine']['code'] ?? '' ) ), 'label' => mb_substr( (string) ( $data['engine']['label'] ?? '' ), 0, 30 ) ) : null,
+			'fallback_from' => ! empty( $data['fallback_from'] ) ? mb_substr( (string) $data['fallback_from'], 0, 30 ) : null,
 		)
 	);
 }

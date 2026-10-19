@@ -252,7 +252,7 @@ get_header();
 									<?php if ( 'api' === ( $cat['source'] ?? '' ) ) : ?>
 										<i class="fa-solid fa-circle-check text-emerald-800"></i> <?php echo esc_html( $n_model ); ?> model từ API
 									<?php elseif ( $n_model > 0 ) : ?>
-										<i class="fa-solid fa-lightbulb text-acc"></i> <?php echo esc_html( $n_model ); ?> model gợi ý (OpenRouter)
+										<i class="fa-solid fa-lightbulb text-acc"></i> <?php echo esc_html( $n_model ); ?> model gợi ý (<?php echo 'static' === ( $cat['source'] ?? '' ) ? 'bảng model Meta' : 'OpenRouter'; ?>)
 									<?php else : ?>
 										Chưa có danh sách model
 									<?php endif; ?>
@@ -323,6 +323,57 @@ get_header();
 					</p>
 				</section>
 			</div>
+
+			<!-- AI Coach: người dùng chọn AI -->
+			<?php
+			$coach_cfg = (array) ( $cfg['coach_engines'] ?? array() );
+			$coach_eff = array_column( (array) ( $cfg['coach_effective'] ?? array() ), null, 'code' );
+			?>
+			<section id="ai-coach" class="<?php echo esc_attr( $card_cls ); ?>">
+				<input type="hidden" name="coach_engines_form" value="1">
+				<div class="border-b border-slate-300 pb-3">
+					<h2 class="text-base font-black text-ink">AI Coach — AI người dùng được chọn</h2>
+					<p class="text-[11px] text-ink-muted">Khung chat AI Coach (mọi trang) cho người dùng đổi AI trả lời bất cứ lúc nào. Chỉ hiện nhà cung cấp đã có key và được bật ở đây; AI chính đứng đầu và là mặc định. AI được chọn lỗi thì tự trả lời bằng AI mặc định. Model để trống = AI chính dùng model của AI chính, nhà cung cấp khác dùng model mặc định.</p>
+				</div>
+				<div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+					<?php foreach ( $providers as $pid => $p ) : ?>
+						<?php
+						$c_on    = ! array_key_exists( 'on', (array) ( $coach_cfg[ $pid ] ?? array() ) ) || ! empty( $coach_cfg[ $pid ]['on'] );
+						$c_model = (string) ( $coach_cfg[ $pid ]['model'] ?? '' );
+						$c_live  = $coach_eff[ $pid ] ?? null;
+						?>
+						<div class="border border-slate-300 rounded-2xl p-3 space-y-2">
+							<label class="flex items-center justify-between gap-2 cursor-pointer">
+								<span class="text-sm font-black text-ink"><?php echo esc_html( $p['label'] ?? $pid ); ?></span>
+								<input type="checkbox" name="coach_on_<?php echo esc_attr( $pid ); ?>" value="1" <?php checked( $c_on ); ?> class="accent-emerald-600 w-4 h-4">
+							</label>
+							<label for="coach_model_<?php echo esc_attr( $pid ); ?>" class="sr-only">Model AI Coach <?php echo esc_html( $p['label'] ?? $pid ); ?></label>
+							<input type="text" name="coach_model_<?php echo esc_attr( $pid ); ?>" id="coach_model_<?php echo esc_attr( $pid ); ?>" value="<?php echo esc_attr( $c_model ); ?>" list="coach-models-<?php echo esc_attr( $pid ); ?>" placeholder="<?php echo esc_attr( 'Mặc định: ' . ( $p['default_model'] ?? '' ) ); ?>" class="<?php echo esc_attr( $input_cls ); ?> text-xs">
+							<datalist id="coach-models-<?php echo esc_attr( $pid ); ?>">
+								<?php foreach ( array_slice( (array) ( $p['catalog']['models'] ?? array() ), 0, 40 ) as $m ) : ?>
+									<option value="<?php echo esc_attr( (string) $m['id'] ); ?>"></option>
+								<?php endforeach; ?>
+							</datalist>
+							<p class="text-[11px] <?php echo $c_live ? 'text-emerald-800' : 'text-ink-muted'; ?>">
+								<?php
+								if ( $c_live ) {
+									echo esc_html( 'Đang hiện cho người dùng · ' . $c_live['model'] . ( ! empty( $c_live['default'] ) ? ' · mặc định' : '' ) );
+								} elseif ( empty( $p['configured'] ) ) {
+									echo 'Chưa có key — nhập key ở trên để bật.';
+								} elseif ( ! $c_on ) {
+									echo 'Đang tắt cho AI Coach.';
+								} else {
+									echo 'Đang tạm chặn (lỗi tài khoản) — bấm Kiểm tra kết nối.';
+								}
+								?>
+							</p>
+							<?php if ( 'meta' === $pid ) : ?>
+								<p class="text-[10px] text-ink-muted">Meta Model API (api.meta.ai). Bản <b>-contributor</b> rẻ hơn nhưng Meta được dùng câu hỏi/trả lời để huấn luyện — mặc định dùng muse-spark-1.3.</p>
+							<?php endif; ?>
+						</div>
+					<?php endforeach; ?>
+				</div>
+			</section>
 
 			<!-- Hạn mức & tỷ giá -->
 			<section class="<?php echo esc_attr( $card_cls ); ?>">

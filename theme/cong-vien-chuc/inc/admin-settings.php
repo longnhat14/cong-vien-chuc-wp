@@ -40,7 +40,7 @@ function cvc_handle_ai_settings_save(): void {
 	}
 
 	$values    = array();
-	$providers = array( 'deepseek', 'qwen', 'openai', 'gemini', 'claude' );
+	$providers = array( 'deepseek', 'qwen', 'openai', 'gemini', 'claude', 'meta' );
 
 	// Key từng nhà cung cấp: để trống = giữ nguyên key đang lưu; tick "Xóa key" = xóa.
 	foreach ( $providers as $p ) {
@@ -72,6 +72,18 @@ function cvc_handle_ai_settings_save(): void {
 		}
 	}
 
+	// AI Coach: AI nào người dùng được chọn trong khung chat + model riêng (để trống = mặc định).
+	if ( ! empty( $_POST['coach_engines_form'] ) ) {
+		$engines = array();
+		foreach ( $providers as $p ) {
+			$engines[ $p ] = array(
+				'on'    => ! empty( $_POST[ 'coach_on_' . $p ] ),
+				'model' => isset( $_POST[ 'coach_model_' . $p ] ) ? trim( sanitize_text_field( wp_unslash( $_POST[ 'coach_model_' . $p ] ) ) ) : '',
+			);
+		}
+		$values['ai.coach_engines'] = (string) wp_json_encode( $engines );
+	}
+
 	$result = ( new CVC_Setting_Service() )->update( 'ai', $values, $token );
 
 	if ( ! $result['ok'] ) {
@@ -79,6 +91,7 @@ function cvc_handle_ai_settings_save(): void {
 		cvc_redirect_with_notice( cvc_admin_ai_settings_url(), 'error', $message, null );
 		return;
 	}
+	delete_transient( 'cvc_aic_engines' );
 
 	cvc_redirect_with_notice( cvc_admin_ai_settings_url(), 'success', 'Đã lưu cấu hình AI.', null );
 }
@@ -154,6 +167,9 @@ function cvc_handle_ai_prices_refresh(): void {
 		? 'Tỷ giá ' . number_format( (float) $d['rate']['rate'], 0, ',', '.' ) . ' ₫/USD (' . $d['rate']['source'] . ')'
 		: 'Tỷ giá lỗi: ' . ( $d['rate']['error'] ?? '' );
 	$parts[] = ! empty( $d['deepseek']['ok'] ) ? 'DeepSeek: ' . (int) $d['deepseek']['updated'] . ' model' : 'DeepSeek lỗi: ' . ( $d['deepseek']['error'] ?? '' );
+	if ( isset( $d['meta'] ) ) {
+		$parts[] = 'Meta Muse: ' . (int) ( $d['meta']['updated'] ?? 0 ) . ' model';
+	}
 	$parts[] = ! empty( $d['openrouter']['ok'] )
 		? 'OpenRouter: ' . (int) $d['openrouter']['updated'] . ' model' . ( ! empty( $d['openrouter']['unmatched'] ) ? ', chưa khớp giá: ' . implode( ', ', array_slice( (array) $d['openrouter']['unmatched'], 0, 5 ) ) : '' )
 		: 'OpenRouter lỗi: ' . ( $d['openrouter']['error'] ?? '' );

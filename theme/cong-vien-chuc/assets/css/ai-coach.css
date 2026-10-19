@@ -29,6 +29,13 @@
 .aic-icon{display:grid;place-items:center;width:35px;height:35px;padding:0;border:1px solid #ffffff40;border-radius:50%;background:#ffffff12;color:#fff;cursor:pointer;font-size:21px;flex:none}
 .aic-icon:hover{background:#ffffff26}
 #aiChatReset{font-size:17px}
+.aic-engines{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:8px 13px;background:#fff;border-bottom:1px solid #dfe7e8}
+.aic-engines-cap{font-size:13px;font-weight:bold;color:#26323c;margin-right:2px}
+.aic-engine{border:1px solid #c3d3da;background:#f7faf9;color:#1d3e55;border-radius:999px;padding:5px 11px;font-size:13.5px;cursor:pointer}
+.aic-engine:hover{border-color:#7fb3a8;background:#eef7f4}
+.aic-engine[aria-checked="true"]{background:var(--aic-navy);border-color:var(--aic-navy);color:#fff;font-weight:bold}
+.aic-msg.note{align-self:center;max-width:100%;padding:5px 11px;border-radius:999px;background:#eef3f4;color:#2c3a46;font-size:13px;text-align:center}
+.aic-by{display:block;margin-bottom:4px;font-size:12px;font-weight:bold;letter-spacing:.02em;color:#126f68;white-space:normal}
 .aic-context{padding:9px 15px;background:#eef3f4;border-bottom:1px solid #dfe7e8;color:#26323c;font-size:13px;line-height:1.45}
 .aic-messages{flex:1;overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:11px;padding:14px 13px 10px;scroll-behavior:smooth}
 .aic-msg{max-width:91%;padding:10px 13px;border-radius:15px;font-size:15px;line-height:1.5;overflow-wrap:anywhere}
