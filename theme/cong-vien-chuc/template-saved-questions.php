@@ -14,12 +14,13 @@ nocache_headers();
 do_action( 'litespeed_control_set_nocache', 'cvc: câu hỏi đã lưu (theo tài khoản)' );
 
 $tabs = array(
+	'saved'   => array( '★ Đã lưu', 'Câu bạn bấm "☆ Lưu" trong Ngân hàng câu hỏi.' ),
 	'flagged' => array( '⚑ Đã đánh dấu', 'Câu bạn bấm "Đánh dấu xem lại" trong lúc làm bài.' ),
 	'wrong'   => array( '✕ Làm sai', 'Câu bạn từng trả lời sai và chưa làm đúng nhiều hơn số lần sai.' ),
 	'review'  => array( '↻ Cần ôn lại', 'Câu từng sai nhưng đã làm đúng lại - ôn thêm để nhớ lâu.' ),
 );
 $type  = sanitize_key( wp_unslash( (string) ( $_GET['loai'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
-$type  = isset( $tabs[ $type ] ) ? $type : 'flagged';
+$type  = isset( $tabs[ $type ] ) ? $type : 'saved';
 $page  = max( 1, absint( $_GET['trang'] ?? 1 ) ); // phpcs:ignore WordPress.Security.NonceVerification
 $res   = ( new CVC_Api_Client( null, 15 ) )->get( '/api/my-questions', array( 'type' => $type, 'page' => $page, 'per_page' => 15 ), cvc_auth_token() );
 if ( 401 === (int) ( $res['status'] ?? 0 ) ) {
@@ -46,29 +47,27 @@ cvc_seo_set_noindex();
 get_header();
 ?>
 <main id="main" class="qb">
-	<section class="qb-hero">
-		<div class="qb-wrap">
-			<?php
-			cvc_render_breadcrumbs(
-				array(
-					array( 'label' => 'Trang chủ', 'url' => home_url( '/' ) ),
-					array( 'label' => 'Ôn thi', 'url' => cvc_exams_url() ),
-					array( 'label' => 'Câu hỏi đã lưu' ),
-				)
-			);
-			?>
+	<div class="qb-wrap">
+		<?php
+		cvc_render_breadcrumbs(
+			array(
+				array( 'label' => 'Trang chủ', 'url' => home_url( '/' ) ),
+				array( 'label' => 'Ôn thi', 'url' => cvc_exams_url() ),
+				array( 'label' => 'Ngân hàng câu hỏi', 'url' => cvc_question_bank_url() ),
+				array( 'label' => 'Câu hỏi đã lưu' ),
+			)
+		);
+		?>
+		<section class="qb-hero">
 			<div class="qb-hero-row">
 				<div>
-					<p class="qb-eyebrow">Ôn thi · Luyện tập</p>
+					<p class="qb-eyebrow"><i class="qb-dot" aria-hidden="true"></i>ÔN THI · LUYỆN TẬP</p>
 					<h1>Câu hỏi đã lưu</h1>
-					<p class="qb-lead">Câu đánh dấu, câu sai và câu cần ôn lại - tự cập nhật sau mỗi lượt làm bài. Ôn tập hoặc thi thử lại đúng những câu này.</p>
+					<p class="qb-lead">Câu đã lưu, câu đánh dấu, câu sai và câu cần ôn lại - tự cập nhật sau mỗi lượt làm bài. Ôn tập hoặc thi thử lại đúng những câu này.</p>
 				</div>
-				<div class="qb-hero-stat"><strong><?php echo (int) ( ( $counts['flagged'] ?? 0 ) + ( $counts['wrong'] ?? 0 ) ); ?></strong><span>câu đánh dấu và câu sai cần xử lý</span><small><a href="<?php echo esc_url( cvc_account_url( 'exam-history' ) ); ?>">Xem kết quả &amp; tiến độ →</a></small></div>
+				<div class="qb-hero-stat"><strong><?php echo (int) ( ( $counts['saved'] ?? 0 ) + ( $counts['flagged'] ?? 0 ) + ( $counts['wrong'] ?? 0 ) ); ?></strong><span>câu đã lưu, đánh dấu và câu sai cần xử lý</span><small><a href="<?php echo esc_url( cvc_question_bank_url() ); ?>">← Về Ngân hàng câu hỏi</a></small></div>
 			</div>
-		</div>
-	</section>
-
-	<div class="qb-wrap qb-main">
+		</section>
 		<?php cvc_render_notice(); ?>
 		<nav class="qb-tabs" aria-label="Nhóm câu hỏi">
 			<?php foreach ( $tabs as $k => $t ) : ?>
@@ -89,7 +88,7 @@ get_header();
 			<?php if ( ! $items ) : ?>
 				<div class="qb-panel qb-empty">
 					<b>Chưa có câu nào trong nhóm này</b>
-					<p><?php echo 'flagged' === $type ? 'Khi làm bài, bấm "⚑ Đánh dấu" ở câu chưa chắc - câu đó sẽ xuất hiện ở đây để ôn lại.' : ( 'wrong' === $type ? 'Sau khi nộp bài, các câu trả lời sai sẽ được đưa vào đây.' : 'Khi bạn làm đúng lại một câu từng sai, câu đó chuyển sang nhóm này.' ); ?></p>
+					<p><?php echo 'saved' === $type ? 'Trong Ngân hàng câu hỏi, bấm "☆ Lưu" trên câu cần xem lại - câu đó sẽ xuất hiện ở đây.' : ( 'flagged' === $type ? 'Khi làm bài, bấm "⚑ Đánh dấu" ở câu chưa chắc - câu đó sẽ xuất hiện ở đây để ôn lại.' : ( 'wrong' === $type ? 'Sau khi nộp bài, các câu trả lời sai sẽ được đưa vào đây.' : 'Khi bạn làm đúng lại một câu từng sai, câu đó chuyển sang nhóm này.' ) ); ?></p>
 					<p><a class="qb-btn-sm" href="<?php echo esc_url( cvc_question_bank_url() ); ?>">Mở Ngân hàng câu hỏi</a> <a class="qb-btn-sm is-ghost" href="<?php echo esc_url( cvc_exams_mode_url( 'thi-that' ) ); ?>">Thi thử một đề</a></p>
 				</div>
 			<?php else : ?>
