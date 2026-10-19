@@ -14,7 +14,7 @@ final class CVC_Bookmark_Service extends CVC_Api_Service {
 	 * BookmarkController::TYPE_MAP (backend là authority, đây chỉ để UI
 	 * không hiện lựa chọn vô nghĩa - backend vẫn tự validate lại).
 	 */
-	public const VALID_TYPES = array( 'recruitment', 'course', 'course_lesson', 'topic', 'knowledge_item', 'exam' );
+	public const VALID_TYPES = array( 'recruitment', 'course', 'course_lesson', 'topic', 'knowledge_item', 'exam', 'legal_document', 'legal_article' );
 
 	protected function endpoint(): string {
 		return '/api/bookmarks';
