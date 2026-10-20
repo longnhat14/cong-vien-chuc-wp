@@ -126,9 +126,10 @@ function cvc_handle_document_buy(): void {
 		return;
 	}
 
-	$payment_url = $result['data']['data']['payment_url'] ?? null;
+	// VNPay -> cổng; SePay -> trang mã QR /thanh-toan/{mã}/ (tự mở khóa khi nhận tiền).
+	$payment_url = cvc_order_pay_url( $result, $fallback );
 
-	if ( ! $payment_url ) {
+	if ( '' === $payment_url ) {
 		cvc_redirect_with_notice( $fallback, 'error', 'Không khởi tạo được thanh toán. Vui lòng thử lại sau.', null );
 		return;
 	}

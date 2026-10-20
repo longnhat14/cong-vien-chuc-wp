@@ -912,9 +912,10 @@ function cvc_admin_handle_payment_settings(): void {
 
 	$keys = array(
 		'vnpay' => array( 'vnpay.mode', 'vnpay.tmn_code', 'vnpay.hash_secret' ),
+		'sepay' => array( 'sepay.enabled', 'sepay.bank', 'sepay.account_number', 'sepay.account_name', 'sepay.api_key', 'sepay.hmac_secret' ),
 		'momo'  => array( 'momo.partner_code', 'momo.access_key', 'momo.secret_key' ),
 	);
-	$secret = array( 'vnpay.hash_secret', 'momo.access_key', 'momo.secret_key' );
+	$secret = array( 'vnpay.hash_secret', 'sepay.api_key', 'sepay.hmac_secret', 'momo.access_key', 'momo.secret_key' );
 
 	if ( ! isset( $keys[ $group ] ) || ! cvc_admin_can( 'settings.update' ) ) {
 		cvc_admin_redirect( $back, 'error', 'Bạn không có quyền sửa cấu hình thanh toán.' );
@@ -938,6 +939,74 @@ function cvc_admin_handle_payment_settings(): void {
 	}
 
 	cvc_admin_redirect( $back, 'success', 'Đã lưu cấu hình ' . strtoupper( $group ) . '.' );
+}
+
+/** Giao dịch SePay gần đây + khớp tay giao dịch ghi sai nội dung (20/10/2026). */
+function cvc_admin_render_sepay_transactions(): void {
+	if ( ! cvc_admin_can( 'order.view' ) ) {
+		return;
+	}
+	$res  = cvc_admin_api_get( '/api/admin/payments/sepay-transactions', array( 'limit' => 30 ) );
+	$d    = $res['ok'] ? (array) ( $res['data']['data'] ?? array() ) : array();
+	$rows = (array) ( $d['rows'] ?? array() );
+	?>
+	<section class="dz-card space-y-3" id="giao-dich-sepay">
+		<div class="flex flex-wrap items-center justify-between gap-2">
+			<h2 class="text-base font-black text-ink">Giao dịch chuyển khoản nhận qua SePay</h2>
+			<span class="text-xs <?php echo ! empty( $d['configured'] ) ? 'text-emerald-800' : 'text-amber-800'; ?>"><?php echo ! empty( $d['configured'] ) ? 'Đang nhận thanh toán VietQR' : 'Chưa bật / chưa đủ cấu hình'; ?></span>
+		</div>
+		<?php if ( empty( $rows ) ) : ?>
+			<p class="text-sm text-ink-muted">Chưa nhận giao dịch nào.</p>
+		<?php else : ?>
+			<div class="overflow-x-auto">
+				<table class="w-full text-sm">
+					<thead><tr class="text-left text-xs text-ink-muted border-b border-slate-300"><th class="py-2 pr-3">Thời gian</th><th class="py-2 pr-3">Số tiền</th><th class="py-2 pr-3">Nội dung</th><th class="py-2 pr-3">Đơn</th><th class="py-2">Kết quả</th></tr></thead>
+					<tbody>
+					<?php foreach ( $rows as $t ) : ?>
+						<tr class="border-b border-slate-200 align-top">
+							<td class="py-2 pr-3 whitespace-nowrap"><?php echo esc_html( ! empty( $t['transaction_date'] ) ? wp_date( 'd/m H:i', strtotime( (string) $t['transaction_date'] ) ) : '—' ); ?><br><span class="text-[11px] text-ink-muted"><?php echo esc_html( (string) $t['gateway'] ); ?></span></td>
+							<td class="py-2 pr-3 tabular-nums whitespace-nowrap font-bold"><?php echo esc_html( number_format( (float) $t['amount'], 0, ',', '.' ) ); ?> ₫</td>
+							<td class="py-2 pr-3 text-xs break-all"><?php echo esc_html( (string) $t['content'] ); ?></td>
+							<td class="py-2 pr-3 text-xs"><?php echo ! empty( $t['order'] ) ? esc_html( $t['order']['code'] . ' (' . $t['order']['status'] . ', ' . number_format( (float) $t['order']['total'], 0, ',', '.' ) . ' ₫)' ) : '—'; ?></td>
+							<td class="py-2 text-xs">
+								<b><?php echo esc_html( (string) $t['status_label'] ); ?></b><?php echo ! empty( $t['note'] ) ? '<br>' . esc_html( (string) $t['note'] ) : ''; ?>
+								<?php if ( in_array( $t['status'], array( 'unmatched', 'underpaid' ), true ) && cvc_admin_can( 'order.update' ) ) : ?>
+									<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="flex gap-1 mt-1" data-cvc-confirm="Gán giao dịch này cho đơn đã nhập? Nếu đủ tiền, đơn sẽ được mở khóa.">
+										<?php wp_nonce_field( 'cvc_admin_sepay_match' ); ?>
+										<input type="hidden" name="action" value="cvc_admin_sepay_match"><input type="hidden" name="id" value="<?php echo (int) $t['id']; ?>">
+										<input type="text" name="order_code" required pattern="CVC[0-9A-Za-z]{6,20}" placeholder="Mã đơn CVC…" class="w-36 px-2 py-1 rounded-lg border border-slate-300 text-xs">
+										<button type="submit" class="px-2 py-1 rounded-lg border border-slate-300 bg-white text-xs font-bold">Khớp</button>
+									</form>
+								<?php endif; ?>
+							</td>
+						</tr>
+					<?php endforeach; ?>
+					</tbody>
+				</table>
+			</div>
+		<?php endif; ?>
+	</section>
+	<?php
+}
+
+add_action( 'admin_post_cvc_admin_sepay_match', 'cvc_admin_handle_sepay_match' );
+add_action( 'admin_post_nopriv_cvc_admin_sepay_match', 'cvc_admin_handle_sepay_match' );
+
+function cvc_admin_handle_sepay_match(): void {
+	check_admin_referer( 'cvc_admin_sepay_match' );
+	$token = cvc_admin_require_staff();
+	$back  = cvc_admin_url( 'thanh-toan' ) . '#giao-dich-sepay';
+	if ( ! cvc_admin_can( 'order.update' ) ) {
+		cvc_admin_redirect( $back, 'error', 'Bạn không có quyền xử lý đơn hàng.' );
+		return;
+	}
+	$code   = strtoupper( preg_replace( '/[^0-9A-Za-z]/', '', (string) ( $_POST['order_code'] ?? '' ) ) );
+	$result = cvc_admin_client()->post( '/api/admin/payments/sepay-transactions/' . absint( $_POST['id'] ?? 0 ) . '/match', array( 'order_code' => $code ), $token );
+	if ( ! $result['ok'] && empty( $result['data']['message'] ) ) {
+		cvc_admin_redirect( $back, 'error', cvc_admin_error_message( $result ) );
+		return;
+	}
+	cvc_admin_redirect( $back, ! empty( $result['data']['success'] ) ? 'success' : 'error', (string) ( $result['data']['message'] ?? 'Đã xử lý.' ) );
 }
 
 add_action( 'wp_ajax_cvc_admin_units', 'cvc_admin_ajax_units' );

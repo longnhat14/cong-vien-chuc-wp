@@ -43,3 +43,8 @@ npm-debug.log*
 
 # Goi plugin dung de cai tay
 plugins/*.zip
+
+# File thu / xem truoc cuc bo (20/10/2026)
+/.preview-exam/
+.claude/settings.local.json
+theme/cong-vien-chuc/test_*

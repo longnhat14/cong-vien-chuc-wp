@@ -9,7 +9,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const CVC_PE_BACK_COOKIE = 'cvc_buy_back';
+if ( ! defined( 'CVC_PE_BACK_COOKIE' ) ) {
+	define( 'CVC_PE_BACK_COOKIE', 'cvc_buy_back' );
+}
 
 /**
  * Quyền làm đề RP (null nếu không phải đề RP hoặc lỗi API).
@@ -120,14 +122,13 @@ function cvc_handle_exam_buy(): void {
 		cvc_redirect_with_notice( $back, 'error', $message, null );
 		return;
 	}
-	$payment_url = $result['data']['data']['payment_url'] ?? null;
-	if ( ! $payment_url ) {
+	// VNPay -> cổng; SePay -> trang mã QR. Nhớ trang đề để quay lại làm bài sau khi thanh toán.
+	$payment_url = cvc_order_pay_url( $result, $back );
+	if ( '' === $payment_url ) {
 		cvc_redirect_with_notice( $back, 'error', 'Không khởi tạo được thanh toán. Vui lòng thử lại sau.', null );
 		return;
 	}
-	// Nhớ trang đề để trang kết quả thanh toán đưa người dùng quay lại làm bài.
-	setcookie( CVC_PE_BACK_COOKIE, $back, array( 'expires' => time() + 3600, 'path' => '/', 'secure' => is_ssl(), 'httponly' => true, 'samesite' => 'Lax' ) );
-	// phpcs:ignore WordPress.Security.SafeRedirect -- cổng VNPay (domain ngoài).
+	// phpcs:ignore WordPress.Security.SafeRedirect -- cổng VNPay (domain ngoài) hoặc trang QR nội bộ.
 	wp_redirect( $payment_url );
 	exit;
 }

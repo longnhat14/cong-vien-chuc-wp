@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Tăng số này khi thêm/sửa rewrite rule để buộc flush lại đúng 1 lần.
-const CVC_REWRITE_VERSION = '16';
+const CVC_REWRITE_VERSION = '17';
 
 /**
  * Section hợp lệ của /tai-khoan/{section}/ (Phase 10) - map slug tiếng
@@ -296,6 +296,13 @@ function cvc_register_rewrite_rules(): void {
 		'top'
 	);
 
+	// Thanh toán chuyển khoản VietQR qua SePay (20/10/2026): /thanh-toan/{mã đơn}/.
+	add_rewrite_rule(
+		'^thanh-toan/(CVC[0-9A-Za-z]{6,20})/?$',
+		'index.php?cvc_page=payment&cvc_order_code=$matches[1]',
+		'top'
+	);
+
 	/*
 	 * Xác thực văn bằng/chứng chỉ công khai (Phase 11) - không cần đăng
 	 * nhập, ai có mã cũng tra được (đúng mục đích chống giả mạo).
@@ -361,6 +368,7 @@ function cvc_register_query_vars( array $vars ): array {
 	$vars[] = 'cvc_round_slug';
 	$vars[] = 'cvc_knowledge_slug';
 	$vars[] = 'cvc_exam_slug';
+	$vars[] = 'cvc_order_code';
 	$vars[] = 'cvc_legal_document_slug';
 	$vars[] = 'cvc_paged';
 	$vars[] = 'cvc_account_section';
@@ -456,6 +464,7 @@ function cvc_template_include( string $template ): string {
 		'documents'             => 'template-documents.php',
 		'document-detail'       => 'template-document-detail.php',
 		'order-result'          => 'template-order-result.php',
+		'payment'               => 'template-payment.php',
 		'certificate-verify'    => 'template-certificate-verify.php',
 		'admin-ai-settings'     => 'template-admin-ai-settings.php',
 		'admin'                 => 'template-admin.php',

@@ -258,6 +258,17 @@ get_header();
 				$settings = cvc_admin_api_get( '/api/admin/settings' );
 				$groups   = $settings['ok'] ? ( $settings['data']['data'] ?? array() ) : array();
 				$schema   = array(
+					'sepay' => array(
+						'title'  => 'Chuyển khoản VietQR (SePay) — tự mở khóa',
+						'fields' => array(
+							'sepay.enabled'        => array( 'Trạng thái', 'select', array( '0' => 'Tắt', '1' => 'Bật (ưu tiên khi khách mua)' ) ),
+							'sepay.bank'           => array( 'Ngân hàng nhận tiền (đã liên kết với SePay)', 'select', array( '' => '— Chọn ngân hàng —', 'MBBank' => 'MB Bank', 'Vietcombank' => 'Vietcombank', 'VietinBank' => 'VietinBank', 'BIDV' => 'BIDV', 'Techcombank' => 'Techcombank', 'ACB' => 'ACB', 'TPBank' => 'TPBank', 'VPBank' => 'VPBank', 'Sacombank' => 'Sacombank', 'VIB' => 'VIB', 'OCB' => 'OCB', 'MSB' => 'MSB', 'SHB' => 'SHB', 'HDBank' => 'HDBank', 'SeABank' => 'SeABank', 'LPBank' => 'LPBank', 'KienLongBank' => 'KienLongBank', 'Agribank' => 'Agribank', 'Eximbank' => 'Eximbank', 'NamABank' => 'Nam A Bank', 'BacABank' => 'Bac A Bank', 'ABBANK' => 'ABBANK', 'PVcomBank' => 'PVcomBank', 'VietABank' => 'VietABank', 'BaoVietBank' => 'BaoViet Bank' ) ),
+							'sepay.account_number' => array( 'Số tài khoản (hoặc số VA của SePay)', 'text' ),
+							'sepay.account_name'   => array( 'Tên chủ tài khoản (hiện cho khách đối chiếu)', 'text' ),
+							'sepay.api_key'        => array( 'API Key webhook (dán cùng giá trị vào SePay → Webhook → Xác thực API Key)', 'secret_gen' ),
+							'sepay.hmac_secret'    => array( 'Secret Key HMAC-SHA256 (tùy chọn, an toàn hơn)', 'secret' ),
+						),
+					),
 					'vnpay' => array(
 						'title'  => 'VNPay',
 						'fields' => array(
@@ -303,6 +314,12 @@ get_header();
 												<option value="<?php echo esc_attr( $ov ); ?>" <?php selected( (string) ( $current['value'] ?? '' ), $ov ); ?>><?php echo esc_html( $ol ); ?></option>
 											<?php endforeach; ?>
 										</select>
+									<?php elseif ( 'secret_gen' === $f[1] ) : ?>
+										<div class="flex gap-2">
+											<input type="password" id="<?php echo esc_attr( $fid ); ?>" name="<?php echo esc_attr( $fid ); ?>" autocomplete="new-password" placeholder="<?php echo esc_attr( ! empty( $current['configured'] ) ? 'Đã lưu (' . (string) ( $current['value'] ?? '' ) . ') — để trống nếu giữ nguyên' : 'Chưa cấu hình' ); ?>" class="<?php echo esc_attr( cvc_admin_input_class() ); ?>">
+											<button type="button" class="px-3 py-2 rounded-xl border border-slate-300 text-xs font-bold bg-white hover:bg-acc-soft whitespace-nowrap" data-cvc-genkey="<?php echo esc_attr( $fid ); ?>">Tạo khóa ngẫu nhiên</button>
+										</div>
+										<p class="text-[11px] text-ink-muted">Bấm tạo khóa → khóa hiện ra để bạn sao chép sang SePay → bấm Lưu. Sau khi lưu, khóa chỉ hiện dạng che.</p>
 									<?php elseif ( 'secret' === $f[1] ) : ?>
 										<input type="password" id="<?php echo esc_attr( $fid ); ?>" name="<?php echo esc_attr( $fid ); ?>" autocomplete="new-password" placeholder="<?php echo esc_attr( ! empty( $current['configured'] ) ? 'Đã lưu (' . (string) ( $current['value'] ?? '' ) . ') — để trống nếu giữ nguyên' : 'Chưa cấu hình' ); ?>" class="<?php echo esc_attr( cvc_admin_input_class() ); ?>">
 									<?php else : ?>
@@ -310,12 +327,29 @@ get_header();
 									<?php endif; ?>
 								</div>
 							<?php endforeach; ?>
+							<?php if ( 'sepay' === $group ) : ?>
+								<div class="text-xs text-ink-2 space-y-1 border-t border-slate-300 pt-3">
+									<p><b>Cài đặt bên SePay:</b> Webhook → Thêm webhook → Gọi đến URL <code class="px-1 bg-slate-100 rounded select-all"><?php echo esc_html( rtrim( cvc_api_base_url(), '/' ) . '/api/payment/sepay/webhook' ); ?></code>, sự kiện <b>Có tiền vào</b>, kiểu chứng thực <b>API Key</b> (hoặc HMAC), Content-Type <b>application/json</b>, bỏ chọn "Bỏ qua nếu không có code".</p>
+									<p>Nội dung chuyển khoản là mã đơn dạng <b>CVC2610190A1B2C</b>. Có thể khai báo ở SePay → Cấu hình công ty → Cấu trúc mã thanh toán: tiền tố <b>CVC</b>, hậu tố 12 ký tự chữ và số (không bắt buộc — hệ thống tự đọc mã từ nội dung).</p>
+								</div>
+							<?php endif; ?>
 							<?php if ( cvc_admin_can( 'settings.update' ) ) : ?>
-								<button type="submit" class="px-4 py-2 bg-acc hover:bg-acc-deep text-white font-black text-sm rounded-xl">Lưu <?php echo esc_html( $conf['title'] ); ?></button>
+								<button type="submit" class="px-4 py-2 bg-acc hover:bg-acc-deep text-white font-black text-sm rounded-xl">Lưu <?php echo esc_html( 'sepay' === $group ? 'SePay' : $conf['title'] ); ?></button>
 							<?php endif; ?>
 						</form>
 					<?php endforeach; ?>
 				</div>
+				<?php if ( function_exists( 'cvc_admin_render_sepay_transactions' ) ) { cvc_admin_render_sepay_transactions(); } ?>
+				<script>
+				document.querySelectorAll('[data-cvc-genkey]').forEach(function (b) {
+					b.addEventListener('click', function () {
+						var el = document.getElementById(b.getAttribute('data-cvc-genkey'));
+						var a = new Uint8Array(24); (window.crypto || window.msCrypto).getRandomValues(a);
+						el.value = Array.prototype.map.call(a, function (x) { return ('0' + x.toString(16)).slice(-2); }).join('');
+						el.type = 'text'; el.select();
+					});
+				});
+				</script>
 				<?php
 			}
 			?>
