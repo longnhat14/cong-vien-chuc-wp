@@ -177,6 +177,10 @@ get_header();
 			<div class="lg:col-span-6 space-y-4">
 				
 				<?php cvc_render_notice(); ?>
+				<?php $cvc_emp = function_exists( 'cvc_employer_of_current_user' ) ? cvc_employer_of_current_user() : null; ?>
+				<?php if ( $cvc_emp ) : ?>
+					<p class="dz-notice">Bạn đang ở khu <b>học tập</b>. Quản lý tin tuyển dụng của <b><?php echo esc_html( (string) $cvc_emp['name'] ); ?></b>: <a class="font-bold" href="<?php echo esc_url( home_url( '/don-vi/' ) ); ?>">Vào trang đơn vị &rarr;</a></p>
+				<?php endif; ?>
 
 				<div class="dz-panel space-y-4">
 					<div class="flex items-center justify-between border-b border-slate-300 pb-3">

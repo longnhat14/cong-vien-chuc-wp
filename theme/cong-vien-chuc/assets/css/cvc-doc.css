@@ -361,3 +361,16 @@ body.cvc-doc .cvc-badge{border-radius:2px!important}
 .dz-timeline-title{margin:2px 0 0;font-weight:bold;line-height:1.4;color:var(--dz-ink)}
 .dz-timeline-links{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:4px;font-size:14px}
 .dz-timeline-links a{color:var(--dz-acc2-ink);text-decoration:underline}
+
+/* Đăng ký: chọn loại tài khoản (21/10/2026) */
+body.cvc-doc .cvc-acct-type{border:0;padding:0;margin:0 0 14px;display:grid;gap:8px}
+body.cvc-doc .cvc-acct-type legend,body.cvc-doc .cvc-emp-fields legend,body.cvc-doc .cvc-form__label{font-weight:bold;font-size:15.5px;margin-bottom:6px;padding:0}
+body.cvc-doc .cvc-acct-opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--dz-line);border-radius:2px;padding:10px 12px;cursor:pointer;background:#fff}
+body.cvc-doc .cvc-acct-opt:has(input:checked){border-color:var(--dz-acc);background:#eaf3fc}
+body.cvc-doc .cvc-acct-opt input{margin-top:4px}
+body.cvc-doc .cvc-acct-opt b{display:block}
+body.cvc-doc .cvc-acct-opt small{display:block;color:#5c5c5c;font-size:14px}
+body.cvc-doc .cvc-emp-fields{border:1px solid var(--dz-line);border-left:3px solid var(--dz-acc);border-radius:2px;padding:12px 14px 2px;margin:0 0 14px}
+body.cvc-doc .cvc-emp-fields[hidden]{display:none}
+body.cvc-doc .cvc-inline{display:flex;gap:8px;align-items:center;font-weight:normal!important;font-size:15px}
+body.cvc-doc .cvc-linkbtn{background:none;border:0;padding:0;color:#1767aa;text-decoration:underline;cursor:pointer;font:inherit}

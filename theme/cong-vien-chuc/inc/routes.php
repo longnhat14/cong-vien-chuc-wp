@@ -710,6 +710,31 @@ function cvc_admin_ai_settings_url(): string {
  *
  * @return array<int, array<string, mixed>>
  */
+/**
+ * Menu "Tuyển dụng" (21/10/2026): Tin tuyển dụng · Tin ngoài công lập (khi bật) · Đăng tin tuyển dụng.
+ * Tài khoản đơn vị: "Đăng tin" vào thẳng màn hình đăng tin; còn lại → trang giới thiệu cho đơn vị.
+ */
+function cvc_rec_nav_item(): array {
+	$kids = array( array( 'label' => 'Tin tuyển dụng', 'url' => cvc_recruitments_url() ) );
+	$set  = function_exists( 'cvc_employer_public_settings' ) ? cvc_employer_public_settings() : array();
+	if ( ! empty( $set['private_enabled'] ) ) {
+		$kids[] = array( 'label' => 'Tin ngoài công lập', 'url' => add_query_arg( 'khu-vuc', 'ngoai-cong-lap', cvc_recruitments_url() ) );
+	}
+	if ( ! isset( $set['enabled'] ) || ! empty( $set['enabled'] ) ) {
+		$emp    = ( function_exists( 'cvc_employer_of_current_user' ) && cvc_is_logged_in() ) ? cvc_employer_of_current_user() : null;
+		$kids[] = array(
+			'label' => 'Đăng tin tuyển dụng',
+			'badge' => 'Miễn phí',
+			'url'   => $emp ? home_url( '/don-vi/dang-tin/' ) : home_url( '/don-vi-tuyen-dung/' ),
+		);
+		if ( ! empty( $set['paid'] ) ) {
+			unset( $kids[ count( $kids ) - 1 ]['badge'] );
+		}
+	}
+
+	return array( 'key' => 'rec', 'label' => 'Tuyển dụng', 'hint' => 'Cơ hội mới nhất', 'url' => cvc_recruitments_url(), 'children' => $kids );
+}
+
 function cvc_main_nav_items(): array {
 	$has_courses = function_exists( 'cvc_has_sellable_courses' ) && cvc_has_sellable_courses();
 
@@ -734,7 +759,7 @@ function cvc_main_nav_items(): array {
 				array( 'group' => 'more', 'label' => 'Khóa học', 'url' => cvc_courses_url(), 'badge' => $has_courses ? '' : 'Sắp mở' ),
 			),
 		),
-		array( 'key' => 'rec', 'label' => 'Tuyển dụng', 'hint' => 'Cơ hội mới nhất', 'url' => cvc_recruitments_url() ),
+		cvc_rec_nav_item(),
 		array( 'key' => 'legal', 'label' => 'Văn bản pháp luật', 'hint' => 'Tra cứu quy định', 'url' => cvc_legal_documents_url() ),
 		array( 'key' => 'docs', 'label' => 'Tài liệu', 'hint' => 'Kho tài liệu hữu ích', 'url' => cvc_documents_url() ),
 	);

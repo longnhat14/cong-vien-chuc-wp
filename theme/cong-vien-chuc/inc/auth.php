@@ -205,6 +205,9 @@ function cvc_handle_login(): void {
 	}
 
 	cvc_set_auth_cookie( (string) $token );
+	if ( empty( $_POST['redirect_to'] ) && ! empty( $result['data']['user']['employer'] ) ) {
+		$redirect = home_url( '/don-vi/' );
+	}
 	wp_safe_redirect( $redirect );
 	exit;
 }
@@ -215,23 +218,41 @@ add_action( 'admin_post_cvc_register', 'cvc_handle_register' );
 function cvc_handle_register(): void {
 	check_admin_referer( 'cvc_register' );
 
-	$name                 = sanitize_text_field( wp_unslash( $_POST['name'] ?? '' ) );
-	$email                = sanitize_email( wp_unslash( $_POST['email'] ?? '' ) );
-	$password             = (string) ( $_POST['password'] ?? '' );
+	$name                  = sanitize_text_field( wp_unslash( $_POST['name'] ?? '' ) );
+	$email                 = sanitize_email( wp_unslash( $_POST['email'] ?? '' ) );
+	$password              = (string) ( $_POST['password'] ?? '' );
 	$password_confirmation = (string) ( $_POST['password_confirmation'] ?? '' );
+	$type                  = 'employer' === ( $_POST['account_type'] ?? '' ) ? 'employer' : 'learner';
 
-	$result = ( new CVC_Api_Client() )->post(
-		'/api/auth/register',
-		array(
-			'name'                  => $name,
-			'email'                 => $email,
-			'password'              => $password,
-			'password_confirmation' => $password_confirmation,
-		)
+	$body = array(
+		'name'                  => $name,
+		'email'                 => $email,
+		'password'              => $password,
+		'password_confirmation' => $password_confirmation,
+		'account_type'          => $type,
 	);
+	$old  = array( 'name' => $name, 'email' => $email, 'account_type' => $type );
+
+	if ( 'employer' === $type ) {
+		$raw = isset( $_POST['employer'] ) && is_array( $_POST['employer'] ) ? wp_unslash( $_POST['employer'] ) : array();
+		$emp = array();
+		foreach ( array( 'name', 'sector', 'province_id', 'phone', 'website', 'address', 'tax_code' ) as $k ) {
+			$v = sanitize_text_field( (string) ( $raw[ $k ] ?? '' ) );
+			if ( '' !== $v ) {
+				$emp[ $k ] = 'province_id' === $k ? (int) $v : ( 'website' === $k ? esc_url_raw( $v ) : $v );
+			}
+		}
+		$emp['sector']    = ( $emp['sector'] ?? '' ) === 'private' ? 'private' : 'public';
+		$body['employer'] = $emp;
+		$old['employer']  = $emp;
+	}
+
+	$result = ( new CVC_Api_Client() )->post( '/api/auth/register', $body );
 
 	if ( ! $result['ok'] ) {
-		cvc_redirect_with_notice( cvc_register_url(), 'error', cvc_api_error_message( $result ), null );
+		cvc_flash_old_input( $old );
+		$back = 'employer' === $type ? add_query_arg( 'loai', 'don-vi', cvc_register_url() ) : cvc_register_url();
+		cvc_redirect_with_notice( $back, 'error', cvc_api_error_message( $result ), null );
 		return;
 	}
 
@@ -245,8 +266,47 @@ function cvc_handle_register(): void {
 	}
 
 	cvc_set_auth_cookie( (string) $token );
+
+	if ( 'employer' === $type ) {
+		delete_transient( 'cvc_employer_public_settings' );
+		$sent = (string) ( $result['data']['verify_code_sent_to'] ?? '' );
+		$msg  = '' !== $sent
+			? 'Đã tạo tài khoản đơn vị. Mã xác minh 6 số vừa gửi tới ' . $sent . ' — nhập mã bên dưới để xác minh đơn vị ngay.'
+			: 'Đã tạo tài khoản đơn vị. Bước cuối: xác minh đơn vị bằng email công vụ hoặc giấy giới thiệu có dấu.';
+		cvc_redirect_with_notice( home_url( '/don-vi/xac-minh/' ), 'success', $msg, null );
+		return;
+	}
+
 	wp_safe_redirect( home_url( '/tai-khoan/' ) );
 	exit;
+}
+
+/**
+ * Giữ lại dữ liệu form đăng ký (không gồm mật khẩu) qua 1 lần chuyển trang khi lỗi.
+ * Lưu transient theo khóa ngẫu nhiên trong cookie ngắn hạn - không đặt dữ liệu cá nhân vào cookie.
+ */
+function cvc_flash_old_input( array $data ): void {
+	$key = wp_generate_password( 20, false );
+	set_transient( 'cvc_old_' . $key, $data, 5 * MINUTE_IN_SECONDS );
+	setcookie( 'cvc_old', $key, array( 'expires' => time() + 5 * MINUTE_IN_SECONDS, 'path' => '/', 'secure' => is_ssl(), 'httponly' => true, 'samesite' => 'Lax' ) );
+}
+
+/** Đọc (1 lần) dữ liệu form đã lưu bởi cvc_flash_old_input(). */
+function cvc_consume_old_input(): array {
+	static $cache = null;
+	if ( null !== $cache ) {
+		return $cache;
+	}
+	$cache = array();
+	$key   = isset( $_COOKIE['cvc_old'] ) ? preg_replace( '/[^A-Za-z0-9]/', '', (string) $_COOKIE['cvc_old'] ) : '';
+	if ( '' !== $key ) {
+		$val   = get_transient( 'cvc_old_' . $key );
+		$cache = is_array( $val ) ? $val : array();
+		delete_transient( 'cvc_old_' . $key );
+		setcookie( 'cvc_old', '', array( 'expires' => time() - HOUR_IN_SECONDS, 'path' => '/' ) );
+	}
+
+	return $cache;
 }
 
 /*

@@ -88,7 +88,8 @@ function cvc_chrome_header(): void {
 		return false;
 	};
 	?>
-	<div class="ch-topline"><div class="ch-container ch-inner"><span><?php echo $ico['plus']; // phpcs:ignore WordPress.Security.EscapeOutput ?> Cùng bạn chuẩn bị tốt hơn cho kỳ thi và hành trình công vụ</span><span class="ch-secondary">Tin tuyển dụng mới · Tài liệu · Ôn thi <a href="<?php echo esc_url( cvc_recruitments_url() ); ?>">Xem cập nhật →</a><?php if ( $staff ) : ?><a class="ch-staff-link" href="<?php echo esc_url( cvc_admin_url() ); ?>">Quản trị</a><?php endif; ?><?php if ( $logged_in && function_exists( 'cvc_employer_of_current_user' ) && cvc_employer_of_current_user() ) : ?><a class="ch-staff-link" href="<?php echo esc_url( home_url( '/don-vi/' ) ); ?>">Đơn vị</a><?php endif; ?></span></div></div>
+	<?php $is_emp = $logged_in && function_exists( 'cvc_employer_of_current_user' ) && null !== cvc_employer_of_current_user(); // Tài khoản đơn vị: nút chính vào /don-vi/. ?>
+	<div class="ch-topline"><div class="ch-container ch-inner"><span><?php echo $ico['plus']; // phpcs:ignore WordPress.Security.EscapeOutput ?> Cùng bạn chuẩn bị tốt hơn cho kỳ thi và hành trình công vụ</span><span class="ch-secondary">Tin tuyển dụng mới · Tài liệu · Ôn thi <a href="<?php echo esc_url( cvc_recruitments_url() ); ?>">Xem cập nhật →</a><?php if ( $staff ) : ?><a class="ch-staff-link" href="<?php echo esc_url( cvc_admin_url() ); ?>">Quản trị</a><?php endif; ?><?php if ( $is_emp ) : ?><a class="ch-staff-link" href="<?php echo esc_url( cvc_account_url() ); ?>">Học tập</a><?php endif; ?></span></div></div>
 	<header class="ch-header">
 		<div class="ch-container ch-nav">
 			<?php cvc_chrome_brand( $ico ); ?>
@@ -141,7 +142,8 @@ function cvc_chrome_header(): void {
 				?>
 				<div class="ch-mobile-acc">
 					<?php if ( $logged_in ) : ?>
-					<a class="ch-btn ch-btn-primary" href="<?php echo esc_url( cvc_account_url() ); ?>">Tài khoản</a>
+					<?php if ( $is_emp ) : ?><a class="ch-btn ch-btn-primary" href="<?php echo esc_url( home_url( '/don-vi/' ) ); ?>">Đơn vị</a><a class="ch-btn ch-btn-outline" href="<?php echo esc_url( cvc_account_url() ); ?>">Học tập</a>
+					<?php else : ?><a class="ch-btn ch-btn-primary" href="<?php echo esc_url( cvc_account_url() ); ?>">Tài khoản</a><?php endif; ?>
 					<?php if ( $staff ) : ?><a class="ch-btn ch-btn-outline" href="<?php echo esc_url( cvc_admin_url() ); ?>">Quản trị</a><?php endif; ?>
 					<a class="ch-btn ch-btn-outline" href="<?php echo esc_url( cvc_logout_url() ); ?>">Đăng xuất</a>
 					<?php else : ?>
@@ -154,7 +156,7 @@ function cvc_chrome_header(): void {
 				<a class="ch-iconbtn" href="<?php echo esc_url( cvc_search_url() ); ?>" data-ch-search aria-label="Tìm kiếm"><?php echo $ico['search']; // phpcs:ignore WordPress.Security.EscapeOutput ?></a>
 				<?php if ( $logged_in ) : ?>
 				<a class="ch-iconbtn" href="<?php echo esc_url( cvc_account_url( 'notifications' ) ); ?>" aria-label="<?php echo esc_attr( $unread > 0 ? sprintf( 'Thông báo: %d chưa đọc', $unread ) : 'Thông báo' ); ?>"><?php echo $ico['bell']; // phpcs:ignore WordPress.Security.EscapeOutput ?><?php if ( $unread > 0 ) : ?><span class="ch-count"><?php echo esc_html( $unread > 9 ? '9+' : (string) $unread ); ?></span><?php endif; ?></a>
-				<a class="ch-btn ch-btn-primary ch-btn-small" href="<?php echo esc_url( cvc_account_url() ); ?>">Tài khoản <?php echo $ico['arrow']; // phpcs:ignore WordPress.Security.EscapeOutput ?></a>
+				<a class="ch-btn ch-btn-primary ch-btn-small" href="<?php echo esc_url( $is_emp ? home_url( '/don-vi/' ) : cvc_account_url() ); ?>"><?php echo $is_emp ? 'Đơn vị' : 'Tài khoản'; ?> <?php echo $ico['arrow']; // phpcs:ignore WordPress.Security.EscapeOutput ?></a>
 				<?php else : ?>
 				<a class="ch-btn ch-btn-outline ch-btn-small" href="<?php echo esc_url( cvc_login_url( $current ) ); ?>">Đăng nhập</a>
 				<a class="ch-btn ch-btn-primary ch-btn-small" href="<?php echo esc_url( cvc_register_url() ); ?>">Tạo tài khoản <?php echo $ico['arrow']; // phpcs:ignore WordPress.Security.EscapeOutput ?></a>

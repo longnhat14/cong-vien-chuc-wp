@@ -70,7 +70,8 @@ get_header();
 
 	<p class="cvc-auth-switch">
 		Chưa có tài khoản?
-		<a href="<?php echo esc_url( cvc_register_url() ); ?>">Đăng ký ngay</a>
+		<?php $cvc_to_emp = isset( $_GET['redirect_to'] ) && str_starts_with( (string) wp_unslash( $_GET['redirect_to'] ), '/don-vi' ); ?>
+		<a href="<?php echo esc_url( $cvc_to_emp ? add_query_arg( 'loai', 'don-vi', cvc_register_url() ) : cvc_register_url() ); ?>"><?php echo $cvc_to_emp ? 'Đăng ký tài khoản đơn vị' : 'Đăng ký ngay'; ?></a>
 	</p>
 </main>
 

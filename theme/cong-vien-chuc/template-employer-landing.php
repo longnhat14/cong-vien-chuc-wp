@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 $set    = cvc_employer_public_settings();
 $prices = (array) ( $set['prices'] ?? array() );
 $emp    = cvc_is_logged_in() ? cvc_employer_of_current_user() : null;
-$cta    = $emp ? cvc_employer_url() : ( cvc_is_logged_in() ? cvc_employer_url( 'dang-ky' ) : cvc_login_url( cvc_employer_url( 'dang-ky' ) ) );
+$cta    = $emp ? cvc_employer_url() : ( cvc_is_logged_in() ? cvc_employer_url( 'dang-ky' ) : add_query_arg( 'loai', 'don-vi', cvc_register_url() ) );
 
 cvc_seo_set_title( 'Đăng tin tuyển dụng công chức, viên chức miễn phí cho đơn vị | Công Viên Chức' );
 if ( function_exists( 'cvc_seo_set_description' ) ) {
@@ -25,7 +25,7 @@ get_header();
 		<h1>Dành cho đơn vị tuyển dụng</h1>
 		<p class="text-ink-2">Đăng thông báo tuyển công chức, viên chức tới hàng nghìn thí sinh đang ôn thi — nhanh, đúng, có xác minh.</p>
 		<p class="mt-3"><a class="dz-btn dz-btn-primary" href="<?php echo esc_url( $cta ); ?>"><?php echo $emp ? 'Vào trang quản lý đơn vị' : 'Đăng ký đơn vị'; ?></a>
-			<?php if ( ! cvc_is_logged_in() ) : ?> <a class="dz-btn" href="<?php echo esc_url( cvc_register_url() ); ?>">Tạo tài khoản</a><?php endif; ?></p>
+			<?php if ( ! cvc_is_logged_in() ) : ?> <a class="dz-btn" href="<?php echo esc_url( cvc_login_url( cvc_employer_url() ) ); ?>">Đơn vị đã có tài khoản: đăng nhập</a><?php endif; ?></p>
 		<?php if ( empty( $set['enabled'] ) ) : ?><p class="dz-notice mt-3">Cổng đang tạm đóng nhận đăng ký mới.</p><?php endif; ?>
 	</header>
 
@@ -43,8 +43,8 @@ get_header();
 
 	<section class="dz-section"><h2 class="dz-h2">Cách đăng tin</h2>
 		<ol class="dz-list">
-			<li><div class="dz-item-title">1. Đăng ký đơn vị</div><div class="dz-item-sum">Tên đơn vị, tỉnh/thành, điện thoại cơ quan<?php echo ! empty( $set['private_enabled'] ) ? '; chọn công lập hoặc ngoài công lập' : ''; ?>.</div></li>
-			<li><div class="dz-item-title">2. Xác minh</div><div class="dz-item-sum">Email công vụ .gov.vn / .edu.vn (xác minh ngay bằng mã 6 số) hoặc giấy giới thiệu có dấu (biên tập viên gọi xác nhận).</div></li>
+			<li><div class="dz-item-title">1. Đăng ký tài khoản đơn vị</div><div class="dz-item-sum">Một lần điền: người phụ trách, email, tên đơn vị, tỉnh/thành, điện thoại cơ quan<?php echo ! empty( $set['private_enabled'] ) ? '; chọn công lập hoặc ngoài công lập' : ''; ?>.</div></li>
+			<li><div class="dz-item-title">2. Xác minh</div><div class="dz-item-sum">Đăng ký bằng email công vụ .gov.vn / .edu.vn thì mã 6 số gửi ngay về email đó — nhập mã là xong. Hoặc gửi giấy giới thiệu có dấu (biên tập viên gọi xác nhận).</div></li>
 			<li><div class="dz-item-title">3. Tải thông báo, kiểm tra, gửi</div><div class="dz-item-sum">Biên tập viên duyệt trong giờ hành chính. Đơn vị đăng chuẩn <?php echo (int) ( $set['trust_threshold'] ?? 3 ); ?> tin trở lên được tự đăng ngay.</div></li>
 			<li><div class="dz-item-title">4. Cập nhật suốt đợt tuyển</div><div class="dz-item-sum">Đính chính, gia hạn, đăng danh sách đủ điều kiện, lịch thi, kết quả; xem lượt xem, lượt lưu, thí sinh bật nhắc hạn.</div></li>
 		</ol>

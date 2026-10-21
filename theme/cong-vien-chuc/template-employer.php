@@ -69,6 +69,7 @@ get_header();
 			<?php foreach ( array( 'bang-dieu-khien' => 'Bảng điều khiển', 'dang-tin' => 'Đăng tin mới', 'xac-minh' => 'Xác minh', 'thanh-vien' => 'Thông tin & thành viên' ) as $k => $l ) : ?>
 				<a class="<?php echo $k === $view ? 'is-active font-bold' : ''; ?>" href="<?php echo esc_url( cvc_employer_url( $k ) ); ?>"><?php echo esc_html( $l ); ?></a>
 			<?php endforeach; ?>
+			<a class="ml-auto" href="<?php echo esc_url( cvc_account_url() ); ?>">Khu học tập &rarr;</a>
 		</nav>
 	<?php endif; ?>
 
@@ -107,14 +108,30 @@ get_header();
 					<?php if ( 'rejected' === $st && ! empty( $emp['note'] ) ) : ?><div class="dz-notice">Chưa xác minh được: <?php echo esc_html( (string) $emp['note'] ); ?></div><?php endif; ?>
 					<?php if ( 'suspended' === $st ) : ?><div class="dz-notice">Đơn vị đang tạm khóa đăng tin<?php echo ! empty( $emp['note'] ) ? ': ' . esc_html( (string) $emp['note'] ) : ''; ?>.</div><?php endif; ?>
 					<?php if ( 'public' === ( $emp['sector'] ?? 'public' ) ) : ?>
+						<?php
+						$pending  = (string) ( $emp['pending_code_email'] ?? '' );
+						$my_email = (string) ( ( cvc_current_user() ?? array() )['email'] ?? '' );
+						$prefill  = '' !== $pending ? $pending : ( preg_match( '/@([a-z0-9-]+\.)*(gov|edu)\.vn$/i', $my_email ) ? $my_email : '' );
+						?>
 						<h2 class="dz-h2">Cách 1 — Email công vụ (xác minh ngay)</h2>
-						<p class="text-sm text-ink-muted">Email thuộc tên miền nhà nước (<b>.gov.vn</b>, <b>.edu.vn</b>) hoặc tên miền đã được xác minh. Hệ thống gửi mã 6 số.</p>
-						<?php $form_open( 'send_code' ); ?>
-							<div class="flex gap-2"><input name="email" type="email" required class="<?php echo esc_attr( $input ); ?>" placeholder="tccb@syt.xxx.gov.vn"><button class="dz-btn" type="submit">Gửi mã</button></div>
-						</form>
-						<?php $form_open( 'verify_code' ); ?>
-							<div class="flex gap-2"><input name="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required class="<?php echo esc_attr( $input ); ?>" placeholder="Nhập mã 6 số"><button class="dz-btn dz-btn-primary" type="submit">Xác minh</button></div>
-						</form>
+						<?php if ( '' !== $pending ) : ?>
+							<p class="text-sm">Mã 6 số đã gửi tới <b><?php echo esc_html( $pending ); ?></b> (hiệu lực 30 phút). Kiểm tra cả hộp thư rác.</p>
+							<?php $form_open( 'verify_code' ); ?>
+								<div class="flex gap-2"><input name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required autofocus class="<?php echo esc_attr( $input ); ?>" placeholder="Nhập mã 6 số"><button class="dz-btn dz-btn-primary" type="submit">Xác minh</button></div>
+							</form>
+							<details class="text-sm"><summary class="cursor-pointer text-acc">Không nhận được mã? Gửi lại hoặc dùng email khác</summary>
+							<?php $form_open( 'send_code' ); ?>
+								<div class="flex gap-2 mt-2"><input name="email" type="email" required class="<?php echo esc_attr( $input ); ?>" value="<?php echo esc_attr( $prefill ); ?>"><button class="dz-btn" type="submit">Gửi lại mã</button></div>
+							</form></details>
+						<?php else : ?>
+							<p class="text-sm text-ink-muted">Email thuộc tên miền nhà nước (<b>.gov.vn</b>, <b>.edu.vn</b>) hoặc tên miền đã được xác minh. Hệ thống gửi mã 6 số.</p>
+							<?php $form_open( 'send_code' ); ?>
+								<div class="flex gap-2"><input name="email" type="email" required class="<?php echo esc_attr( $input ); ?>" placeholder="tccb@syt.xxx.gov.vn" value="<?php echo esc_attr( $prefill ); ?>"><button class="dz-btn" type="submit">Gửi mã</button></div>
+							</form>
+							<?php $form_open( 'verify_code' ); ?>
+								<div class="flex gap-2"><input name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required class="<?php echo esc_attr( $input ); ?>" placeholder="Nhập mã 6 số"><button class="dz-btn dz-btn-primary" type="submit">Xác minh</button></div>
+							</form>
+						<?php endif; ?>
 						<h2 class="dz-h2">Cách 2 — Giấy giới thiệu có dấu</h2>
 					<?php else : ?>
 						<h2 class="dz-h2">Giấy phép / giấy giới thiệu có dấu</h2>
