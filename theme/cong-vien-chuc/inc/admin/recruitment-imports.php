@@ -74,6 +74,10 @@ function cvc_admin_render_imports_index(): void {
 					<label class="flex items-center gap-2"><input type="radio" name="personal_exams" value="<?php echo esc_attr( $k ); ?>" class="accent-acc-2" <?php checked( 'inherit', $k ); ?>> <?php echo esc_html( $lbl ); ?></label>
 				<?php endforeach; ?>
 			</fieldset>
+			<label class="flex items-start gap-2 text-sm text-ink-2">
+				<input type="checkbox" name="allow_duplicate" value="1" class="mt-1 accent-acc-2">
+				<span>Vẫn tải lên dù tệp đã có trên hệ thống <span class="text-ink-muted">(mặc định: hệ thống báo ngay nếu tệp trùng với tin đã đăng, hàng chờ hoặc lần nhập trước, không tốn phí đọc chữ/AI)</span></span>
+			</label>
 			<button type="submit" class="px-5 py-2.5 bg-acc hover:bg-acc-deep text-white font-black text-sm rounded-xl" data-cvc-import-submit>Tải lên &amp; phân tích</button>
 		</form>
 		<script>
@@ -294,6 +298,7 @@ function cvc_admin_handle_import(): void {
 					'province_id'    => absint( $_POST['province_id'] ?? 0 ) ?: null,
 					'title'          => sanitize_text_field( wp_unslash( (string) ( $_POST['title'] ?? '' ) ) ),
 					'personal_exams' => sanitize_key( (string) ( $_POST['personal_exams'] ?? 'inherit' ) ),
+					'allow_duplicate' => empty( $_POST['allow_duplicate'] ) ? null : '1',
 				),
 				static fn ( $v ) => null !== $v && '' !== $v
 			),
@@ -301,7 +306,12 @@ function cvc_admin_handle_import(): void {
 			$token
 		);
 		if ( ! $result['ok'] ) {
-			cvc_admin_redirect( $back, 'error', cvc_admin_error_message( $result ) );
+			$msg = cvc_admin_error_message( $result );
+			// 21/10/2026: tep trung voi tep da co -> chi ro tin / lan nhap, goi y "Van tai len".
+			if ( 409 === (int) ( $result['status'] ?? 0 ) && 'duplicate_file' === ( $result['data']['code'] ?? '' ) ) {
+				$msg = (string) ( $result['data']['message'] ?? 'Tệp đã có trên hệ thống.' ) . ' Không tải lên lại. Nếu vẫn muốn tạo lần nhập mới, tích "Vẫn tải lên dù tệp đã có" rồi gửi lại.';
+			}
+			cvc_admin_redirect( $back, 'error', $msg );
 			return;
 		}
 		$new = (int) ( $result['data']['data']['id'] ?? 0 );
