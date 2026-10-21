@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Tăng số này khi thêm/sửa rewrite rule để buộc flush lại đúng 1 lần.
-const CVC_REWRITE_VERSION = '17';
+const CVC_REWRITE_VERSION = '18';
 
 /**
  * Section hợp lệ của /tai-khoan/{section}/ (Phase 10) - map slug tiếng
@@ -296,6 +296,12 @@ function cvc_register_rewrite_rules(): void {
 		'top'
 	);
 
+	// Cổng đơn vị tuyển dụng (21/10/2026).
+	add_rewrite_rule( '^don-vi-tuyen-dung/?$', 'index.php?cvc_page=employer-landing', 'top' );
+	add_rewrite_rule( '^don-vi/tin/([0-9]+)/?$', 'index.php?cvc_page=employer&cvc_employer_view=tin&cvc_employer_id=$matches[1]', 'top' );
+	add_rewrite_rule( '^don-vi/([a-z-]+)/?$', 'index.php?cvc_page=employer&cvc_employer_view=$matches[1]', 'top' );
+	add_rewrite_rule( '^don-vi/?$', 'index.php?cvc_page=employer&cvc_employer_view=bang-dieu-khien', 'top' );
+
 	// Thanh toán chuyển khoản VietQR qua SePay (20/10/2026): /thanh-toan/{mã đơn}/.
 	add_rewrite_rule(
 		'^thanh-toan/(CVC[0-9A-Za-z]{6,20})/?$',
@@ -369,6 +375,8 @@ function cvc_register_query_vars( array $vars ): array {
 	$vars[] = 'cvc_knowledge_slug';
 	$vars[] = 'cvc_exam_slug';
 	$vars[] = 'cvc_order_code';
+	$vars[] = 'cvc_employer_view';
+	$vars[] = 'cvc_employer_id';
 	$vars[] = 'cvc_legal_document_slug';
 	$vars[] = 'cvc_paged';
 	$vars[] = 'cvc_account_section';
@@ -465,6 +473,8 @@ function cvc_template_include( string $template ): string {
 		'document-detail'       => 'template-document-detail.php',
 		'order-result'          => 'template-order-result.php',
 		'payment'               => 'template-payment.php',
+		'employer-landing'      => 'template-employer-landing.php',
+		'employer'              => 'template-employer.php',
 		'certificate-verify'    => 'template-certificate-verify.php',
 		'admin-ai-settings'     => 'template-admin-ai-settings.php',
 		'admin'                 => 'template-admin.php',

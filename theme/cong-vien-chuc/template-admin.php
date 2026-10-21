@@ -41,6 +41,8 @@ if ( 'thanh-toan' === $resource_key ) {
 	$view = 'payment';
 } elseif ( 'thu-thap' === $resource_key ) {
 	$view = cvc_admin_can( 'recruitment.view' ) ? 'ingestion' : 'forbidden';
+} elseif ( 'don-vi' === $resource_key ) {
+	$view = cvc_admin_can( 'employer.view' ) ? 'employers' : 'forbidden';
 } elseif ( '' !== $resource_key ) {
 	if ( ! $res || ! cvc_admin_can( $res['module'] . '.view' ) ) {
 		$view = 'forbidden';
@@ -74,6 +76,8 @@ if ( 'list' === $view || 'form' === $view ) {
 	$page_title = 'Cấu hình thanh toán';
 } elseif ( 'ingestion' === $view ) {
 	$page_title = 'Thu thập tin tuyển dụng';
+} elseif ( 'employers' === $view ) {
+	$page_title = 'Đơn vị tuyển dụng';
 }
 
 cvc_seo_set_title( $page_title . ' | Quản trị' );
@@ -98,6 +102,9 @@ get_header();
 				<a href="<?php echo esc_url( cvc_admin_url() ); ?>" class="flex items-center gap-2 px-2.5 py-2 rounded-lg <?php echo 'dashboard' === $view ? 'bg-acc-soft text-acc font-bold' : 'text-ink-2 hover:bg-acc-soft'; ?>"><i class="fa-solid fa-chart-pie w-4" aria-hidden="true"></i> Tổng quan</a>
 				<?php if ( cvc_admin_can( 'recruitment.view' ) ) : ?>
 					<a href="<?php echo esc_url( cvc_admin_url( 'thu-thap' ) ); ?>" class="flex items-center gap-2 px-2.5 py-2 rounded-lg <?php echo 'ingestion' === $view ? 'bg-acc-soft text-acc font-bold' : 'text-ink-2 hover:bg-acc-soft'; ?>"><i class="fa-solid fa-robot w-4" aria-hidden="true"></i> Thu thập tin</a>
+				<?php endif; ?>
+				<?php if ( cvc_admin_can( 'employer.view' ) ) : ?>
+					<a href="<?php echo esc_url( cvc_admin_url( 'don-vi' ) ); ?>" class="flex items-center gap-2 px-2.5 py-2 rounded-lg <?php echo 'employers' === $view ? 'bg-acc-soft text-acc font-bold' : 'text-ink-2 hover:bg-acc-soft'; ?>"><i class="fa-solid fa-building-columns w-4" aria-hidden="true"></i> Đơn vị tuyển dụng</a>
 				<?php endif; ?>
 				<?php foreach ( cvc_admin_menu_groups() as $group_label => $keys ) : ?>
 					<?php
@@ -221,6 +228,9 @@ get_header();
 					</section>
 				</div>
 			<?php endif; ?>
+
+		<?php elseif ( 'employers' === $view ) : ?>
+			<?php cvc_admin_render_employers(); ?>
 
 		<?php elseif ( 'ingestion' === $view ) : ?>
 			<?php

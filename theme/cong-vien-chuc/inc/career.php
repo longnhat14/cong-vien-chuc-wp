@@ -93,6 +93,8 @@ function cvc_ci_filters_from_request( array $src ): array {
 		'de-sap-xep'  => isset( $src['de-sap-xep'] ) && in_array( $src['de-sap-xep'], array( 'relevance', 'title', 'duration', 'newest' ), true ) ? (string) $src['de-sap-xep'] : '',
 		'da-lam'      => isset( $src['da-lam'] ) && in_array( $src['da-lam'], array( 'done', 'not_done' ), true ) ? (string) $src['da-lam'] : '',
 		'tin'         => isset( $src['tin'] ) ? absint( $src['tin'] ) : 0,
+		// Cổng đơn vị (21/10/2026): tin đơn vị ngoài công lập ở mục riêng.
+		'khu-vuc'     => isset( $src['khu-vuc'] ) && 'ngoai-cong-lap' === sanitize_key( wp_unslash( $src['khu-vuc'] ) ) ? 'ngoai-cong-lap' : '',
 	);
 }
 
@@ -107,6 +109,7 @@ function cvc_ci_url_args( array $f ): array {
 		'sap-xep'     => $f['sap-xep'],
 		'luu'         => $f['luu'] ?: null,
 		'phuong-thuc' => $f['phuong-thuc'],
+		'khu-vuc'     => $f['khu-vuc'] ?? '',
 	);
 }
 
@@ -144,6 +147,7 @@ function cvc_ci_jobs_query( array $f, int $page ): array {
 			'sort'        => $f['sap-xep'] ?: 'relevant',
 			'saved'       => $f['luu'] ? 1 : null,
 			'method'      => $f['phuong-thuc'],
+			'sector'      => 'ngoai-cong-lap' === ( $f['khu-vuc'] ?? '' ) ? 'private' : null,
 			'page'        => $page,
 			'per_page'    => 10,
 		),
@@ -238,7 +242,8 @@ function cvc_ci_render_job_card( array $r, bool $logged_in ): void {
 		<div class="ci-job-top">
 			<div class="ci-job-logo" aria-hidden="true">⌂</div>
 			<div class="ci-job-main">
-				<h3 class="ci-job-title"><a href="<?php echo esc_url( cvc_recruitment_url( (string) $r['slug'] ) ); ?>"><?php echo esc_html( (string) $r['title'] ); ?></a></h3>
+				<h3 class="ci-job-title"><?php if ( ! empty( $r['pinned'] ) ) : ?><span class="ci-pill is-blue" title="Tin được đơn vị ghim"><i class="fa-solid fa-thumbtack" aria-hidden="true"></i> Ghim</span> <?php endif; ?><a href="<?php echo esc_url( cvc_recruitment_url( (string) $r['slug'] ) ); ?>"><?php echo esc_html( (string) $r['title'] ); ?></a></h3>
+				<?php if ( ! empty( $r['employer'] ) ) : ?><div class="ci-meta"><span><i class="fa-solid fa-circle-check" aria-hidden="true"></i> <?php echo esc_html( (string) $r['employer']['label'] ); ?></span></div><?php endif; ?>
 				<div class="ci-meta"><?php foreach ( $meta as $m ) : ?><span><?php echo esc_html( $m ); ?></span><?php endforeach; ?></div>
 			</div>
 			<?php echo cvc_ci_status_pill( $st ); // phpcs:ignore WordPress.Security.EscapeOutput ?>

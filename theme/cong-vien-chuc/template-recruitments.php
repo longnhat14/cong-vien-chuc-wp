@@ -81,6 +81,10 @@ get_header();
 					<div class="ci-eyebrow"><i class="ci-pulse" aria-hidden="true"></i> Tuyển dụng · Đề thi · Văn bản · Lộ trình</div>
 					<h1><?php echo esc_html( '' !== $f['nhom'] || '' !== $province_name ? $title : 'Từ cơ hội tuyển dụng đến lộ trình chinh phục' ); ?></h1>
 					<p>Tìm cơ hội còn hạn từ nguồn chính thức, xem đề thi và văn bản liên quan, hiểu vì sao nội dung được đề xuất — rồi biến mục tiêu dự tuyển thành kế hoạch học tập rõ ràng.</p>
+					<?php $cvc_emp_set = function_exists( 'cvc_employer_public_settings' ) ? cvc_employer_public_settings() : array(); ?>
+					<?php if ( ! empty( $cvc_emp_set['private_enabled'] ) ) : ?>
+						<p class="ci-meta" aria-label="Khu vực tuyển dụng"><a class="ci-pill <?php echo '' === ( $f['khu-vuc'] ?? '' ) ? 'is-blue' : 'is-gray'; ?>" href="<?php echo esc_url( cvc_ci_url() ); ?>">Công chức, viên chức</a> <a class="ci-pill <?php echo 'ngoai-cong-lap' === ( $f['khu-vuc'] ?? '' ) ? 'is-blue' : 'is-gray'; ?>" href="<?php echo esc_url( cvc_ci_url( array( 'khu-vuc' => 'ngoai-cong-lap' ) ) ); ?>">Đơn vị ngoài công lập</a> <a class="ci-pill is-gray" href="<?php echo esc_url( cvc_employer_landing_url() ); ?>">Đơn vị đăng tin miễn phí →</a></p>
+					<?php endif; ?>
 					<div class="ci-hero-actions"><a class="ci-btn is-primary" href="#ci-search">Tìm cơ hội &amp; đề thi ↗</a><a class="ci-btn" href="<?php echo esc_url( cvc_positions_url() ); ?>">Tìm theo vị trí tuyển dụng</a><a class="ci-btn" href="<?php echo esc_url( add_query_arg( 'tab', 'path', cvc_ci_url() ) ); ?>" data-ci-tab="path">Xem lộ trình cá nhân</a></div>
 				</div>
 				<div class="ci-hero-summary">
@@ -109,6 +113,7 @@ get_header();
 		</div>
 
 		<form id="ci-filters" class="ci-adv<?php echo $filter_count > 0 ? ' is-open' : ''; ?>" method="get" action="<?php echo esc_url( cvc_ci_url() ); ?>">
+			<?php if ( 'ngoai-cong-lap' === ( $f['khu-vuc'] ?? '' ) ) : ?><input type="hidden" name="khu-vuc" value="ngoai-cong-lap"><?php endif; ?>
 			<section class="ci-panel" id="ci-adv">
 				<div class="ci-panel-head"><h2>Bộ lọc cơ hội</h2><span class="ci-pill is-gray" id="ci-filter-count"><?php echo (int) $filter_count; ?> lọc</span></div>
 				<div class="ci-panel-body ci-filter-grid">

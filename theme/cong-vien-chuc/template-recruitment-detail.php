@@ -550,6 +550,7 @@ get_header();
 		</dl>
 
 		<div class="rd-card-body" id="noi-dung">
+			<?php cvc_render_recruitment_employer_block( $recruitment ); // Cổng đơn vị (21/10/2026): nhãn đơn vị + văn bản cập nhật đợt. ?>
 			<?php if ( '' !== $summary ) : ?>
 				<div class="rd-prose"><?php echo cvc_notice_text( $summary ); // phpcs:ignore WordPress.Security.EscapeOutput ?></div>
 			<?php endif; ?>
@@ -565,7 +566,7 @@ get_header();
 							<li><b><?php echo esc_html( (string) ( $ch['field_label'] ?? '' ) ); ?>:</b>
 								<?php if ( null !== ( $ch['old_value'] ?? null ) && '' !== (string) $ch['old_value'] ) : ?><s><?php echo esc_html( $fmtv( $ch['old_value'] ) ); ?></s> →<?php endif; ?>
 								<b class="is-new"><?php echo esc_html( $fmtv( $ch['new_value'] ?? '' ) ); ?></b>
-								<?php if ( ! empty( $ch['source_doc_number'] ) ) : ?><small>(theo văn bản số <?php echo esc_html( (string) $ch['source_doc_number'] ); ?>)</small><?php endif; ?>
+								<?php if ( ! empty( $ch['source_doc_number'] ) ) : ?><small>(theo văn bản số <?php echo esc_html( (string) $ch['source_doc_number'] ); ?>)</small><?php elseif ( ! empty( $ch['note'] ) && 0 === strpos( (string) $ch['note'], 'Đơn vị đính chính' ) ) : ?><small>(<?php echo esc_html( (string) $ch['note'] ); ?><?php echo ! empty( $ch['created_at'] ) ? ', ' . esc_html( wp_date( 'd/m/Y', strtotime( (string) $ch['created_at'] ) ) ) : ''; ?>)</small><?php endif; ?>
 							</li>
 						<?php endforeach; ?>
 					</ul>
@@ -1045,6 +1046,7 @@ get_header();
 			<h2><span class="rd-ico is-gold" aria-hidden="true">ⓘ</span>Gợi ý nhanh</h2>
 			<p class="rd-small rd-muted">Đừng chỉ dựa vào bản tóm tắt. Hãy kiểm tra điều kiện, thời hạn và phụ lục trong văn bản gốc trước khi chuẩn bị hồ sơ; khi có điều chỉnh, cơ quan sẽ ban hành văn bản mới.</p>
 		</div>
+		<?php cvc_render_recruitment_report_form( $recruitment ); // Báo sai thông tin (21/10/2026). ?>
 	</aside>
 	</div><!-- /.rd-layout -->
 

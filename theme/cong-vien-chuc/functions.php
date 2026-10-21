@@ -48,6 +48,8 @@ require_once __DIR__ . '/inc/admin/personal-exams.php';
 require_once __DIR__ . '/inc/admin/recruitment-imports.php';
 require_once __DIR__ . '/inc/recruitment-fulltext.php';
 require_once __DIR__ . '/inc/payment-sepay.php';
+require_once __DIR__ . '/inc/employer.php';
+require_once __DIR__ . '/inc/admin/employers.php';
 require_once __DIR__ . '/inc/personal-exams.php';
 require_once __DIR__ . '/inc/ingestion-cron.php';
 require_once __DIR__ . '/inc/seo.php';
