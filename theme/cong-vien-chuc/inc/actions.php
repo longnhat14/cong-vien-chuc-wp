@@ -320,6 +320,9 @@ function cvc_handle_profile_update(): void {
 	if ( isset( $_POST['province_id'] ) && '' !== $_POST['province_id'] ) {
 		$payload['province_id'] = absint( $_POST['province_id'] );
 	}
+	if ( isset( $_POST['leaderboard_visibility'] ) ) {
+		$payload['leaderboard_visibility'] = 'hidden' === $_POST['leaderboard_visibility'] ? 'hidden' : 'full';
+	}
 
 	$result = ( new CVC_Profile_Service() )->update( $payload, $token );
 

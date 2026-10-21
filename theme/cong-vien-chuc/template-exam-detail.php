@@ -267,6 +267,7 @@ get_header();
 				</div>
 
 				<?php if ( function_exists( 'cvc_ci_render_exam_jobs' ) ) { cvc_ci_render_exam_jobs( (int) ( $exam['id'] ?? 0 ) ); } // Career Intelligence: đề -> tin tuyển dụng ?>
+				<?php if ( function_exists( 'cvc_render_leaderboard_mini' ) && 'published' === ( $exam['status'] ?? 'published' ) ) { cvc_render_leaderboard_mini( array( 'de' => (int) ( $exam['id'] ?? 0 ) ), 'Top thí sinh đề này' ); } // Bảng xếp hạng (21/10/2026) ?>
 
 				<div class="dz-card space-y-2 text-xs">
 					<h3 class="font-extrabold text-xs text-acc uppercase tracking-wider">Ôn thêm trước khi thi</h3>

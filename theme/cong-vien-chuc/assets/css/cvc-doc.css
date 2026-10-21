@@ -374,3 +374,47 @@ body.cvc-doc .cvc-emp-fields{border:1px solid var(--dz-line);border-left:3px sol
 body.cvc-doc .cvc-emp-fields[hidden]{display:none}
 body.cvc-doc .cvc-inline{display:flex;gap:8px;align-items:center;font-weight:normal!important;font-size:15px}
 body.cvc-doc .cvc-linkbtn{background:none;border:0;padding:0;color:#1767aa;text-decoration:underline;cursor:pointer;font:inherit}
+
+/* Ảnh đại diện, logo, khung cắt (21/10/2026) */
+body.cvc-doc .cvc-avatar-row{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap}
+body.cvc-doc .cvc-avatar-forms{flex:1;min-width:220px;display:grid;gap:8px}
+body.cvc-doc .cvc-logo{object-fit:contain;background:#fff;border:1px solid var(--dz-line);border-radius:2px;flex:none;vertical-align:middle}
+body.cvc-doc .cvc-logo.is-empty{display:inline-flex;align-items:center;justify-content:center;width:96px;height:96px;font-size:13px;color:#5c5c5c;text-align:center}
+body.cvc-doc .cvc-crop-stage{margin:8px 0;display:grid;gap:6px;justify-items:start}
+body.cvc-doc .cvc-crop-stage canvas{width:240px;height:240px;max-width:100%;background:repeating-conic-gradient(#eee 0 25%,#fff 0 50%) 0 0/16px 16px;border:1px solid var(--dz-line);touch-action:none;cursor:grab}
+body.cvc-doc [data-cvc-crop="contain"] .cvc-crop-stage canvas{cursor:default}
+body.cvc-doc .cvc-crop-zoom{display:flex;gap:8px;align-items:center;font-size:14px}
+body.cvc-doc .cvc-crop-err{color:#a11;font-size:14px}
+body.cvc-doc .cvc-emp-note{display:flex;gap:12px;align-items:center}
+body.cvc-doc .cvc-emp-chip{display:inline-flex;gap:6px;align-items:center}
+body.cvc-doc .cvc-emp-chip .cvc-logo{border:0}
+body.cvc-doc .cvc-logo-strip{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+body.cvc-doc .cvc-logo-strip li{display:grid;justify-items:center;gap:4px;text-align:center;font-size:13px;color:#333}
+body.cvc-doc .cvc-logo-strip span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+/* Bảng xếp hạng (21/10/2026) */
+.cvc-lb-table .cvc-lb-rank{width:64px;text-align:center}
+.cvc-lb-table tr.is-me td{background:#eaf3fc}
+.cvc-lb-who{display:flex;gap:10px;align-items:center}
+.cvc-lb-who small{display:block;color:#5c5c5c;font-size:13px}
+.cvc-lb-badge{display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;padding:0 6px;border-radius:14px;border:1px solid #c8c8c8;font-weight:bold;font-size:14px;background:#fff}
+.cvc-lb-badge.is-gold,.cvc-lb-badges li.is-gold{background:#f6e7b8;border-color:#c9a338;color:#5b4300}
+.cvc-lb-badge.is-silver,.cvc-lb-badges li.is-silver{background:#ececec;border-color:#9a9a9a;color:#333}
+.cvc-lb-badge.is-bronze,.cvc-lb-badges li.is-bronze{background:#f2ddca;border-color:#b07b4f;color:#5a3412}
+.cvc-lb-me{display:flex;gap:12px;align-items:center;border:1px solid #8fb4da;border-left:3px solid #123a63;background:#eaf3fc;padding:10px 14px;border-radius:2px}
+.cvc-lb-me span{color:#333}
+.cvc-lb-mini-h{font-weight:bold;font-size:16px;margin:0 0 2px}
+.cvc-lb-mini-sub{font-size:13px;color:#5c5c5c;margin:2px 0 6px}
+.cvc-lb-mini-list{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.cvc-lb-mini-list li{display:flex;gap:8px;align-items:center;font-size:14px}
+.cvc-lb-mini-list li.is-me{background:#eaf3fc}
+.cvc-lb-mini-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cvc-lb-mini-name small{display:block;color:#5c5c5c;font-size:12px}
+.cvc-lb-mini-ex{color:#5c5c5c;font-size:12px;margin-left:4px}
+.cvc-lb-link{font-weight:bold;color:#1767aa;text-decoration:underline}
+.cvc-lb-stats{list-style:none;margin:0 0 10px;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px}
+.cvc-lb-stats li{border:1px solid #d6d6d6;padding:10px;border-radius:2px;display:grid}
+.cvc-lb-stats span{font-size:13px;color:#5c5c5c}.cvc-lb-stats b{font-size:20px}.cvc-lb-stats small{font-size:12px;color:#5c5c5c}
+.cvc-lb-badges{list-style:none;margin:0 0 10px;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.cvc-lb-badges li{border:1px solid #c8c8c8;border-radius:14px;padding:3px 10px;font-size:13px;background:#fff}
+@media(max-width:640px){.cvc-lb-hide-sm{display:none}}

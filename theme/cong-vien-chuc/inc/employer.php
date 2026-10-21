@@ -131,6 +131,17 @@ function cvc_handle_employer_action(): void {
 			cvc_auth_refresh_user_cache();
 			$done( $res, cvc_employer_url( 'xac-minh' ) );
 			return;
+		case 'logo':
+			$files = cvc_employer_files_from_request( 'file' );
+			if ( empty( $files ) ) {
+				cvc_redirect_with_notice( $back, 'error', 'Hãy chọn ảnh logo (JPG, PNG hoặc WebP, tối đa 2 MB).', null );
+				return;
+			}
+			$done( $api->post_multipart( '/api/employer/logo', array(), $files, $token ), cvc_employer_url( 'thanh-vien' ) );
+			return;
+		case 'logo_remove':
+			$done( $api->delete( '/api/employer/logo', $token ), cvc_employer_url( 'thanh-vien' ) );
+			return;
 		case 'profile':
 			$done( $api->put( '/api/employer/profile', array_filter( array( 'website' => esc_url_raw( $p( 'website' ) ) ?: null, 'phone' => $p( 'phone' ) ?: null, 'address' => $p( 'address' ) ?: null ) ), $token ), cvc_employer_url( 'thanh-vien' ) );
 			return;
@@ -279,10 +290,11 @@ function cvc_render_recruitment_employer_block( array $r ): void {
 	$updates = (array) ( $r['employer_updates'] ?? array() );
 	if ( $emp ) :
 		?>
-		<div class="dz-notice" role="note">
-			<b><i class="fa-solid fa-circle-check" aria-hidden="true"></i> <?php echo esc_html( (string) $emp['label'] ); ?>:</b>
+		<div class="dz-notice cvc-emp-note" role="note">
+			<?php echo cvc_logo_html( isset( $emp['logo'] ) ? (string) $emp['logo'] : null, (string) $emp['name'], 44 ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+			<div><b><i class="fa-solid fa-circle-check" aria-hidden="true"></i> <?php echo esc_html( (string) $emp['label'] ); ?>:</b>
 			<?php echo esc_html( (string) $emp['name'] ); ?>
-			<?php if ( ! empty( $emp['website'] ) ) : ?> · <a href="<?php echo esc_url( (string) $emp['website'] ); ?>" target="_blank" rel="nofollow noopener">website đơn vị</a><?php endif; ?>
+			<?php if ( ! empty( $emp['website'] ) ) : ?> · <a href="<?php echo esc_url( (string) $emp['website'] ); ?>" target="_blank" rel="nofollow noopener">website đơn vị</a><?php endif; ?></div>
 		</div>
 		<?php
 	endif;

@@ -41,6 +41,22 @@ get_header();
 		<?php endforeach; ?>
 	</section>
 
+	<?php
+	$show = get_transient( 'cvc_employer_showcase' );
+	if ( ! is_array( $show ) ) {
+		$sr   = cvc_employer_api()->get( '/api/employer/showcase' );
+		$show = $sr['ok'] ? (array) ( $sr['data']['data'] ?? array() ) : array();
+		set_transient( 'cvc_employer_showcase', $show, 30 * MINUTE_IN_SECONDS );
+	}
+	if ( count( $show ) >= 4 ) :
+		?>
+	<section class="dz-section" aria-label="Đơn vị đã tham gia"><h2 class="dz-h2">Đơn vị đã tham gia</h2>
+		<ul class="cvc-logo-strip">
+			<?php foreach ( $show as $sh ) : ?><li title="<?php echo esc_attr( (string) $sh['name'] ); ?>"><?php echo cvc_logo_html( (string) ( $sh['logo'] ?? '' ), (string) $sh['name'], 72 ); // phpcs:ignore WordPress.Security.EscapeOutput ?><span><?php echo esc_html( (string) $sh['name'] ); ?></span></li><?php endforeach; ?>
+		</ul>
+	</section>
+	<?php endif; ?>
+
 	<section class="dz-section"><h2 class="dz-h2">Cách đăng tin</h2>
 		<ol class="dz-list">
 			<li><div class="dz-item-title">1. Đăng ký tài khoản đơn vị</div><div class="dz-item-sum">Một lần điền: người phụ trách, email, tên đơn vị, tỉnh/thành, điện thoại cơ quan<?php echo ! empty( $set['private_enabled'] ) ? '; chọn công lập hoặc ngoài công lập' : ''; ?>.</div></li>

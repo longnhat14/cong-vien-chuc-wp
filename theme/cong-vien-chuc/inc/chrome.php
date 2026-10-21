@@ -156,7 +156,7 @@ function cvc_chrome_header(): void {
 				<a class="ch-iconbtn" href="<?php echo esc_url( cvc_search_url() ); ?>" data-ch-search aria-label="Tìm kiếm"><?php echo $ico['search']; // phpcs:ignore WordPress.Security.EscapeOutput ?></a>
 				<?php if ( $logged_in ) : ?>
 				<a class="ch-iconbtn" href="<?php echo esc_url( cvc_account_url( 'notifications' ) ); ?>" aria-label="<?php echo esc_attr( $unread > 0 ? sprintf( 'Thông báo: %d chưa đọc', $unread ) : 'Thông báo' ); ?>"><?php echo $ico['bell']; // phpcs:ignore WordPress.Security.EscapeOutput ?><?php if ( $unread > 0 ) : ?><span class="ch-count"><?php echo esc_html( $unread > 9 ? '9+' : (string) $unread ); ?></span><?php endif; ?></a>
-				<a class="ch-btn ch-btn-primary ch-btn-small" href="<?php echo esc_url( $is_emp ? home_url( '/don-vi/' ) : cvc_account_url() ); ?>"><?php echo $is_emp ? 'Đơn vị' : 'Tài khoản'; ?> <?php echo $ico['arrow']; // phpcs:ignore WordPress.Security.EscapeOutput ?></a>
+				<a class="ch-btn ch-btn-primary ch-btn-small ch-acc-btn" href="<?php echo esc_url( $is_emp ? home_url( '/don-vi/' ) : cvc_account_url() ); ?>"><?php echo function_exists( 'cvc_current_avatar_html' ) ? cvc_current_avatar_html( 22, 'ch-acc-avatar' ) : ''; // phpcs:ignore WordPress.Security.EscapeOutput ?><?php echo $is_emp ? 'Đơn vị' : 'Tài khoản'; ?> <?php echo $ico['arrow']; // phpcs:ignore WordPress.Security.EscapeOutput ?></a>
 				<?php else : ?>
 				<a class="ch-btn ch-btn-outline ch-btn-small" href="<?php echo esc_url( cvc_login_url( $current ) ); ?>">Đăng nhập</a>
 				<a class="ch-btn ch-btn-primary ch-btn-small" href="<?php echo esc_url( cvc_register_url() ); ?>">Tạo tài khoản <?php echo $ico['arrow']; // phpcs:ignore WordPress.Security.EscapeOutput ?></a>

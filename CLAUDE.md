@@ -70,3 +70,8 @@ Trước khi code:
 - Dữ liệu: `cvc_home17_data()` ← `GET /api/homepage/overview` (cache 5 phút ở backend). AJAX `cvc_home_jobs` (tin còn hạn theo tỉnh, transient 10 phút) và `cvc_ai_coach` (→ `POST /api/ai/coach`, backend giới hạn 10/phút + 40/ngày theo IP thật). Cấu hình JS `window.CVC_HOME` đặt qua `$GLOBALS['cvc_home17_cfg']` (in trong wp_head, không gọi wp_add_inline_script trước khi script được enqueue).
 - Khu `#khoa-hoc`: có khóa bán được → thẻ khóa học; chưa có → form "Báo tôi khi mở" (newsletter `source=courses_coming_soon`) + danh sách khóa "Sắp mở".
 - Liên quan: `/tinh-luong/` (`template-salary.php`, công cụ lương chuyển từ trang chủ cũ), `/tuyen-dung/?tinh=<province_id>`, `/tai-lieu/?dinh-dang=word|pdf|excel|ppt`. SEO: Rank Math bị ghi đè title/description/canonical bằng giá trị `cvc_seo_set_*()` (inc/seo.php).
+
+## Đăng ký 2 loại tài khoản, ảnh đại diện, bảng xếp hạng (21/10/2026)
+- `/dang-ky/` chọn "Thí sinh / học viên" hoặc "Đơn vị tuyển dụng" (`?loai=don-vi`); lỗi giữ lại dữ liệu đã nhập (`cvc_flash_old_input`). Tài khoản đơn vị: đăng nhập → `/don-vi/`, nút đầu trang "Đơn vị" + "Học tập". Menu "Tuyển dụng" (`cvc_rec_nav_item`): Tin tuyển dụng · Tin ngoài công lập (khi bật) · Đăng tin tuyển dụng.
+- Ảnh: `inc/avatars.php` (`cvc_avatar_html` ảnh/chữ cái đầu, `cvc_logo_html`, `cvc_render_image_picker` + `assets/js/cvc-avatar-crop.js` khung cắt), hồ sơ `/tai-khoan/ho-so/` (ảnh + công tắc hiện tên trên bảng xếp hạng), logo ở `/don-vi/thanh-vien/`.
+- Bảng xếp hạng: `/xep-hang/` (`template-leaderboard.php`, `inc/leaderboard.php`), Top 5 trên trang đề và trang tin, khung "Xếp hạng" trên trang làm bài (đã nộp) và trang kết quả, huy hiệu ở Tổng quan tài khoản. Menu Đề thi → Đánh giá → "Bảng xếp hạng".

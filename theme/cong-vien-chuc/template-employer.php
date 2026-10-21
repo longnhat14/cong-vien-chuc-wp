@@ -51,6 +51,7 @@ get_header();
 		<p class="text-xs font-bold uppercase tracking-wider text-ink-muted"><a href="<?php echo esc_url( cvc_employer_landing_url() ); ?>">Dành cho đơn vị tuyển dụng</a></p>
 		<h1><?php echo esc_html( $titles[ $view ] ?? 'Đơn vị tuyển dụng' ); ?></h1>
 		<?php if ( $emp ) : ?>
+			<?php if ( ! empty( $emp['logo'] ) ) : ?><p class="mt-2"><?php echo cvc_logo_html( (string) $emp['logo'], (string) $emp['name'], 56 ); // phpcs:ignore WordPress.Security.EscapeOutput ?></p><?php endif; ?>
 			<p class="text-sm text-ink-muted"><?php echo esc_html( (string) $emp['name'] ); ?> · <?php echo wp_kses_post( cvc_employer_status_tag( (string) $emp['status'] ) ); ?>
 				<?php if ( 'auto' === ( $emp['trust'] ?? '' ) ) : ?> <span class="dz-tag is-ok">Được tự đăng tin</span><?php endif; ?>
 				<?php if ( 'private' === ( $emp['sector'] ?? '' ) ) : ?> <span class="dz-tag">Ngoài công lập</span><?php endif; ?></p>
@@ -363,6 +364,21 @@ get_header();
 		$sr  = mb_strlen( $q ) >= 3 ? $api->get( '/api/employer/recruitments/search', array( 'q' => $q ), $token ) : null;
 		?>
 		<div class="grid lg:grid-cols-2 gap-4">
+			<section class="dz-card space-y-3"><h2 class="dz-h2">Logo đơn vị</h2>
+				<div class="cvc-avatar-row">
+					<?php echo ! empty( $emp['logo'] ) ? cvc_logo_html( (string) $emp['logo'], (string) $emp['name'], 96 ) : '<span class="cvc-logo is-empty" aria-hidden="true">Chưa có logo</span>'; // phpcs:ignore WordPress.Security.EscapeOutput ?>
+					<div class="cvc-avatar-forms">
+						<?php $form_open( 'logo', array(), true ); ?>
+							<?php cvc_render_image_picker( 'file', 'contain' ); ?>
+							<button class="dz-btn dz-btn-primary" type="submit">Lưu logo</button>
+						</form>
+						<?php if ( ! empty( $emp['logo'] ) ) : ?>
+							<?php $form_open( 'logo_remove' ); ?><button class="cvc-linkbtn" type="submit">Xóa logo</button></form>
+						<?php endif; ?>
+					</div>
+				</div>
+				<p class="text-sm text-ink-muted">Logo hiện cạnh tin tuyển dụng của đơn vị<?php echo 'verified' === ( $emp['status'] ?? '' ) ? '' : ' sau khi đơn vị được xác minh'; ?>. Dùng đúng logo / con dấu biểu trưng của đơn vị; biên tập viên có thể gỡ logo không phù hợp.</p>
+			</section>
 			<section class="dz-card space-y-3"><h2 class="dz-h2">Thông tin đơn vị</h2>
 				<?php $form_open( 'profile' ); ?>
 					<div><label class="<?php echo esc_attr( $label ); ?>">Điện thoại</label><input name="phone" value="<?php echo esc_attr( (string) ( $emp['phone'] ?? '' ) ); ?>" class="<?php echo esc_attr( $input ); ?>"></div>

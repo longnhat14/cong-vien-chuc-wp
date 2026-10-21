@@ -422,6 +422,12 @@ $doc_icon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H
 					<?php if ( $is_submitted && $real_attempt_id > 0 ) : ?><a class="sx-btn sx-primary sx-wide" href="<?php echo esc_url( cvc_exam_result_url( (int) $real_attempt_id ) ); ?>">Xem kết quả &amp; lộ trình ôn tập</a><?php else : ?><a class="sx-btn sx-wide" href="<?php echo esc_url( cvc_account_url( 'recommendations' ) ); ?>">Xem gợi ý ôn tập</a><?php endif; ?>
 				</div>
 			</section>
+			<?php if ( $is_submitted && $real_attempt_id > 0 && function_exists( 'cvc_render_attempt_ranking' ) ) : ?>
+				<?php ob_start(); cvc_render_attempt_ranking( (int) $real_attempt_id ); $cvc_rank_html = (string) ob_get_clean(); ?>
+				<?php if ( '' !== trim( $cvc_rank_html ) ) : ?>
+			<section class="sx-panel"><div class="sx-body"><?php echo $cvc_rank_html; // phpcs:ignore WordPress.Security.EscapeOutput ?></div></section>
+				<?php endif; ?>
+			<?php endif; ?>
 		</aside>
 	</div>
 

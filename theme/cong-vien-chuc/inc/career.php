@@ -243,7 +243,7 @@ function cvc_ci_render_job_card( array $r, bool $logged_in ): void {
 			<div class="ci-job-logo" aria-hidden="true">⌂</div>
 			<div class="ci-job-main">
 				<h3 class="ci-job-title"><?php if ( ! empty( $r['pinned'] ) ) : ?><span class="ci-pill is-blue" title="Tin được đơn vị ghim"><i class="fa-solid fa-thumbtack" aria-hidden="true"></i> Ghim</span> <?php endif; ?><a href="<?php echo esc_url( cvc_recruitment_url( (string) $r['slug'] ) ); ?>"><?php echo esc_html( (string) $r['title'] ); ?></a></h3>
-				<?php if ( ! empty( $r['employer'] ) ) : ?><div class="ci-meta"><span><i class="fa-solid fa-circle-check" aria-hidden="true"></i> <?php echo esc_html( (string) $r['employer']['label'] ); ?></span></div><?php endif; ?>
+				<?php if ( ! empty( $r['employer'] ) ) : ?><div class="ci-meta"><span class="cvc-emp-chip"><?php echo cvc_logo_html( isset( $r['employer']['logo'] ) ? (string) $r['employer']['logo'] : null, (string) ( $r['employer']['name'] ?? '' ), 22 ); // phpcs:ignore WordPress.Security.EscapeOutput ?><i class="fa-solid fa-circle-check" aria-hidden="true"></i> <?php echo esc_html( (string) $r['employer']['label'] ); ?></span></div><?php endif; ?>
 				<div class="ci-meta"><?php foreach ( $meta as $m ) : ?><span><?php echo esc_html( $m ); ?></span><?php endforeach; ?></div>
 			</div>
 			<?php echo cvc_ci_status_pill( $st ); // phpcs:ignore WordPress.Security.EscapeOutput ?>

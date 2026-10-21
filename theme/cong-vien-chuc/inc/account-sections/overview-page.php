@@ -299,6 +299,9 @@ get_header();
 				<a class="ad-tile" href="<?php echo esc_url( cvc_account_url( 'my-documents' ) ); ?>"><span class="ad-itemico">▧</span><span><strong>Tài liệu của tôi</strong><small>Tài liệu đã mua, đã tải</small></span></a>
 			</section>
 
+			<?php if ( function_exists( 'cvc_render_my_leaderboard' ) ) : ?>
+			<section class="ad-card"><div class="ad-cbody"><?php cvc_render_my_leaderboard(); ?></div></section>
+			<?php endif; ?>
 			<section class="ad-card ad-activity">
 				<div class="ad-chead"><div><h3>Hoạt động gần đây</h3><small>Bài làm, nội dung đã lưu và đã xem</small></div><a class="ad-btn is-sm" href="<?php echo esc_url( cvc_account_url( 'exam-history' ) ); ?>">Xem lịch sử →</a></div>
 				<div class="ad-cbody ad-list">

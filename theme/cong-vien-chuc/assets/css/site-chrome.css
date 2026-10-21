@@ -268,3 +268,9 @@
  :root .ch-nav-links .ch-mega-more a{min-height:0;padding:6px 8px;border:0}
 }
 @media(max-width:420px){:root .ch-nav-sub.ch-mega{padding-left:12px}}
+
+/* Ảnh đại diện (21/10/2026) - dùng cả trang chủ v17 */
+.cvc-avatar{display:inline-flex;align-items:center;justify-content:center;border-radius:50%;object-fit:cover;flex:none;background:#eaf3fc;color:#fff;font-weight:bold;line-height:1;letter-spacing:.02em;overflow:hidden;vertical-align:middle}
+.cvc-avatar.is-initials{font-family:inherit}
+:root .ch-acc-btn{gap:7px}
+:root .ch-acc-btn .ch-acc-avatar{box-shadow:0 0 0 2px rgba(255,255,255,.85)}

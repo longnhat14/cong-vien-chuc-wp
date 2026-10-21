@@ -351,6 +351,10 @@ else :
 
 	</div>
 	<aside class="right"><div class="right-grid">
+		<?php if ( function_exists( 'cvc_render_attempt_ranking' ) ) : ?>
+			<?php ob_start(); cvc_render_attempt_ranking( $attempt_id, 'side-title' ); $cvc_rank_html = (string) ob_get_clean(); ?>
+			<?php if ( '' !== trim( $cvc_rank_html ) ) : ?><section class="card"><div class="pad"><?php echo $cvc_rank_html; // phpcs:ignore WordPress.Security.EscapeOutput ?></div></section><?php endif; ?>
+		<?php endif; ?>
 		<section class="card"><div class="pad"><h2 class="side-title">Bước tiếp theo</h2>
 			<?php if ( $has_quiz( 'wrong' ) ) : ?><button class="side-btn" id="retry" type="button" data-action="practice" data-kind="wrong"><span class="ico">↻</span><span><b>Luyện lại câu sai</b><small>Tạo bài luyện từ <?php $e( $miss ); ?> câu chưa đúng</small></span></button><?php endif; ?>
 			<?php if ( $has_quiz( 'weak' ) ) : ?><button class="side-btn" id="weak" type="button" data-action="practice" data-kind="weak"><span class="ico">◎</span><span><b>Ôn chủ đề còn yếu</b><small><?php $e( $trim( $weak_name, 48 ) ); ?></small></span></button><?php else : ?><a class="side-btn" id="weak" href="#study-resources"><span class="ico">◎</span><span><b>Ôn chủ đề còn yếu</b><small>Bắt đầu từ nhóm điểm thấp nhất</small></span></a><?php endif; ?>

@@ -200,6 +200,9 @@ function cvc_admin_render_employer_detail( int $id ): void {
 			<dt>Giấy tờ</dt><dd><?php if ( ! empty( $e['document_name'] ) ) : ?><a class="underline" target="_blank" rel="noopener" href="<?php echo esc_url( cvc_admin_employer_file_url( 'doc', $id ) ); ?>"><?php echo esc_html( (string) $e['document_name'] ); ?></a><?php else : ?>—<?php endif; ?></dd>
 			<dt>Tin đã đăng / bị trả lại</dt><dd><?php echo (int) ( $e['posts_published'] ?? 0 ); ?> / <?php echo (int) ( $e['posts_rejected'] ?? 0 ); ?></dd>
 			<dt>Quyền đăng</dt><dd><?php echo 'auto' === ( $e['trust'] ?? '' ) ? 'Tự đăng (hậu kiểm)' : 'Qua duyệt'; ?></dd>
+			<dt>Logo</dt><dd><?php if ( ! empty( $e['logo'] ) ) : ?><?php echo cvc_logo_html( (string) $e['logo'], (string) $e['name'], 64 ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+				<?php if ( cvc_admin_can( 'employer.review' ) ) : ?><?php cvc_admin_employer_form( 'logo_remove', array( 'id' => $id ), 'inline-flex gap-1 mt-1' ); ?><input name="note" class="<?php echo esc_attr( $inp ); ?>" placeholder="Lý do gỡ"><button class="<?php echo esc_attr( $btn ); ?> text-red-700">Gỡ logo</button></form><?php endif; ?>
+				<?php else : ?>—<?php endif; ?></dd>
 		</dl>
 		<div class="flex flex-wrap gap-2 pt-2">
 			<?php if ( cvc_admin_can( 'employer.review' ) ) : ?>
@@ -306,6 +309,9 @@ function cvc_admin_handle_employer(): void {
 			break;
 		case 'emp_trust':
 			$res = $client->post( '/api/admin/employers/' . $id . '/trust', array( 'trust' => 'auto' === sanitize_key( wp_unslash( $_POST['trust'] ?? '' ) ) ? 'auto' : 'review' ), $token );
+			break;
+		case 'logo_remove':
+			$res = $client->post( '/api/admin/employers/' . $id . '/remove-logo', array( 'note' => $note ?: null ), $token );
 			break;
 		case 'unpin':
 			$res = $client->post( '/api/admin/recruitments/' . absint( $_POST['recruitment_id'] ?? 0 ) . '/unpin', array(), $token );

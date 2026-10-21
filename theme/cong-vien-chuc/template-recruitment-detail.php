@@ -943,6 +943,7 @@ get_header();
 	<?php endif; ?>
 
 	<?php if ( function_exists( 'cvc_ci_render_detail_block' ) ) { cvc_ci_render_detail_block( $rid ); } ?>
+	<?php if ( function_exists( 'cvc_render_leaderboard_mini' ) && $rid ) { cvc_render_leaderboard_mini( array( 'dot' => (int) $rid ), 'Bảng xếp hạng ôn thi đợt này', 'rd-card cvc-lb-rd' ); } // Bảng xếp hạng (21/10/2026) ?>
 
 	<div class="rd-legacy"><?php cvc_render_candidate_kit( $recruitment ); ?></div>
 
