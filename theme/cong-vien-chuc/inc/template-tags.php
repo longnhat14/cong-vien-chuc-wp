@@ -1739,6 +1739,57 @@ function cvc_search_domains(): array {
 }
 
 /**
+ * Đường dẫn + nhãn + thông tin phụ cho 1 kết quả GET /api/search (API chỉ trả type + slug, không có url).
+ *
+ * @param array<string, mixed> $result
+ * @return array{url: string, label: string, meta: array<int, string>}
+ */
+function cvc_search_result_link( array $result ): array {
+	$type = (string) ( $result['type'] ?? '' );
+	$slug = (string) ( $result['slug'] ?? '' );
+	$meta = is_array( $result['meta'] ?? null ) ? $result['meta'] : array();
+
+	$builders = array(
+		'course'         => 'cvc_course_url',
+		'topic'          => 'cvc_topic_url',
+		'recruitment'    => 'cvc_recruitment_url',
+		'knowledge'      => 'cvc_knowledge_item_url',
+		'exam'           => 'cvc_exam_url',
+		'legal_document' => 'cvc_legal_document_url',
+	);
+	$url = '';
+	if ( '' !== $slug && isset( $builders[ $type ] ) && function_exists( $builders[ $type ] ) ) {
+		$url = (string) call_user_func( $builders[ $type ], $slug );
+	}
+
+	$label = 'Kết quả';
+	foreach ( cvc_search_domains() as $domain ) {
+		if ( $domain['result_type'] === $type ) {
+			$label = $domain['label'];
+			break;
+		}
+	}
+
+	$info = array();
+	foreach ( array( 'document_number', 'issuing_agency', 'agency', 'location', 'exam_subject', 'topic' ) as $k ) {
+		if ( ! empty( $meta[ $k ] ) && is_string( $meta[ $k ] ) ) {
+			$info[] = $meta[ $k ];
+		}
+	}
+	if ( ! empty( $meta['effective_date'] ) && is_string( $meta['effective_date'] ) && ( $ts = strtotime( $meta['effective_date'] ) ) ) {
+		$info[] = 'Hiệu lực ' . wp_date( 'd/m/Y', $ts );
+	}
+	if ( ! empty( $meta['application_deadline'] ) && is_string( $meta['application_deadline'] ) && ( $ts = strtotime( $meta['application_deadline'] ) ) ) {
+		$info[] = 'Hạn nộp ' . wp_date( 'd/m/Y', $ts );
+	}
+	if ( ! empty( $meta['total_questions'] ) ) {
+		$info[] = (int) $meta['total_questions'] . ' câu';
+	}
+
+	return array( 'url' => $url, 'label' => $label, 'meta' => array_slice( $info, 0, 3 ) );
+}
+
+/**
  * Danh sách type hợp lệ cho query param "type" (dùng để validate URL
  * + build filter UI) - luôn gồm 'all' + các key của cvc_search_domains().
  *

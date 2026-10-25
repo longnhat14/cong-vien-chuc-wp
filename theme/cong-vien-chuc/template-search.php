@@ -156,17 +156,26 @@ get_header();
 					<div class="space-y-3">
 						<?php foreach ( $items as $s_item ) : ?>
 							<?php
+							$s_link  = cvc_search_result_link( (array) $s_item );
 							$s_title = $s_item['title'] ?? ($s_item['name'] ?? 'Kết quả tìm kiếm');
-							$s_url   = $s_item['url'] ?? '#';
-							$s_type  = $s_item['type_label'] ?? 'Dữ liệu';
-							$s_desc  = $s_item['summary'] ?? ($s_item['description'] ?? '');
+							$s_url   = $s_link['url'];
+							$s_type  = $s_link['label'];
+							$s_desc  = $s_item['excerpt'] ?? ($s_item['summary'] ?? ($s_item['description'] ?? ''));
+							if ( '' === $s_url ) {
+								continue; // khong dung duoc duong dan -> khong hien ket qua "chet"
+							}
+							if ( $s_desc === $s_title || ( '' !== $s_desc && false !== mb_strpos( (string) $s_title, (string) $s_desc ) ) ) {
+								$s_desc = ''; // trich yeu da nam trong tieu de
+							}
 							?>
 							<article class="dz-card hover:bg-acc-soft hover:border-acc-2 space-y-2 transition-all group">
 								<div class="flex items-center justify-between text-[10px]">
 									<span class="bg-acc-soft text-acc font-extrabold px-2.5 py-0.5 rounded-full border border-acc-line">
 										📌 <?php echo esc_html($s_type); ?>
 									</span>
-									<span class="text-ink-muted">Cập nhật 2026</span>
+									<?php if ( $s_link['meta'] ) : ?>
+										<span class="text-ink-muted text-right"><?php echo esc_html( implode( ' · ', $s_link['meta'] ) ); ?></span>
+									<?php endif; ?>
 								</div>
 
 								<h3 class="font-extrabold text-sm text-ink group-hover:text-cyan-300 leading-snug">
@@ -189,6 +198,22 @@ get_header();
 							</article>
 						<?php endforeach; ?>
 					</div>
+
+					<?php if ( $lastPg > 1 ) : ?>
+						<nav class="dz-card flex items-center justify-between text-xs" aria-label="Phân trang kết quả">
+							<?php if ( $currentPg > 1 ) : ?>
+								<a class="text-acc font-bold" href="<?php echo esc_url( cvc_search_url( $q, $type, $currentPg - 1 ) ); ?>">&larr; Trang trước</a>
+							<?php else : ?>
+								<span></span>
+							<?php endif; ?>
+							<span class="text-ink-muted">Trang <?php echo (int) $currentPg; ?> / <?php echo (int) $lastPg; ?></span>
+							<?php if ( $currentPg < $lastPg ) : ?>
+								<a class="text-acc font-bold" href="<?php echo esc_url( cvc_search_url( $q, $type, $currentPg + 1 ) ); ?>">Trang sau &rarr;</a>
+							<?php else : ?>
+								<span></span>
+							<?php endif; ?>
+						</nav>
+					<?php endif; ?>
 
 				<?php endif; ?>
 
