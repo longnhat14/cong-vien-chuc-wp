@@ -138,7 +138,7 @@ get_header();
 .cvp-info button:focus-visible,.cvp-alt:focus-visible{outline:2px solid #0e645d;outline-offset:2px}
 .cvp-warn{margin:12px 0 0;font-size:13px;padding:9px 11px;border-radius:9px;background:#fff4ef;color:#7a2d0c}
 .cvp-order ul{list-style:none;margin:0;padding:0}.cvp-order li{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px dashed #e3e7e9;font-size:14px}
-.cvp-order li.is-total{border-bottom:0;font-size:16px}.cvp-alt{margin-top:12px;font-size:13px;font-weight:bold;padding:8px 12px;border-radius:10px;border:1px solid #cfd6da;background:#fff;cursor:pointer}
+.cvp-order li b{white-space:nowrap}.cvp-order li.is-total{border-bottom:0;font-size:16px}.cvp-alt{margin-top:12px;font-size:13px;font-weight:bold;padding:8px 12px;border-radius:10px;border:1px solid #cfd6da;background:#fff;cursor:pointer}
 .cvp-note{font-size:12px;color:#5d6870;margin-top:10px}
 @media (max-width:760px){.cvp-grid{grid-template-columns:1fr}}
 </style>
