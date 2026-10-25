@@ -296,3 +296,18 @@ a.side-btn{text-decoration:none}
 @media(max-width:650px){.er-introside{justify-content:flex-start;margin-top:12px}.er-introside .complete{margin-top:0}}
 @media print{.er-introside .er-tool{display:none!important}}
 .cq-goform{margin:0}.cq-goform .side-btn{width:100%;text-align:left;font:inherit;cursor:pointer}
+
+/* Báo câu sai (25/10/2026) */
+.qreport{margin-top:8px;text-align:right}
+.qreport-btn{border:0;background:none;color:#7a5b2e;font-size:12.5px;padding:4px 6px;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.qreport-btn:hover{color:#5a3f17}.qreport-btn[disabled]{color:#156361;text-decoration:none;cursor:default}
+.qreport-form{margin-top:8px;text-align:left;padding:10px 12px;border:1px solid #e3d6bf;background:#fffaf1;border-radius:9px;font-size:13.5px}
+.qreport-form fieldset{border:0;margin:0;padding:0;display:grid;gap:5px}
+.qreport-form legend{font-weight:700;margin-bottom:4px}
+.qreport-form label{display:flex;gap:7px;align-items:flex-start;cursor:pointer}
+.qreport-note{flex-direction:column;margin-top:8px}
+.qreport-note textarea{width:100%;border:1px solid #d6cbb6;border-radius:7px;padding:6px 8px;font:inherit;resize:vertical}
+.qreport-actions{display:flex;gap:8px;margin-top:8px}
+.qreport-send{background:#156361;color:#fff;border:0;border-radius:8px;padding:6px 12px;font-weight:700}
+.qreport-cancel{background:#fff;border:1px solid #d6cbb6;border-radius:8px;padding:6px 12px}
+@media print{.qreport{display:none}}

@@ -203,6 +203,27 @@
     }).catch(function () { busy(btn, false); note('Lỗi kết nối, vui lòng thử lại.'); });
   }
   $$('.ask-ai').forEach(function (b) { b.onclick = function () { ask(b); }; });
+
+  /* --- Báo câu sai (25/10/2026) --- */
+  $$('.qreport').forEach(function (box) {
+    var btn = $('.qreport-btn', box), form = $('.qreport-form', box);
+    if (!btn || !form) return;
+    btn.onclick = function () { form.hidden = !form.hidden; btn.setAttribute('aria-expanded', form.hidden ? 'false' : 'true'); };
+    $('.qreport-cancel', form).onclick = function () { form.hidden = true; btn.setAttribute('aria-expanded', 'false'); };
+    form.onsubmit = function (ev) {
+      ev.preventDefault();
+      var reason = (form.querySelector('input[name="reason"]:checked') || {}).value;
+      if (!reason) { note('Chọn lý do báo câu sai.'); return; }
+      var send = $('.qreport-send', form);
+      busy(send, true, 'Đang gửi…');
+      post('cvc_result_report', { question_id: btn.dataset.report, reason: reason, note: form.note.value }).then(function (res) {
+        busy(send, false);
+        if (!res || !res.success) { fail(res, 'Chưa gửi được báo cáo.'); return; }
+        form.hidden = true; btn.disabled = true; btn.textContent = '✓ Đã báo câu sai';
+        note((res.data && res.data.message) || 'Cảm ơn bạn! Báo cáo đã được ghi nhận.');
+      }).catch(function () { busy(send, false); note('Lỗi kết nối, vui lòng thử lại.'); });
+    };
+  });
   var why = $('#why');
   if (why) why.onclick = function () {
     var first = qs.filter(function (q) { return q.dataset.status === 'wrong'; })[0] || qs.filter(function (q) { return q.dataset.status === 'blank'; })[0];

@@ -46,6 +46,7 @@ require_once __DIR__ . '/inc/admin/official-domains.php';
 require_once __DIR__ . '/inc/admin/rounds.php';
 require_once __DIR__ . '/inc/admin/personal-exams.php';
 require_once __DIR__ . '/inc/admin/recruitment-imports.php';
+require_once __DIR__ . '/inc/admin/question-reports.php';
 require_once __DIR__ . '/inc/recruitment-fulltext.php';
 require_once __DIR__ . '/inc/payment-sepay.php';
 require_once __DIR__ . '/inc/employer.php';

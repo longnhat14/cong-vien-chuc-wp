@@ -92,7 +92,30 @@ function cvc_result_ajax_fail( array $result ): void {
 	wp_send_json_error( array( 'message' => cvc_api_error_message( $result ) ), (int) ( $result['status'] ?? 0 ) ?: 500 );
 }
 
-foreach ( array( 'tasks', 'practice', 'start', 'save_job', 'explain' ) as $cvc_result_action ) {
+/** Báo câu sai (25/10/2026) -> POST /api/questions/{id}/reports. */
+function cvc_result_ajax_report(): void {
+	$token    = cvc_result_ajax_token();
+	$question = absint( $_POST['question_id'] ?? 0 );
+	$reason   = sanitize_key( (string) ( $_POST['reason'] ?? '' ) );
+	if ( ! $question || '' === $reason ) {
+		wp_send_json_error( array( 'message' => 'Dữ liệu không hợp lệ.' ), 422 );
+	}
+	$result = ( new CVC_Api_Client( null, 20 ) )->post(
+		'/api/questions/' . $question . '/reports',
+		array(
+			'reason'          => $reason,
+			'note'            => sanitize_textarea_field( wp_unslash( (string) ( $_POST['note'] ?? '' ) ) ),
+			'exam_attempt_id' => absint( $_POST['attempt_id'] ?? 0 ) ?: null,
+		),
+		$token
+	);
+	if ( ! $result['ok'] ) {
+		cvc_result_ajax_fail( $result );
+	}
+	wp_send_json_success( array( 'message' => (string) ( $result['data']['message'] ?? 'Cảm ơn bạn! Báo cáo đã được ghi nhận.' ) ) );
+}
+
+foreach ( array( 'tasks', 'practice', 'start', 'save_job', 'explain', 'report' ) as $cvc_result_action ) {
 	add_action( 'wp_ajax_cvc_result_' . $cvc_result_action, 'cvc_result_ajax_' . $cvc_result_action );
 	add_action( 'wp_ajax_nopriv_cvc_result_' . $cvc_result_action, 'cvc_result_ajax_' . $cvc_result_action );
 }

@@ -246,6 +246,20 @@ else :
 						<?php if ( ! empty( $q['source']['url'] ) ) : ?><br><a href="<?php $a( $rel( (string) $q['source']['url'] ) ); ?>" class="source" target="_blank" rel="noopener">Căn cứ: <?php $e( $q['source']['label'] ); ?> →</a><?php elseif ( ! empty( $q['source_reference'] ) ) : ?><br><span class="source-ref">Nguồn: <?php $e( $q['source_reference'] ); ?></span><?php endif; ?>
 						<?php if ( 'correct' !== $st ) : ?><br><button class="ask-ai" type="button" data-ask="<?php echo (int) $q['question_id']; ?>">✦ Hỏi AI Coach vì sao<?php echo 'blank' === $st ? '' : ' tôi sai'; ?></button><div class="ai-out" hidden></div><?php endif; ?>
 					</div>
+					<div class="qreport">
+						<button class="qreport-btn" type="button" data-report="<?php echo (int) $q['question_id']; ?>" aria-expanded="false">⚑ Báo câu sai</button>
+						<form class="qreport-form" hidden>
+							<fieldset><legend>Câu này có vấn đề gì?</legend>
+								<label><input type="radio" name="reason" value="wrong_answer" required> Đáp án sai</label>
+								<label><input type="radio" name="reason" value="ambiguous"> Nhiều đáp án đúng / câu mơ hồ</label>
+								<label><input type="radio" name="reason" value="outdated"> Quy định đã thay đổi</label>
+								<label><input type="radio" name="reason" value="typo"> Lỗi chính tả / trình bày</label>
+								<label><input type="radio" name="reason" value="other"> Lý do khác</label>
+							</fieldset>
+							<label class="qreport-note">Ghi chú (không bắt buộc): căn cứ, đáp án bạn cho là đúng…<textarea name="note" maxlength="1000" rows="2"></textarea></label>
+							<div class="qreport-actions"><button type="submit" class="qreport-send">Gửi báo cáo</button><button type="button" class="qreport-cancel">Hủy</button></div>
+						</form>
+					</div>
 				</article>
 			<?php endforeach; ?>
 		</div>
