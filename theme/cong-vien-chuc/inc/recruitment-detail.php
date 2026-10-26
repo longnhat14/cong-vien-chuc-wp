@@ -334,7 +334,7 @@ function cvc_rd_near_html( array $d, bool $detail ): string {
  *
  * @param array<int, array<string, mixed>> $groups
  */
-function cvc_rd_render_personal_exams( array $groups, string $focus_position = '', string $track_label = '', array $pricing = array() ): void {
+function cvc_rd_render_personal_exams( array $groups, string $focus_position = '', string $track_label = '', array $pricing = array(), int $recruitment_id = 0 ): void {
 	if ( empty( $groups ) ) {
 		return;
 	}
@@ -377,6 +377,9 @@ function cvc_rd_render_personal_exams( array $groups, string $focus_position = '
 						<?php if ( $positions ) : ?>
 							<p class="rd-muted rd-pe-pos"><?php echo esc_html( 'Áp dụng cho: ' . implode( '; ', array_slice( $positions, 0, 4 ) ) . ( count( $positions ) > 4 ? ' và ' . ( count( $positions ) - 4 ) . ' vị trí khác' : '' ) ); ?></p>
 						<?php endif; ?>
+					<?php endif; ?>
+					<?php if ( $recruitment_id > 0 && $exams && function_exists( 'cvc_pdf_button' ) ) : ?>
+						<p class="rd-pe-pdf"><?php echo cvc_pdf_button( 'recruitment', $recruitment_id, array( 'group' => (string) ( $g['group'] ?? '' ), 'label' => 'Tải trọn bộ ' . count( $exams ) . ' đề PDF (có đáp án)', 'variant' => 'dap-an' ) ); // phpcs:ignore WordPress.Security.EscapeOutput ?> <small class="rd-muted">Xem trước miễn phí · logo Công Viên Chức · mã QR làm bài online</small></p>
 					<?php endif; ?>
 					<div class="rd-linkgrid">
 						<?php foreach ( $exams as $e ) : ?>

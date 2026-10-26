@@ -47,6 +47,7 @@ require_once __DIR__ . '/inc/admin/rounds.php';
 require_once __DIR__ . '/inc/admin/personal-exams.php';
 require_once __DIR__ . '/inc/admin/recruitment-imports.php';
 require_once __DIR__ . '/inc/admin/question-reports.php';
+require_once __DIR__ . '/inc/admin/exam-pdf.php';
 require_once __DIR__ . '/inc/recruitment-fulltext.php';
 require_once __DIR__ . '/inc/payment-sepay.php';
 require_once __DIR__ . '/inc/employer.php';
@@ -54,6 +55,7 @@ require_once __DIR__ . '/inc/avatars.php';
 require_once __DIR__ . '/inc/leaderboard.php';
 require_once __DIR__ . '/inc/admin/employers.php';
 require_once __DIR__ . '/inc/personal-exams.php';
+require_once __DIR__ . '/inc/exam-pdf.php'; // Tải đề trắc nghiệm PDF (26/10/2026)
 require_once __DIR__ . '/inc/ingestion-cron.php';
 require_once __DIR__ . '/inc/seo.php';
 require_once __DIR__ . '/inc/auth.php';

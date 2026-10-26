@@ -47,6 +47,7 @@ function cvc_ingestion_tabs( string $active ): void {
 		'ten-mien' => array( 'Nguồn chính thức', cvc_admin_url( 'thu-thap', null, array( 'xem' => 'ten-mien' ) ) ),
 		'dot'      => array( 'Văn bản chưa xác định đợt', cvc_admin_url( 'thu-thap', null, array( 'xem' => 'dot' ) ) ),
 		'bao-cau-sai' => array( 'Báo câu sai', cvc_admin_url( 'thu-thap', null, array( 'xem' => 'bao-cau-sai' ) ) ),
+		'tai-pdf'     => array( 'Tải đề PDF', cvc_admin_url( 'thu-thap', null, array( 'xem' => 'tai-pdf' ) ) ),
 	);
 	echo '<nav class="flex flex-wrap gap-1 border-b border-slate-300" aria-label="Thu thập tin">';
 	foreach ( $tabs as $key => $tab ) {

@@ -154,7 +154,7 @@ else :
 	?>
 <main class="wrap" id="cvc-result" data-attempt="<?php echo (int) $at['id']; ?>">
 	<div class="crumb"><a href="<?php $a( home_url( '/' ) ); ?>">Trang chủ</a>　›　<a href="<?php $a( cvc_exams_url() ); ?>">Thi thử</a>　›　<?php if ( ! empty( $ex['slug'] ) && empty( $ex['personal'] ) ) : ?><a href="<?php $a( cvc_exam_url( (string) $ex['slug'] ) ); ?>"><?php $e( $trim( $ex['title'] ?? '', 60 ) ); ?></a>　›　<?php endif; ?>Kết quả &amp; Phân tích</div>
-	<div class="intro"><div><div class="eyebrow">BÁO CÁO NĂNG LỰC CÁ NHÂN</div><h1>Kết quả &amp; Phân tích bài thi</h1><p>Không chỉ xem điểm — hiểu phần cần củng cố và chọn bước ôn tập tiếp theo.</p></div><div class="er-introside"><div class="complete">● Đã chấm điểm</div><a class="er-tool" href="<?php $a( cvc_account_url( 'exam-history' ) ); ?>">Lịch sử thi</a><button class="er-tool" id="print" type="button">In / Lưu PDF</button></div></div>
+	<div class="intro"><div><div class="eyebrow">BÁO CÁO NĂNG LỰC CÁ NHÂN</div><h1>Kết quả &amp; Phân tích bài thi</h1><p>Không chỉ xem điểm — hiểu phần cần củng cố và chọn bước ôn tập tiếp theo.</p></div><div class="er-introside"><div class="complete">● Đã chấm điểm</div><a class="er-tool" href="<?php $a( cvc_account_url( 'exam-history' ) ); ?>">Lịch sử thi</a><button class="er-tool" id="print" type="button">In / Lưu PDF</button><?php if ( ! empty( $ex['id'] ) && empty( $ex['personal'] ) ) { echo cvc_pdf_button( 'exam', (int) $ex['id'], array( 'variant' => 'dap-an', 'label' => 'Tải đề + đáp án PDF', 'class' => 'er-tool' ) ); } // phpcs:ignore WordPress.Security.EscapeOutput ?></div></div>
 
 	<div class="grid"><div class="left">
 

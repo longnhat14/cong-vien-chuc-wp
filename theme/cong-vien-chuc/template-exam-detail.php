@@ -146,7 +146,7 @@ get_header();
 					<?php echo esc_html( implode( ' · ', array_filter( array( $duration > 0 ? $duration . ' phút' : null, $total_q . ' câu hỏi', null !== $pass_score ? 'Điểm đạt ' . $pass_score : null, $exam_subject_names ? implode( ', ', $exam_subject_names ) : null ) ) ) ); ?>
 				</p>
 				<span class="dz-rule" aria-hidden="true"></span>
-				<div style="margin-top:12px;display:flex;justify-content:center"><?php cvc_render_bookmark_button( 'exam', (int) ( $exam['id'] ?? 0 ) ); ?></div>
+				<div style="margin-top:12px;display:flex;justify-content:center;flex-wrap:wrap;gap:8px"><?php cvc_render_bookmark_button( 'exam', (int) ( $exam['id'] ?? 0 ) ); ?><?php if ( 'published' === ( $exam['status'] ?? 'published' ) ) { echo cvc_pdf_button( 'exam', (int) ( $exam['id'] ?? 0 ), array( 'label' => 'Tải đề PDF (có đáp án)', 'variant' => 'dap-an' ) ); } // phpcs:ignore WordPress.Security.EscapeOutput ?></div>
 			</header>
 
 			<!-- 3-COLUMN SHELL GRID -->
