@@ -355,6 +355,7 @@ function cvc_rd_render_personal_exams( array $groups, string $focus_position = '
 		usort( $groups, static fn ( $a, $b ) => ( $has( $a ) ? 0 : 1 ) <=> ( $has( $b ) ? 0 : 1 ) );
 	}
 	$total = array_sum( array_map( static fn ( $g ) => count( (array) ( $g['exams'] ?? array() ) ), $groups ) );
+	$set_slugs = function_exists( 'cvc_pdf_set_slugs_for_recruitment' ) ? cvc_pdf_set_slugs_for_recruitment( $recruitment_id ) : array();
 	?>
 	<section class="rd-card" id="de-rieng" aria-labelledby="rd-pe-h">
 		<div class="rd-card-head"><h2 id="rd-pe-h"><span class="rd-ico" aria-hidden="true">✎</span>Đề thi trắc nghiệm dành riêng cho tin này</h2></div>
@@ -379,7 +380,7 @@ function cvc_rd_render_personal_exams( array $groups, string $focus_position = '
 						<?php endif; ?>
 					<?php endif; ?>
 					<?php if ( $recruitment_id > 0 && $exams && function_exists( 'cvc_pdf_button' ) ) : ?>
-						<p class="rd-pe-pdf"><?php echo cvc_pdf_button( 'recruitment', $recruitment_id, array( 'group' => (string) ( $g['group'] ?? '' ), 'label' => 'Tải trọn bộ ' . count( $exams ) . ' đề PDF (có đáp án)', 'variant' => 'dap-an' ) ); // phpcs:ignore WordPress.Security.EscapeOutput ?> <small class="rd-muted">Xem trước miễn phí · logo Công Viên Chức · mã QR làm bài online</small></p>
+						<p class="rd-pe-pdf"><?php echo cvc_pdf_button( 'recruitment', $recruitment_id, array( 'group' => (string) ( $g['group'] ?? '' ), 'label' => 'Tải trọn bộ ' . count( $exams ) . ' đề PDF (có đáp án)', 'variant' => 'dap-an' ) ); // phpcs:ignore WordPress.Security.EscapeOutput ?> <small class="rd-muted">Xem trước miễn phí · logo Công Viên Chức · mã QR làm bài online</small><?php if ( ! empty( $set_slugs[ (string) ( $g['group'] ?? '' ) ] ) ) : ?> <a class="rd-pe-set" href="<?php echo esc_url( cvc_pdf_set_url( $set_slugs[ (string) ( $g['group'] ?? '' ) ] ) ); ?>">Trang bộ đề &amp; ảnh chia sẻ ›</a><?php endif; ?></p>
 					<?php endif; ?>
 					<div class="rd-linkgrid">
 						<?php foreach ( $exams as $e ) : ?>

@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Tăng số này khi thêm/sửa rewrite rule để buộc flush lại đúng 1 lần.
-const CVC_REWRITE_VERSION = '19';
+const CVC_REWRITE_VERSION = '20';
 
 /**
  * Section hợp lệ của /tai-khoan/{section}/ (Phase 10) - map slug tiếng
@@ -49,6 +49,11 @@ add_action( 'init', 'cvc_register_rewrite_rules' );
 function cvc_register_rewrite_rules(): void {
 	// 19/10/2026: sitemap tin tuyển dụng + vị trí (inc/sitemap.php), gắn vào sitemap_index của Rank Math.
 	add_rewrite_rule( '^sitemap-tuyen-dung\.xml$', 'index.php?cvc_sitemap=tuyen-dung', 'top' );
+	// 27/10/2026: Bộ đề PDF (inc/pdf-sets.php).
+	add_rewrite_rule( '^sitemap-bo-de-pdf\.xml$', 'index.php?cvc_sitemap=bo-de-pdf', 'top' );
+	add_rewrite_rule( '^bo-de-pdf/page/([0-9]+)/?$', 'index.php?cvc_page=pdf-sets&cvc_paged=$matches[1]', 'top' );
+	add_rewrite_rule( '^bo-de-pdf/([a-z0-9-]+)/?$', 'index.php?cvc_page=pdf-set-detail&cvc_pdf_slug=$matches[1]', 'top' );
+	add_rewrite_rule( '^bo-de-pdf/?$', 'index.php?cvc_page=pdf-sets', 'top' );
 	add_rewrite_rule(
 		'^khoa-hoc/page/([0-9]+)/?$',
 		'index.php?cvc_page=courses&cvc_paged=$matches[1]',
@@ -386,6 +391,7 @@ function cvc_register_query_vars( array $vars ): array {
 	$vars[] = 'cvc_certificate_code';
 	$vars[] = 'cvc_admin_resource';
 	$vars[] = 'cvc_admin_item';
+	$vars[] = 'cvc_pdf_slug';
 
 	return $vars;
 }
@@ -485,6 +491,8 @@ function cvc_template_include( string $template ): string {
 		'exam-result'           => 'template-exam-result.php',
 		'question-bank'         => 'template-question-bank.php',
 		'saved-questions'       => 'template-saved-questions.php',
+		'pdf-sets'              => 'template-pdf-sets.php',
+		'pdf-set-detail'        => 'template-pdf-set-detail.php',
 	);
 
 	if ( isset( $map[ $page ] ) ) {
@@ -754,6 +762,7 @@ function cvc_main_nav_items(): array {
 				array( 'group' => 'practice', 'label' => 'Ngân hàng câu hỏi', 'desc' => 'Luyện theo môn, chủ đề và điều khoản pháp luật', 'url' => cvc_question_bank_url(), 'sym' => '▤' ),
 				array( 'group' => 'practice', 'label' => 'Ôn tập kiến thức', 'desc' => 'Làm câu hỏi, xem giải thích và học căn cứ pháp lý', 'url' => cvc_exams_mode_url( 'on-tap' ), 'sym' => '✎' ),
 				array( 'group' => 'practice', 'label' => 'Câu hỏi đã lưu', 'desc' => 'Câu đánh dấu, câu sai và câu cần ôn lại', 'url' => cvc_saved_questions_url(), 'sym' => '⚑' ),
+				array( 'group' => 'assess', 'label' => 'Bộ đề PDF có đáp án', 'desc' => 'Tải đề theo tin tuyển dụng, theo văn bản - miễn phí', 'url' => home_url( '/bo-de-pdf/' ), 'sym' => '⇩' ),
 				array( 'group' => 'assess', 'label' => 'Thi thử như thi thật', 'desc' => 'Làm đề có thời gian, nộp bài và xem điểm', 'url' => cvc_exams_mode_url( 'thi-that' ), 'sym' => '◷' ),
 				array( 'group' => 'assess', 'label' => 'Bảng xếp hạng', 'desc' => 'Top thí sinh thi thử theo tuần, tháng, từng đề', 'url' => home_url( '/xep-hang/' ), 'sym' => '★' ),
 				array( 'group' => 'assess', 'label' => 'Kết quả & tiến độ', 'desc' => 'Tổng quan điểm số, tiến độ và chủ đề còn yếu', 'url' => cvc_account_url( 'overview' ), 'sym' => '↗' ),

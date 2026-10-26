@@ -82,6 +82,9 @@ function cvc_document_price_badge( array $doc ): string {
 		'Mẫu hồ sơ dự tuyển, văn bản tham khảo và tài liệu ôn tập — có tài liệu miễn phí và tài liệu trả phí biên soạn chuyên sâu.',
 		isset( $pagination['total'] ) ? array( array( number_format_i18n( (int) $pagination['total'] ), 'tài liệu' ) ) : array()
 	);
+	if ( function_exists( 'cvc_pdf_render_docs_banner' ) ) {
+		cvc_pdf_render_docs_banner(); // Bộ đề PDF (27/10/2026)
+	}
 	$filters = array(
 		''  => 'Tất cả',
 		'1' => 'Miễn phí',

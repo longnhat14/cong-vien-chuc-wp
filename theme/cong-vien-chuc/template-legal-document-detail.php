@@ -456,6 +456,7 @@ get_header();
 				</div>
 			</section>
 
+			<?php if ( function_exists( 'cvc_pdf_render_legal_block' ) ) { cvc_pdf_render_legal_block( $doc_id, '' !== $doc_number ? $doc_number : $title ); } // Bộ đề PDF (27/10/2026) ?>
 			<section class="ld-section" id="lien-quan">
 				<div class="ld-section-title"><div><h2>Văn bản &amp; tài liệu liên quan</h2><p>Kết nối theo văn bản sửa đổi – thay thế, căn cứ pháp lý của tin tuyển dụng và nội dung ôn thi</p></div></div>
 				<div class="ld-section-body">

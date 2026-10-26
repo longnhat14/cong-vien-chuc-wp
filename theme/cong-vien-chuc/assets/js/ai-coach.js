@@ -85,9 +85,22 @@
 		save();
 		if (open) { box.scrollTop = box.scrollHeight; if (focus !== false) { input.focus({ preventScroll: true }); } }
 	}
+	// Do luot hoi AI Coach cua nguoi den tu file PDF / anh bia (27/10/2026): 1 lan / phien.
+	function pdfAsk() {
+		try {
+			var r = JSON.parse(sessionStorage.getItem('cvc-pdf-ref') || 'null');
+			if (!r || sessionStorage.getItem('cvc-pdf-ask') || !window.CVC_AIC || !CVC_AIC.ajax) { return; }
+			sessionStorage.setItem('cvc-pdf-ask', '1');
+			var f = new FormData();
+			f.append('action', 'cvc_pdf_visit'); f.append('event', 'ai_ask'); f.append('source', r.source || 'pdf');
+			f.append('medium', r.medium || ''); f.append('code', r.code || ''); f.append('path', location.pathname);
+			if (navigator.sendBeacon) { navigator.sendBeacon(CVC_AIC.ajax, f); } else { fetch(CVC_AIC.ajax, { method: 'POST', body: f, credentials: 'same-origin', keepalive: true }); }
+		} catch (e) { /* bo qua */ }
+	}
 	function ask(text) {
 		var value = String(text || '').trim();
 		if (!value || busy) { return; }
+		pdfAsk();
 		if (panel.hidden) { setOpen(true); }
 		bubble(value, 'user'); remember(value, 'user');
 		input.value = ''; busy = true; send.disabled = true;
