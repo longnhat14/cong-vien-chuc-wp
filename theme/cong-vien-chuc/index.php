@@ -103,7 +103,6 @@ $exam_type_label = static function ( $type ) {
 /* Biểu tượng dùng lặp lại (giữ nguyên nét vẽ của thiết kế). */
 $ico_arrow = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
 $ico_check = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 12 4 4L19 6"/></svg>';
-$ico_brand = '<svg width="27" height="27" viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M7 23V9h4.4l4.6 7 4.6-7H25v14h-4V15l-5 7-5-7v8H7Z" fill="#E9C98E"/><path d="M6 27h20" stroke="#E9C98E" stroke-width="1.5" stroke-linecap="round"/></svg>';
 $ico_doc   = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 3h10l4 4v14H5z"/><path d="M14 3v5h5M8 13h8M8 17h6"/></svg>';
 $ico_exam  = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h2m3 0h3M8 15h2m3 0h3"/></svg>';
 $ico_files = '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 3h10l4 4v14H5z"/><path d="M14 3v5h5M8 13h8M8 17h8"/></svg>';

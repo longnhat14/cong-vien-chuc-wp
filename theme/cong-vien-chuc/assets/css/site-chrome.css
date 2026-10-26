@@ -274,3 +274,9 @@
 .cvc-avatar.is-initials{font-family:inherit}
 :root .ch-acc-btn{gap:7px}
 :root .ch-acc-btn .ch-acc-avatar{box-shadow:0 0 0 2px rgba(255,255,255,.85)}
+
+/* Logo mới (26/10/2026): biểu tượng tòa nhà + sách, không khung nền; chân trang dùng bản trắng-vàng. */
+:root .ch-brand-mark{background:none!important;box-shadow:none!important;border-radius:0!important;overflow:visible;animation:none!important}
+:root .ch-brand-mark:after{display:none!important}
+:root .ch-brand-mark img{display:block;width:100%;height:100%;object-fit:contain}
+:root .ch-brand:hover .ch-brand-mark{transform:translateY(-1px);box-shadow:none!important}

@@ -14,6 +14,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 add_action( 'wp_enqueue_scripts', 'cvc_chrome_assets', 5 );
+add_action( 'wp_head', 'cvc_brand_icons', 2 );
+add_action( 'admin_head', 'cvc_brand_icons', 2 );
+
+/** Biểu tượng tab trình duyệt / màn hình chính (bộ logo mới). */
+function cvc_brand_icons(): void {
+	if ( function_exists( 'has_site_icon' ) && has_site_icon() ) {
+		return;
+	}
+	printf( '<link rel="icon" href="%s" sizes="any">' . "\n", esc_url( cvc_brand_url( 'favicon.ico' ) ) );
+	printf( '<link rel="icon" type="image/png" sizes="32x32" href="%s">' . "\n", esc_url( cvc_brand_url( 'icon-32.png' ) ) );
+	printf( '<link rel="icon" type="image/png" sizes="192x192" href="%s">' . "\n", esc_url( cvc_brand_url( 'icon-192.png' ) ) );
+	printf( '<link rel="apple-touch-icon" sizes="180x180" href="%s">' . "\n", esc_url( cvc_brand_url( 'icon-180.png' ) ) );
+	echo '<meta name="theme-color" content="#0f2a4a">' . "\n";
+}
 
 function cvc_chrome_assets(): void {
 	if ( is_admin() ) {
@@ -45,7 +59,6 @@ function cvc_chrome_unread(): int {
 
 function cvc_chrome_icons(): array {
 	return array(
-		'brand'  => '<svg width="27" height="27" viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M7 23V9h4.4l4.6 7 4.6-7H25v14h-4V15l-5 7-5-7v8H7Z" fill="#E9C98E"/><path d="M6 27h20" stroke="#E9C98E" stroke-width="1.5" stroke-linecap="round"/></svg>',
 		'arrow'  => '<svg class="ch-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
 		'plus'   => '<svg class="ch-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="vertical-align:middle;width:17px" aria-hidden="true"><path d="M12 3v18M3 12h18"/></svg>',
 		'menu'   => '<svg class="ch-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>',
@@ -59,10 +72,18 @@ function cvc_chrome_icons(): array {
 	);
 }
 
-function cvc_chrome_brand( array $ico ): void {
+/** Đường dẫn tệp trong bộ logo (assets/brand, lấy từ Cong_Vien_Chuc_Logo_Pack 26/10/2026). */
+function cvc_brand_url( string $file ): string {
+	return get_theme_file_uri( '/assets/brand/' . $file );
+}
+
+/** Logo: biểu tượng navy trên nền sáng (đầu trang); bản trắng-vàng trên nền tối (chân trang). */
+function cvc_chrome_brand( array $ico, bool $light = false ): void {
+	unset( $ico );
+	$img = $light ? 'icon-light-128.png' : 'icon-128.png';
 	?>
 	<a class="ch-brand" href="<?php echo esc_url( home_url( '/' ) ); ?>" aria-label="Công Viên Chức - Trang chủ">
-		<span class="ch-brand-mark"><?php echo $ico['brand']; // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
+		<span class="ch-brand-mark"><img src="<?php echo esc_url( cvc_brand_url( $img ) ); ?>" alt="" width="50" height="50" decoding="async"></span>
 		<span><span class="ch-brand-name">CÔNG VIÊN CHỨC</span><span class="ch-brand-sub">Ôn thi vững vàng · Công vụ tự tin</span></span>
 	</a>
 	<?php
@@ -175,7 +196,7 @@ function cvc_chrome_footer(): void {
 	<footer class="ch-footer">
 		<div class="ch-container">
 			<div class="ch-footer-grid">
-				<div><?php cvc_chrome_brand( $ico ); ?><p>Nền tảng hỗ trợ ôn thi công chức, viên chức, tra cứu văn bản, tìm tài liệu và theo dõi thông báo tuyển dụng.</p></div>
+				<div><?php cvc_chrome_brand( $ico, true ); ?><p>Nền tảng hỗ trợ ôn thi công chức, viên chức, tra cứu văn bản, tìm tài liệu và theo dõi thông báo tuyển dụng.</p></div>
 				<div><h3>Ôn thi</h3><div class="ch-footer-links"><a href="<?php echo esc_url( cvc_question_bank_url() ); ?>">Ngân hàng câu hỏi</a><a href="<?php echo esc_url( cvc_exams_mode_url( 'on-tap' ) ); ?>">Ôn tập kiến thức</a><a href="<?php echo esc_url( cvc_exams_mode_url( 'thi-that' ) ); ?>">Thi thử như thi thật</a><a href="<?php echo esc_url( cvc_saved_questions_url() ); ?>">Câu hỏi đã lưu</a></div></div>
 				<div><h3>Tra cứu</h3><div class="ch-footer-links"><a href="<?php echo esc_url( cvc_recruitments_url() ); ?>">Tin tuyển dụng</a><a href="<?php echo esc_url( cvc_legal_documents_url() ); ?>">Văn bản pháp luật</a><a href="<?php echo esc_url( cvc_documents_url() ); ?>">Mẫu hồ sơ &amp; tài liệu</a><a href="<?php echo esc_url( home_url( '/tinh-luong/' ) ); ?>">Ước tính lương</a><a href="<?php echo esc_url( home_url( '/don-vi-tuyen-dung/' ) ); ?>">Dành cho đơn vị tuyển dụng</a></div></div>
 				<div><h3>Tài khoản</h3><div class="ch-footer-links"><?php if ( $logged_in ) : ?><a href="<?php echo esc_url( cvc_account_url( 'conquest' ) ); ?>">Hồ sơ chinh phục kỳ thi</a><a href="<?php echo esc_url( cvc_account_url() ); ?>">Tài khoản của tôi</a><a href="<?php echo esc_url( cvc_account_url( 'exam-history' ) ); ?>">Lịch sử thi</a><a href="<?php echo esc_url( cvc_logout_url() ); ?>">Đăng xuất</a><?php else : ?><a href="<?php echo esc_url( cvc_login_url() ); ?>">Đăng nhập</a><a href="<?php echo esc_url( cvc_register_url() ); ?>">Đăng ký miễn phí</a><a href="<?php echo esc_url( home_url( '/' ) ); ?>">Trang chủ</a><?php endif; ?></div></div>

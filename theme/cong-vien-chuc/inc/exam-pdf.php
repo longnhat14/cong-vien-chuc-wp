@@ -74,7 +74,7 @@ function cvc_pdf_modal(): void {
 			<div class="cvc-pdf-variants" id="cvcPdfVariants" role="radiogroup" aria-label="Chọn loại file"></div>
 			<div class="cvc-pdf-body" id="cvcPdfBody"><p class="cvc-pdf-loading">Đang tải bản xem trước…</p></div>
 			<footer class="cvc-pdf-actions">
-				<p class="cvc-pdf-note" id="cvcPdfNote">File có logo Công Viên Chức, chữ chìm congvienchuc.com và mã QR để làm bài trực tuyến.</p>
+				<p class="cvc-pdf-note" id="cvcPdfNote">File có logo Công Viên Chức, chữ chìm congvienchuc.com, mã QR làm bài trực tuyến và được khóa sao chép nội dung (vẫn in được).</p>
 				<button type="button" class="cvc-pdf-go" id="cvcPdfGo">Tải về</button>
 			</footer>
 		</div>

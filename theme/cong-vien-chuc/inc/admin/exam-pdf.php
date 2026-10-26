@@ -49,6 +49,8 @@ function cvc_admin_render_exam_pdf(): void {
 			<label class="flex items-center gap-2"><input type="checkbox" name="enabled" value="1" class="accent-acc-2" <?php checked( ! empty( $s['enabled'] ) ); ?>> Bật tính năng tải đề PDF</label>
 			<label class="flex items-center gap-2"><input type="checkbox" name="answers" value="1" class="accent-acc-2" <?php checked( ! empty( $s['answers'] ) ); ?>> Cho tải bản có đáp án và giải thích</label>
 			<label class="flex items-center gap-2"><input type="checkbox" name="paywall" value="1" class="accent-acc-2" <?php checked( ! empty( $s['paywall'] ) ); ?>> <b>Thu phí</b> (cần gói 30 ngày hoặc gói theo bộ đề; xem trước vẫn miễn phí)</label>
+			<label class="flex items-center gap-2"><input type="checkbox" name="protect" value="1" class="accent-acc-2" <?php checked( ! isset( $s['protect'] ) || ! empty( $s['protect'] ) ); ?>> Khóa sao chép, trích xuất và chỉnh sửa nội dung PDF</label>
+			<label class="flex items-center gap-2"><input type="checkbox" name="allow_print" value="1" class="accent-acc-2" <?php checked( ! isset( $s['allow_print'] ) || ! empty( $s['allow_print'] ) ); ?>> Cho phép in file PDF (khi đang khóa)</label>
 			<label class="flex items-center gap-2">Giới hạn mỗi người <input type="number" name="daily_limit" min="1" max="500" value="<?php echo esc_attr( (string) (int) ( $s['daily_limit'] ?? 20 ) ); ?>" class="w-20 border border-slate-300 rounded px-2 py-1"> file/ngày</label>
 		</fieldset>
 		<p class="text-xs <?php echo ! empty( $s['paywall'] ) ? 'text-amber-800' : 'text-emerald-800'; ?>"><?php echo esc_html( ! empty( $s['paywall'] ) ? 'Đang thu phí: người chưa có gói chỉ xem trước được. Giá gói lấy theo cấu hình đề cá nhân hóa (gói theo bộ đề / gói 30 ngày).' : 'Đang miễn phí: mọi tài khoản đã đăng nhập đều tải được (trong giới hạn mỗi ngày).' ); ?></p>
@@ -100,6 +102,8 @@ function cvc_admin_handle_exam_pdf(): void {
 		'enabled'     => ! empty( $_POST['enabled'] ),
 		'answers'     => ! empty( $_POST['answers'] ),
 		'paywall'     => ! empty( $_POST['paywall'] ),
+		'protect'     => ! empty( $_POST['protect'] ),
+		'allow_print' => ! empty( $_POST['allow_print'] ),
 		'daily_limit' => max( 1, min( 500, absint( $_POST['daily_limit'] ?? 20 ) ) ),
 	);
 	$result = ( new CVC_Api_Client( null, 30 ) )->put( '/api/admin/exam-pdf', $body, $token );

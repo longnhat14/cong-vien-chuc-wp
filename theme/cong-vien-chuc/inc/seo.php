@@ -200,7 +200,9 @@ function cvc_seo_output_meta(): void {
 	$og_description = $seo['og']['description'] ?? $seo['description'];
 	$og_url         = $seo['og']['url'] ?? $seo['canonical'];
 	$og_type        = $seo['og']['type'] ?? 'website';
-	$og_image       = $seo['og']['image'] ?? null;
+	// Ảnh chia sẻ mặc định: thẻ logo Công Viên Chức 1200x630 (khi trang không có ảnh riêng).
+	$og_default     = empty( $seo['og']['image'] ) && function_exists( 'cvc_brand_url' );
+	$og_image       = $seo['og']['image'] ?? ( $og_default ? cvc_brand_url( 'og-default.png' ) : null );
 
 	if ( ! empty( $og_title ) ) {
 		printf( '<meta property="og:title" content="%s">' . "\n", esc_attr( $og_title ) );
@@ -218,6 +220,9 @@ function cvc_seo_output_meta(): void {
 
 	if ( ! empty( $og_image ) ) {
 		printf( '<meta property="og:image" content="%s">' . "\n", esc_url( $og_image ) );
+		if ( $og_default ) {
+			echo '<meta property="og:image:width" content="1200">' . "\n" . '<meta property="og:image:height" content="630">' . "\n";
+		}
 	}
 
 	/*

@@ -189,4 +189,6 @@
 	document.addEventListener('keydown', function (e) {
 		if (e.key === 'Escape' && !panel.hidden && panel.contains(document.activeElement)) { setOpen(false); launcher.focus(); }
 	});
+	// Lien ket tu file PDF / ma QR (?ai=1 hoac #ai-coach) mo san khung chat, khong bat ban phim tren dien thoai.
+	if (/[?&]ai=1(&|$)/.test(location.search) || location.hash === '#ai-coach') { setOpen(true, false); }
 })();

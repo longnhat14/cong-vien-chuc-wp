@@ -71,7 +71,7 @@
 				setNote('Tải đề PDF cần gói ôn thi.', false);
 			} else {
 				go.textContent = 'Tải về (PDF)';
-				setNote('File có logo Công Viên Chức, chữ chìm congvienchuc.com và mã QR làm bài trực tuyến.' + (d.remaining_today != null ? ' Còn ' + d.remaining_today + ' lượt tải hôm nay.' : ''), false);
+				setNote('File có logo Công Viên Chức, chữ chìm congvienchuc.com, mã QR làm bài trực tuyến; khóa sao chép, vẫn in được.' + (d.remaining_today != null ? ' Còn ' + d.remaining_today + ' lượt tải hôm nay.' : ''), false);
 			}
 		}).catch(function () { setNote('Mất kết nối, vui lòng thử lại.', true); });
 	}
