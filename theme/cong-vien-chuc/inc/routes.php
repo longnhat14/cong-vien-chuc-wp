@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Tăng số này khi thêm/sửa rewrite rule để buộc flush lại đúng 1 lần.
-const CVC_REWRITE_VERSION = '23';
+const CVC_REWRITE_VERSION = '24';
 
 /**
  * Section hợp lệ của /tai-khoan/{section}/ (Phase 10) - map slug tiếng
@@ -56,6 +56,7 @@ function cvc_register_rewrite_rules(): void {
 	add_rewrite_rule( '^bo-de-pdf/?$', 'index.php?cvc_page=pdf-sets', 'top' );
 	add_rewrite_rule( '^chinh-sach-bao-mat/?$', 'index.php?cvc_page=privacy', 'top' ); // 27/10/2026
 	add_rewrite_rule( '^dieu-khoan-su-dung/?$', 'index.php?cvc_page=terms', 'top' ); // 28/10/2026
+	add_rewrite_rule( '^q/([A-Za-z0-9-]{2,24})/?$', 'index.php?cvc_qr=$matches[1]', 'top' ); // QR ngắn trong đề PDF (28/10/2026)
 	add_rewrite_rule( '^xac-minh-email/?$', 'index.php?cvc_page=verify-email', 'top' ); // 27/10/2026
 	add_rewrite_rule(
 		'^khoa-hoc/page/([0-9]+)/?$',
@@ -374,6 +375,7 @@ add_filter( 'query_vars', 'cvc_register_query_vars' );
  */
 function cvc_register_query_vars( array $vars ): array {
 	$vars[] = 'cvc_page';
+	$vars[] = 'cvc_qr';
 	$vars[] = 'cvc_course_slug';
 	$vars[] = 'cvc_lesson_id';
 	$vars[] = 'cvc_topic_slug';
@@ -781,4 +783,25 @@ function cvc_main_nav_items(): array {
 		array( 'key' => 'legal', 'label' => 'Văn bản pháp luật', 'hint' => 'Tra cứu quy định', 'url' => cvc_legal_documents_url() ),
 		array( 'key' => 'docs', 'label' => 'Tài liệu', 'hint' => 'Kho tài liệu hữu ích', 'url' => cvc_documents_url() ),
 	);
+}
+
+/*
+ * QR ngắn trong đề PDF (28/10/2026): /q/T-XXXXXX (mã tải), /q/e{đề}, /q/r{tin} -> hỏi API đích + utm -> chuyển hướng 302.
+ */
+add_action( 'template_redirect', 'cvc_qr_redirect', 1 );
+
+function cvc_qr_redirect(): void {
+	$key = (string) get_query_var( 'cvc_qr' );
+	if ( '' === $key || ! preg_match( '/^[A-Za-z0-9-]{2,24}$/', $key ) ) {
+		return;
+	}
+	nocache_headers();
+	$res    = ( new CVC_Api_Client( null, 8 ) )->get( '/api/exam-pdf/q/' . rawurlencode( $key ) );
+	$target = ! empty( $res['ok'] ) ? (string) ( $res['data']['data']['url'] ?? '' ) : '';
+	$host   = (string) wp_parse_url( home_url( '/' ), PHP_URL_HOST );
+	if ( '' === $target || (string) wp_parse_url( $target, PHP_URL_HOST ) !== $host ) {
+		$target = home_url( '/bo-de-pdf/' );
+	}
+	wp_redirect( $target, 302, 'Cong Vien Chuc' ); // phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- đã kiểm tra cùng tên miền.
+	exit;
 }
