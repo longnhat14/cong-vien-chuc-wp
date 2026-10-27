@@ -298,6 +298,29 @@ function cvc_handle_notification_read_all(): void {
 	cvc_redirect_with_notice( cvc_account_url( 'notifications' ), 'success', 'Đã đánh dấu tất cả đã đọc.', null );
 }
 
+add_action( 'admin_post_nopriv_cvc_email_prefs', 'cvc_handle_email_prefs' );
+add_action( 'admin_post_cvc_email_prefs', 'cvc_handle_email_prefs' );
+
+/** Email muốn nhận (27/10/2026). */
+function cvc_handle_email_prefs(): void {
+	check_admin_referer( 'cvc_email_prefs' );
+	$token  = cvc_require_token_or_die();
+	$back   = cvc_account_url( 'notifications' ) . '#email';
+	$result = ( new CVC_Api_Client( null, 10 ) )->put(
+		'/api/me/email-preferences',
+		array(
+			'digest'       => ! empty( $_POST['digest'] ),
+			'reminder'     => ! empty( $_POST['reminder'] ),
+			'unsubscribed' => ! empty( $_POST['unsubscribed'] ),
+		),
+		$token
+	);
+	if ( empty( $result['ok'] ) ) {
+		cvc_redirect_with_notice( $back, 'error', cvc_api_error_message( $result ), null );
+	}
+	cvc_redirect_with_notice( $back, 'success', 'Đã lưu lựa chọn email.', null );
+}
+
 /*
  * ============================================================
  * PROFILE

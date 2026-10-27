@@ -84,3 +84,24 @@ $notifications = $pagination['data'] ?? array();
 		?>
 	<?php endif; ?>
 </section>
+
+<?php
+// Email muốn nhận (27/10/2026) - API GET/PUT /api/me/email-preferences.
+$cvc_ep  = ( new CVC_Api_Client( null, 10 ) )->get( '/api/me/email-preferences', array(), $token );
+$cvc_epd = ! empty( $cvc_ep['ok'] ) ? (array) ( $cvc_ep['data']['data'] ?? array() ) : array();
+?>
+<section class="cvc-account-section" id="email">
+	<div class="cvc-section-header-row"><h2>Email muốn nhận</h2></div>
+	<?php if ( ! $cvc_epd ) : ?>
+		<p>Chưa tải được tùy chọn email. Vui lòng thử lại sau.</p>
+	<?php else : ?>
+		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="cvc-email-prefs" style="display:grid;gap:10px">
+			<?php wp_nonce_field( 'cvc_email_prefs' ); ?>
+			<input type="hidden" name="action" value="cvc_email_prefs">
+			<label style="display:flex;gap:8px;align-items:flex-start"><input type="checkbox" id="ep-digest" name="digest" value="1" <?php checked( ! empty( $cvc_epd['digest'] ) ); ?>> <span><b>Bản tin hằng tuần</b> – tin tuyển dụng và bộ đề PDF mới theo tỉnh, ngành bạn quan tâm (sáng thứ Hai).</span></label>
+			<label style="display:flex;gap:8px;align-items:flex-start"><input type="checkbox" id="ep-reminder" name="reminder" value="1" <?php checked( ! empty( $cvc_epd['reminder'] ) ); ?>> <span><b>Nhắc ôn</b> – khi bạn 3 ngày chưa vào học (tối đa 1 email / 10 ngày).</span></label>
+			<label style="display:flex;gap:8px;align-items:flex-start"><input type="checkbox" id="ep-all" name="unsubscribed" value="1" <?php checked( ! empty( $cvc_epd['unsubscribed'] ) ); ?>> <span><b>Không nhận email nào</b> từ Công Viên Chức (trừ email đặt lại mật khẩu bạn tự yêu cầu).</span></label>
+			<p style="margin:0"><button type="submit" class="cvc-btn cvc-btn--small">Lưu lựa chọn</button></p>
+		</form>
+	<?php endif; ?>
+</section>

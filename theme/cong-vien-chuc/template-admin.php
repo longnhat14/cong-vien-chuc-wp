@@ -257,6 +257,8 @@ get_header();
 				cvc_admin_render_question_reports();
 			} elseif ( 'tai-pdf' === $cvc_ing_view ) {
 				cvc_admin_render_exam_pdf();
+			} elseif ( 'email' === $cvc_ing_view ) {
+				cvc_admin_render_email_retention();
 			} elseif ( 'duyet-ai' === $cvc_ing_view ) {
 				cvc_admin_render_content_review();
 			} else {

@@ -268,7 +268,7 @@ function cvc_pdf_sitemap_index( $xml ) {
 /** In script ghi lượt khi URL có utm_source=pdf|cover (và lưu nguồn vào sessionStorage cho AI Coach). */
 function cvc_pdf_visit_script(): void {
 	$src = isset( $_GET['utm_source'] ) ? sanitize_key( wp_unslash( $_GET['utm_source'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification
-	if ( ! in_array( $src, array( 'pdf', 'cover' ), true ) ) {
+	if ( ! in_array( $src, array( 'pdf', 'cover', 'email' ), true ) ) {
 		return;
 	}
 	wp_register_script( 'cvc-pdf-visit', '', array(), '1', true );
@@ -279,7 +279,7 @@ function cvc_pdf_visit_script(): void {
 	);
 	wp_add_inline_script(
 		'cvc-pdf-visit',
-		'(function(c){try{var p=new URLSearchParams(location.search),s=p.get("utm_source");if(s!=="pdf"&&s!=="cover")return;'
+		'(function(c){try{var p=new URLSearchParams(location.search),s=p.get("utm_source");if(s!=="pdf"&&s!=="cover"&&s!=="email")return;'
 		. 'var r={source:s,medium:p.get("utm_medium")||"",code:p.get("utm_content")||""};'
 		. 'try{sessionStorage.setItem("cvc-pdf-ref",JSON.stringify(r));}catch(e){}'
 		. 'function send(ev){var f=new FormData();f.append("action","cvc_pdf_visit");f.append("_n",c.nonce);f.append("event",ev);f.append("source",r.source);f.append("medium",r.medium);f.append("code",r.code);f.append("path",location.pathname);'
@@ -300,7 +300,7 @@ function cvc_pdf_ajax_visit(): void {
 	}
 	$body = array(
 		'event'  => $event,
-		'source' => in_array( $_POST['source'] ?? '', array( 'pdf', 'cover' ), true ) ? (string) $_POST['source'] : 'pdf',
+		'source' => in_array( $_POST['source'] ?? '', array( 'pdf', 'cover', 'email' ), true ) ? (string) $_POST['source'] : 'pdf',
 		'medium' => substr( sanitize_key( wp_unslash( $_POST['medium'] ?? '' ) ), 0, 32 ),
 		'code'   => preg_match( '/^T-[A-Z0-9]{4,12}$/', (string) ( $_POST['code'] ?? '' ) ) ? (string) $_POST['code'] : '',
 		'path'   => substr( esc_url_raw( home_url( (string) wp_unslash( $_POST['path'] ?? '/' ) ) ), 0, 255 ),
