@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Tăng số này khi thêm/sửa rewrite rule để buộc flush lại đúng 1 lần.
-const CVC_REWRITE_VERSION = '20';
+const CVC_REWRITE_VERSION = '21';
 
 /**
  * Section hợp lệ của /tai-khoan/{section}/ (Phase 10) - map slug tiếng
@@ -54,6 +54,7 @@ function cvc_register_rewrite_rules(): void {
 	add_rewrite_rule( '^bo-de-pdf/page/([0-9]+)/?$', 'index.php?cvc_page=pdf-sets&cvc_paged=$matches[1]', 'top' );
 	add_rewrite_rule( '^bo-de-pdf/([a-z0-9-]+)/?$', 'index.php?cvc_page=pdf-set-detail&cvc_pdf_slug=$matches[1]', 'top' );
 	add_rewrite_rule( '^bo-de-pdf/?$', 'index.php?cvc_page=pdf-sets', 'top' );
+	add_rewrite_rule( '^chinh-sach-bao-mat/?$', 'index.php?cvc_page=privacy', 'top' ); // 27/10/2026
 	add_rewrite_rule(
 		'^khoa-hoc/page/([0-9]+)/?$',
 		'index.php?cvc_page=courses&cvc_paged=$matches[1]',
@@ -493,6 +494,7 @@ function cvc_template_include( string $template ): string {
 		'saved-questions'       => 'template-saved-questions.php',
 		'pdf-sets'              => 'template-pdf-sets.php',
 		'pdf-set-detail'        => 'template-pdf-set-detail.php',
+		'privacy'               => 'template-privacy.php',
 	);
 
 	if ( isset( $map[ $page ] ) ) {

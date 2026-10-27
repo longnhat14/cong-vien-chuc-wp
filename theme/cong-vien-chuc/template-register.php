@@ -139,6 +139,7 @@ get_header();
 			<input type="password" id="cvc-register-password-confirm" name="password_confirmation" required minlength="8" autocomplete="new-password">
 		</div>
 
+		<p class="cvc-form-note" style="font-size:14px;color:#55657a;margin:0 0 10px">Bằng việc đăng ký, bạn đồng ý với <a href="<?php echo esc_url( home_url( '/chinh-sach-bao-mat/' ) ); ?>" target="_blank" rel="noopener">Chính sách bảo mật</a> của Công Viên Chức.</p>
 		<button type="submit" class="cvc-btn cvc-btn--primary"><span data-for="learner"<?php echo 'learner' !== $type ? ' hidden' : ''; ?>>Đăng ký</span><span data-for="employer"<?php echo 'employer' !== $type ? ' hidden' : ''; ?>>Đăng ký đơn vị</span></button>
 	</form>
 

@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<?php wp_head(); ?>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CÔNG VIÊN CHỨC - Ôn thi công chức, viên chức</title>
+<?php
+// 27/10/2026: bỏ thẻ <title> viết cứng (trùng với title-tag của WordPress/SEO - mỗi trang có 2 thẻ title);
+// đưa charset/viewport lên trước wp_head để trình duyệt nhận mã hóa sớm.
+wp_head();
+?>
 <!-- Tailwind CSS CDN -->
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
