@@ -28,12 +28,13 @@ function cvc_auth_token(): ?string {
 	return is_string( $token ) && '' !== $token ? $token : null;
 }
 
-function cvc_set_auth_cookie( string $token ): void {
+function cvc_set_auth_cookie( string $token, bool $remember = true ): void {
 	setcookie(
 		CVC_AUTH_COOKIE,
 		$token,
 		array(
-			'expires'  => time() + ( 30 * DAY_IN_SECONDS ),
+			// 28/10/2026: "Ghi nhớ đăng nhập" bỏ chọn -> cookie phiên (đóng trình duyệt là đăng xuất).
+			'expires'  => $remember ? time() + ( 30 * DAY_IN_SECONDS ) : 0,
 			'path'     => '/',
 			'secure'   => is_ssl(),
 			'httponly' => true,
@@ -204,7 +205,7 @@ function cvc_handle_login(): void {
 		return;
 	}
 
-	cvc_set_auth_cookie( (string) $token );
+	cvc_set_auth_cookie( (string) $token, ! empty( $_POST['remember'] ) );
 	if ( empty( $_POST['redirect_to'] ) && ! empty( $result['data']['user']['employer'] ) ) {
 		$redirect = home_url( '/don-vi/' );
 	}
@@ -223,6 +224,7 @@ function cvc_handle_register(): void {
 	$password              = (string) ( $_POST['password'] ?? '' );
 	$password_confirmation = (string) ( $_POST['password_confirmation'] ?? '' );
 	$type                  = 'employer' === ( $_POST['account_type'] ?? '' ) ? 'employer' : 'learner';
+	$agree                 = ! empty( $_POST['agree_terms'] );
 
 	$body = array(
 		'name'                  => $name,
@@ -230,8 +232,16 @@ function cvc_handle_register(): void {
 		'password'              => $password,
 		'password_confirmation' => $password_confirmation,
 		'account_type'          => $type,
+		'terms'                 => $agree ? '1' : '0',
 	);
-	$old  = array( 'name' => $name, 'email' => $email, 'account_type' => $type );
+	$old  = array( 'name' => $name, 'email' => $email, 'account_type' => $type, 'agree_terms' => $agree );
+
+	// 28/10/2026: bắt buộc đồng ý Chính sách bảo mật + Điều khoản sử dụng.
+	if ( ! $agree ) {
+		cvc_flash_old_input( $old );
+		cvc_redirect_with_notice( 'employer' === $type ? add_query_arg( 'loai', 'don-vi', cvc_register_url() ) : cvc_register_url(), 'error', 'Vui lòng đồng ý với Chính sách bảo mật và Điều khoản sử dụng để đăng ký.', null );
+		return;
+	}
 
 	if ( 'employer' === $type ) {
 		$raw = isset( $_POST['employer'] ) && is_array( $_POST['employer'] ) ? wp_unslash( $_POST['employer'] ) : array();

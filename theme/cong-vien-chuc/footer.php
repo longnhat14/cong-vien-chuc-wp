@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Giữ hộp tìm kiếm (nút kính lúp ở đầu trang mở hộp này).
  */
 ?>
-<?php cvc_chrome_footer(); // inc/chrome.php - chân trang dùng chung, giống trang chủ. ?>
+<?php if ( empty( $GLOBALS['cvc_hide_chrome_footer'] ) ) { cvc_chrome_footer(); } // inc/chrome.php - chân trang dùng chung; trang tài khoản ẩn (28/10/2026). ?>
 <!-- Hộp tìm kiếm -->
 <div id="search-modal" class="hidden dz-modal" role="dialog" aria-modal="true" aria-label="Tìm kiếm">
 <div class="dz-modal-box">

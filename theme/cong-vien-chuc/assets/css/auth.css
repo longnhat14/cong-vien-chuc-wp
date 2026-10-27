@@ -1,0 +1,163 @@
+/* Trang tài khoản (28/10/2026): Đăng nhập / Đăng ký / Quên & đặt lại mật khẩu - inc/auth-ui.php. */
+.au{--au-navy:#0f2a4a;--au-navy2:#173c66;--au-gold:#c9a052;--au-gold2:#a5803f;--au-cream:#fbf6ea;--au-ink:#1d2733;--au-muted:#56606d;--au-line:#d5dbe2;--au-blue:#1d5fa8;
+	position:relative;overflow:hidden;isolation:isolate;padding:30px 16px 150px;min-height:calc(100vh - 80px);
+	background:radial-gradient(900px 520px at 12% 8%,#fffdf7 0,rgba(255,253,247,0) 70%),linear-gradient(180deg,#fcf8ee 0,#f7eedb 100%);color:var(--au-ink)}
+.au *{box-sizing:border-box}
+.au-waves{position:absolute;left:0;right:0;bottom:0;height:200px;z-index:-1;pointer-events:none}
+.au-waves__svg{display:block;width:100%;height:100%}
+.au-building{position:absolute;left:calc(max(16px,(100% - 1180px) / 2) - 60px);bottom:56px;width:580px;max-width:48vw;z-index:-2;pointer-events:none}
+.au-building__svg{display:block;width:100%;height:auto}
+.au-wrap{position:relative;max-width:1180px;margin:0 auto;display:grid;grid-template-columns:minmax(260px,380px) minmax(0,1fr);grid-template-areas:"head card" "list card";grid-template-rows:auto 1fr;column-gap:56px;align-items:start}
+
+/* Cột thương hiệu */
+.au-head{grid-area:head;display:flex;flex-direction:column;align-items:center;text-align:center;padding-top:12px}
+.au-logo img{display:block;width:96px;height:96px}
+.au-name{margin:10px 0 0;font-size:31px;line-height:1.15;font-weight:700;color:var(--au-navy);letter-spacing:.01em}
+.au-tagline{margin:4px 0 0;font-size:17px;color:#3c4a5b}
+.au-rule{display:block;width:64px;height:2px;margin:22px 0 6px;background:var(--au-gold)}
+.au-benefits{grid-area:list;list-style:none;margin:16px 0 0;padding:0 0 230px;display:grid;gap:26px}
+.au-benefits li{display:grid;grid-template-columns:58px 1fr;gap:16px;align-items:start}
+.au-benefits__ico{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;color:var(--au-navy);background:radial-gradient(circle at 35% 30%,#fff6dd 0,#f6dfaa 65%,#eccb83 100%);box-shadow:inset 0 0 0 1px rgba(201,160,82,.35)}
+.au-benefits__ico .au-ico{width:28px;height:28px}
+.au-benefits b{display:block;font-size:18px;line-height:1.3;color:var(--au-navy)}
+.au-benefits small{display:block;margin-top:3px;font-size:15px;line-height:1.45;color:var(--au-muted)}
+
+/* Thẻ form */
+.au-card{grid-area:card;width:100%;max-width:620px;justify-self:center;background:#fff;border:1px solid #efe6d2;border-radius:22px;box-shadow:0 26px 60px rgba(15,42,74,.12),0 2px 6px rgba(15,42,74,.05);padding:26px 40px 30px}
+.au-crumbs{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;font-size:14.5px;color:var(--au-ink)}
+.au-crumbs a{color:var(--au-blue);text-decoration:none}
+.au-crumbs a:hover{text-decoration:underline}
+.au-crumbs span[aria-hidden]{color:#9aa4b1}
+.au-title{margin:18px 0 0;text-align:center;font-size:36px;line-height:1.15;font-weight:700;color:var(--au-navy);text-transform:uppercase;letter-spacing:.02em;text-wrap:balance}
+.au-sub{margin:8px 0 0;text-align:center;font-size:19px;color:#3c4a5b}
+.au-desc{max-width:520px;margin:12px auto 0;text-align:center;font-size:15.5px;line-height:1.55;color:var(--au-muted)}
+.au-notice:empty{display:none}
+.au-notice{margin-top:14px}
+.au-panel{margin-top:22px;padding:24px 26px 22px;border:1px solid #e8edf2;border-radius:16px;background:#fff;box-shadow:0 8px 24px rgba(15,42,74,.06)}
+
+/* Nút Google: lớp hiển thị theo font trang + nút chính thức của Google (trong suốt) phủ lên trên để nhận cú bấm. */
+.au-google{display:flex;flex-direction:column;align-items:center}
+.au-gwrap{position:relative;width:100%;max-width:400px;height:50px}
+.au-gface{display:flex;align-items:center;gap:14px;height:100%;padding:0 20px 0 24px;border:1px solid var(--au-line);border-radius:999px;background:#fff;box-shadow:0 2px 6px rgba(15,42,74,.06);font-size:18px;font-weight:700;color:var(--au-ink);transition:border-color .15s,background-color .15s,box-shadow .15s}
+.au-gface .au-gmark{width:24px;height:24px;flex:none}
+.au-gface__t{flex:1;text-align:center}
+.au-gface .au-ico{width:20px;height:20px;color:#7d8794;flex:none}
+.au-gwrap:hover .au-gface{border-color:var(--au-gold);background:#fffcf5;box-shadow:0 4px 12px rgba(15,42,74,.1)}
+.au-gwrap:focus-within .au-gface{outline:2px solid var(--au-gold);outline-offset:2px}
+.au-gbtn{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;overflow:hidden;opacity:.011;transform:scaleY(1.25)}
+.au-gwrap:not(.is-ready) .au-gbtn{display:none}
+.au-gnote{margin:10px 0 0;text-align:center;font-size:14.5px;line-height:1.5;color:var(--au-muted)}
+.au-gwait{margin:10px 0 0;text-align:center;font-size:15px;color:var(--au-navy)}
+.au-or{display:flex;align-items:center;gap:12px;margin:18px 0 6px;font-size:14px;color:var(--au-muted)}
+.au-or::before,.au-or::after{content:"";flex:1;border-top:1px solid #e3e7ec}
+
+/* Ô nhập */
+.au-form{display:grid;gap:18px;margin-top:14px}
+.au-field label{display:flex;align-items:center;gap:8px;margin:0 0 7px;font-size:17px;font-weight:700;color:var(--au-navy)}
+.au-ico--label{width:18px;height:18px;color:var(--au-navy)}
+.au-input{position:relative}
+.au-input input,.au-select,.au-form select{width:100%;height:48px;padding:0 14px;border:1px solid #c9d1da;border-radius:6px;background:#fff;font-size:16.5px;color:var(--au-ink);transition:border-color .15s,box-shadow .15s}
+.au-input.has-eye input{padding-right:48px}
+.au-input input::placeholder{color:#8a94a1}
+.au-input input:focus,.au-form select:focus{outline:none;border-color:var(--au-blue);box-shadow:0 0 0 3px rgba(29,95,168,.15)}
+.au-eye{position:absolute;top:50%;right:6px;transform:translateY(-50%);width:38px;height:38px;display:grid;place-items:center;border:0;border-radius:6px;background:transparent;color:#6b7684;cursor:pointer}
+.au-eye:hover{color:var(--au-navy);background:#f3f5f8}
+.au-eye:focus-visible{outline:2px solid var(--au-blue);outline-offset:1px}
+.au-eye .au-ico{width:21px;height:21px}
+.au-eye .au-ico--off,.au-eye[aria-pressed="true"] .au-ico--on{display:none}
+.au-eye[aria-pressed="true"] .au-ico--off{display:block}
+.au-hint{display:block;margin-top:6px;font-size:14px;line-height:1.45;color:var(--au-muted)}
+.au-hint:empty{display:none}
+.au-hint button,.au-linkbtn{padding:0;border:0;background:none;color:var(--au-blue);text-decoration:underline;cursor:pointer;font-size:inherit}
+
+/* Kiểu hàng (trang đăng ký): biểu tượng tròn bên trái */
+.au-field.is-row{display:grid;grid-template-columns:44px 1fr;gap:14px;align-items:start}
+.au-field__ico{width:44px;height:44px;margin-top:22px;border-radius:50%;display:grid;place-items:center;background:#f1f4f8;color:var(--au-navy)}
+.au-field__ico .au-ico{width:21px;height:21px}
+
+.au-check{display:flex;align-items:flex-start;gap:10px;font-size:15.5px;line-height:1.45;color:var(--au-ink);cursor:pointer}
+.au-check input{width:18px;height:18px;margin:2px 0 0;flex:none;accent-color:var(--au-navy)}
+.au-check a{color:var(--au-blue)}
+.au-row2{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.au-row2 > a{font-size:15.5px;color:var(--au-blue);text-decoration:none}
+.au-row2 > a:hover{text-decoration:underline}
+
+.au-submit{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;height:54px;border:0;border-radius:6px;background:linear-gradient(180deg,#14355c,var(--au-navy));color:#fff;font-size:19.5px;font-weight:700;cursor:pointer;box-shadow:0 6px 16px rgba(15,42,74,.22);transition:filter .15s,transform .15s}
+.au-submit:hover{filter:brightness(1.12)}
+.au-submit:active{transform:translateY(1px)}
+.au-submit:focus-visible{outline:3px solid var(--au-gold);outline-offset:2px}
+.au-submit .au-ico{width:22px;height:22px}
+.au-switch{margin:16px 0 0;text-align:center;font-size:15.5px;color:#3c4a5b}
+.au-switch a{color:var(--au-blue);text-decoration:none}
+.au-switch a:hover{text-decoration:underline}
+
+/* Loại tài khoản (đăng ký) */
+.au-types{border:0;margin:0;padding:0;min-width:0}
+.au-types legend{padding:0;margin:0 0 10px;font-size:17px;font-weight:700;color:var(--au-navy)}
+.au-types__grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.au-type{position:relative;display:grid;grid-template-columns:34px 1fr;gap:10px;padding:14px 34px 14px 14px;border:1px solid #e1e6ec;border-radius:10px;background:#fff;cursor:pointer;transition:border-color .15s,background-color .15s,box-shadow .15s}
+.au-type:hover{border-color:#b8c7d8}
+.au-type input{position:absolute;top:12px;right:12px;width:17px;height:17px;margin:0;accent-color:var(--au-blue)}
+.au-type__ico{width:34px;height:34px;display:grid;place-items:center;border-radius:8px;background:#eef4fb;color:var(--au-blue)}
+.au-type--emp .au-type__ico{background:#fbf2df;color:var(--au-gold2)}
+.au-type__ico .au-ico{width:22px;height:22px}
+.au-type b{display:block;font-size:16.5px;color:var(--au-navy)}
+.au-type small{display:block;margin-top:3px;font-size:14px;line-height:1.45;color:var(--au-muted)}
+.au-type:has(input:checked){border:2px solid #3b7bc4;padding:13px 33px 13px 13px;background:#f4f8fd;box-shadow:0 4px 12px rgba(29,95,168,.1)}
+.au-type:has(input:focus-visible){outline:2px solid var(--au-blue);outline-offset:2px}
+
+/* Thông tin đơn vị */
+.au-emp{display:grid;gap:16px;margin:0;padding:16px 16px 18px;border:1px solid #efe3c6;border-radius:12px;background:#fffcf4;min-width:0}
+.au-emp[hidden]{display:none}
+.au-emp legend{padding:0 6px;font-size:16px;font-weight:700;color:var(--au-gold2)}
+.au-emp .au-field label{font-size:16px}
+.au-radio{display:flex;gap:8px;align-items:flex-start;margin-top:6px;font-size:15.5px;cursor:pointer}
+.au-radio input{margin-top:3px;accent-color:var(--au-navy)}
+
+/* Khối an toàn */
+.au-secure{display:grid;grid-template-columns:52px 1fr;gap:16px;align-items:center;margin-top:24px;padding:18px 22px;border-radius:14px;background:linear-gradient(180deg,#f5f8fc,#eef3f9)}
+.au-secure__ico{width:52px;height:52px;display:grid;place-items:center;border-radius:14px;background:linear-gradient(160deg,#7fb2e8,#2f6fb5);color:#fff;box-shadow:0 6px 14px rgba(47,111,181,.28)}
+.au-secure__ico .au-ico{width:30px;height:30px}
+.au-secure p{margin:0;font-size:15px;line-height:1.5;color:#3c4a5b}
+.au-secure b{display:block;margin-bottom:3px;font-size:16.5px;color:var(--au-navy)}
+.au-secure a{color:var(--au-blue)}
+
+/* Thông báo dùng chung */
+.au-notice .cvc-notice,.au-notice [role="alert"],.au-notice [role="status"]{border-radius:10px}
+
+@media (max-width:1100px){
+	.au-wrap{column-gap:32px;grid-template-columns:minmax(240px,320px) minmax(0,1fr)}
+	.au-card{padding:24px 28px 28px}
+}
+@media (max-width:900px){
+	.au{padding:18px 16px 120px;min-height:0}
+	.au-waves{height:110px}
+	.au-building{display:none}
+	.au-wrap{grid-template-columns:minmax(0,1fr);grid-template-areas:"head" "card" "list";row-gap:18px}
+	.au-head{flex-direction:row;justify-content:center;gap:12px;text-align:left;padding-top:0}
+	.au-logo img{width:56px;height:56px}
+	.au-name{margin:0;font-size:22px}
+	.au-tagline{font-size:14.5px}
+	.au-rule{display:none}
+	.au-benefits{grid-template-columns:1fr 1fr;gap:14px;margin:4px auto 0;padding:0;max-width:620px;width:100%}
+	.au-benefits li{grid-template-columns:42px 1fr;gap:10px}
+	.au-benefits__ico{width:42px;height:42px}
+	.au-benefits__ico .au-ico{width:21px;height:21px}
+	.au-benefits b{font-size:15.5px}
+	.au-benefits small{font-size:13.5px}
+}
+@media (max-width:560px){
+	.au-card{padding:20px 16px 22px;border-radius:16px}
+	.au-title{font-size:27px}
+	.au-sub{font-size:17px}
+	.au-desc{font-size:14.5px}
+	.au-panel{padding:18px 14px 16px;border-radius:12px}
+	.au-gface{font-size:16.5px;padding:0 14px 0 16px}
+	.au-types__grid{grid-template-columns:1fr}
+	.au-field.is-row{grid-template-columns:36px 1fr;gap:10px}
+	.au-field__ico{width:36px;height:36px;margin-top:24px}
+	.au-benefits{grid-template-columns:1fr}
+	.au-secure{grid-template-columns:42px 1fr;padding:14px}
+	.au-secure__ico{width:42px;height:42px}
+}
+@media (prefers-reduced-motion:reduce){.au *{transition:none!important}}
