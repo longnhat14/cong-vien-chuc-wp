@@ -15,13 +15,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 <p class="dz-kicker">Tra cứu</p>
 <form method="get" action="<?php echo esc_url( home_url( '/tim-kiem/' ) ); ?>" class="dz-searchform">
 <label class="sr-only" for="dz-search-q">Từ khóa</label>
-<input id="dz-search-q" type="search" name="q" placeholder="Luật Cán bộ, công chức; đề thi chuyên viên; tuyển dụng giáo viên…">
+<input id="dz-search-q" type="search" name="q" data-cvc-suggest placeholder="Luật Cán bộ, công chức; đề thi chuyên viên; tuyển dụng giáo viên…">
 <button type="submit" class="dz-btn dz-btn-primary">Tìm</button>
 </form>
 <p class="dz-muted">Gợi ý:</p>
 <div class="dz-chips">
-<a href="<?php echo esc_url( cvc_search_url( 'Bảng lương công chức 2026' ) ); ?>">Bảng lương công chức 2026</a>
-<a href="<?php echo esc_url( cvc_search_url( 'Thi sát hạch Chuyên viên chính' ) ); ?>">Thi sát hạch Chuyên viên chính</a>
+<a href="<?php echo esc_url( cvc_search_url( 'Luật Viên chức' ) ); ?>">Luật Viên chức</a>
+<a href="<?php echo esc_url( cvc_search_url( 'Đề thi kiến thức chung' ) ); ?>">Đề thi kiến thức chung</a>
+<a href="<?php echo esc_url( cvc_search_url( 'Tuyển dụng giáo viên' ) ); ?>">Tuyển dụng giáo viên</a>
 <a href="<?php echo esc_url( cvc_search_url( 'Nghị định 170/2025/NĐ-CP' ) ); ?>">Nghị định 170/2025/NĐ-CP</a>
 </div>
 </div>

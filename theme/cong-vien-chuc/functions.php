@@ -59,6 +59,7 @@ require_once __DIR__ . '/inc/personal-exams.php';
 require_once __DIR__ . '/inc/exam-pdf.php'; // Tải đề trắc nghiệm PDF (26/10/2026)
 require_once __DIR__ . '/inc/email-verify.php'; // Xác minh email (27/10/2026)
 require_once __DIR__ . '/inc/pdf-sets.php'; // Bộ đề PDF: danh mục, trang đích, đo lượt quay lại (27/10/2026)
+require_once __DIR__ . '/inc/search-suggest.php'; // Gợi ý tìm kiếm khi gõ (28/10/2026)
 require_once __DIR__ . '/inc/ingestion-cron.php';
 require_once __DIR__ . '/inc/seo.php';
 require_once __DIR__ . '/inc/auth.php';

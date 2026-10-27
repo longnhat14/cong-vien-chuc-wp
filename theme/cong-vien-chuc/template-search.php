@@ -75,8 +75,11 @@ get_header();
 					<input type="hidden" name="type" value="<?php echo esc_attr($type); ?>">
 					<div class="relative flex-1">
 						<input 
-							type="text" 
+							type="search" 
 							name="q" 
+							data-cvc-suggest
+							<?php echo $has_query ? '' : 'autofocus'; ?>
+							aria-label="Từ khóa tìm kiếm" 
 							value="<?php echo esc_attr($q); ?>" 
 							placeholder="Nhập số hiệu văn bản, từ khóa tuyển dụng, chủ đề thi tuyển..." 
 							class="w-full border-2 border-acc-line focus:border-acc-2 text-ink rounded-2xl px-4 py-3 text-xs sm:text-sm font-semibold focus:outline-none border-slate-400 bg-white"
@@ -174,7 +177,7 @@ get_header();
 								$s_desc = ''; // trich yeu da nam trong tieu de
 							}
 							?>
-							<article class="dz-card hover:bg-acc-soft hover:border-acc-2 space-y-2 transition-all group">
+							<article class="dz-card cvc-sr space-y-2 group">
 								<div class="flex items-center justify-between text-[10px]">
 									<span class="bg-acc-soft text-acc font-extrabold px-2.5 py-0.5 rounded-full border border-acc-line">
 										📌 <?php echo esc_html($s_type); ?>
@@ -184,8 +187,8 @@ get_header();
 									<?php endif; ?>
 								</div>
 
-								<h3 class="font-extrabold text-sm text-ink group-hover:text-cyan-300 leading-snug">
-									<a href="<?php echo esc_url($s_url); ?>">
+								<h3 class="font-extrabold text-sm text-ink leading-snug">
+									<a class="cvc-sr-link" href="<?php echo esc_url($s_url); ?>">
 										<?php echo esc_html($s_title); ?>
 									</a>
 								</h3>
@@ -197,7 +200,7 @@ get_header();
 								<?php endif; ?>
 
 								<div class="pt-2 flex items-center justify-end text-xs">
-									<a href="<?php echo esc_url($s_url); ?>" class="text-acc font-bold text-[11px] flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+									<a href="<?php echo esc_url($s_url); ?>" class="cvc-sr-more text-acc font-bold text-[11px] flex items-center gap-1" tabindex="-1" aria-hidden="true">
 										Xem chi tiết &rarr;
 									</a>
 								</div>

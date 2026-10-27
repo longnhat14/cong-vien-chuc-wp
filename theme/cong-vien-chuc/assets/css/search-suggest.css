@@ -1,0 +1,23 @@
+/* Gợi ý tìm kiếm khi gõ (28/10/2026) - tông navy / vàng / kem của website. */
+.cvc-sg{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:80;max-height:min(70vh,460px);overflow-y:auto;background:#fff;border:1px solid #e3d6b8;border-top:3px solid #c9a052;border-radius:10px;box-shadow:0 12px 32px rgba(15,42,74,.16);font-family:inherit;text-align:left}
+.cvc-sg[hidden]{display:none}
+.cvc-sg.is-busy{opacity:.75}
+.cvc-sg-i{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;align-items:baseline;padding:9px 14px;border-bottom:1px solid #f1ead8;color:#0f2a4a;text-decoration:none}
+.cvc-sg-i:hover,.cvc-sg-i.is-on{background:#fbf7ee}
+.cvc-sg-k{grid-row:span 2;align-self:start;margin-top:2px;padding:1px 7px;border:1px solid #e3d6b8;border-radius:999px;background:#f8f2e4;color:#7a5a1e;font-size:11px;font-weight:700;white-space:nowrap}
+.cvc-sg-t{font-size:14.5px;line-height:1.4;font-weight:600;color:#0f2a4a}
+.cvc-sg-t mark{background:none;color:inherit;font-weight:800;text-decoration:underline;text-decoration-color:#c9a052;text-decoration-thickness:2px;text-underline-offset:2px}
+.cvc-sg-m{grid-column:2;font-size:12px;color:#5b6675;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cvc-sg-all{display:block;padding:10px 14px;font-size:13.5px;font-weight:700;color:#0f2a4a;text-decoration:none;background:#fdfaf3}
+.cvc-sg-all:hover,.cvc-sg-all.is-on{background:#f8f2e4;text-decoration:underline}
+.cvc-sg-empty{padding:12px 14px;font-size:13.5px;color:#5b6675;line-height:1.5}
+@media (max-width:600px){.cvc-sg-i{grid-template-columns:1fr}.cvc-sg-k{grid-row:auto;justify-self:start}.cvc-sg-m{grid-column:1}}
+/* Thẻ kết quả trang /tim-kiem/: hover dịu (kem + viền vàng), cả thẻ bấm được. */
+.cvc-sr{position:relative;transition:background-color .15s,border-color .15s,box-shadow .15s}
+.cvc-sr:hover,.cvc-sr:focus-within{background:#fbf7ee;border-color:#c9a052;box-shadow:0 4px 14px rgba(15,42,74,.08)}
+.cvc-sr .cvc-sr-link{color:#0f2a4a}
+.cvc-sr .cvc-sr-link::after{content:"";position:absolute;inset:0}
+.cvc-sr:hover .cvc-sr-link,.cvc-sr .cvc-sr-link:focus-visible{text-decoration:underline;text-decoration-color:#c9a052;text-decoration-thickness:2px;text-underline-offset:3px}
+.cvc-sr .cvc-sr-link:focus-visible{outline:none}
+.cvc-sr:focus-within{outline:2px solid #c9a052;outline-offset:2px}
+.cvc-sr:hover .cvc-sr-more{color:#7a5a1e}
