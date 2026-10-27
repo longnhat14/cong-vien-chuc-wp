@@ -897,22 +897,9 @@ function cvc_build_recruitment_job_posting_jsonld( array $recruitment ): ?array 
 	}
 
 	if ( ( $province && ! empty( $province['name'] ) ) || ( $adminUnit && ! empty( $adminUnit['name'] ) ) ) {
-		$address = array(
-			'@type'          => 'PostalAddress',
-			'addressCountry' => 'VN',
-		);
-
-		if ( $adminUnit && ! empty( $adminUnit['name'] ) ) {
-			$address['addressLocality'] = (string) $adminUnit['name'];
-		}
-
-		if ( $province && ! empty( $province['name'] ) ) {
-			$address['addressRegion'] = (string) $province['name'];
-		}
-
 		$schema['jobLocation'] = array(
 			'@type'   => 'Place',
-			'address' => $address,
+			'address' => cvc_job_postal_address( $recruitment ),
 		);
 	}
 
@@ -2742,4 +2729,92 @@ function cvc_render_executive_modals(): void {
 		</div>
 	</div>
 	<?php
+}
+
+/**
+ * Địa chỉ nơi làm việc cho JobPosting (28/10/2026 - Search Console báo thiếu streetAddress/addressLocality/postalCode).
+ * Chỉ dùng dữ liệu thật của tin: địa điểm nộp hồ sơ, đơn vị hành chính, tỉnh/thành, tên cơ quan.
+ * postalCode: mã bưu chính cấp tỉnh (QĐ 2334/QĐ-BKHCN, hiệu lực 24/8/2025) chỉ cho 11 tỉnh/thành không sáp nhập
+ * (một vùng mã duy nhất); tỉnh sáp nhập có nhiều vùng mã theo địa bàn cũ nên bỏ trống thay vì đoán.
+ */
+function cvc_job_postal_address( array $rec ): array {
+	$prov  = is_array( $rec['province'] ?? null ) ? (string) ( $rec['province']['name'] ?? '' ) : '';
+	$unit  = is_array( $rec['admin_unit'] ?? null ) ? (string) ( $rec['admin_unit']['name'] ?? '' ) : '';
+	$agen  = is_array( $rec['agency'] ?? null ) ? (string) ( $rec['agency']['name'] ?? '' ) : '';
+	$loc   = trim( (string) preg_replace( '/\s+/u', ' ', (string) ( $rec['location'] ?? '' ) ) );
+	$addr  = is_array( $rec['agency'] ?? null ) ? trim( (string) ( $rec['agency']['address'] ?? '' ) ) : '';
+
+	// Nhiều nơi nộp ("…; …", "… và Sở …") -> chọn nơi thuộc đúng tỉnh/thành của tin, không có thì nơi đầu tiên.
+	$short = trim( (string) preg_replace( '/^(tỉnh|thành phố)\s+/iu', '', $prov ) );
+	$pick  = static function ( string $src ) use ( $short ): string {
+		$parts = array_values( array_filter( array_map( 'trim', (array) preg_split( '/;|\s+và\s+(?=\p{Lu})/u', $src ) ) ) );
+		foreach ( $parts as $p ) {
+			if ( '' !== $short && false !== mb_stripos( $p, $short ) ) {
+				return $p;
+			}
+		}
+		return $parts[0] ?? '';
+	};
+	$loc  = $pick( $loc );
+	$addr = $pick( $addr );
+
+	// streetAddress: "địa chỉ: ..." trong địa điểm nộp hồ sơ, hoặc phần bắt đầu từ số nhà / đường / thôn...
+	$street = '';
+	foreach ( array( $addr, $loc ) as $src ) {
+		if ( '' === $src || mb_strlen( $src ) > 260 || preg_match( '/^(tại|nộp|thí sinh|qua|trực tiếp|gửi)\b/iu', $src ) ) {
+			continue;
+		}
+		if ( preg_match( '/(?:địa chỉ|đ\/c)\s*:?\s*([^()]+)/iu', $src, $m ) ) {
+			$street = trim( $m[1], " ,.;)" );
+			break;
+		}
+		$parts = array_map( 'trim', explode( ',', $src ) );
+		foreach ( $parts as $i => $p ) {
+			if ( preg_match( '/^(số\s*\d|\d|đường|phố|thôn|ấp|tổ|khu|nhà|tầng|km|xóm|bản|khối|lô|quốc lộ|tỉnh lộ)/iu', $p ) ) {
+				$street = implode( ', ', array_slice( $parts, $i ) );
+				break 2;
+			}
+		}
+	}
+	if ( '' === $street && '' !== $agen ) {
+		$street = $agen; // nơi làm việc là trụ sở cơ quan tuyển dụng
+	}
+	if ( mb_strlen( $street ) > 160 ) {
+		$street = rtrim( mb_substr( $street, 0, (int) mb_strrpos( mb_substr( $street, 0, 160 ), ',' ) ?: 160 ), ' ,' );
+	}
+	// Bỏ phần tỉnh/thành ở cuối (đã có addressRegion).
+	$street = trim( (string) preg_replace( '/,\s*(tỉnh|thành phố|tp\.?)\s+[^,]+$/iu', '', $street ), ' ,.' );
+
+	// addressLocality: xã/phường của tin; không có thì đọc từ địa chỉ; cuối cùng là tỉnh/thành.
+	$locality = $unit;
+	if ( '' === $locality && preg_match( '/\b(phường|xã|đặc khu|thị trấn)\s+([^,;()]+)/iu', $addr . ', ' . $loc, $m ) ) {
+		$locality = mb_convert_case( $m[1], MB_CASE_TITLE, 'UTF-8' ) . ' ' . trim( $m[2] );
+	}
+	if ( '' === $locality ) {
+		$locality = trim( (string) preg_replace( '/^(tỉnh|thành phố)\s+/iu', '', $prov ) );
+	}
+
+	$postal = array(
+		'ha-noi' => '10000', 'cao-bang' => '21000', 'dien-bien' => '32000', 'ha-tinh' => '45000', 'hue' => '49000', 'lai-chau' => '30000',
+		'lang-son' => '25000', 'nghe-an' => '43000', 'quang-ninh' => '01000', 'son-la' => '34000', 'thanh-hoa' => '40000',
+	);
+	$key  = (string) preg_replace( '/^(tinh|thanh-pho)-/', '', sanitize_title( remove_accents( $prov ) ) );
+	$code = '';
+	if ( preg_match( '/mã bưu chính\s*:?\s*(\d{5,6})/iu', $addr . ' ' . $loc, $m ) ) {
+		$code = $m[1];
+	} elseif ( isset( $postal[ $key ] ) ) {
+		$code = $postal[ $key ];
+	}
+
+	return array_filter(
+		array(
+			'@type'           => 'PostalAddress',
+			'streetAddress'   => $street,
+			'addressLocality' => $locality,
+			'addressRegion'   => $prov,
+			'postalCode'      => $code,
+			'addressCountry'  => 'VN',
+		),
+		static fn ( $v ) => '' !== $v
+	);
 }

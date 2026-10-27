@@ -117,14 +117,7 @@ function cvc_rd_position_jsonld( array $rec, array $pos, string $url ): ?array {
 	if ( '' !== $prov ) {
 		$s['jobLocation'] = array(
 			'@type'   => 'Place',
-			'address' => array_filter(
-				array(
-					'@type'           => 'PostalAddress',
-					'addressLocality' => (string) ( $rec['admin_unit']['name'] ?? '' ),
-					'addressRegion'   => $prov,
-					'addressCountry'  => 'VN',
-				)
-			),
+			'address' => cvc_job_postal_address( $rec ),
 		);
 	}
 
