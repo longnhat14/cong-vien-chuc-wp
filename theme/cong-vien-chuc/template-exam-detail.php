@@ -9,6 +9,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 $slug = sanitize_text_field( (string) get_query_var( 'cvc_exam_slug' ) );
+// 28/10/2026: slug cũ đã đổi (bỏ cụm "giả lập") -> chuyển hướng 301 để giữ SEO / liên kết cũ.
+$cvc_old_slugs = array(
+	'de-thi-gia-lap-vien-chuc-giao-duc-2026-chuan-luat-nha-giao-732025-nd-2592026-ma-de-002' => 'de-thi-trac-nghiem-vien-chuc-giao-duc-2026-chuan-luat-nha-giao-732025-nd-2592026-ma-de-002',
+);
+if ( isset( $cvc_old_slugs[ $slug ] ) ) {
+	wp_safe_redirect( cvc_exam_url( $cvc_old_slugs[ $slug ] ), 301 );
+	exit;
+}
 
 $service = new CVC_Exam_Service();
 $result  = $service->find( $slug );

@@ -1836,7 +1836,7 @@ function cvc_render_search_form( string $current_q = '', string $input_id = 'cvc
  * PHASE 10A.2 - Premium homepage components (Visual Benchmark).
  * Không có ảnh chụp thật (course/recruitment chưa có thumbnail thật,
  * KHÔNG dùng ảnh stock generic) - toàn bộ minh họa dưới đây là SVG
- * inline vẽ tay theo brand color, KHÔNG phải ảnh chụp giả lập nội dung
+ * inline vẽ tay theo brand color, KHÔNG phải ảnh chụp mô phỏng nội dung
  * thật (Phần 10 - "có thể dùng abstract branded illustration").
  * ============================================================
  */
