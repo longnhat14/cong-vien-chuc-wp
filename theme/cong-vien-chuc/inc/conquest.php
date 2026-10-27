@@ -638,6 +638,7 @@ function cvc_cq_ajax(): void {
 		case 'practice':
 			$kind = sanitize_key( wp_unslash( $_POST['kind'] ?? 'weak' ) );
 			$res  = $c->post( '/api/me/career/practice', array( 'kind' => in_array( $kind, array( 'wrong', 'weak', 'recheck' ), true ) ? $kind : 'weak' ), $token );
+			cvc_verify_ajax_fail_if_required( $res );
 			$aid  = (int) ( $res['data']['data']['id'] ?? 0 );
 			if ( $res['ok'] && $aid > 0 ) {
 				wp_send_json_success( array( 'url' => cvc_exam_attempt_url( $aid ) ) );

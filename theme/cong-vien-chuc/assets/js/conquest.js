@@ -33,6 +33,7 @@
 			.then(function (j) {
 				if (!j || !j.success) {
 					var d = (j && j.data) || {};
+					if (d.verify && d.redirect) { toast(d.message); setTimeout(function () { location.href = d.redirect; }, 1200); throw new Error('cq'); }
 					if (d.login) { toast(d.message, { href: d.login, label: 'Đăng nhập' }); } else { toast(d.message || 'Không thực hiện được, vui lòng thử lại.'); }
 					throw new Error('cq');
 				}

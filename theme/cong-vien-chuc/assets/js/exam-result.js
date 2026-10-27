@@ -30,6 +30,7 @@
     });
   }
   function fail(res, fallback) {
+    if (res && res.data && res.data.verify && res.data.redirect) { note(res.data.message); setTimeout(function () { location.href = res.data.redirect; }, 1200); return; }
     if (res && res._status === 401) { note('Phiên đăng nhập đã hết hạn — đang chuyển tới trang đăng nhập…'); setTimeout(function () { location.href = C.login; }, 1200); return; }
     note((res && res.data && res.data.message) || fallback || 'Có lỗi xảy ra, vui lòng thử lại.');
   }

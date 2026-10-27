@@ -62,6 +62,7 @@ if ( $is_found && null !== $token && '' !== $start_mode && (int) ( $exam['questi
 		wp_safe_redirect( cvc_exam_attempt_url( $att_id ) );
 		exit;
 	}
+	cvc_verify_redirect_if_required( $started, remove_query_arg( 'che-do', (string) wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ) );
 	if ( 401 === (int) ( $started['status'] ?? 0 ) ) {
 		$token = null; // token hết hạn -> hiện nút đăng nhập.
 	} else {
@@ -190,6 +191,9 @@ get_header();
 						<h2 class="text-base font-black text-ink flex items-center gap-2"><i class="fa-solid fa-circle-play text-acc"></i> Chọn chế độ làm bài</h2>
 						<?php if ( '' !== $start_error ) : ?>
 							<p class="text-red-700 font-bold"><?php echo esc_html( $start_error ); ?></p>
+						<?php endif; ?>
+						<?php if ( cvc_email_unverified() ) : ?>
+							<p class="border border-amber-300 bg-amber-50 text-amber-900 p-3">✉ Tài khoản cần <b>xác minh email</b> trước khi làm bài. <a class="font-bold underline text-ink" href="<?php echo esc_url( cvc_verify_email_url( cvc_verify_return_path( (string) wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ) ) ); ?>">Nhập mã xác minh →</a></p>
 						<?php endif; ?>
 						<?php if ( empty( $questions ) && 0 === $total_q ) : ?>
 							<?php cvc_render_empty_state( 'Đề thi này chưa có câu hỏi được công bố.' ); ?>

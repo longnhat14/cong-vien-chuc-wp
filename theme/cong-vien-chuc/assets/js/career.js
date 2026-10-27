@@ -230,6 +230,7 @@
     return fetch(C.ajax, { method: 'POST', body: body, credentials: 'same-origin' }).then(function (r) { return r.json(); });
   }
   function fail(res, fb) {
+    if (res && res.data && res.data.verify && res.data.redirect) { toast(res.data.message); setTimeout(function () { location.href = res.data.redirect; }, 1200); return; }
     if (res && res.data && res.data.login) { toast('Phiên đăng nhập đã hết hạn. <a href="' + C.login + '">Đăng nhập lại</a>', true); return; }
     toast((res && res.data && res.data.message) || fb || 'Có lỗi xảy ra, vui lòng thử lại.');
   }

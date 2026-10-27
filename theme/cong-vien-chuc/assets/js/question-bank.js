@@ -126,9 +126,16 @@
 		var st = card && card.querySelector('[data-qb-status]');
 		if (st && d.recorded) { st.textContent = d.is_correct ? 'Đã trả lời đúng' : 'Đã trả lời sai'; st.className = 'qb-tag ' + (d.is_correct ? 'is-t' : 'is-r'); }
 	}
+	// Bắt buộc đăng nhập + xác minh email trước khi luyện câu (27/10/2026).
+	function gateHtml(kind) {
+		return kind === 'verify'
+			? '<div class="qb-gate"><p><b>Xác minh email để luyện câu hỏi.</b> Nhập mã 6 số đã gửi tới hộp thư của bạn — chỉ mất chưa đầy 1 phút, sau đó bạn được luyện toàn bộ ngân hàng câu hỏi, xem đáp án, giải thích và căn cứ pháp lý.</p><a class="qb-b is-sm is-primary" href="' + esc(CFG.verify) + '">Xác minh email →</a></div>'
+			: '<div class="qb-gate"><p><b>Đăng nhập để luyện câu hỏi.</b> Tài khoản miễn phí giúp lưu tiến độ, xem đáp án, giải thích, căn cứ pháp lý và ôn lại câu sai.</p><a class="qb-b is-sm is-primary" href="' + esc(CFG.login) + '">Đăng nhập / Đăng ký →</a></div>';
+	}
 	function check(box, id, key) {
 		box.querySelectorAll('.qb-opt').forEach(function (o) { o.disabled = true; if (o.getAttribute('data-key') === key) { o.classList.add('is-picked'); } });
 		ajax('cvc_qb_check', { id: id, key: key }, 'POST').then(function (res) {
+			if (res && !res.success && res.data && res.data.redirect) { box.innerHTML = gateHtml(res.data.verify ? 'verify' : 'login'); return; }
 			if (!res || !res.success) {
 				toast((res && res.data && res.data.message) || 'Chưa chấm được, vui lòng thử lại.');
 				box.querySelectorAll('.qb-opt').forEach(function (o) { o.disabled = false; o.classList.remove('is-picked'); });
@@ -150,6 +157,7 @@
 			btn.setAttribute('aria-expanded', 'true');
 			btn.textContent = 'Thu gọn ↑';
 			if (box.getAttribute('data-loaded')) { return; }
+			if (CFG.gate) { box.innerHTML = gateHtml(CFG.gate); return; }
 			box.innerHTML = '<p class="qb-loading">Đang tải phương án…</p>';
 			ajax('cvc_qb_q', { id: id }).then(function (res) {
 				if (!res || !res.success) { box.innerHTML = '<p class="qb-loading">' + esc((res && res.data && res.data.message) || 'Chưa tải được câu hỏi.') + '</p>'; return; }

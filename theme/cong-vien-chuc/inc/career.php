@@ -853,6 +853,7 @@ function cvc_ci_ajax_act(): void {
 			break;
 		case 'practice':
 			$res = $client->post( '/api/me/career/practice', array( 'kind' => sanitize_key( wp_unslash( $_POST['kind'] ?? '' ) ) ), $token );
+			cvc_verify_ajax_fail_if_required( $res );
 			$id  = (int) ( $res['data']['data']['id'] ?? 0 );
 			if ( $res['ok'] && $id > 0 ) {
 				wp_send_json_success( array( 'url' => cvc_exam_attempt_url( $id ) ) );

@@ -50,7 +50,10 @@ function cvc_qb_assets(): void {
 			'ajax'     => admin_url( 'admin-ajax.php' ),
 			'nonce'    => wp_create_nonce( 'cvc_qb' ),
 			'loggedIn' => cvc_is_logged_in(),
-			'login'    => cvc_login_url( cvc_question_bank_url() ),
+			'login'    => cvc_login_url( cvc_verify_return_path( (string) wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ) ),
+			// Bắt buộc đăng nhập + xác minh email trước khi luyện câu (27/10/2026).
+			'gate'     => ! cvc_is_logged_in() ? 'login' : ( cvc_email_unverified() ? 'verify' : '' ),
+			'verify'   => cvc_verify_email_url( cvc_verify_return_path( (string) wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ) ),
 		)
 	);
 }
@@ -190,6 +193,7 @@ function cvc_qb_handle_start(): void {
 		wp_safe_redirect( cvc_login_url( $back ) );
 		exit;
 	}
+	cvc_verify_redirect_if_required( $result, $back );
 	if ( ! $result['ok'] || $id <= 0 ) {
 		cvc_redirect_with_notice( $back, 'error', cvc_api_error_message( $result ), null );
 		return;
@@ -234,6 +238,10 @@ function cvc_qb_ajax_check(): void {
 	$res   = ( new CVC_Api_Client( null, 12 ) )->post( '/api/question-bank/questions/' . $id . '/check', array( 'key' => $key ), $token );
 	if ( empty( $res['ok'] ) ) {
 		$status = (int) ( $res['status'] ?? 0 );
+		cvc_verify_ajax_fail_if_required( $res );
+		if ( 401 === $status ) {
+			wp_send_json_error( array( 'message' => 'Đăng nhập để luyện câu hỏi, xem đáp án và căn cứ.', 'login' => true, 'redirect' => cvc_login_url( cvc_verify_return_path() ) ), 401 );
+		}
 		wp_send_json_error( array( 'message' => 429 === $status ? 'Bạn trả lời quá nhanh, vui lòng thử lại sau ít giây.' : 'Chưa chấm được câu này, vui lòng thử lại.' ), $status >= 400 ? $status : 502 );
 	}
 	$d = (array) ( $res['data']['data'] ?? array() );

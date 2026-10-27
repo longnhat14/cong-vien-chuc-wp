@@ -287,3 +287,4 @@ a.qb-tag:hover{text-decoration:underline}
 	.qb-start.is-row{grid-template-columns:1fr}
 }
 @media (prefers-reduced-motion:reduce){.qb *,.qb *:before,.qb *:after{transition:none!important;animation:none!important}}
+.qb-gate{padding:12px 14px;border:1px solid #f1d9a6;border-radius:10px;background:#fff7e6;color:#5a4410;font-size:14px;line-height:1.55}.qb-gate p{margin:0 0 10px}.qb-gate b{color:#0f2a4a}

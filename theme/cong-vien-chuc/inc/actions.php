@@ -405,6 +405,7 @@ function cvc_handle_exam_start(): void {
 	}
 
 	$result = ( new CVC_Exam_Attempt_Service() )->start( $examId, $mode, $token );
+	cvc_verify_redirect_if_required( $result, cvc_exam_url_from_id( $examId ) );
 
 	if ( ! $result['ok'] ) {
 		cvc_redirect_with_notice( cvc_exam_url_from_id( $examId ), 'error', cvc_api_error_message( $result ), null );

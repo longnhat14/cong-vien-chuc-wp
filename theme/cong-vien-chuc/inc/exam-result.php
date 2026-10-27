@@ -89,6 +89,7 @@ function cvc_result_ajax_token(): string {
 }
 
 function cvc_result_ajax_fail( array $result ): void {
+	cvc_verify_ajax_fail_if_required( $result );
 	wp_send_json_error( array( 'message' => cvc_api_error_message( $result ) ), (int) ( $result['status'] ?? 0 ) ?: 500 );
 }
 

@@ -27,7 +27,8 @@ if ( $has_query ) {
 	$result = ( new CVC_Search_Service() )->search( $q, $type, $page, 12 );
 }
 
-$search_data = $result['ok'] ? ($result['data']['data'] ?? array()) : array();
+// 27/10/2026: chưa nhập từ khóa thì $result = null (bấm kính lúp ở đầu trang) - tránh cảnh báo PHP.
+$search_data = ( is_array( $result ) && ! empty( $result['ok'] ) ) ? (array) ( $result['data']['data'] ?? array() ) : array();
 $items       = $search_data['data'] ?? array();
 $total_items = (int) ($search_data['total'] ?? count($items));
 $currentPg   = (int) ($search_data['current_page'] ?? $page);
@@ -140,10 +141,15 @@ get_header();
 						<div class="w-16 h-16 mx-auto rounded-full bg-acc-soft text-acc flex items-center justify-center font-black text-2xl border border-acc-line">
 							⚠️
 						</div>
-						<h2 class="text-xl font-black text-ink">Không Tìm Thấy Kết Quả Quá Trình Tìm Kiếm</h2>
-						<p class="text-xs text-ink-muted max-w-md mx-auto">
-							Không tìm thấy dữ liệu phù hợp cho từ khóa "<strong class="text-acc"><?php echo esc_html($q); ?></strong>". Thử tìm kiếm với từ khóa ngắn hơn hoặc kiểm tra lỗi chính tả.
-						</p>
+						<?php if ( mb_strlen( $q ) < 2 ) : ?>
+							<h2 class="text-xl font-black text-ink">Từ khóa quá ngắn</h2>
+							<p class="text-sm text-ink-muted max-w-md mx-auto">Nhập ít nhất 2 ký tự, ví dụ "luật viên chức", "73/2025/QH15" hoặc "tuyển dụng giáo viên Bắc Ninh".</p>
+						<?php else : ?>
+							<h2 class="text-xl font-black text-ink">Không tìm thấy kết quả</h2>
+							<p class="text-sm text-ink-muted max-w-md mx-auto">
+								Không tìm thấy dữ liệu phù hợp cho từ khóa "<strong class="text-acc"><?php echo esc_html( $q ); ?></strong>". Thử bỏ bớt từ, dùng số hiệu văn bản (ví dụ 172/2025) hoặc kiểm tra chính tả.
+							</p>
+						<?php endif; ?>
 					</div>
 
 				<?php else : ?>
