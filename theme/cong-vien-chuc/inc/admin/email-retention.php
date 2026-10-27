@@ -67,6 +67,18 @@ function cvc_admin_render_email_retention(): void {
 		<?php if ( $can ) : ?><button type="submit" class="px-4 py-2 rounded-lg bg-acc text-white font-bold text-sm">Lưu cài đặt</button><?php endif; ?>
 	</form>
 
+	<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="border border-slate-300 rounded-xl p-4 bg-white space-y-3">
+		<?php wp_nonce_field( 'cvc_admin_email_retention' ); ?>
+		<input type="hidden" name="action" value="cvc_admin_email_retention">
+		<input type="hidden" name="op" value="google">
+		<h2 class="font-black text-ink">Đăng nhập bằng Google <span class="text-xs font-bold px-2 py-0.5 rounded-full <?php echo ! empty( $data['google_client_id'] ) ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'; ?>"><?php echo ! empty( $data['google_client_id'] ) ? 'Đang bật' : 'Chưa bật'; ?></span></h2>
+		<p class="text-xs text-ink-muted">Tạo <b>OAuth Client ID</b> loại "Web application" tại Google Cloud Console → APIs &amp; Services → Credentials; mục <b>Authorized JavaScript origins</b> thêm <code>https://congvienchuc.com</code>. Chỉ cần Client ID (không cần Client secret). Để trống rồi lưu = tắt nút Google.</p>
+		<fieldset class="text-sm" <?php disabled( ! $can ); ?>>
+			<label class="block">Client ID <input type="text" name="google_client_id" value="<?php echo esc_attr( (string) ( $data['google_client_id'] ?? '' ) ); ?>" placeholder="123456789012-xxxxxxxx.apps.googleusercontent.com" class="mt-1 w-full border border-slate-300 rounded px-2 py-1 font-mono text-xs" autocomplete="off" spellcheck="false"></label>
+		</fieldset>
+		<?php if ( $can ) : ?><button type="submit" class="px-4 py-2 rounded-lg bg-acc text-white font-bold text-sm">Lưu Client ID</button><?php endif; ?>
+	</form>
+
 	<?php if ( $can ) : ?>
 		<section class="border border-slate-300 rounded-xl p-4 bg-white space-y-2">
 			<h2 class="font-black text-ink">Gửi thử tới hộp thư của bạn</h2>
@@ -124,6 +136,17 @@ function cvc_admin_handle_email_retention(): void {
 		return;
 	}
 	$op = sanitize_key( wp_unslash( $_POST['op'] ?? 'save' ) );
+	if ( 'google' === $op ) {
+		$gid    = sanitize_text_field( wp_unslash( $_POST['google_client_id'] ?? '' ) );
+		$result = ( new CVC_Api_Client( null, 20 ) )->put( '/api/admin/email-retention', array( 'google_client_id' => $gid ), $token );
+		delete_transient( 'cvc_google_cfg' );
+		if ( ! $result['ok'] ) {
+			cvc_admin_redirect( $back, 'error', cvc_admin_error_message( $result ) );
+			return;
+		}
+		cvc_admin_redirect( $back, 'success', '' !== $gid ? 'Đã bật đăng nhập bằng Google.' : 'Đã tắt đăng nhập bằng Google.' );
+		return;
+	}
 	if ( 'test' === $op ) {
 		$kind   = sanitize_key( wp_unslash( $_POST['kind'] ?? '' ) );
 		$result = ( new CVC_Api_Client( null, 60 ) )->post( '/api/admin/email-retention/test', array( 'kind' => $kind ), $token );

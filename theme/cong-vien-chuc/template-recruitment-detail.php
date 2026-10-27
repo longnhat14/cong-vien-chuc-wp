@@ -130,6 +130,9 @@ if ( 0 === $total ) {
 }
 $location  = implode( ', ', array_filter( array( $admin_unit['name'] ?? null, $province['name'] ?? null ) ) );
 $deadline  = (string) ( $dates['application_deadline'] ?? '' );
+// 28/10/2026: tin chưa rõ hạn nộp tự hết hạn sau 25 ngày kể từ ngày thông báo (không có thì ngày đăng) - recruitment:expire.
+$auto_exp_anchor = (string) ( $dates['announcement_date'] ?? '' ) ?: (string) ( $dates['published_at'] ?? '' );
+$auto_exp        = '' === $deadline && '' !== $auto_exp_anchor && ( $ts_ae = strtotime( substr( $auto_exp_anchor, 0, 10 ) . ' +25 days' ) ) ? gmdate( 'Y-m-d', $ts_ae ) : '';
 $days_left = '' !== $deadline ? cvc_rd_days_left( $deadline ) : null;
 $dl_unver  = in_array( 'deadline_unverified', (array) ( $ver['warnings'] ?? array() ), true );
 $countdown = $is_open && '' !== $deadline && null !== $days_left && $days_left >= 0 && ( $ver ? ! empty( $ver['allow_deadline_reminder'] ) : ! $collected );
@@ -321,7 +324,7 @@ get_header();
 				<small>
 					<?php
 					if ( '' === $deadline ) {
-						echo 'Cần đối chiếu văn bản gốc';
+						echo '' !== $auto_exp && $is_open ? esc_html( 'Xem hạn trong văn bản gốc · tin tự ẩn sau ' . cvc_format_date_vn( $auto_exp ) ) : 'Cần đối chiếu văn bản gốc';
 					} elseif ( $dl_unver ) {
 						echo 'Chưa có trích dẫn — đối chiếu bản gốc';
 					} elseif ( $is_open && null !== $days_left ) {

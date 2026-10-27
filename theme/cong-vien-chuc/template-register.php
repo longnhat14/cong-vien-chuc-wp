@@ -59,6 +59,8 @@ get_header();
 
 	<?php cvc_render_notice(); ?>
 
+	<?php if ( function_exists( 'cvc_google_button' ) ) { cvc_google_button( isset( $_GET['redirect_to'] ) ? sanitize_text_field( wp_unslash( $_GET['redirect_to'] ) ) : '', 'signup' ); } ?>
+
 	<form class="cvc-form cvc-form--auth" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" id="cvc-register-form">
 		<?php wp_nonce_field( 'cvc_register' ); ?>
 		<input type="hidden" name="action" value="cvc_register">

@@ -418,3 +418,12 @@ body.cvc-doc .cvc-logo-strip span{display:-webkit-box;-webkit-line-clamp:2;-webk
 .cvc-lb-badges{list-style:none;margin:0 0 10px;padding:0;display:flex;flex-wrap:wrap;gap:6px}
 .cvc-lb-badges li{border:1px solid #c8c8c8;border-radius:14px;padding:3px 10px;font-size:13px;background:#fff}
 @media(max-width:640px){.cvc-lb-hide-sm{display:none}}
+
+/* Đăng nhập bằng Google (28/10/2026) */
+body.cvc-doc .cvc-google{background:#fff;border:1px solid var(--dz-line);border-top:2px solid var(--dz-acc);border-radius:2px;padding:18px 20px 6px;margin:14px 0 0;display:flex;flex-direction:column;align-items:center;gap:8px}
+body.cvc-doc .cvc-google__btn{width:100%;max-width:400px;min-height:44px;display:flex;justify-content:center}
+body.cvc-doc .cvc-google__note{margin:0;font-size:14px;color:var(--dz-muted);text-align:center}
+body.cvc-doc .cvc-google__wait{margin:10px 0;font-size:15px;color:var(--dz-ink2)}
+body.cvc-doc .cvc-google__or{width:100%;display:flex;align-items:center;gap:10px;margin:8px 0 4px;color:var(--dz-muted);font-size:13px}
+body.cvc-doc .cvc-google__or::before,body.cvc-doc .cvc-google__or::after{content:"";flex:1;border-top:1px solid var(--dz-line)}
+body.cvc-doc .cvc-google + .cvc-form--auth{margin-top:0;border-top:0}
