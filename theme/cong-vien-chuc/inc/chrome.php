@@ -187,6 +187,9 @@ function cvc_chrome_header(): void {
 		</div>
 	</header>
 	<?php
+	if ( function_exists( 'cvc_email_verify_banner' ) ) {
+		cvc_email_verify_banner(); // 27/10/2026: nhắc xác minh email
+	}
 }
 
 function cvc_chrome_footer(): void {

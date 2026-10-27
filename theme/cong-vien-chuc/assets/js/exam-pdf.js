@@ -66,6 +66,9 @@
 			if (!cfg.logged) {
 				go.textContent = 'Đăng nhập để tải về';
 				setNote('Xem trước miễn phí. Đăng nhập (miễn phí) để tải file PDF đầy đủ.', false);
+			} else if (d.verify_required) {
+				go.textContent = 'Xác minh email để tải';
+				setNote('Tài khoản cần xác minh email trước khi tải đề PDF. Mã xác minh đã gửi vào hộp thư của bạn (xem cả mục Spam).', false);
 			} else if (d.locked) {
 				go.textContent = 'Mua gói để tải';
 				setNote('Tải đề PDF cần gói ôn thi.', false);
@@ -95,6 +98,7 @@
 	go.addEventListener('click', function () {
 		if (!state) { return; }
 		if (!cfg.logged) { window.location.href = cfg.login; return; }
+		if (cfg.verify && go.textContent.indexOf('Xác minh') === 0) { window.location.href = cfg.verify; return; }
 		go.disabled = true;
 		go.textContent = 'Đang tạo file…';
 		post('cvc_pdf_link', { kind: state.kind, id: state.id, group: state.group, variant: state.variant }).then(function (res) {
@@ -106,6 +110,7 @@
 				return;
 			}
 			if (res.data && res.data.login) { window.location.href = cfg.login; return; }
+			if (res.data && res.data.verify) { window.location.href = res.data.verify; return; }
 			go.textContent = 'Tải về (PDF)';
 			setNote((res.data && res.data.message) || 'Không tạo được file.', true);
 		}).catch(function () { go.disabled = false; go.textContent = 'Tải về (PDF)'; setNote('Mất kết nối, vui lòng thử lại.', true); });

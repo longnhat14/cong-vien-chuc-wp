@@ -20,7 +20,7 @@ function cvc_admin_render_email_retention(): void {
 	$can  = cvc_admin_can( 'settings.update' );
 	$fmt  = static fn ( $n ): string => number_format( (int) $n, 0, ',', '.' );
 	$desc = array(
-		'welcome'  => 'Gửi khoảng 5 phút sau khi đăng ký: cách bắt đầu, tin tuyển dụng và bộ đề PDF hợp tỉnh/ngành (đoán từ mục tiêu, hồ sơ, đề đã làm, bộ đề đã tải).',
+		'welcome'  => 'Từ 27/10 email chào mừng được gửi NGAY khi đăng ký, kèm mã xác minh email (luôn gửi, không phụ thuộc công tắc này). Công tắc này chỉ gửi bù cho người đăng ký 48 giờ qua chưa nhận.',
 		'digest'   => 'Sáng thứ Hai 07:35: tin mới 7 ngày + bộ đề PDF mới theo tỉnh/ngành quan tâm, kết quả ôn tuần qua. Không có tin mới thì không gửi.',
 		'reminder' => '19:05 hằng ngày cho người đã 3 ngày không vào: bài đang làm dở, đề làm lại, tin mới. Tối đa 1 lần / 10 ngày.',
 	);
@@ -42,7 +42,7 @@ function cvc_admin_render_email_retention(): void {
 	<section class="grid grid-cols-2 sm:grid-cols-4 gap-3">
 		<?php
 		foreach ( array(
-			array( 'Tài khoản', $aud['users'] ?? 0, '' ),
+			array( 'Tài khoản', $aud['users'] ?? 0, (int) ( $aud['verified'] ?? 0 ) . ' đã xác minh email' ),
 			array( 'Đã gửi hôm nay', $data['sent_today'] ?? 0, 'giới hạn ' . (int) ( $s['daily_cap'] ?? 200 ) . '/ngày' ),
 			array( 'Hủy nhận mọi email', $aud['unsubscribed'] ?? 0, '' ),
 			array( 'Tắt bản tin / nhắc ôn', ( (int) ( $aud['digest_off'] ?? 0 ) ) . ' / ' . ( (int) ( $aud['reminder_off'] ?? 0 ) ), '' ),

@@ -54,6 +54,7 @@ function cvc_pdf_assets(): void {
 				'nonce'  => wp_create_nonce( 'cvc_pdf' ),
 				'logged' => null !== cvc_auth_token(),
 				'login'  => cvc_login_url( $current ),
+				'verify' => function_exists( 'cvc_verify_email_url' ) ? cvc_verify_email_url( (string) wp_parse_url( $current, PHP_URL_PATH ) ) : '',
 			),
 			JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP
 		) . ';',
@@ -125,6 +126,9 @@ function cvc_pdf_ajax_link(): void {
 	$result = ( new CVC_Api_Client( null, 20 ) )->post( $path, array_filter( array( 'variant' => $variant, 'group' => $group ) ), $token );
 	if ( ! $result['ok'] ) {
 		$status = (int) ( $result['status'] ?? 0 ) ?: 500;
+		if ( ! empty( $result['data']['verify_required'] ) ) {
+			wp_send_json_error( array( 'message' => (string) ( $result['data']['message'] ?? 'Vui lòng xác minh email trước khi tải đề PDF.' ), 'verify' => cvc_verify_email_url( (string) wp_parse_url( wp_get_referer() ?: home_url( '/' ), PHP_URL_PATH ) ) ), 403 );
+		}
 		wp_send_json_error( array( 'message' => cvc_api_error_message( $result ), 'login' => 401 === $status ), $status );
 	}
 	$data = (array) ( $result['data']['data'] ?? array() );
