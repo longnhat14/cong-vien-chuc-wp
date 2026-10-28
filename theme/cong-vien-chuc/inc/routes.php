@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Tăng số này khi thêm/sửa rewrite rule để buộc flush lại đúng 1 lần.
-const CVC_REWRITE_VERSION = '25';
+const CVC_REWRITE_VERSION = '26';
 
 /**
  * Section hợp lệ của /tai-khoan/{section}/ (Phase 10) - map slug tiếng
@@ -47,6 +47,15 @@ function cvc_account_primary_sections(): array {
 add_action( 'init', 'cvc_register_rewrite_rules' );
 
 function cvc_register_rewrite_rules(): void {
+	// 28/10/2026 (phải đứng trước luật chi tiết tin /tuyen-dung/{slug}/): ôn thi theo đối tượng (cvc_cat_tracks) + tin tuyển dụng theo loại (cvc_rec_presets).
+	foreach ( array( 'on-thi-cong-chuc' => 'cong-chuc', 'on-thi-vien-chuc' => 'vien-chuc', 'on-thi-vien-chuc-giao-vien' => 'giao-vien', 'on-thi-vien-chuc-y-te' => 'y-te' ) as $cvc_p => $cvc_k ) {
+		add_rewrite_rule( '^' . $cvc_p . '/page/([0-9]+)/?$', 'index.php?cvc_page=exams&cvc_exam_mode=on-tap&cvc_exam_track=' . $cvc_k . '&cvc_paged=$matches[1]', 'top' );
+		add_rewrite_rule( '^' . $cvc_p . '/?$', 'index.php?cvc_page=exams&cvc_exam_mode=on-tap&cvc_exam_track=' . $cvc_k, 'top' );
+	}
+	foreach ( array( 'cong-chuc', 'vien-chuc', 'hop-dong', 'giao-vien', 'y-te' ) as $cvc_k ) {
+		add_rewrite_rule( '^tuyen-dung/' . $cvc_k . '/page/([0-9]+)/?$', 'index.php?cvc_page=recruitments&cvc_rec_preset=' . $cvc_k . '&cvc_paged=$matches[1]', 'top' );
+		add_rewrite_rule( '^tuyen-dung/' . $cvc_k . '/?$', 'index.php?cvc_page=recruitments&cvc_rec_preset=' . $cvc_k, 'top' );
+	}
 	// 19/10/2026: sitemap tin tuyển dụng + vị trí (inc/sitemap.php), gắn vào sitemap_index của Rank Math.
 	add_rewrite_rule( '^sitemap-tuyen-dung\.xml$', 'index.php?cvc_sitemap=tuyen-dung', 'top' );
 	// 27/10/2026: Bộ đề PDF (inc/pdf-sets.php).
@@ -396,6 +405,8 @@ function cvc_register_query_vars( array $vars ): array {
 	$vars[] = 'cvc_legal_document_slug';
 	$vars[] = 'cvc_paged';
 	$vars[] = 'cvc_exam_mode';
+	$vars[] = 'cvc_exam_track';
+	$vars[] = 'cvc_rec_preset';
 	$vars[] = 'cvc_account_section';
 	$vars[] = 'cvc_attempt_id';
 	$vars[] = 'cvc_document_slug';

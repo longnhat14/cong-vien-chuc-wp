@@ -13,7 +13,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 $paged     = max( 1, absint( get_query_var( 'cvc_paged' ) ) );
-$f         = cvc_ci_filters_from_request( $_GET );
+// 28/10/2026: /tuyen-dung/{cong-chuc|vien-chuc|hop-dong|giao-vien|y-te}/ - lọc sẵn (cvc_rec_presets).
+$preset_key = (string) get_query_var( 'cvc_rec_preset' );
+$preset     = cvc_rec_presets()[ $preset_key ] ?? null;
+$f          = cvc_ci_filters_from_request( $preset ? $_GET + $preset['filter'] : $_GET ); // phpcs:ignore WordPress.Security.NonceVerification
 $token     = cvc_auth_token();
 $logged_in = null !== $token;
 if ( $logged_in ) {
@@ -61,9 +64,20 @@ if ( '' !== $f['nhom'] ) {
 if ( '' !== $province_name ) {
 	$title .= ' tại ' . $province_name;
 }
-cvc_seo_set_title( $title );
-cvc_seo_set_description( 'Tin tuyển dụng công chức, viên chức còn hạn từ nguồn chính thức, kèm đề thi, văn bản cần học và lộ trình ôn tập cho từng cơ hội.' );
-cvc_seo_set_listing_pagination_state( $paged, static fn ( int $p ) => cvc_ci_url( cvc_ci_url_args( $f ), $p ) );
+if ( $preset ) {
+	$title = $preset['h1'] . ( '' !== $province_name ? ' tại ' . $province_name : '' );
+	cvc_seo_set_title( '' !== $province_name ? $title : $preset['title'] );
+	cvc_seo_set_description( $preset['desc'] );
+	if ( $paged > 1 ) {
+		cvc_seo_set_noindex();
+	} else {
+		cvc_seo_set_canonical( cvc_rec_preset_url( $preset_key ) );
+	}
+} else {
+	cvc_seo_set_title( $title );
+	cvc_seo_set_description( 'Tin tuyển dụng công chức, viên chức còn hạn từ nguồn chính thức, kèm đề thi, văn bản cần học và lộ trình ôn tập cho từng cơ hội.' );
+	cvc_seo_set_listing_pagination_state( $paged, static fn ( int $p ) => cvc_ci_url( cvc_ci_url_args( $f ), $p ) );
+}
 if ( $f['luu'] || '' !== $f['q'] ) {
 	cvc_seo_set_noindex();
 }
@@ -75,16 +89,17 @@ get_header();
 <main id="main" class="dz-main ci" data-tab="<?php echo esc_attr( $f['tab'] ); ?>">
 	<section class="ci-hero">
 		<div class="ci-wrap">
-			<?php cvc_render_breadcrumbs( array( array( 'label' => 'Trang chủ', 'url' => home_url( '/' ) ), array( 'label' => 'Tuyển dụng' ) ) ); ?>
+			<?php cvc_render_breadcrumbs( $preset ? array( array( 'label' => 'Trang chủ', 'url' => home_url( '/' ) ), array( 'label' => 'Tuyển dụng', 'url' => cvc_ci_url() ), array( 'label' => $preset['h1'] ) ) : array( array( 'label' => 'Trang chủ', 'url' => home_url( '/' ) ), array( 'label' => 'Tuyển dụng' ) ) ); ?>
 			<div class="ci-hero-row">
 				<div>
 					<div class="ci-eyebrow"><i class="ci-pulse" aria-hidden="true"></i> Tuyển dụng · Đề thi · Văn bản · Lộ trình</div>
-					<h1><?php echo esc_html( '' !== $f['nhom'] || '' !== $province_name ? $title : 'Từ cơ hội tuyển dụng đến lộ trình chinh phục' ); ?></h1>
+					<h1><?php echo esc_html( $preset || '' !== $f['nhom'] || '' !== $province_name ? $title : 'Từ cơ hội tuyển dụng đến lộ trình chinh phục' ); ?></h1>
 					<p>Tìm cơ hội còn hạn từ nguồn chính thức, xem đề thi và văn bản liên quan, hiểu vì sao nội dung được đề xuất — rồi biến mục tiêu dự tuyển thành kế hoạch học tập rõ ràng.</p>
 					<?php $cvc_emp_set = function_exists( 'cvc_employer_public_settings' ) ? cvc_employer_public_settings() : array(); ?>
 					<?php if ( ! empty( $cvc_emp_set['private_enabled'] ) ) : ?>
 						<p class="ci-meta" aria-label="Khu vực tuyển dụng"><a class="ci-pill <?php echo '' === ( $f['khu-vuc'] ?? '' ) ? 'is-blue' : 'is-gray'; ?>" href="<?php echo esc_url( cvc_ci_url() ); ?>">Công chức, viên chức</a> <a class="ci-pill <?php echo 'ngoai-cong-lap' === ( $f['khu-vuc'] ?? '' ) ? 'is-blue' : 'is-gray'; ?>" href="<?php echo esc_url( cvc_ci_url( array( 'khu-vuc' => 'ngoai-cong-lap' ) ) ); ?>">Đơn vị ngoài công lập</a> <a class="ci-pill is-gray" href="<?php echo esc_url( cvc_employer_landing_url() ); ?>">Đơn vị đăng tin miễn phí →</a></p>
 					<?php endif; ?>
+					<p class="ci-meta" aria-label="Tin theo loại" style="margin-top:6px"><?php foreach ( cvc_rec_presets() as $pk => $pv ) : ?><a class="ci-pill <?php echo $pk === $preset_key ? 'is-blue' : 'is-gray'; ?>" href="<?php echo esc_url( $pk === $preset_key ? cvc_ci_url() : cvc_rec_preset_url( $pk ) ); ?>"<?php echo $pk === $preset_key ? ' aria-current="page"' : ''; ?>><?php echo esc_html( $pv['chip'] ); ?><?php echo $pk === $preset_key ? ' ×' : ''; ?></a> <?php endforeach; ?><?php if ( is_array( $me['goal'] ?? null ) ) : ?><a class="ci-pill is-gold" href="<?php echo esc_url( cvc_ci_url( array( 'sap-xep' => 'relevant' ) ) ); ?>">★ Theo mục tiêu của bạn</a><?php endif; ?></p>
 					<div class="ci-hero-actions"><a class="ci-btn is-primary" href="#ci-search">Tìm cơ hội &amp; đề thi ↗</a><a class="ci-btn" href="<?php echo esc_url( cvc_positions_url() ); ?>">Tìm theo vị trí tuyển dụng</a><a class="ci-btn" href="<?php echo esc_url( add_query_arg( 'tab', 'path', cvc_ci_url() ) ); ?>" data-ci-tab="path">Xem lộ trình cá nhân</a></div>
 				</div>
 				<div class="ci-hero-summary">
@@ -183,6 +198,9 @@ get_header();
 							$on    = array( $k ) === $f['loai'];
 							$nopen = isset( $counts['open_by_kind'][ $k ] ) ? (int) $counts['open_by_kind'][ $k ] : null;
 							$href  = cvc_ci_url( array( 'loai' => $on ? null : $k, 'tinh' => $f['tinh'] ?: null, 'nhom' => $f['nhom'] ?: null, 'q' => $f['q'] ?: null ) );
+							if ( ! $on && ! $f['tinh'] && '' === $f['nhom'] && '' === $f['q'] ) {
+								$href = cvc_rec_preset_url( 'civil' === $k ? 'cong-chuc' : 'vien-chuc' );
+							}
 							?>
 							<a class="ci-quick-btn<?php echo $on ? ' is-on' : ''; ?>" href="<?php echo esc_url( $href ); ?>" data-ci-kind="<?php echo esc_attr( $k ); ?>" aria-pressed="<?php echo $on ? 'true' : 'false'; ?>">
 								<span class="ci-quick-ico" aria-hidden="true"><?php echo esc_html( $qk[1] ); ?></span>

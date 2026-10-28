@@ -307,3 +307,6 @@
 @media(min-width:1401px){
  :root :is(.ch-topline,.ch-header) .ch-container{width:min(1320px,calc(100% - 40px))}
 }
+/* 28/10/2026: menu lớn có thêm hàng "Theo đối tượng" */
+:root .ch-mega-more+.ch-mega-more{margin-top:2px}
+:root .ch-mega-row-audience>span{color:#824c17}

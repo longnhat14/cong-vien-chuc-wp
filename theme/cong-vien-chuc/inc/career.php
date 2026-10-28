@@ -33,6 +33,23 @@ function cvc_ci_families(): array {
 	);
 }
 
+/**
+ * Trang tin tuyển dụng theo loại (28/10/2026): /tuyen-dung/{key}/ = danh sách lọc sẵn + tiêu đề / mô tả riêng (SEO).
+ */
+function cvc_rec_presets(): array {
+	return array(
+		'cong-chuc' => array( 'label' => 'Tin tuyển dụng công chức', 'chip' => 'Công chức', 'filter' => array( 'loai' => 'civil' ), 'h1' => 'Tuyển dụng công chức', 'title' => 'Tuyển dụng công chức 2026: thông báo thi tuyển còn hạn', 'desc' => 'Thông báo tuyển dụng công chức còn hạn nộp hồ sơ từ nguồn chính thức các bộ, ngành, tỉnh, thành; kèm đề trắc nghiệm, văn bản cần ôn và hạn nộp.' ),
+		'vien-chuc' => array( 'label' => 'Tin tuyển dụng viên chức', 'chip' => 'Viên chức', 'filter' => array( 'loai' => 'public' ), 'h1' => 'Tuyển dụng viên chức', 'title' => 'Tuyển dụng viên chức 2026: giáo viên, y tế, sự nghiệp công lập', 'desc' => 'Thông báo tuyển dụng viên chức còn hạn: giáo viên, bác sĩ, điều dưỡng, đơn vị sự nghiệp công lập; kèm đề trắc nghiệm riêng theo tin và lộ trình ôn tập.' ),
+		'hop-dong'  => array( 'label' => 'Tin tuyển hợp đồng', 'chip' => 'Hợp đồng', 'filter' => array( 'loai' => 'contract' ), 'h1' => 'Tuyển dụng lao động hợp đồng', 'title' => 'Tuyển dụng lao động hợp đồng trong cơ quan nhà nước 2026', 'desc' => 'Thông báo tuyển lao động hợp đồng tại cơ quan hành chính, đơn vị sự nghiệp công lập còn hạn nộp hồ sơ, cập nhật từ nguồn chính thức.' ),
+		'giao-vien' => array( 'label' => 'Tin tuyển giáo viên', 'chip' => 'Giáo viên', 'filter' => array( 'nhom' => 'education' ), 'h1' => 'Tuyển dụng giáo viên', 'title' => 'Tuyển dụng giáo viên 2026: mầm non, tiểu học, THCS, THPT', 'desc' => 'Thông báo tuyển dụng giáo viên mầm non, tiểu học, THCS, THPT, giảng viên còn hạn; kèm đề trắc nghiệm theo vị trí và văn bản ngành giáo dục cần ôn.' ),
+		'y-te'      => array( 'label' => 'Tin tuyển ngành y tế', 'chip' => 'Y tế', 'filter' => array( 'nhom' => 'health' ), 'h1' => 'Tuyển dụng ngành y tế', 'title' => 'Tuyển dụng ngành y tế 2026: bác sĩ, điều dưỡng, hộ sinh, dược', 'desc' => 'Thông báo tuyển dụng bác sĩ, điều dưỡng, hộ sinh, kỹ thuật y, dược tại bệnh viện, trung tâm y tế công lập còn hạn; kèm đề ôn theo luật ngành y.' ),
+	);
+}
+
+function cvc_rec_preset_url( string $key ): string {
+	return isset( cvc_rec_presets()[ $key ] ) ? home_url( '/tuyen-dung/' . $key . '/' ) : cvc_ci_url();
+}
+
 function cvc_ci_kinds(): array {
 	return array(
 		'civil'    => 'Tuyển dụng công chức',

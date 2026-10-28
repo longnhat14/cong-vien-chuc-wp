@@ -131,7 +131,10 @@ function cvc_chrome_header(): void {
 					<?php
 					// Mega menu 2 cột (19/10/2026): Luyện tập · Đánh giá + hàng "Học thêm".
 					$cols = array( 'practice' => 'Luyện tập', 'assess' => 'Đánh giá' );
-					$more = array_values( array_filter( $kids, static fn ( $k ) => 'more' === ( $k['group'] ?? '' ) ) );
+					$rows = array(
+						'audience' => array( 'Theo đối tượng:', array_values( array_filter( $kids, static fn ( $k ) => 'audience' === ( $k['group'] ?? '' ) ) ) ),
+						'more'     => array( 'Học thêm:', array_values( array_filter( $kids, static fn ( $k ) => 'more' === ( $k['group'] ?? '' ) ) ) ),
+					);
 					?>
 					<div class="ch-nav-sub ch-mega">
 						<div class="ch-mega-cols">
@@ -144,11 +147,11 @@ function cvc_chrome_header(): void {
 							</div>
 							<?php endforeach; ?>
 						</div>
-						<?php if ( $more ) : ?>
-						<div class="ch-mega-more"><span>Học thêm:</span>
+						<?php foreach ( $rows as $row_key => $row_v ) : $more = $row_v[1]; if ( ! $more ) { continue; } ?>
+						<div class="ch-mega-more ch-mega-row-<?php echo esc_attr( $row_key ); ?>"><span><?php echo esc_html( $row_v[0] ); ?></span>
 							<?php foreach ( $more as $kid ) : ?><a href="<?php echo esc_url( $kid['url'] ); ?>"<?php echo $active( array( $kid['url'] ) ) ? ' class="is-active" aria-current="page"' : ''; ?>><?php echo esc_html( $kid['label'] ); ?><?php if ( ! empty( $kid['badge'] ) ) : ?> <small class="ch-nav-badge"><?php echo esc_html( $kid['badge'] ); ?></small><?php endif; ?></a><?php endforeach; ?>
 						</div>
-						<?php endif; ?>
+						<?php endforeach; ?>
 					</div>
 					<?php else : ?>
 					<div class="ch-nav-sub">

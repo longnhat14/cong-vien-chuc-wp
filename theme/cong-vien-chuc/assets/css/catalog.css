@@ -275,3 +275,10 @@
 .ec .ec-rp-quick .ec-btn{padding:6px 11px;font-size:13.5px}
 @media(max-width:900px){.ec .ec-rp-grid{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:420px){.ec .ec-rp{padding:12px}.ec .ec-rp-head h2{font-size:17px}}
+
+/* 28/10/2026: ôn thi theo đối tượng */
+.ec .ec-tracks{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;margin:-4px 0 14px;font-size:14px}
+.ec .ec-tracks>span{color:var(--m);font-weight:bold}
+.ec .ec-chip{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border:1px solid #cbd6d2;border-radius:99px;background:#fff;color:var(--n);font-weight:bold;font-size:13.5px}
+.ec .ec-chip:hover{border-color:#9fb8ad;background:#f6faf8}
+.ec .ec-chip.is-on{background:var(--soft);border-color:#a8c9bb;color:var(--t-ink)}

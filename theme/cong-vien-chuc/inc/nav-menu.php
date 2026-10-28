@@ -9,6 +9,9 @@
  *  - Mục cấp 2: "Lớp CSS" = nhom-luyen-tap | nhom-danh-gia | nhom-hoc-them -> menu lớn 2 cột + hàng "Học thêm";
  *    "Mô tả" = dòng mô tả; "Thuộc tính tiêu đề" (title attribute) = ký hiệu 1 ký tự (✎ ◷ ▤ ...).
  *    Nhãn dạng "Tên | Nhãn nhỏ" -> hiện nhãn nhỏ (vd. "Đăng tin tuyển dụng | Miễn phí").
+ *    Nhóm "nhom-doi-tuong" = hàng "Theo đối tượng" trong menu lớn (như hàng "Học thêm").
+ *    Lớp "tu-dong-dang-tin": đường dẫn tự theo tài khoản (đơn vị -> màn hình đăng tin), nhãn "Miễn phí" khi chưa thu phí,
+ *    ẩn khi tắt tính năng đơn vị. Lớp "an-khi-tat-ngoai-cong-lap": ẩn khi chưa bật tin ngoài công lập.
  *  - Chưa gán menu nào cho vị trí Primary -> dùng menu mặc định trong code (cvc_main_nav_items_default).
  * Màn hình Giao diện → Menu tự hiện các ô Mô tả / Lớp CSS / Thuộc tính tiêu đề.
  */
@@ -17,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const CVC_NAV_GROUPS = array( 'nhom-luyen-tap' => 'practice', 'nhom-danh-gia' => 'assess', 'nhom-hoc-them' => 'more' );
+const CVC_NAV_GROUPS = array( 'nhom-luyen-tap' => 'practice', 'nhom-danh-gia' => 'assess', 'nhom-doi-tuong' => 'audience', 'nhom-hoc-them' => 'more' );
 
 /** Tách "Nhãn | Huy hiệu". @return array{0: string, 1: string} */
 function cvc_nav_split_badge( string $title ): array {
@@ -70,6 +73,24 @@ function cvc_nav_from_wp_menu(): ?array {
 			if ( '' === $row['badge'] && '' !== $courses_url && untrailingslashit( $row['url'] ) === $courses_url && ! $has_courses ) {
 				$row['badge'] = 'Sắp mở';
 			}
+			if ( in_array( 'tu-dong-dang-tin', $classes, true ) || in_array( 'an-khi-tat-ngoai-cong-lap', $classes, true ) ) {
+				$set = function_exists( 'cvc_employer_public_settings' ) ? cvc_employer_public_settings() : array();
+				if ( in_array( 'an-khi-tat-ngoai-cong-lap', $classes, true ) && empty( $set['private_enabled'] ) ) {
+					continue;
+				}
+				if ( in_array( 'tu-dong-dang-tin', $classes, true ) ) {
+					if ( isset( $set['enabled'] ) && empty( $set['enabled'] ) ) {
+						continue;
+					}
+					$emp        = ( function_exists( 'cvc_employer_of_current_user' ) && function_exists( 'cvc_is_logged_in' ) && cvc_is_logged_in() ) ? cvc_employer_of_current_user() : null;
+					$row['url'] = $emp ? home_url( '/don-vi/dang-tin/' ) : home_url( '/don-vi-tuyen-dung/' );
+					if ( ! empty( $set['paid'] ) ) {
+						$row['badge'] = '';
+					} elseif ( '' === $row['badge'] ) {
+						$row['badge'] = 'Miễn phí';
+					}
+				}
+			}
 			$children[ (int) $it->menu_item_parent ][] = $row + array( 'group' => $group, 'sym' => trim( (string) $it->attr_title ) );
 		}
 	}
@@ -116,7 +137,8 @@ add_action(
 		echo '<div class="notice notice-info"><p><b>Menu chính Công Viên Chức</b> (vị trí "Primary Menu"). '
 			. 'Mục cấp 1: <i>Mô tả</i> = dòng chú thích; <i>Lớp CSS</i> = <code>icon-exams</code> / <code>icon-rec</code> / <code>icon-legal</code> / <code>icon-docs</code> / <code>icon-posts</code>; '
 			. 'thêm <code>tu-dong-tuyen-dung</code> để tự sinh menu con Tuyển dụng. '
-			. 'Mục cấp 2: <i>Lớp CSS</i> = <code>nhom-luyen-tap</code> / <code>nhom-danh-gia</code> / <code>nhom-hoc-them</code> (menu lớn 2 cột), <i>Thuộc tính tiêu đề</i> = ký hiệu (✎ ◷ ▤), '
+			. 'Mục cấp 2: <i>Lớp CSS</i> = <code>nhom-luyen-tap</code> / <code>nhom-danh-gia</code> (2 cột menu lớn), <code>nhom-doi-tuong</code> (hàng "Theo đối tượng"), <code>nhom-hoc-them</code> (hàng "Học thêm"); <i>Thuộc tính tiêu đề</i> = ký hiệu (✎ ◷ ▤); '
+			. '<code>tu-dong-dang-tin</code> = nút Đăng tin tự theo tài khoản; <code>an-khi-tat-ngoai-cong-lap</code> = ẩn khi chưa bật tin ngoài công lập; '
 			. 'nhãn dạng <code>Tên | Nhãn nhỏ</code> để hiện huy hiệu. Bỏ gán vị trí Primary → web dùng menu mặc định.</p></div>';
 	}
 );

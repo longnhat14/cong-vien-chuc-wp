@@ -64,6 +64,13 @@ function cvc_sitemap_render(): void {
 		array( 'path' => '/luyen-thi-trac-nghiem/', 'lastmod' => cvc_sitemap_lastmod( $data['notices'] ) ),
 		array( 'path' => '/thi-thu-trac-nghiem/', 'lastmod' => cvc_sitemap_lastmod( $data['notices'] ) ),
 	);
+	// 28/10/2026: trang theo đối tượng (ôn thi) và theo loại (tuyển dụng).
+	foreach ( function_exists( 'cvc_cat_tracks' ) ? cvc_cat_tracks() : array() as $t ) {
+		$rows[] = array( 'path' => '/' . $t['path'] . '/', 'lastmod' => cvc_sitemap_lastmod( $data['notices'] ) );
+	}
+	foreach ( array_keys( function_exists( 'cvc_rec_presets' ) ? cvc_rec_presets() : array() ) as $k ) {
+		$rows[] = array( 'path' => '/tuyen-dung/' . $k . '/', 'lastmod' => cvc_sitemap_lastmod( $data['notices'] ) );
+	}
 	$rows = array_merge( $rows, $data['notices'], $data['positions'] );
 
 	status_header( 200 );

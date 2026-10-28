@@ -73,6 +73,65 @@ function cvc_cat_config( string $kind ): array {
 	return $all[ $kind ] ?? $all['exams'];
 }
 
+/**
+ * Trang ôn thi theo đối tượng (28/10/2026): luyện thi (chế độ ôn tập) với đề riêng theo tin + đề chung lọc sẵn.
+ * rp = lọc khối "Đề riêng theo tin" (type = recruitment_type, family = job_family); cat = lọc danh sách đề chung.
+ */
+function cvc_cat_tracks(): array {
+	return array(
+		'cong-chuc'  => array(
+			'path'  => 'on-thi-cong-chuc',
+			'chip'  => 'Công chức',
+			'label' => 'Ôn thi công chức',
+			'h1'    => 'Ôn thi công chức',
+			'lead'  => 'Đề trắc nghiệm theo tin tuyển dụng công chức đang nhận hồ sơ và đề kiến thức chung, quản lý hành chính nhà nước: xem đáp án, giải thích và căn cứ pháp luật sau mỗi câu.',
+			'title' => 'Ôn thi công chức 2026: đề trắc nghiệm theo tin tuyển dụng',
+			'desc'  => 'Ôn thi công chức miễn phí: đề trắc nghiệm theo từng tin tuyển dụng công chức đang nhận hồ sơ, kiến thức chung, quản lý hành chính nhà nước, có đáp án và căn cứ pháp luật.',
+			'rp'    => array( 'type' => 'civil_servant' ),
+			'cat'   => array( 'track' => 'civil' ),
+		),
+		'vien-chuc'  => array(
+			'path'  => 'on-thi-vien-chuc',
+			'chip'  => 'Viên chức',
+			'label' => 'Ôn thi viên chức',
+			'h1'    => 'Ôn thi viên chức',
+			'lead'  => 'Đề trắc nghiệm theo tin tuyển dụng viên chức (giáo dục, y tế, sự nghiệp công lập) đang nhận hồ sơ, kèm đề kiến thức chung và chuyên ngành.',
+			'title' => 'Ôn thi viên chức 2026: đề trắc nghiệm theo tin tuyển dụng',
+			'desc'  => 'Ôn thi viên chức miễn phí: đề trắc nghiệm theo từng tin tuyển dụng viên chức đang nhận hồ sơ, Luật Viên chức, kiến thức chung và chuyên ngành, có đáp án và căn cứ pháp luật.',
+			'rp'    => array( 'type' => 'public_employee' ),
+			'cat'   => array( 'track' => 'public' ),
+		),
+		'giao-vien'  => array(
+			'path'  => 'on-thi-vien-chuc-giao-vien',
+			'chip'  => 'Giáo viên',
+			'label' => 'Ôn thi viên chức giáo viên',
+			'h1'    => 'Ôn thi viên chức giáo viên',
+			'lead'  => 'Đề trắc nghiệm theo tin tuyển dụng giáo viên mầm non, tiểu học, THCS, THPT đang nhận hồ sơ: Luật Nhà giáo, Luật Giáo dục, chuẩn nghề nghiệp, quy tắc ứng xử.',
+			'title' => 'Ôn thi viên chức giáo viên 2026: đề trắc nghiệm theo tin tuyển dụng',
+			'desc'  => 'Ôn thi viên chức giáo viên mầm non, tiểu học, THCS, THPT: đề trắc nghiệm theo tin tuyển dụng đang nhận hồ sơ, Luật Nhà giáo 2025, chuẩn nghề nghiệp, có đáp án và căn cứ.',
+			'rp'    => array( 'family' => 'education' ),
+			'cat'   => array( 'group' => 'education' ),
+		),
+		'y-te'       => array(
+			'path'  => 'on-thi-vien-chuc-y-te',
+			'chip'  => 'Y tế',
+			'label' => 'Ôn thi viên chức y tế',
+			'h1'    => 'Ôn thi viên chức y tế',
+			'lead'  => 'Đề trắc nghiệm theo tin tuyển dụng bác sĩ, điều dưỡng, hộ sinh, kỹ thuật y, dược đang nhận hồ sơ: Luật Khám bệnh, chữa bệnh, Luật Bảo hiểm y tế, quy tắc ứng xử ngành y.',
+			'title' => 'Ôn thi viên chức y tế 2026: đề trắc nghiệm theo tin tuyển dụng',
+			'desc'  => 'Ôn thi viên chức y tế (bác sĩ, điều dưỡng, hộ sinh, kỹ thuật y, dược): đề trắc nghiệm theo tin tuyển dụng đang nhận hồ sơ, Luật Khám bệnh, chữa bệnh 2023, có đáp án và căn cứ.',
+			'rp'    => array( 'family' => 'health' ),
+			'cat'   => array( 'group' => 'health' ),
+		),
+	);
+}
+
+function cvc_cat_track_url( string $key, int $page = 1 ): string {
+	$t = cvc_cat_tracks()[ $key ] ?? null;
+
+	return $t ? home_url( '/' . $t['path'] . '/' . ( $page > 1 ? 'page/' . $page . '/' : '' ) ) : cvc_exams_mode_url( 'on-tap', $page );
+}
+
 /** Cấu hình kèm nhãn của trang Luyện thi / Thi thử trắc nghiệm (28/10/2026). */
 function cvc_cat_cfg( string $kind, array $f ): array {
 	$cfg = cvc_cat_config( $kind );
@@ -101,6 +160,12 @@ function cvc_cat_cfg( string $kind, array $f ): array {
 				'title'   => 'Đề thi thử chung',
 			)
 		);
+	}
+
+	$tk = 'exams' === $kind ? (string) ( $f['tuyen'] ?? '' ) : '';
+	if ( '' !== $tk && isset( cvc_cat_tracks()[ $tk ] ) ) {
+		$t   = cvc_cat_tracks()[ $tk ];
+		$cfg = array_merge( $cfg, array( 'crumb' => $t['label'], 'eyebrow' => $t['label'], 'h1' => $t['h1'], 'lead' => $t['lead'] ) );
 	}
 
 	return $cfg;
@@ -151,6 +216,13 @@ function cvc_cat_filters( string $kind, array $src ): array {
 		if ( in_array( $route_mode, array( 'thi-that', 'on-tap' ), true ) ) {
 			$f['che-do'] = $route_mode;
 		}
+		// Trang ôn thi theo đối tượng: route (cvc_exam_track) hoặc ô ẩn "tuyen" khi lọc bằng AJAX.
+		$tk = (string) get_query_var( 'cvc_exam_track' );
+		$tk = '' !== $tk ? $tk : $s( 'tuyen' );
+		$f['tuyen'] = isset( cvc_cat_tracks()[ $tk ] ) ? $tk : '';
+		if ( '' !== $f['tuyen'] ) {
+			$f['che-do'] = 'on-tap';
+		}
 	} elseif ( 'topics' === $kind ) {
 		$f += array(
 			'subject_id' => absint( $s( 'subject_id' ) ),
@@ -192,7 +264,7 @@ function cvc_cat_args( array $f ): array {
 function cvc_cat_filter_count( array $f ): int {
 	$n = 0;
 	foreach ( cvc_cat_args( $f ) as $k => $v ) {
-		if ( 'sort' !== $k && 'che-do' !== $k ) {
+		if ( 'sort' !== $k && 'che-do' !== $k && 'tuyen' !== $k ) {
 			$n += is_array( $v ) ? count( $v ) : 1;
 		}
 	}
@@ -207,12 +279,24 @@ function cvc_cat_url( string $kind, array $f, int $page = 1 ): string {
 		$base = cvc_exams_mode_url( (string) $f['che-do'], max( 1, $page ) );
 		unset( $args['che-do'] );
 	}
+	if ( 'exams' === $kind && ! empty( $f['tuyen'] ) && 'on-tap' === ( $f['che-do'] ?? '' ) ) {
+		$base = cvc_cat_track_url( (string) $f['tuyen'], max( 1, $page ) );
+	}
+	unset( $args['tuyen'] );
 
 	return $args ? $base . '?' . http_build_query( $args, '', '&' ) : $base;
 }
 
 function cvc_cat_fetch( string $kind, array $f, int $page, ?string $token ): array {
-	$q = array_diff_key( cvc_cat_args( $f ), array( 'che-do' => 1 ) ) + array( 'page' => $page, 'per_page' => 10 );
+	$q = array_diff_key( cvc_cat_args( $f ), array( 'che-do' => 1, 'tuyen' => 1 ) ) + array( 'page' => $page, 'per_page' => 10 );
+	$tr = 'exams' === $kind ? ( cvc_cat_tracks()[ (string) ( $f['tuyen'] ?? '' ) ] ?? null ) : null;
+	if ( $tr ) {
+		foreach ( (array) $tr['cat'] as $k => $v ) {
+			if ( 'group' !== $k || empty( $q['group'] ) ) {
+				$q[ $k ] = $v;
+			}
+		}
+	}
 	if ( 'exams' === $kind && ! empty( $f['che-do'] ) ) {
 		$q['personal'] = 'exclude'; // Đề riêng theo tin hiện ở khối riêng phía trên.
 	}
@@ -572,7 +656,7 @@ function cvc_cat_render_page( string $kind ): void {
 	foreach ( (array) ( $st['groups'] ?? array() ) as $g ) {
 		$groups[ (string) $g['code'] ] = $g['label'] . ' (' . cvc_cat_n( $g['count'] ) . ')';
 	}
-	$base      = 'exams' === $kind && ! empty( $f['che-do'] ) ? cvc_exams_mode_url( (string) $f['che-do'] ) : call_user_func( $cfg['url'], 1 );
+	$base      = 'exams' === $kind && ! empty( $f['tuyen'] ) ? cvc_cat_track_url( (string) $f['tuyen'] ) : ( 'exams' === $kind && ! empty( $f['che-do'] ) ? cvc_exams_mode_url( (string) $f['che-do'] ) : call_user_func( $cfg['url'], 1 ) );
 	$saved_n   = $mine ? (int) ( $mine['saved'] ?? 0 ) : null;
 
 	// Ô số liệu: [biểu tượng, giá trị, nhãn]
@@ -651,7 +735,12 @@ function cvc_cat_render_page( string $kind ): void {
 						<a class="ec-btn" href="<?php echo esc_url( cvc_question_bank_url() ); ?>">▤ Ngân hàng câu hỏi</a>
 					</nav>
 				</section>
-				<?php if ( '' !== $md ) { cvc_cat_render_rp( $md, $token ); } ?>
+				<nav class="ec-tracks" aria-label="Ôn thi theo đối tượng"><span>Theo đối tượng:</span>
+					<?php foreach ( cvc_cat_tracks() as $tk => $tr ) : $is = $tk === ( $f['tuyen'] ?? '' ); ?>
+						<a class="ec-chip<?php echo $is ? ' is-on' : ''; ?>" href="<?php echo esc_url( $is ? cvc_exams_mode_url( 'on-tap' ) : cvc_cat_track_url( $tk ) ); ?>"<?php echo $is ? ' aria-current="page" title="Bỏ lọc đối tượng"' : ''; ?>><?php echo esc_html( $tr['chip'] ); ?><?php echo $is ? ' <b aria-hidden="true">×</b>' : ''; ?></a>
+					<?php endforeach; ?>
+				</nav>
+				<?php if ( '' !== $md ) { cvc_cat_render_rp( $md, $token, (array) ( cvc_cat_tracks()[ (string) ( $f['tuyen'] ?? '' ) ]['rp'] ?? array() ), (string) ( $f['tuyen'] ?? '' ) ); } ?>
 			<?php endif; ?>
 			<section class="ec-stats" aria-label="Số liệu">
 				<?php foreach ( $cards as $c ) : ?>
@@ -663,6 +752,7 @@ function cvc_cat_render_page( string $kind ): void {
 				<aside class="ec-side">
 					<form class="ec-panel" id="ec-form" method="get" action="<?php echo esc_url( $base ); ?>" data-ec-form role="search">
 						<?php if ( ! empty( $f['che-do'] ) ) : ?><input type="hidden" name="che-do" value="<?php echo esc_attr( (string) $f['che-do'] ); ?>"><?php endif; ?>
+						<?php if ( ! empty( $f['tuyen'] ) ) : ?><input type="hidden" name="tuyen" value="<?php echo esc_attr( (string) $f['tuyen'] ); ?>"><?php endif; ?>
 						<div class="ec-panel-head"><h2><?php echo esc_html( $cfg['filter_h'] ); ?></h2><span class="ec-fcount" data-ec-fcount><?php echo (int) cvc_cat_filter_count( $f ); ?> bộ lọc</span><button type="button" class="ec-ftoggle" data-ec-ftoggle aria-expanded="false" aria-controls="ec-form">Mở bộ lọc ▾</button></div>
 						<div class="ec-panel-body">
 							<div class="ec-search-area">
@@ -792,15 +882,15 @@ function cvc_cat_render_page( string $kind ): void {
  * Đề riêng theo tin tuyển dụng đang nhận hồ sơ (28/10/2026) - trang Luyện thi / Thi thử trắc nghiệm.
  * GET /api/catalog/recruitment-exams; lọc tỉnh (?tinh=) và trang (?tin-trang=) bằng link thường.
  * ------------------------------------------------------------------ */
-function cvc_cat_render_rp( string $mode, ?string $token ): void {
+function cvc_cat_render_rp( string $mode, ?string $token, array $rp = array(), string $track = '' ): void {
 	$prov = absint( $_GET['tinh'] ?? 0 ); // phpcs:ignore WordPress.Security.NonceVerification
 	$pg   = max( 1, min( 100, absint( $_GET['tin-trang'] ?? 1 ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
-	$res  = cvc_ci_api( '/api/catalog/recruitment-exams', array_filter( array( 'province_id' => $prov ?: null, 'page' => $pg, 'per_page' => 6 ) ), $token, 15, $token ? 0 : 300 );
+	$res  = cvc_ci_api( '/api/catalog/recruitment-exams', array_filter( array( 'province_id' => $prov ?: null, 'page' => $pg, 'per_page' => 6 ) + $rp ), $token, 15, $token ? 0 : 300 );
 	$data = $res['ok'] ? (array) ( $res['data']['data'] ?? array() ) : array();
 	$items = (array) ( $data['items'] ?? array() );
 	$pgn   = (array) ( $data['pagination'] ?? array() );
 	$provs = (array) ( $data['provinces'] ?? array() );
-	$base  = cvc_exams_mode_url( $mode );
+	$base  = '' !== $track ? cvc_cat_track_url( $track ) : cvc_exams_mode_url( $mode );
 	$total = (int) ( $pgn['total'] ?? 0 );
 	$last  = max( 1, (int) ( $pgn['last_page'] ?? 1 ) );
 	$link  = static function ( int $p ) use ( $base, $prov ): string {
@@ -901,6 +991,9 @@ function cvc_cat_assets(): void {
 		return;
 	}
 	$mode_base = 'exams' === $page && in_array( (string) get_query_var( 'cvc_exam_mode' ), array( 'on-tap', 'thi-that' ), true ) ? cvc_exams_mode_url( (string) get_query_var( 'cvc_exam_mode' ) ) : '';
+	if ( 'exams' === $page && isset( cvc_cat_tracks()[ (string) get_query_var( 'cvc_exam_track' ) ] ) ) {
+		$mode_base = cvc_cat_track_url( (string) get_query_var( 'cvc_exam_track' ) );
+	}
 	wp_enqueue_style( 'cvc-catalog', get_theme_file_uri( '/assets/css/catalog.css' ), array(), (string) filemtime( get_theme_file_path( '/assets/css/catalog.css' ) ) );
 	wp_enqueue_script( 'cvc-catalog', get_theme_file_uri( '/assets/js/catalog.js' ), array(), (string) filemtime( get_theme_file_path( '/assets/js/catalog.js' ) ), true );
 	wp_add_inline_script(
