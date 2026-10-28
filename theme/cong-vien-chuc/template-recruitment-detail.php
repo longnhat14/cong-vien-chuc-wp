@@ -89,6 +89,26 @@ $courses      = (array) ( $recruitment['courses'] ?? array() );
 $dossier      = is_array( $recruitment['dossier'] ?? null ) ? $recruitment['dossier'] : array();
 $subjects     = (array) ( $dossier['exam_subjects'] ?? array() );
 $legal_docs   = (array) ( $dossier['legal_documents'] ?? array() );
+// 28/10/2026: chỉ giữ văn bản nền (Hiến pháp, Luật/NQ Quốc hội, Nghị định, Thông tư); bỏ quyết định cá biệt
+// và văn bản nhắc tới tỉnh/thành khác (vd. QĐ giải thể trung tâm của tỉnh khác).
+$rd_prov    = trim( (string) preg_replace( '/^(Tỉnh|Thành phố)\s+/u', '', (string) ( $recruitment['province']['name'] ?? '' ) ) );
+$legal_docs = array_values(
+	array_filter(
+		$legal_docs,
+		static function ( $ld ) use ( $rd_prov ): bool {
+			$num   = (string) ( $ld['document_number'] ?? '' );
+			$title = (string) ( $ld['title'] ?? '' );
+			if ( ! preg_match( '/Hiến pháp|\/QH\d+|NĐ-CP|\/TT-|TTLT/u', $num . ' ' . $title ) ) {
+				return false;
+			}
+			if ( preg_match( '/\b(tỉnh|thành phố)\s+(\p{Lu}[\p{L}]*(?:\s+\p{Lu}[\p{L}]*)*)/u', $title, $m ) && ( '' === $rd_prov || false === mb_stripos( $m[2], $rd_prov ) ) ) {
+				return false;
+			}
+			return true;
+		}
+	)
+);
+$legal_docs = array_slice( $legal_docs, 0, 24 );
 $is_open      = ! empty( $recruitment['is_open'] );
 $status       = (string) ( $recruitment['status'] ?? '' );
 $source_url   = (string) ( $recruitment['source_url'] ?? '' );
@@ -648,6 +668,23 @@ get_header();
 		<?php endif; ?>
 	</section>
 
+	<?php
+	// 28/10/2026: đề riêng của tin đặt ngay sau bảng vị trí (trước kho tài liệu, hồ sơ ôn thi).
+	if ( $personal ) {
+		cvc_rd_render_personal_exams( $personal, is_array( $position ) ? (string) ( $position['name'] ?? '' ) : '', mb_strtolower( $type_lbl ), (array) ( $recruitment['personal_exams_pricing'] ?? array() ), (int) ( $recruitment['id'] ?? 0 ) );
+	} elseif ( 'building' === ( $recruitment['personal_exams_state'] ?? '' ) ) {
+		?>
+		<section class="rd-card rd-pe-building" id="de-rieng" aria-labelledby="rd-pe-h">
+			<div class="rd-card-head"><h2 id="rd-pe-h"><span class="rd-ico" aria-hidden="true">✎</span>Đề thi trắc nghiệm dành riêng cho tin này</h2></div>
+			<div class="rd-card-body">
+				<p class="rd-pe-wait"><span class="rd-pe-spin" aria-hidden="true"></span><b>Đang tạo đề riêng cho tin này</b> – thường xong trong 30 phút. Đề được biên soạn theo căn cứ của thông báo và từng nhóm vị trí; tải lại trang sau ít phút để luyện.</p>
+				<?php if ( $exams ) : ?><p class="rd-muted rd-small">Trong lúc chờ, bạn có thể luyện <a href="#ho-so-on-thi">đề luyện chung</a> (chưa riêng cho tin này).</p><?php endif; ?>
+			</div>
+		</section>
+		<?php
+	}
+	?>
+
 	<!-- ============ KHO TÀI LIỆU ============ -->
 	<section class="rd-card" id="tai-lieu" aria-labelledby="rd-doc-h">
 		<span id="van-ban-goc" class="rd-anchor" aria-hidden="true"></span>
@@ -889,9 +926,6 @@ get_header();
 		echo '</div>';
 	}
 
-	if ( $personal ) {
-		cvc_rd_render_personal_exams( $personal, is_array( $position ) ? (string) ( $position['name'] ?? '' ) : '', mb_strtolower( $type_lbl ), (array) ( $recruitment['personal_exams_pricing'] ?? array() ), (int) ( $recruitment['id'] ?? 0 ) );
-	}
 	?>
 
 	<?php if ( $exams || $subjects || $legal_docs ) : ?>
@@ -901,7 +935,7 @@ get_header();
 			<div class="rd-card-body">
 				<p class="rd-muted">Tổng hợp từ đề thi, môn thi, chủ đề và văn bản đang gắn với đợt tuyển dụng trong hệ thống.</p>
 				<?php if ( $exams ) : ?>
-					<div class="rd-block"><h3>Đề thi thử gắn với đợt này</h3>
+					<div class="rd-block"><h3><?php echo $personal ? 'Đề luyện chung (tham khảo thêm)' : 'Đề luyện chung – chưa riêng cho tin này'; ?></h3>
 						<div class="rd-linkgrid">
 							<?php foreach ( $exams as $exam ) : ?>
 								<a href="<?php echo esc_url( cvc_exam_url( (string) ( $exam['slug'] ?? '' ) ) ); ?>"><b><?php echo esc_html( (string) ( $exam['title'] ?? '' ) ); ?></b>
@@ -1022,6 +1056,7 @@ get_header();
 			<h2><span class="rd-ico" aria-hidden="true">▣</span>Liên quan đến ôn thi</h2>
 			<a class="rd-navitem" href="#tai-lieu"><span aria-hidden="true">▤</span><b>Tài liệu cần đọc<small>Thông báo và <?php echo count( $attachments ); ?> tệp đính kèm</small></b></a>
 			<a class="rd-navitem" href="#vi-tri"><span aria-hidden="true">☷</span><b>Danh sách vị trí<small><?php echo esc_html( count( $positions ) . ' vị trí · lọc theo mã, chuyên ngành' ); ?></small></b></a>
+			<?php if ( ! $personal && 'building' === ( $recruitment['personal_exams_state'] ?? '' ) ) : ?><a class="rd-navitem" href="#de-rieng"><span aria-hidden="true">✎</span><b>Đề trắc nghiệm riêng cho tin<small>Đang tạo – thường xong trong 30 phút</small></b></a><?php endif; ?>
 			<?php if ( $personal ) : ?><a class="rd-navitem" href="#de-rieng"><span aria-hidden="true">✎</span><b>Đề trắc nghiệm riêng cho tin<small><?php echo esc_html( array_sum( array_map( fn ( $g ) => count( (array) ( $g['exams'] ?? array() ) ), $personal ) ) . ' đề mô phỏng vòng 1' ); ?></small></b></a><?php endif; ?>
 			<?php if ( $study_plan ) : ?><a class="rd-navitem" href="#lo-trinh-on"><span aria-hidden="true">◎</span><b>Lộ trình ôn của đợt<small>Theo danh mục tài liệu của Hội đồng</small></b></a><?php endif; ?>
 			<a class="rd-navitem" href="#chuan-bi"><span aria-hidden="true">✓</span><b>Lộ trình chuẩn bị<small>Ba bước trước khi luyện đề</small></b></a>

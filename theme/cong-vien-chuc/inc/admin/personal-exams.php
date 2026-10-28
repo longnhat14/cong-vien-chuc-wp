@@ -1,7 +1,7 @@
 <?php
 /**
  * Quản trị đề cá nhân hóa theo tin tuyển dụng (20/10/2026):
- * công tắc từng tin (Theo mặc định / Luôn bật / Luôn tắt), phạm vi chung theo loại tin, chạy dựng đề ngay.
+ * công tắc từng tin (Không tạo (mặc định) / Tạo đề riêng / Tắt hẳn), phạm vi chung theo loại tin, chạy dựng đề ngay.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

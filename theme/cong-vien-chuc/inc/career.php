@@ -144,7 +144,7 @@ function cvc_ci_jobs_query( array $f, int $page ): array {
 			'province_id' => $f['tinh'] ?: null,
 			'kind'        => $f['loai'] ?: null,
 			'status'      => $f['trang-thai'] ?: 'open',
-			'sort'        => $f['sap-xep'] ?: 'relevant',
+			'sort'        => $f['sap-xep'] ?: 'newest',
 			'saved'       => $f['luu'] ? 1 : null,
 			'method'      => $f['phuong-thuc'],
 			'sector'      => 'ngoai-cong-lap' === ( $f['khu-vuc'] ?? '' ) ? 'private' : null,
@@ -256,7 +256,13 @@ function cvc_ci_render_job_card( array $r, bool $logged_in ): void {
 		</div>
 		<?php if ( ! empty( $r['summary'] ) ) : ?><p class="ci-job-body"><?php echo esc_html( wp_trim_words( (string) $r['summary'], 40 ) ); ?></p><?php endif; ?>
 		<div class="ci-job-foot">
-			<span class="ci-deadline<?php echo empty( $st['deadline'] ) ? ' is-unknown' : ''; ?>">◷ <?php echo ! empty( $st['deadline'] ) ? 'Hạn nộp ' . esc_html( cvc_ci_date( (string) $st['deadline'] ) ) . ( ! empty( $st['deadline_verified'] ) ? '' : ' · cần đối chiếu' ) : 'Chưa công bố hạn nộp'; ?></span>
+			<span class="ci-deadline<?php echo empty( $st['deadline'] ) ? ' is-unknown' : ''; ?>">◷ <?php
+			$posted = ! empty( $r['published_at'] ) ? cvc_ci_date( (string) $r['published_at'] ) : '';
+			if ( '' !== $posted ) {
+				echo '<span class="ci-posted">Đăng ' . esc_html( $posted ) . '</span> · ';
+			}
+			echo ! empty( $st['deadline'] ) ? 'Hạn nộp ' . esc_html( cvc_ci_date( (string) $st['deadline'] ) ) . ( ! empty( $st['deadline_verified'] ) ? '' : ' · cần đối chiếu' ) : 'Chưa công bố hạn nộp';
+			?></span>
 			<div class="ci-actions">
 				<button type="button" class="ci-btn" data-ci="related" data-id="<?php echo (int) $r['id']; ?>">Xem đề &amp; tài liệu ↗</button>
 				<?php if ( $logged_in ) : ?>
@@ -271,7 +277,8 @@ function cvc_ci_render_job_card( array $r, bool $logged_in ): void {
 		</div>
 		<?php if ( ! empty( $exams ) ) : ?>
 			<div class="ci-linked">
-				<b>ĐỀ THI LIÊN QUAN</b>
+				<?php $has_rp = (bool) array_filter( $exams, static fn( $e ) => 'personal' === ( $e['tier'] ?? '' ) ); ?>
+				<b><?php echo $has_rp ? 'ĐỀ THI RIÊNG CHO TIN NÀY' : 'ĐỀ LUYỆN CHUNG'; ?><?php if ( ! $has_rp ) : ?> <small>· chưa riêng cho tin này</small><?php endif; ?></b>
 				<?php foreach ( $exams as $e ) : ?>
 					<div class="ci-linked-row">
 						<a href="<?php echo esc_url( cvc_exam_url( (string) $e['slug'] ) ); ?>"><?php echo esc_html( (string) $e['title'] ); ?></a>

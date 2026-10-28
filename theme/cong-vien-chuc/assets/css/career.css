@@ -105,11 +105,11 @@ main.ci{background:var(--ci-bg);padding:0 0 46px}
 .ci-meta{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--ci-muted)}
 .ci-tags{display:flex;flex-wrap:wrap;gap:5px;margin:7px 0}
 .ci-job-body{font-size:13px;color:#2e3841;margin:6px 0}
-.ci-job-foot{border-top:1px solid #edf0ee;margin-top:9px;padding-top:9px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.ci-job-foot{border-top:1px solid #edf0ee;margin-top:9px;padding-top:9px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px}
 .ci-job-foot .ci-btn{font-size:12px;padding:6px 9px}
 .ci-deadline{font-size:12px;color:#755217;background:var(--ci-goldbg);padding:5px 8px;border-radius:7px;white-space:nowrap}.ci-deadline.is-unknown{background:#edf0f2;color:#343f45}
 .ci-linked{margin-top:10px;padding:8px 10px;background:#f7faf8;border:1px solid #e0ebe4;border-radius:9px}
-.ci-linked b{font-size:11px;color:var(--ci-teal-ink);display:block;margin-bottom:4px;letter-spacing:.6px}
+.ci-linked b{font-size:11px;color:var(--ci-teal-ink);display:block;margin-bottom:4px;letter-spacing:.6px}.ci-linked b small{font-weight:normal;letter-spacing:0;color:var(--ci-muted);font-size:11px}
 .ci-linked-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #e5ece7;font-size:13px}
 .ci-linked-row:last-child{border:0}
 .ci-linked-row a{color:var(--ci-navy);font-weight:bold;min-width:0;overflow-wrap:anywhere}.ci-linked-row a:hover{text-decoration:underline}

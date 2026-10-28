@@ -70,7 +70,7 @@ function cvc_admin_render_imports_index(): void {
 			</div>
 			<fieldset class="flex flex-wrap items-center gap-3 text-sm">
 				<legend class="text-sm font-bold text-ink mb-1">Tự tạo đề trắc nghiệm cho tin sau khi đăng</legend>
-				<?php foreach ( array( 'inherit' => 'Theo mặc định', 'on' => 'Luôn bật', 'off' => 'Tắt' ) as $k => $lbl ) : ?>
+				<?php foreach ( array( 'inherit' => 'Không tạo (mặc định)', 'on' => 'Tạo đề riêng', 'off' => 'Tắt hẳn' ) as $k => $lbl ) : ?>
 					<label class="flex items-center gap-2"><input type="radio" name="personal_exams" value="<?php echo esc_attr( $k ); ?>" class="accent-acc-2" <?php checked( 'inherit', $k ); ?>> <?php echo esc_html( $lbl ); ?></label>
 				<?php endforeach; ?>
 			</fieldset>
@@ -250,7 +250,7 @@ function cvc_admin_render_import_detail( int $id ): void {
 			<?php wp_nonce_field( 'cvc_admin_import' ); ?>
 			<input type="hidden" name="action" value="cvc_admin_import"><input type="hidden" name="op" value="mode"><input type="hidden" name="id" value="<?php echo (int) $id; ?>">
 			<span class="font-bold text-ink">Tự tạo đề trắc nghiệm:</span>
-			<?php foreach ( array( 'inherit' => 'Theo mặc định', 'on' => 'Luôn bật', 'off' => 'Tắt' ) as $k => $lbl ) : ?>
+			<?php foreach ( array( 'inherit' => 'Không tạo (mặc định)', 'on' => 'Tạo đề riêng', 'off' => 'Tắt hẳn' ) as $k => $lbl ) : ?>
 				<label class="flex items-center gap-2"><input type="radio" name="personal_exams" value="<?php echo esc_attr( $k ); ?>" class="accent-acc-2" <?php checked( (string) ( $d['personal_exams'] ?? 'inherit' ), $k ); ?>> <?php echo esc_html( $lbl ); ?></label>
 			<?php endforeach; ?>
 			<button type="submit" class="<?php echo esc_attr( $btn ); ?> bg-white border border-slate-300 text-ink hover:bg-acc-soft">Lưu</button>

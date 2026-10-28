@@ -152,9 +152,9 @@ get_header();
 						</select>
 						<label class="ci-label" for="ci-f-sort" style="margin-top:8px">Sắp xếp</label>
 						<select id="ci-f-sort" name="sap-xep" class="ci-field">
-							<option value=""<?php selected( $f['sap-xep'], '' ); ?>>Phù hợp nhất<?php echo is_array( $me['goal'] ?? null ) ? ' (theo mục tiêu)' : ''; ?></option>
+							<option value=""<?php selected( in_array( $f['sap-xep'], array( '', 'newest' ), true ) ); ?>>Mới đăng</option>
+							<option value="relevant"<?php selected( $f['sap-xep'], 'relevant' ); ?>>Phù hợp nhất<?php echo is_array( $me['goal'] ?? null ) ? ' (theo mục tiêu)' : ''; ?></option>
 							<option value="deadline"<?php selected( $f['sap-xep'], 'deadline' ); ?>>Hạn gần nhất</option>
-							<option value="newest"<?php selected( $f['sap-xep'], 'newest' ); ?>>Mới đăng</option>
 						</select>
 					</div>
 				</div>
