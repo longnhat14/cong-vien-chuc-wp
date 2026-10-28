@@ -85,26 +85,60 @@ if ( is_array( $pe_acc ) && null !== $token ) {
 	do_action( 'litespeed_control_set_nocache', 'cvc: quyền làm đề / kết quả thanh toán theo người dùng' );
 }
 
+/*
+ * 28/10/2026 - bỏ màn "Chọn chế độ làm bài":
+ *  - Đến từ Luyện thi / Thi thử (?che-do=) mà chưa đăng nhập -> hộp đăng nhập gọn; đăng nhập xong quay lại
+ *    đúng URL có ?che-do= nên vào thẳng bài làm. Trang này có nonce Google -> không cache.
+ *  - Vào thẳng trang đề -> trang giới thiệu đề (SEO) với hàng nút Luyện thi / Thi thử / Tải PDF.
+ */
+$mode_key  = array_search( $start_mode, array( 'thi-that' => 'exam', 'on-tap' => 'practice' ), true );
+$mode_key  = false === $mode_key ? '' : (string) $mode_key;
+$scope     = $is_found && is_array( $exam['scope'] ?? null ) ? $exam['scope'] : array();
+$rp_rec    = is_array( $scope['recruitment'] ?? null ) ? $scope['recruitment'] : null;
+$total_q   = $is_found ? (int) ( $exam['questions_count'] ?? count( (array) ( $exam['questions'] ?? array() ) ) ) : 0;
+$show_gate = $is_found && null === $token && '' !== $mode_key && $total_q > 0;
+if ( $show_gate ) {
+	nocache_headers();
+	do_action( 'litespeed_control_set_nocache', 'cvc: hộp đăng nhập vào thi (nonce Google)' );
+}
+if ( $is_found && '' !== $mode_key ) {
+	cvc_seo_set_noindex(); // Biến thể ?che-do= (canonical vẫn là URL sạch).
+}
+
 cvc_seo_set_title( $is_found ? (string) $exam['title'] : 'Chi tiết đề thi trắc nghiệm' );
 
-$breadcrumb_items = array(
-	array(
-		'label' => 'Trang chủ',
-		'url'   => home_url( '/' ),
-	),
-	array(
-		'label' => 'Thi trắc nghiệm',
-		'url'   => cvc_exams_url(),
-	),
-	array( 'label' => $is_found ? (string) $exam['title'] : 'Chi tiết đề thi' ),
-);
+$breadcrumb_items = array( array( 'label' => 'Trang chủ', 'url' => home_url( '/' ) ) );
+if ( $rp_rec ) {
+	$breadcrumb_items[] = array( 'label' => 'Tuyển dụng', 'url' => cvc_recruitments_url() );
+	$breadcrumb_items[] = array( 'label' => wp_trim_words( (string) $rp_rec['title'], 9 ), 'url' => cvc_recruitment_url( (string) $rp_rec['slug'] ) );
+} elseif ( 'on-tap' === $mode_key ) {
+	$breadcrumb_items[] = array( 'label' => 'Luyện thi trắc nghiệm', 'url' => cvc_exams_mode_url( 'on-tap' ) );
+} elseif ( 'thi-that' === $mode_key ) {
+	$breadcrumb_items[] = array( 'label' => 'Thi thử trắc nghiệm', 'url' => cvc_exams_mode_url( 'thi-that' ) );
+} else {
+	$breadcrumb_items[] = array( 'label' => 'Thi trắc nghiệm', 'url' => cvc_exams_url() );
+}
+$breadcrumb_items[] = array( 'label' => $is_found ? (string) $exam['title'] : 'Chi tiết đề thi' );
+
+// Mô tả ngắn: bỏ danh sách "Văn bản: ..." (đã có mục Phạm vi kiến thức).
+$short_desc = '';
+if ( $is_found && ! empty( $exam['description'] ) ) {
+	$short_desc = trim( (string) preg_replace( '/\s*Văn bản:.*$/us', '', wp_strip_all_tags( (string) $exam['description'] ) ) );
+	$short_desc = wp_trim_words( $short_desc, 48 );
+}
 
 if ( $is_found ) {
-	if ( ! empty( $exam['description'] ) ) {
-		cvc_seo_set_description( (string) $exam['description'] );
+	if ( '' !== $short_desc ) {
+		cvc_seo_set_description( $short_desc );
 	}
 	cvc_seo_set_canonical( cvc_exam_url( $slug ) );
 	cvc_seo_add_breadcrumb_jsonld( $breadcrumb_items );
+	wp_enqueue_style( 'cvc-exam-detail', get_theme_file_uri( '/assets/css/exam-detail.css' ), array(), (string) filemtime( get_theme_file_path( '/assets/css/exam-detail.css' ) ) );
+	if ( $show_gate ) {
+		wp_enqueue_style( 'cvc-auth', get_theme_file_uri( '/assets/css/auth.css' ), array(), (string) filemtime( get_theme_file_path( '/assets/css/auth.css' ) ) );
+	} elseif ( $total_q > 0 ) {
+		add_filter( 'body_class', static fn ( $c ) => array_merge( (array) $c, array( 'xd-has-sticky' ) ) );
+	}
 }
 
 get_header();
@@ -114,7 +148,6 @@ get_header();
 
 	<div class="dz-wrap space-y-6">
 
-		<!-- Breadcrumbs -->
 		<?php cvc_render_breadcrumbs( $breadcrumb_items ); ?>
 
 		<?php if ( ! $is_found ) : ?>
@@ -127,10 +160,7 @@ get_header();
 			</div>
 		<?php else : ?>
 			<?php
-			// Chỉ dùng câu hỏi thật đã công bố của đề - không còn bộ câu hỏi mẫu.
-			$questions  = is_array( $exam['questions'] ?? null ) ? $exam['questions'] : array();
 			$duration   = (int) ( $exam['duration_minutes'] ?? 0 );
-			$total_q    = (int) ( $exam['questions_count'] ?? count( $questions ) );
 			$pass_score = null;
 			if ( isset( $exam['passing_score'] ) && is_numeric( $exam['passing_score'] ) && (float) $exam['passing_score'] > 0 ) {
 				$pass_score = rtrim( rtrim( number_format( (float) $exam['passing_score'], 2, ',', '.' ), '0' ), ',' );
@@ -144,156 +174,159 @@ get_header();
 					$exam_subject_names[] = (string) $subject['name'];
 				}
 			}
+			$stats     = array_filter( array( $total_q . ' câu', $duration > 0 ? $duration . ' phút' : null, null !== $pass_score ? 'Điểm đạt ' . $pass_score : null ) );
+			$exam_id   = (int) ( $exam['id'] ?? 0 );
+			$clean_url = cvc_exam_url( $slug );
+			$mode_url  = static fn ( string $m ): string => add_query_arg( 'che-do', $m, $clean_url );
+			$locked    = is_array( $pe_acc ) && ! empty( $pe_acc['locked'] );
+			$can_pdf   = 'published' === ( $exam['status'] ?? 'published' );
 			?>
-			<?php cvc_render_track_marker( 'exam_viewed', 'exam', (int) ( $exam['id'] ?? 0 ) ); ?>
+			<?php cvc_render_track_marker( 'exam_viewed', 'exam', $exam_id ); ?>
 
 			<header class="dz-pagehead">
 				<p class="dz-kicker">Đề thi trắc nghiệm<?php echo ! empty( $exam['code'] ) ? ' · Mã đề ' . esc_html( (string) $exam['code'] ) : ''; ?></p>
 				<h1><?php echo esc_html( $exam['title'] ); ?></h1>
-				<?php if ( ! empty( $exam['description'] ) ) : ?><p><?php echo esc_html( (string) $exam['description'] ); ?></p><?php endif; ?>
-				<p class="dz-pagehead-stats">
-					<?php echo esc_html( implode( ' · ', array_filter( array( $duration > 0 ? $duration . ' phút' : null, $total_q . ' câu hỏi', null !== $pass_score ? 'Điểm đạt ' . $pass_score : null, $exam_subject_names ? implode( ', ', $exam_subject_names ) : null ) ) ) ); ?>
-				</p>
+				<?php if ( '' !== $short_desc && ! $show_gate ) : ?><p class="xd-desc"><?php echo esc_html( $short_desc ); ?></p><?php endif; ?>
+				<p class="dz-pagehead-stats"><?php echo esc_html( implode( ' · ', array_merge( $stats, $exam_subject_names && ! $show_gate ? array( implode( ', ', $exam_subject_names ) ) : array() ) ) ); ?></p>
 				<span class="dz-rule" aria-hidden="true"></span>
-				<div style="margin-top:12px;display:flex;justify-content:center;flex-wrap:wrap;gap:8px"><?php cvc_render_bookmark_button( 'exam', (int) ( $exam['id'] ?? 0 ) ); ?><?php if ( 'published' === ( $exam['status'] ?? 'published' ) ) { echo cvc_pdf_button( 'exam', (int) ( $exam['id'] ?? 0 ), array( 'label' => 'Tải đề PDF (có đáp án)', 'variant' => 'dap-an' ) ); } // phpcs:ignore WordPress.Security.EscapeOutput ?></div>
 			</header>
 
-			<!-- 3-COLUMN SHELL GRID -->
-			<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+			<?php if ( $show_gate ) : ?>
+				<?php $back_rel = wp_make_link_relative( $mode_url( $mode_key ) ); ?>
+				<section class="xd-gate" aria-labelledby="xd-gate-h">
+					<span class="xd-chip is-<?php echo esc_attr( $mode_key ); ?>"><?php echo 'on-tap' === $mode_key ? '✎ Luyện thi' : '◷ Thi thử'; ?></span>
+					<h2 id="xd-gate-h"><?php echo 'on-tap' === $mode_key ? 'Đăng nhập để bắt đầu luyện đề này' : 'Đăng nhập để bắt đầu thi thử đề này'; ?></h2>
+					<p class="xd-gate-sub"><?php echo esc_html( 'on-tap' === $mode_key ? 'Không tính giờ; trả lời xong mỗi câu là thấy ngay đáp án, giải thích và căn cứ pháp luật.' : 'Tính giờ như phòng thi' . ( $duration > 0 ? ' (' . $duration . ' phút)' : '' ) . '; đáp án và giải thích hiện sau khi nộp bài.' ); ?></p>
+					<div class="xd-gate-google"><?php if ( function_exists( 'cvc_google_button' ) ) { cvc_google_button( $back_rel, 'signin' ); } ?></div>
+					<div class="xd-gate-links">
+						<a class="xd-btn is-primary" href="<?php echo esc_url( cvc_login_url( $back_rel ) ); ?>" rel="nofollow">Đăng nhập bằng email</a>
+						<a class="xd-btn" href="<?php echo esc_url( add_query_arg( 'redirect_to', rawurlencode( $back_rel ), cvc_register_url() ) ); ?>" rel="nofollow">Tạo tài khoản miễn phí</a>
+					</div>
+					<p class="xd-gate-note"><?php echo esc_html( $locked ? 'Đăng nhập xong vào thẳng bài làm. Đề riêng theo tin: làm thử ' . (int) ( $pe_acc['preview'] ?? 10 ) . ' câu đầu miễn phí.' : 'Đăng nhập xong vào thẳng bài làm. Miễn phí; tài khoản dùng để lưu kết quả và xem giải thích từng câu.' ); ?></p>
+					<a class="xd-gate-back" href="<?php echo esc_url( $clean_url ); ?>">Xem thông tin đề trước →</a>
+				</section>
+			<?php else : ?>
 
-				<!-- LEFT COLUMN (3 COLS — EXAM METADATA & SPECS) -->
-				<aside class="lg:col-span-3 space-y-4">
-					
-					<div class="dz-card space-y-4 text-xs">
-						<h3 class="dz-sideh2">
-							<i class="fa-solid fa-sliders"></i> Thông Số Đề Thi
-						</h3>
+				<?php if ( '' !== $start_error ) : ?><p class="xd-alert is-error"><?php echo esc_html( $start_error ); ?></p><?php endif; ?>
+				<?php if ( cvc_email_unverified() ) : ?>
+					<p class="xd-alert">✉ Tài khoản cần <b>xác minh email</b> trước khi làm bài. <a href="<?php echo esc_url( cvc_verify_email_url( cvc_verify_return_path( (string) wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ) ) ); ?>">Xác minh ngay →</a></p>
+				<?php endif; ?>
 
-						<div class="space-y-2.5 text-ink-2">
-							<div class="flex justify-between border-b border-slate-300 pb-1.5">
-								<span class="text-ink-muted">Thời gian:</span>
-								<strong class="text-ink"><?php echo $duration > 0 ? esc_html( $duration . ' phút' ) : 'Không giới hạn'; ?></strong>
-							</div>
-							<div class="flex justify-between border-b border-slate-300 pb-1.5">
-								<span class="text-ink-muted">Số câu trắc nghiệm:</span>
-								<strong class="text-acc"><?php echo esc_html( $total_q ); ?> câu</strong>
-							</div>
-							<?php if ( null !== $pass_score ) : ?>
-								<div class="flex justify-between border-b border-slate-300 pb-1.5">
-									<span class="text-ink-muted">Điểm đạt:</span>
-									<strong class="text-emerald-800"><?php echo esc_html( $pass_score ); ?></strong>
-								</div>
-							<?php endif; ?>
-							<div class="flex justify-between">
-								<span class="text-ink-muted">Hình thức:</span>
-								<span class="text-emerald-800 font-bold">Trắc nghiệm, chấm tự động</span>
-							</div>
+				<?php if ( 0 === $total_q ) : ?>
+					<?php cvc_render_empty_state( 'Đề thi này chưa có câu hỏi được công bố.' ); ?>
+				<?php else : ?>
+					<section class="xd-actions" aria-label="Làm đề">
+						<a class="xd-act is-primary" href="<?php echo esc_url( $mode_url( 'on-tap' ) ); ?>" rel="nofollow"><b>✎ Luyện thi đề này</b><small>Không tính giờ, xem đáp án và căn cứ sau mỗi câu</small></a>
+						<a class="xd-act is-navy" href="<?php echo esc_url( $mode_url( 'thi-that' ) ); ?>" rel="nofollow"><b>◷ Thi thử đề này</b><small>Tính giờ<?php echo $duration > 0 ? ' ' . (int) $duration . ' phút' : ''; ?>, nộp bài xem điểm</small></a>
+						<div class="xd-act-side">
+							<?php if ( $can_pdf ) { echo cvc_pdf_button( 'exam', $exam_id, array( 'label' => 'Tải PDF có đáp án', 'variant' => 'dap-an', 'class' => 'xd-pdf' ) ); } // phpcs:ignore WordPress.Security.EscapeOutput ?>
+							<?php cvc_render_bookmark_button( 'exam', $exam_id ); ?>
 						</div>
+						<?php if ( $locked ) : ?><p class="xd-act-note">Đề riêng theo tin: chưa mua thì làm thử <?php echo (int) ( $pe_acc['preview'] ?? 10 ); ?> câu đầu miễn phí.</p><?php endif; ?>
+					</section>
+				<?php endif; ?>
+
+				<div class="xd-grid">
+					<div class="xd-main">
+						<?php
+						$docs     = array_values( array_filter( (array) ( $scope['documents'] ?? array() ), 'is_array' ) );
+						$sections = array_values( array_filter( (array) ( $scope['sections'] ?? array() ), 'is_array' ) );
+						$doc_by   = array();
+						foreach ( $docs as $d ) {
+							$doc_by[ (int) $d['id'] ] = $d;
+						}
+						$chip = static function ( array $d ): string {
+							$label = '' !== (string) $d['number'] ? (string) $d['number'] : wp_trim_words( (string) $d['title'], 6 );
+							$inner = esc_html( $label ) . ' <small>' . (int) $d['count'] . ' câu</small>';
+							return ! empty( $d['slug'] )
+								? '<a class="xd-doc" href="' . esc_url( cvc_legal_document_url( (string) $d['slug'] ) ) . '" title="' . esc_attr( (string) $d['title'] ) . '">' . $inner . '</a>'
+								: '<span class="xd-doc" title="' . esc_attr( (string) $d['title'] ) . '">' . $inner . '</span>';
+						};
+						?>
+						<?php if ( $docs ) : ?>
+							<section class="dz-panel xd-scope" aria-labelledby="xd-scope-h">
+								<h2 id="xd-scope-h">Phạm vi kiến thức</h2>
+								<?php if ( $sections ) : ?>
+									<?php
+									$wsum = max( 1, array_sum( array_column( $sections, 'weight' ) ) );
+									$used = array();
+									foreach ( $sections as $sec ) :
+										$in = array();
+										foreach ( (array) $sec['doc_ids'] as $id ) {
+											if ( isset( $doc_by[ (int) $id ] ) && ! isset( $used[ (int) $id ] ) ) {
+												$in[]              = $doc_by[ (int) $id ];
+												$used[ (int) $id ] = true;
+											}
+										}
+										if ( ! $in ) {
+											continue;
+										}
+										usort( $in, static fn ( $a, $b ) => $b['count'] <=> $a['count'] );
+										?>
+										<div class="xd-sec">
+											<h3><?php echo esc_html( (string) $sec['label'] ); ?> <span><?php echo (int) round( (int) $sec['weight'] / $wsum * 100 ); ?>%</span></h3>
+											<p class="xd-docs"><?php echo implode( '', array_map( $chip, $in ) ); // phpcs:ignore WordPress.Security.EscapeOutput ?></p>
+										</div>
+									<?php endforeach; ?>
+									<?php $rest = array_values( array_filter( $docs, static fn ( $d ) => ! isset( $used[ (int) $d['id'] ] ) ) ); ?>
+									<?php if ( $rest ) : ?>
+										<div class="xd-sec"><h3>Văn bản khác</h3><p class="xd-docs"><?php echo implode( '', array_map( $chip, $rest ) ); // phpcs:ignore WordPress.Security.EscapeOutput ?></p></div>
+									<?php endif; ?>
+								<?php else : ?>
+									<p class="xd-docs"><?php echo implode( '', array_map( $chip, $docs ) ); // phpcs:ignore WordPress.Security.EscapeOutput ?></p>
+								<?php endif; ?>
+								<p class="xd-muted">Số câu theo từng văn bản trong đề; bấm để đọc văn bản gốc.</p>
+							</section>
+						<?php endif; ?>
+
+						<?php if ( $total_q > 0 ) : ?>
+							<section class="dz-panel xd-how" aria-labelledby="xd-how-h">
+								<h2 id="xd-how-h">Cách làm bài</h2>
+								<ul>
+									<li><b>Luyện thi:</b> không tính giờ; trả lời xong từng câu là thấy đáp án đúng, giải thích và Điều luật làm căn cứ.</li>
+									<li><b>Thi thử:</b> đồng hồ<?php echo $duration > 0 ? ' ' . (int) $duration . ' phút' : ''; ?> do máy chủ kiểm soát, hết giờ tự nộp; đáp án và giải thích hiện sau khi nộp.</li>
+									<li>Mỗi đáp án được lưu ngay khi chọn; mất mạng hay tải lại trang vẫn khôi phục được bài làm.</li>
+									<li>Nộp bài xong có trang Kết quả &amp; Phân tích: điểm, câu sai, căn cứ văn bản và bài luyện đề xuất.</li>
+								</ul>
+							</section>
+						<?php endif; ?>
 					</div>
 
-				</aside>
+					<aside class="xd-side">
+						<?php if ( is_array( $pe_acc ) ) { cvc_pe_render_paybox( $exam, $pe_acc, $token, $clean_url ); } ?>
 
-				<!-- CENTER MAIN COLUMN (6 COLS — HƯỚNG DẪN; đã bỏ phần xem trước câu hỏi 18/10/2026) -->
-				<div class="lg:col-span-6 space-y-4">
-					<div class="dz-panel space-y-4 text-sm text-ink-2">
-						<h2 class="text-base font-black text-ink flex items-center gap-2"><i class="fa-solid fa-circle-play text-acc"></i> Chọn chế độ làm bài</h2>
-						<?php if ( '' !== $start_error ) : ?>
-							<p class="text-red-700 font-bold"><?php echo esc_html( $start_error ); ?></p>
-						<?php endif; ?>
-						<?php if ( cvc_email_unverified() ) : ?>
-							<p class="border border-amber-300 bg-amber-50 text-amber-900 p-3">✉ Tài khoản cần <b>xác minh email</b> trước khi làm bài. <a class="font-bold underline text-ink" href="<?php echo esc_url( cvc_verify_email_url( cvc_verify_return_path( (string) wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ) ) ) ); ?>">Nhập mã xác minh →</a></p>
-						<?php endif; ?>
-						<?php if ( empty( $questions ) && 0 === $total_q ) : ?>
-							<?php cvc_render_empty_state( 'Đề thi này chưa có câu hỏi được công bố.' ); ?>
-						<?php else : ?>
-							<p>Đề gồm <strong><?php echo esc_html( (string) $total_q ); ?> câu</strong><?php echo $duration > 0 ? ', thời gian <strong>' . esc_html( (string) $duration ) . ' phút</strong>' : ''; ?>. Câu hỏi chỉ hiện khi bạn bắt đầu làm bài.</p>
-							<div class="grid sm:grid-cols-2 gap-3 my-3">
-								<div class="border border-line p-3">
-									<p class="font-black text-ink">Thi thật</p>
-									<p class="text-ink-2">Mô phỏng phòng thi: đồng hồ <?php echo $duration > 0 ? esc_html( (string) $duration ) . ' phút ' : ''; ?>do máy chủ kiểm soát, hết giờ tự nộp. Đáp án, giải thích và căn cứ pháp luật chỉ hiện sau khi nộp bài.</p>
-								</div>
-								<div class="border border-line p-3">
-									<p class="font-black text-ink">Ôn tập</p>
-									<p class="text-ink-2">Không tính giờ. Trả lời xong từng câu là thấy ngay đáp án đúng, giải thích và Điều luật làm căn cứ; câu đã chấm không đổi được.</p>
-								</div>
+						<?php if ( $rp_rec ) : ?>
+							<div class="dz-card xd-rec">
+								<h3 class="dz-sideh2">Đề riêng của tin tuyển dụng</h3>
+								<a href="<?php echo esc_url( cvc_recruitment_url( (string) $rp_rec['slug'] ) ); ?>"><?php echo esc_html( (string) $rp_rec['title'] ); ?></a>
+								<?php if ( ! empty( $rp_rec['group_label'] ) ) : ?><p>Nhóm vị trí: <b><?php echo esc_html( (string) $rp_rec['group_label'] ); ?></b></p><?php endif; ?>
+								<a class="xd-link" href="<?php echo esc_url( cvc_recruitment_url( (string) $rp_rec['slug'] ) . '#de-rieng' ); ?>">Các đề khác của tin →</a>
 							</div>
-							<?php if ( null !== $token ) : ?>
-								<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="flex flex-wrap gap-2">
-									<?php wp_nonce_field( 'cvc_exam_start' ); ?>
-									<input type="hidden" name="action" value="cvc_exam_start">
-									<input type="hidden" name="exam_id" value="<?php echo esc_attr( (string) (int) ( $exam['id'] ?? 0 ) ); ?>">
-									<button type="submit" name="mode" value="exam" class="px-5 py-2.5 text-white font-black rounded-xl bg-acc hover:bg-acc-deep">Thi thật &rarr;</button>
-									<button type="submit" name="mode" value="practice" class="px-5 py-2.5 font-black rounded-xl bg-white text-acc border border-acc-line hover:bg-acc-soft">Ôn tập &rarr;</button>
-								</form>
-							<?php endif; ?>
-							<ul class="list-disc pl-5 space-y-1 mt-3">
-								<li>Mỗi đáp án được lưu lên máy chủ ngay khi chọn; mất mạng hay tải lại trang vẫn khôi phục được bài làm.</li>
-								<li>Trước khi nộp có bảng rà soát câu bỏ trống, câu đánh dấu - bấm số câu để mở lại.</li>
-								<li>Nộp bài xong mở ngay trang Kết quả &amp; Phân tích: điểm, câu sai, căn cứ văn bản và bài luyện đề xuất.</li>
-							</ul>
 						<?php endif; ?>
-					</div>
+
+						<div class="dz-card xd-specs">
+							<h3 class="dz-sideh2">Thông số đề thi</h3>
+							<dl>
+								<div><dt>Thời gian</dt><dd><?php echo $duration > 0 ? esc_html( $duration . ' phút' ) : 'Không giới hạn'; ?></dd></div>
+								<div><dt>Số câu</dt><dd><?php echo (int) $total_q; ?> câu</dd></div>
+								<?php if ( null !== $pass_score ) : ?><div><dt>Điểm đạt</dt><dd><?php echo esc_html( $pass_score ); ?></dd></div><?php endif; ?>
+								<div><dt>Hình thức</dt><dd>Trắc nghiệm, chấm tự động</dd></div>
+								<?php if ( $exam_subject_names ) : ?><div><dt>Môn thi</dt><dd><?php echo esc_html( implode( ', ', $exam_subject_names ) ); ?></dd></div><?php endif; ?>
+							</dl>
+						</div>
+
+						<?php if ( function_exists( 'cvc_ci_render_exam_jobs' ) && ! $rp_rec ) { cvc_ci_render_exam_jobs( $exam_id ); } ?>
+						<?php if ( function_exists( 'cvc_render_leaderboard_mini' ) && $can_pdf ) { cvc_render_leaderboard_mini( array( 'de' => $exam_id ), 'Top thí sinh đề này' ); } ?>
+					</aside>
 				</div>
 
-				<!-- RIGHT SIDEBAR (3 COLS — LAUNCH EXAM OS X CTA + UPSELL) -->
-			<aside class="lg:col-span-3 space-y-4 sticky top-[80px]">
-
-				<?php if ( is_array( $pe_acc ) ) { cvc_pe_render_paybox( $exam, $pe_acc, $token, cvc_exam_url( $slug ) ); } ?>
-
-				<!-- PRIMARY CTA: BẮT ĐẦU THI -->
-				<div class="border-2 border-acc-line p-6 rounded-3xl space-y-4 text-center">
-					<div class="w-14 h-14 mx-auto rounded-2xl bg-acc text-white flex items-center justify-center font-black text-2xl">
-						⚡
-					</div>
-
-					<div class="space-y-1">
-						<h3 class="text-lg font-black text-ink">Sẵn Sàng Làm Bài Thi?</h3>
-						<p class="text-xs text-ink-2">
-							Thi thật tính giờ như phòng thi; Ôn tập xem đáp án ngay sau mỗi câu.
-						</p>
-					</div>
-
-					<?php if ( empty( $questions ) && 0 === $total_q ) : ?>
-						<p class="text-xs text-ink-muted">Đề chưa có câu hỏi nên chưa thể làm bài.</p>
-					<?php elseif ( null === $token ) : ?>
-						<a href="<?php echo esc_url( cvc_login_url( cvc_exam_url( $slug ) ) ); ?>" rel="nofollow" class="block w-full py-3.5 text-white font-black text-sm rounded-2xl bg-acc hover:bg-acc-deep">
-							Đăng nhập để vào thi &rarr;
-						</a>
-						<p class="text-[10px] text-ink-muted"><?php echo is_array( $pe_acc ) && ! empty( $pe_acc['locked'] ) ? esc_html( 'Làm thử ' . (int) ( $pe_acc['preview'] ?? 10 ) . ' câu đầu miễn phí; cần tài khoản để lưu kết quả.' ) : 'Miễn phí. Cần tài khoản để lưu kết quả và xem giải thích từng câu.'; ?></p>
-					<?php else : ?>
-						<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="cvc-startmodes">
-							<?php wp_nonce_field( 'cvc_exam_start' ); ?>
-							<input type="hidden" name="action" value="cvc_exam_start">
-							<input type="hidden" name="exam_id" value="<?php echo esc_attr( (string) (int) ( $exam['id'] ?? 0 ) ); ?>">
-							<button type="submit" name="mode" value="exam" class="block w-full py-3 text-white font-black text-sm rounded-2xl bg-acc hover:bg-acc-deep">
-								Thi thật &rarr;
-								<span class="block text-[11px] font-normal opacity-90">Tính giờ, đáp án và giải thích hiện sau khi nộp bài</span>
-							</button>
-							<button type="submit" name="mode" value="practice" class="block w-full mt-2 py-3 font-black text-sm rounded-2xl bg-white text-acc border border-acc-line hover:bg-acc-soft">
-								Ôn tập &rarr;
-								<span class="block text-[11px] font-normal">Không tính giờ, xem đáp án, giải thích và căn cứ pháp luật ngay sau mỗi câu</span>
-							</button>
-						</form>
-						<p class="text-[10px] text-ink-muted"><?php echo is_array( $pe_acc ) && ! empty( $pe_acc['locked'] ) ? esc_html( 'Chưa mua: mở lượt làm thử ' . (int) ( $pe_acc['preview'] ?? 10 ) . ' câu đầu.' ) : 'Đáp án được lưu lên máy chủ ngay khi chọn và khôi phục khi tải lại trang.'; ?></p>
-					<?php endif; ?>
-				</div>
-
-				<?php if ( function_exists( 'cvc_ci_render_exam_jobs' ) ) { cvc_ci_render_exam_jobs( (int) ( $exam['id'] ?? 0 ) ); } // Career Intelligence: đề -> tin tuyển dụng ?>
-				<?php if ( function_exists( 'cvc_render_leaderboard_mini' ) && 'published' === ( $exam['status'] ?? 'published' ) ) { cvc_render_leaderboard_mini( array( 'de' => (int) ( $exam['id'] ?? 0 ) ), 'Top thí sinh đề này' ); } // Bảng xếp hạng (21/10/2026) ?>
-
-				<div class="dz-card space-y-2 text-xs">
-					<h3 class="font-extrabold text-xs text-acc uppercase tracking-wider">Ôn thêm trước khi thi</h3>
-					<p class="text-ink-muted text-[11px]">Xem khóa học và tài liệu ôn thi đang có trên hệ thống.</p>
-					<div class="flex gap-2">
-						<a href="<?php echo esc_url( cvc_courses_url() ); ?>" class="flex-1 py-2 bg-white hover:bg-acc-soft text-acc border border-acc-line font-bold rounded-xl text-center">Khóa học</a>
-						<a href="<?php echo esc_url( cvc_documents_url() ); ?>" class="flex-1 py-2 bg-white hover:bg-acc-soft text-acc border border-acc-line font-bold rounded-xl text-center">Tài liệu</a>
-					</div>
-				</div>
-
-			</aside>
-
-			</div>
-
+				<?php if ( $total_q > 0 ) : ?>
+					<nav class="xd-sticky" aria-label="Làm đề nhanh">
+						<a class="xd-act is-primary" href="<?php echo esc_url( $mode_url( 'on-tap' ) ); ?>" rel="nofollow"><b>✎ Luyện thi</b></a>
+						<a class="xd-act is-navy" href="<?php echo esc_url( $mode_url( 'thi-that' ) ); ?>" rel="nofollow"><b>◷ Thi thử</b></a>
+					</nav>
+				<?php endif; ?>
+			<?php endif; ?>
 		<?php endif; ?>
 
 	</div>
