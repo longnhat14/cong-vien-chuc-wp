@@ -251,3 +251,27 @@
 .ec .ec-modebar b{display:block;font-size:17px;color:#0d263d}
 .ec .ec-modebar span{font-size:14.5px;color:#2e3d49}
 .ec .ec-modes{display:flex;flex-wrap:wrap;gap:8px}
+
+/* 28/10/2026: Đề riêng theo tin tuyển dụng (trang Luyện thi / Thi thử trắc nghiệm) */
+.ec .ec-rp{margin:0 0 16px;padding:16px;border:1px solid #cfe0d8;border-radius:13px;background:#fff;box-shadow:0 5px 20px rgba(23,51,79,.03)}
+.ec .ec-rp-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px 16px;margin-bottom:12px}
+.ec .ec-rp-head h2{font-size:19px;color:var(--n);text-wrap:balance}
+.ec .ec-rp-head p{font-size:14px;color:var(--m);margin-top:3px;max-width:68ch}
+.ec .ec-rp-filter select{max-width:100%;border:1px solid #cbd6d2;border-radius:9px;padding:8px 10px;background:#fff;font-size:14px}
+.ec .ec-rp-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.ec .ec-rp-card{border:1px solid var(--line);border-radius:11px;padding:12px;background:#fbfcfb;min-width:0}
+.ec .ec-rp-card h3{font-size:15.5px;line-height:1.35;color:var(--n);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ec .ec-rp-card h3 a:hover{text-decoration:underline}
+.ec .ec-rp-meta{font-size:12.5px;color:var(--m);margin:5px 0 8px}
+.ec .ec-rp-groups{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.ec .ec-rp-groups li{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 10px;padding-top:6px;border-top:1px solid #e8ece9}
+.ec .ec-rp-label{font-size:13.5px;font-weight:bold;color:var(--ink);min-width:0;overflow-wrap:anywhere}
+.ec .ec-rp-exams{display:flex;gap:5px;flex-wrap:wrap}
+.ec .ec-rp-exam{display:inline-block;padding:4px 10px;border:1px solid #a8c9bb;border-radius:99px;background:var(--soft);color:var(--t-ink);font-size:12.5px;font-weight:bold;white-space:nowrap}
+.ec .ec-rp-exam:hover,.ec .ec-rp-exam:focus-visible{background:var(--t);border-color:var(--t);color:#fff}
+.ec .ec-rp-empty{font-size:14px;color:var(--m);padding:10px 0}
+.ec .ec-rp-pager{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:12px;font-size:14px}
+.ec .ec-rp-quick{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin-top:14px;padding-top:12px;border-top:1px dashed #d4ded9;font-size:14px}
+.ec .ec-rp-quick .ec-btn{padding:6px 11px;font-size:13.5px}
+@media(max-width:900px){.ec .ec-rp-grid{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:420px){.ec .ec-rp{padding:12px}.ec .ec-rp-head h2{font-size:17px}}

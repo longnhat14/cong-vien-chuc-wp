@@ -73,6 +73,39 @@ function cvc_cat_config( string $kind ): array {
 	return $all[ $kind ] ?? $all['exams'];
 }
 
+/** Cấu hình kèm nhãn của trang Luyện thi / Thi thử trắc nghiệm (28/10/2026). */
+function cvc_cat_cfg( string $kind, array $f ): array {
+	$cfg = cvc_cat_config( $kind );
+	$md  = 'exams' === $kind ? (string) ( $f['che-do'] ?? '' ) : '';
+	if ( 'on-tap' === $md ) {
+		$cfg = array_merge(
+			$cfg,
+			array(
+				'crumb'   => 'Luyện thi trắc nghiệm',
+				'eyebrow' => 'Luyện thi trắc nghiệm',
+				'h1'      => 'Luyện thi trắc nghiệm công chức, viên chức',
+				'lead'    => 'Ôn theo đề riêng của tin tuyển dụng đang nhận hồ sơ hoặc đề luyện chung: trả lời xong mỗi câu là thấy ngay đáp án, giải thích và căn cứ pháp luật. Không tính giờ.',
+				'find'    => 'Tìm đề luyện',
+				'title'   => 'Đề luyện chung',
+			)
+		);
+	} elseif ( 'thi-that' === $md ) {
+		$cfg = array_merge(
+			$cfg,
+			array(
+				'crumb'   => 'Thi thử trắc nghiệm',
+				'eyebrow' => 'Thi thử trắc nghiệm',
+				'h1'      => 'Thi thử trắc nghiệm công chức, viên chức',
+				'lead'    => 'Làm đề tính giờ như phòng thi, thời gian do máy chủ kiểm soát. Nộp bài là có điểm, đáp án, giải thích và căn cứ pháp luật từng câu.',
+				'find'    => 'Tìm đề thi thử',
+				'title'   => 'Đề thi thử chung',
+			)
+		);
+	}
+
+	return $cfg;
+}
+
 function cvc_cat_exam_types(): array {
 	return array(
 		'practice' => 'Luyện tập theo văn bản',
@@ -114,6 +147,10 @@ function cvc_cat_filters( string $kind, array $src ): array {
 			// Chế độ chọn từ menu Ôn thi (19/10/2026): thẻ đề mở thẳng phòng làm bài đúng chế độ.
 			'che-do'      => in_array( $s( 'che-do' ), array( 'thi-that', 'on-tap' ), true ) ? $s( 'che-do' ) : '',
 		);
+		$route_mode = (string) get_query_var( 'cvc_exam_mode' );
+		if ( in_array( $route_mode, array( 'thi-that', 'on-tap' ), true ) ) {
+			$f['che-do'] = $route_mode;
+		}
 	} elseif ( 'topics' === $kind ) {
 		$f += array(
 			'subject_id' => absint( $s( 'subject_id' ) ),
@@ -166,12 +203,19 @@ function cvc_cat_filter_count( array $f ): int {
 function cvc_cat_url( string $kind, array $f, int $page = 1 ): string {
 	$base = call_user_func( cvc_cat_config( $kind )['url'], max( 1, $page ) );
 	$args = cvc_cat_args( $f );
+	if ( 'exams' === $kind && ! empty( $f['che-do'] ) ) {
+		$base = cvc_exams_mode_url( (string) $f['che-do'], max( 1, $page ) );
+		unset( $args['che-do'] );
+	}
 
 	return $args ? $base . '?' . http_build_query( $args, '', '&' ) : $base;
 }
 
 function cvc_cat_fetch( string $kind, array $f, int $page, ?string $token ): array {
 	$q = array_diff_key( cvc_cat_args( $f ), array( 'che-do' => 1 ) ) + array( 'page' => $page, 'per_page' => 10 );
+	if ( 'exams' === $kind && ! empty( $f['che-do'] ) ) {
+		$q['personal'] = 'exclude'; // Đề riêng theo tin hiện ở khối riêng phía trên.
+	}
 
 	return cvc_ci_api( '/api/catalog/' . $kind, $q, $token, 15, 120 );
 }
@@ -398,7 +442,7 @@ function cvc_cat_pages( int $cur, int $last ): array {
 }
 
 function cvc_cat_render_results( string $kind, array $res, array $f, int $page, array $st, bool $logged_in ): void {
-	$cfg   = cvc_cat_config( $kind );
+	$cfg   = cvc_cat_cfg( $kind, $f );
 	$data  = $res['ok'] ? (array) ( $res['data']['data'] ?? array() ) : array();
 	$items = (array) ( $data['items'] ?? array() );
 	$pg    = (array) ( $data['pagination'] ?? array() );
@@ -514,11 +558,11 @@ function cvc_cat_check( string $name, string $label, bool $on, bool $auth, bool 
 
 function cvc_cat_render_page( string $kind ): void {
 	$kind      = in_array( $kind, CVC_CAT_KINDS, true ) ? $kind : 'exams';
-	$cfg       = cvc_cat_config( $kind );
 	$token     = cvc_auth_token();
 	$logged_in = null !== $token;
 	$page      = max( 1, absint( get_query_var( 'cvc_paged' ) ) );
 	$f         = cvc_cat_filters( $kind, $_GET ); // phpcs:ignore WordPress.Security.NonceVerification
+	$cfg       = cvc_cat_cfg( $kind, $f );
 	$GLOBALS['cvc_cat_mode'] = (string) ( $f['che-do'] ?? '' );
 	$sr        = cvc_ci_api( '/api/catalog/stats', array( 'kind' => $kind ), $token, 12, 600 );
 	$st        = $sr['ok'] ? (array) ( $sr['data']['data'] ?? array() ) : array();
@@ -528,7 +572,7 @@ function cvc_cat_render_page( string $kind ): void {
 	foreach ( (array) ( $st['groups'] ?? array() ) as $g ) {
 		$groups[ (string) $g['code'] ] = $g['label'] . ' (' . cvc_cat_n( $g['count'] ) . ')';
 	}
-	$base      = call_user_func( $cfg['url'], 1 );
+	$base      = 'exams' === $kind && ! empty( $f['che-do'] ) ? cvc_exams_mode_url( (string) $f['che-do'] ) : call_user_func( $cfg['url'], 1 );
 	$saved_n   = $mine ? (int) ( $mine['saved'] ?? 0 ) : null;
 
 	// Ô số liệu: [biểu tượng, giá trị, nhãn]
@@ -599,14 +643,15 @@ function cvc_cat_render_page( string $kind ): void {
 		<div class="ec-wrap ec-main">
 			<?php if ( 'exams' === $kind ) : $md = (string) ( $f['che-do'] ?? '' ); ?>
 				<section class="ec-modebar<?php echo '' !== $md ? ' is-' . esc_attr( $md ) : ''; ?>" aria-label="Chế độ làm bài">
-					<div><b><?php echo 'on-tap' === $md ? 'Ôn tập kiến thức' : ( 'thi-that' === $md ? 'Thi thử như thi thật' : 'Chọn chế độ làm bài' ); ?></b>
-						<span><?php echo 'on-tap' === $md ? 'Chọn đề để ôn: trả lời xong mỗi câu là thấy ngay đáp án, giải thích và căn cứ pháp luật. Không tính giờ.' : ( 'thi-that' === $md ? 'Chọn đề để thi: tính giờ do máy chủ kiểm soát, đáp án và giải thích hiện sau khi nộp bài.' : 'Thi thật tính giờ như phòng thi; Ôn tập xem đáp án ngay sau mỗi câu.' ); ?></span></div>
+					<div><b><?php echo '' !== $md ? 'Chế độ làm bài' : 'Chọn chế độ làm bài'; ?></b>
+						<span><?php echo 'on-tap' === $md ? 'Đang ở Luyện thi: xem đáp án ngay sau mỗi câu, không tính giờ.' : ( 'thi-that' === $md ? 'Đang ở Thi thử: tính giờ, đáp án hiện sau khi nộp bài.' : 'Thi thật tính giờ như phòng thi; Luyện thi xem đáp án ngay sau mỗi câu.' ); ?></span></div>
 					<nav class="ec-modes">
-						<a class="ec-btn<?php echo 'on-tap' === $md ? ' is-primary' : ''; ?>" href="<?php echo esc_url( cvc_cat_url( $kind, array_merge( $f, array( 'che-do' => 'on-tap' ) ) ) ); ?>"<?php echo 'on-tap' === $md ? ' aria-current="page"' : ''; ?>>✎ Ôn tập</a>
+						<a class="ec-btn<?php echo 'on-tap' === $md ? ' is-primary' : ''; ?>" href="<?php echo esc_url( cvc_cat_url( $kind, array_merge( $f, array( 'che-do' => 'on-tap' ) ) ) ); ?>"<?php echo 'on-tap' === $md ? ' aria-current="page"' : ''; ?>>✎ Luyện thi</a>
 						<a class="ec-btn<?php echo 'thi-that' === $md ? ' is-primary' : ''; ?>" href="<?php echo esc_url( cvc_cat_url( $kind, array_merge( $f, array( 'che-do' => 'thi-that' ) ) ) ); ?>"<?php echo 'thi-that' === $md ? ' aria-current="page"' : ''; ?>>◷ Thi thử</a>
 						<a class="ec-btn" href="<?php echo esc_url( cvc_question_bank_url() ); ?>">▤ Ngân hàng câu hỏi</a>
 					</nav>
 				</section>
+				<?php if ( '' !== $md ) { cvc_cat_render_rp( $md, $token ); } ?>
 			<?php endif; ?>
 			<section class="ec-stats" aria-label="Số liệu">
 				<?php foreach ( $cards as $c ) : ?>
@@ -744,6 +789,108 @@ function cvc_cat_render_page( string $kind ): void {
 }
 
 /* ------------------------------------------------------------------
+ * Đề riêng theo tin tuyển dụng đang nhận hồ sơ (28/10/2026) - trang Luyện thi / Thi thử trắc nghiệm.
+ * GET /api/catalog/recruitment-exams; lọc tỉnh (?tinh=) và trang (?tin-trang=) bằng link thường.
+ * ------------------------------------------------------------------ */
+function cvc_cat_render_rp( string $mode, ?string $token ): void {
+	$prov = absint( $_GET['tinh'] ?? 0 ); // phpcs:ignore WordPress.Security.NonceVerification
+	$pg   = max( 1, min( 100, absint( $_GET['tin-trang'] ?? 1 ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
+	$res  = cvc_ci_api( '/api/catalog/recruitment-exams', array_filter( array( 'province_id' => $prov ?: null, 'page' => $pg, 'per_page' => 6 ) ), $token, 15, $token ? 0 : 300 );
+	$data = $res['ok'] ? (array) ( $res['data']['data'] ?? array() ) : array();
+	$items = (array) ( $data['items'] ?? array() );
+	$pgn   = (array) ( $data['pagination'] ?? array() );
+	$provs = (array) ( $data['provinces'] ?? array() );
+	$base  = cvc_exams_mode_url( $mode );
+	$total = (int) ( $pgn['total'] ?? 0 );
+	$last  = max( 1, (int) ( $pgn['last_page'] ?? 1 ) );
+	$link  = static function ( int $p ) use ( $base, $prov ): string {
+		return add_query_arg( array_filter( array( 'tinh' => $prov ?: null, 'tin-trang' => $p > 1 ? $p : null ) ), $base ) . '#de-rieng-theo-tin';
+	};
+	$is_test = 'thi-that' === $mode;
+	?>
+	<section class="ec-rp" id="de-rieng-theo-tin" aria-labelledby="ec-rp-h">
+		<div class="ec-rp-head">
+			<div>
+				<h2 id="ec-rp-h">Đề riêng theo tin tuyển dụng đang nhận hồ sơ</h2>
+				<p><?php echo esc_html( ( $total > 0 ? $total . ' tin · ' : '' ) . 'Biên soạn theo căn cứ của từng thông báo và từng nhóm vị trí. ' . ( $is_test ? 'Chọn đề để thi tính giờ.' : 'Chọn đề để luyện, xem đáp án sau mỗi câu.' ) ); ?></p>
+			</div>
+			<?php if ( $provs ) : ?>
+				<form class="ec-rp-filter" method="get" action="<?php echo esc_url( $base ); ?>#de-rieng-theo-tin">
+					<label class="ec-sr" for="ec-rp-tinh">Tỉnh, thành phố</label>
+					<select id="ec-rp-tinh" name="tinh" onchange="this.form.submit()">
+						<option value="">Tất cả tỉnh, thành (<?php echo (int) array_sum( array_column( $provs, 'count' ) ); ?> tin)</option>
+						<?php foreach ( $provs as $pv ) : ?>
+							<option value="<?php echo (int) $pv['id']; ?>"<?php selected( $prov, (int) $pv['id'] ); ?>><?php echo esc_html( (string) $pv['name'] . ' (' . (int) $pv['count'] . ')' ); ?></option>
+						<?php endforeach; ?>
+					</select>
+					<noscript><button class="ec-btn" type="submit">Lọc</button></noscript>
+				</form>
+			<?php endif; ?>
+		</div>
+		<?php if ( ! $items ) : ?>
+			<p class="ec-rp-empty"><?php echo $res['ok'] ? 'Chưa có tin đang nhận hồ sơ nào có đề riêng' . ( $prov ? ' ở tỉnh, thành này' : '' ) . '. Bạn có thể dùng đề chung bên dưới.' : 'Chưa tải được danh sách đề riêng, vui lòng thử lại sau.'; ?></p>
+		<?php else : ?>
+			<div class="ec-rp-grid">
+				<?php foreach ( $items as $r ) : ?>
+					<?php
+					$meta = array_filter(
+						array(
+							! empty( $r['province']['name'] ) ? (string) $r['province']['name'] : '',
+							! empty( $r['published_at'] ) ? 'Đăng ' . cvc_cat_date( (string) $r['published_at'] ) : '',
+							! empty( $r['deadline'] ) ? 'Hạn nộp ' . cvc_cat_date( (string) $r['deadline'] ) : 'Chưa công bố hạn nộp',
+						)
+					);
+					?>
+					<article class="ec-rp-card">
+						<h3><a href="<?php echo esc_url( cvc_recruitment_url( (string) $r['slug'] ) ); ?>"><?php echo esc_html( (string) $r['title'] ); ?></a></h3>
+						<p class="ec-rp-meta"><?php if ( ! empty( $r['saved'] ) ) : ?><span class="ec-badge is-g">♥ Tin bạn đã lưu</span> <?php endif; ?><?php echo esc_html( implode( ' · ', $meta ) ); ?></p>
+						<ul class="ec-rp-groups">
+							<?php foreach ( (array) $r['groups'] as $g ) : ?>
+								<li>
+									<span class="ec-rp-label"><?php echo esc_html( (string) $g['label'] ); ?></span>
+									<span class="ec-rp-exams">
+										<?php foreach ( (array) $g['exams'] as $e ) : ?>
+											<a class="ec-rp-exam" href="<?php echo esc_url( add_query_arg( 'che-do', $mode, cvc_exam_url( (string) $e['slug'] ) ) ); ?>" title="<?php echo esc_attr( (string) $e['title'] . ' · ' . (int) $e['total_questions'] . ' câu · ' . (int) $e['duration_minutes'] . ' phút' ); ?>"><?php echo esc_html( 'Đề ' . (int) $e['n'] ); ?></a>
+										<?php endforeach; ?>
+									</span>
+								</li>
+							<?php endforeach; ?>
+						</ul>
+					</article>
+				<?php endforeach; ?>
+			</div>
+			<?php if ( $last > 1 ) : ?>
+				<nav class="ec-rp-pager" aria-label="Trang tin có đề riêng">
+					<?php if ( $pg > 1 ) : ?><a class="ec-btn" href="<?php echo esc_url( $link( $pg - 1 ) ); ?>">← Trước</a><?php endif; ?>
+					<span>Trang <?php echo (int) $pg; ?> / <?php echo (int) $last; ?></span>
+					<?php if ( $pg < $last ) : ?><a class="ec-btn" href="<?php echo esc_url( $link( $pg + 1 ) ); ?>">Sau →</a><?php endif; ?>
+				</nav>
+			<?php endif; ?>
+		<?php endif; ?>
+		<?php if ( null === $token ) : // Khách: không in nonce vào trang có thể bị cache. ?>
+			<div class="ec-rp-quick">
+				<span><b><?php echo $is_test ? 'Thi nhanh' : 'Luyện nhanh'; ?></b> câu ngẫu nhiên từ ngân hàng câu hỏi:</span>
+				<a class="ec-btn" href="<?php echo esc_url( cvc_login_url( $base ) ); ?>" rel="nofollow">Đăng nhập để bắt đầu</a>
+				<?php if ( $is_test ) : ?><a class="ec-link" href="<?php echo esc_url( home_url( '/xep-hang/' ) ); ?>">★ Bảng xếp hạng thi thử →</a><?php else : ?><a class="ec-link" href="<?php echo esc_url( cvc_question_bank_url() ); ?>">Chọn theo môn, văn bản →</a><?php endif; ?>
+			</div>
+		<?php else : ?>
+		<form class="ec-rp-quick" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+			<input type="hidden" name="action" value="cvc_qb_start">
+			<input type="hidden" name="mode" value="<?php echo $is_test ? 'exam' : 'practice'; ?>">
+			<input type="hidden" name="back" value="<?php echo esc_url( $base ); ?>">
+			<?php wp_nonce_field( 'cvc_qb_start' ); ?>
+			<span><b><?php echo $is_test ? 'Thi nhanh' : 'Luyện nhanh'; ?></b> câu ngẫu nhiên từ ngân hàng câu hỏi:</span>
+			<?php foreach ( $is_test ? array( 20, 40, 60 ) : array( 10, 20, 40 ) as $n ) : ?>
+				<button class="ec-btn" type="submit" name="so-cau" value="<?php echo (int) $n; ?>"><?php echo (int) $n; ?> câu<?php echo $is_test ? ' · ' . (int) $n . ' phút' : ''; ?></button>
+			<?php endforeach; ?>
+			<?php if ( $is_test ) : ?><a class="ec-link" href="<?php echo esc_url( home_url( '/xep-hang/' ) ); ?>">★ Bảng xếp hạng thi thử →</a><?php else : ?><a class="ec-link" href="<?php echo esc_url( cvc_question_bank_url() ); ?>">Chọn theo môn, văn bản →</a><?php endif; ?>
+		</form>
+		<?php endif; ?>
+	</section>
+	<?php
+}
+
+/* ------------------------------------------------------------------
  * Tài nguyên + AJAX
  * ------------------------------------------------------------------ */
 add_action( 'wp_enqueue_scripts', 'cvc_cat_assets', 60 );
@@ -753,6 +900,7 @@ function cvc_cat_assets(): void {
 	if ( ! in_array( $page, CVC_CAT_KINDS, true ) ) {
 		return;
 	}
+	$mode_base = 'exams' === $page && in_array( (string) get_query_var( 'cvc_exam_mode' ), array( 'on-tap', 'thi-that' ), true ) ? cvc_exams_mode_url( (string) get_query_var( 'cvc_exam_mode' ) ) : '';
 	wp_enqueue_style( 'cvc-catalog', get_theme_file_uri( '/assets/css/catalog.css' ), array(), (string) filemtime( get_theme_file_path( '/assets/css/catalog.css' ) ) );
 	wp_enqueue_script( 'cvc-catalog', get_theme_file_uri( '/assets/js/catalog.js' ), array(), (string) filemtime( get_theme_file_path( '/assets/js/catalog.js' ) ), true );
 	wp_add_inline_script(
@@ -763,8 +911,8 @@ function cvc_cat_assets(): void {
 				'nonce'    => wp_create_nonce( 'cvc_cat' ),
 				'kind'     => $page,
 				'loggedIn' => null !== cvc_auth_token(),
-				'login'    => cvc_login_url( call_user_func( cvc_cat_config( $page )['url'], 1 ) ),
-				'base'     => call_user_func( cvc_cat_config( $page )['url'], 1 ),
+				'login'    => cvc_login_url( $mode_base ?: call_user_func( cvc_cat_config( $page )['url'], 1 ) ),
+				'base'     => $mode_base ?: call_user_func( cvc_cat_config( $page )['url'], 1 ),
 			)
 		) . ';',
 		'before'

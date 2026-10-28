@@ -336,10 +336,10 @@ get_header();
 		</div>
 
 		<section class="qb-quick" aria-label="Liên kết nhanh">
-			<a class="qb-tile" href="<?php echo esc_url( cvc_exams_mode_url( 'on-tap' ) ); ?>"><i aria-hidden="true">✓</i><span><strong>Ôn tập kiến thức</strong><small>Làm đề, xem đáp án ngay sau mỗi câu</small></span></a>
+			<a class="qb-tile" href="<?php echo esc_url( cvc_exams_mode_url( 'on-tap' ) ); ?>"><i aria-hidden="true">✓</i><span><strong>Luyện thi trắc nghiệm</strong><small>Làm đề, xem đáp án ngay sau mỗi câu</small></span></a>
 			<a class="qb-tile" href="<?php echo esc_url( cvc_legal_documents_url() ); ?>"><i aria-hidden="true">§</i><span><strong>Văn bản pháp luật</strong><small>Mở Điều khoản tham chiếu</small></span></a>
 			<a class="qb-tile" href="<?php echo esc_url( cvc_recruitments_url() ); ?>"><i aria-hidden="true">▣</i><span><strong>Tin tuyển dụng</strong><small>Định hướng theo vị trí</small></span></a>
-			<a class="qb-tile" href="<?php echo esc_url( cvc_exams_mode_url( 'thi-that' ) ); ?>"><i aria-hidden="true">◷</i><span><strong>Thi thử như thi thật</strong><small>Tính giờ theo cấu trúc đề</small></span></a>
+			<a class="qb-tile" href="<?php echo esc_url( cvc_exams_mode_url( 'thi-that' ) ); ?>"><i aria-hidden="true">◷</i><span><strong>Thi thử trắc nghiệm</strong><small>Tính giờ theo cấu trúc đề</small></span></a>
 		</section>
 	</div>
 	<div class="qb-toast" role="status" aria-live="polite" data-qb-toast></div>

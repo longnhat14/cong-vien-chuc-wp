@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Tăng số này khi thêm/sửa rewrite rule để buộc flush lại đúng 1 lần.
-const CVC_REWRITE_VERSION = '24';
+const CVC_REWRITE_VERSION = '25';
 
 /**
  * Section hợp lệ của /tai-khoan/{section}/ (Phase 10) - map slug tiếng
@@ -149,6 +149,11 @@ function cvc_register_rewrite_rules(): void {
 		'top'
 	);
 
+	// 28/10/2026: trang Luyện thi / Thi thử trắc nghiệm = danh mục đề với chế độ đặt sẵn.
+	add_rewrite_rule( '^luyen-thi-trac-nghiem/page/([0-9]+)/?$', 'index.php?cvc_page=exams&cvc_exam_mode=on-tap&cvc_paged=$matches[1]', 'top' );
+	add_rewrite_rule( '^luyen-thi-trac-nghiem/?$', 'index.php?cvc_page=exams&cvc_exam_mode=on-tap', 'top' );
+	add_rewrite_rule( '^thi-thu-trac-nghiem/page/([0-9]+)/?$', 'index.php?cvc_page=exams&cvc_exam_mode=thi-that&cvc_paged=$matches[1]', 'top' );
+	add_rewrite_rule( '^thi-thu-trac-nghiem/?$', 'index.php?cvc_page=exams&cvc_exam_mode=thi-that', 'top' );
 	add_rewrite_rule(
 		'^thi-trac-nghiem/page/([0-9]+)/?$',
 		'index.php?cvc_page=exams&cvc_paged=$matches[1]',
@@ -390,6 +395,7 @@ function cvc_register_query_vars( array $vars ): array {
 	$vars[] = 'cvc_employer_id';
 	$vars[] = 'cvc_legal_document_slug';
 	$vars[] = 'cvc_paged';
+	$vars[] = 'cvc_exam_mode';
 	$vars[] = 'cvc_account_section';
 	$vars[] = 'cvc_attempt_id';
 	$vars[] = 'cvc_document_slug';
@@ -650,8 +656,14 @@ function cvc_saved_questions_url( string $type = '' ): string {
 }
 
 /** Danh sách đề ở chế độ đã chọn: thi-that | on-tap (thẻ đề mở thẳng đúng chế độ). */
-function cvc_exams_mode_url( string $mode ): string {
-	return add_query_arg( 'che-do', $mode, cvc_exams_url() );
+/** Trang Luyện thi trắc nghiệm (on-tap) / Thi thử trắc nghiệm (thi-that) - 28/10/2026. */
+function cvc_exams_mode_url( string $mode, int $page = 1 ): string {
+	$path = 'thi-that' === $mode ? 'thi-thu-trac-nghiem/' : ( 'on-tap' === $mode ? 'luyen-thi-trac-nghiem/' : '' );
+	if ( '' === $path ) {
+		return cvc_exams_url( $page );
+	}
+
+	return home_url( '/' . $path . ( $page > 1 ? 'page/' . $page . '/' : '' ) );
 }
 
 function cvc_account_url( string $section = 'overview' ): string {
@@ -767,11 +779,11 @@ function cvc_main_nav_items(): array {
 			 * danh sách dọc trên điện thoại); 'more' = hàng "Học thêm" dưới cùng.
 			 */
 			'children' => array(
+				array( 'group' => 'practice', 'label' => 'Luyện thi trắc nghiệm', 'desc' => 'Đề riêng theo tin tuyển dụng, xem đáp án và căn cứ sau mỗi câu', 'url' => cvc_exams_mode_url( 'on-tap' ), 'sym' => '✎' ),
+				array( 'group' => 'practice', 'label' => 'Thi thử trắc nghiệm', 'desc' => 'Làm đề tính giờ như phòng thi, nộp bài xem điểm', 'url' => cvc_exams_mode_url( 'thi-that' ), 'sym' => '◷' ),
 				array( 'group' => 'practice', 'label' => 'Ngân hàng câu hỏi', 'desc' => 'Luyện theo môn, chủ đề và điều khoản pháp luật', 'url' => cvc_question_bank_url(), 'sym' => '▤' ),
-				array( 'group' => 'practice', 'label' => 'Ôn tập kiến thức', 'desc' => 'Làm câu hỏi, xem giải thích và học căn cứ pháp lý', 'url' => cvc_exams_mode_url( 'on-tap' ), 'sym' => '✎' ),
 				array( 'group' => 'practice', 'label' => 'Câu hỏi đã lưu', 'desc' => 'Câu đánh dấu, câu sai và câu cần ôn lại', 'url' => cvc_saved_questions_url(), 'sym' => '⚑' ),
 				array( 'group' => 'assess', 'label' => 'Bộ đề PDF có đáp án', 'desc' => 'Tải đề theo tin tuyển dụng, theo văn bản - miễn phí', 'url' => home_url( '/bo-de-pdf/' ), 'sym' => '⇩' ),
-				array( 'group' => 'assess', 'label' => 'Thi thử như thi thật', 'desc' => 'Làm đề có thời gian, nộp bài và xem điểm', 'url' => cvc_exams_mode_url( 'thi-that' ), 'sym' => '◷' ),
 				array( 'group' => 'assess', 'label' => 'Bảng xếp hạng', 'desc' => 'Top thí sinh thi thử theo tuần, tháng, từng đề', 'url' => home_url( '/xep-hang/' ), 'sym' => '★' ),
 				array( 'group' => 'assess', 'label' => 'Kết quả & tiến độ', 'desc' => 'Tổng quan điểm số, tiến độ và chủ đề còn yếu', 'url' => cvc_account_url( 'overview' ), 'sym' => '↗' ),
 				array( 'group' => 'more', 'label' => 'Chủ đề ôn thi', 'url' => cvc_topics_url() ),

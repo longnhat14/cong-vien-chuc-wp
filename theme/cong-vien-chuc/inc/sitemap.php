@@ -60,6 +60,9 @@ function cvc_sitemap_render(): void {
 	$rows = array(
 		array( 'path' => '/tuyen-dung/', 'lastmod' => cvc_sitemap_lastmod( $data['notices'] ) ),
 		array( 'path' => '/tuyen-dung/vi-tri/', 'lastmod' => cvc_sitemap_lastmod( $data['positions'] ) ),
+		// 28/10/2026: trang đề riêng theo tin (đổi theo tin mới).
+		array( 'path' => '/luyen-thi-trac-nghiem/', 'lastmod' => cvc_sitemap_lastmod( $data['notices'] ) ),
+		array( 'path' => '/thi-thu-trac-nghiem/', 'lastmod' => cvc_sitemap_lastmod( $data['notices'] ) ),
 	);
 	$rows = array_merge( $rows, $data['notices'], $data['positions'] );
 
