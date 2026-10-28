@@ -68,7 +68,7 @@ function cvc_handle_google(): void {
 		cvc_redirect_with_notice( cvc_login_url(), 'error', 'Chưa nhận được phản hồi từ Google, vui lòng thử lại.', $redirect );
 		return;
 	}
-	$result = ( new CVC_Api_Client( null, 20 ) )->post( '/api/auth/google', array( 'credential' => $credential ) );
+	$result = ( new CVC_Api_Client( null, 20 ) )->post( '/api/auth/google', array( 'credential' => $credential ) + ( function_exists( 'cvc_track_signup_fields' ) ? cvc_track_signup_fields() : array() ) );
 	$token  = (string) ( $result['data']['token'] ?? '' );
 	if ( empty( $result['ok'] ) || '' === $token ) {
 		$msg = (string) ( $result['data']['message'] ?? '' );

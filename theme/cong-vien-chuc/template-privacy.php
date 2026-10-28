@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$cvc_pp_updated = '27/10/2026';
+$cvc_pp_updated = '28/10/2026';
 cvc_seo_set_title( 'Chính sách bảo mật' );
 cvc_seo_set_description( 'Công Viên Chức thu thập những dữ liệu nào, dùng vào việc gì, chia sẻ với ai, lưu trữ thế nào và quyền của bạn đối với dữ liệu cá nhân khi dùng congvienchuc.com.' );
 cvc_seo_set_canonical( home_url( '/chinh-sach-bao-mat/' ) );
@@ -62,7 +62,7 @@ get_header();
 			</nav>
 
 			<h2 id="pham-vi">1. Phạm vi</h2>
-			<p>Chính sách này giải thích cách Công Viên Chức (congvienchuc.com) thu thập, sử dụng, chia sẻ và bảo vệ dữ liệu cá nhân của người dùng khi bạn truy cập website, tạo tài khoản, ôn thi, tải tài liệu, dùng AI Coach hoặc đăng tin với tư cách đơn vị tuyển dụng. Chúng tôi xử lý dữ liệu cá nhân theo quy định của pháp luật Việt Nam về bảo vệ dữ liệu cá nhân. Khi sử dụng dịch vụ, bạn đồng ý với việc xử lý dữ liệu như mô tả dưới đây; bạn có thể rút lại đồng ý bất cứ lúc nào (xem mục 9).</p>
+			<p>Chính sách này giải thích cách Công Viên Chức (congvienchuc.com) thu thập, sử dụng, chia sẻ và bảo vệ dữ liệu cá nhân của người dùng khi bạn truy cập website, tạo tài khoản, ôn thi, tải tài liệu, dùng AI Coach hoặc đăng tin với tư cách đơn vị tuyển dụng. Chúng tôi xử lý dữ liệu cá nhân theo quy định của pháp luật Việt Nam về bảo vệ dữ liệu cá nhân (Luật Bảo vệ dữ liệu cá nhân năm 2025 và các văn bản hướng dẫn). Khi sử dụng dịch vụ, bạn đồng ý với việc xử lý dữ liệu như mô tả dưới đây; bạn có thể rút lại đồng ý bất cứ lúc nào (xem mục 9).</p>
 
 			<h2 id="du-lieu">2. Dữ liệu chúng tôi thu thập</h2>
 			<ul>
@@ -71,6 +71,7 @@ get_header();
 				<li><b>Hoạt động học tập:</b> lượt làm bài, câu trả lời, điểm, tiến độ theo từng câu hỏi, câu hỏi đã lưu, tin và văn bản đã đánh dấu, báo câu sai, chứng chỉ, lộ trình học, lịch sử tải đề PDF (mỗi file gắn một mã tải).</li>
 				<li><b>Đơn vị tuyển dụng:</b> tên đơn vị, mã số thuế, địa chỉ, điện thoại, email công vụ, website và tài liệu xác minh bạn tải lên.</li>
 				<li><b>Thanh toán:</b> mã đơn hàng, gói đã mua, số tiền, trạng thái và mã giao dịch do cổng thanh toán trả về. Chúng tôi <b>không</b> nhận và không lưu số thẻ, mật khẩu hay thông tin đăng nhập ngân hàng của bạn — các thông tin này nhập trực tiếp tại cổng thanh toán hoặc ứng dụng ngân hàng.</li>
+				<li><b>Nhật ký sử dụng (từ 28/10/2026):</b> thời điểm đăng nhập, cách đăng nhập (email hoặc Google), loại thiết bị, hệ điều hành và trình duyệt (ví dụ "Điện thoại · Android · Chrome"), tỉnh/thành ước tính từ địa chỉ IP; các trang bạn xem và thời gian bạn dùng website mỗi ngày (chỉ tính khi tab đang mở và có thao tác), từ khóa tìm kiếm (thống kê chung, không gắn với tài khoản); nguồn bạn đến website lần đầu (ví dụ từ Google, Zalo, Facebook) khi đăng ký. Với khách chưa đăng nhập, chúng tôi chỉ đếm theo một mã ngẫu nhiên của trình duyệt, không biết bạn là ai.</li>
 				<li><b>Dữ liệu kỹ thuật:</b> địa chỉ IP và thông tin trình duyệt khi bạn làm bài, tải đề PDF hoặc khi quản trị viên thao tác (để chống gian lận, bảo mật và giới hạn truy cập bất thường). Địa chỉ IP có thể được dùng để ước tính tỉnh/thành nhằm gợi ý tin tuyển dụng gần bạn. Khi bạn mở site từ liên kết trong file PDF, ảnh chia sẻ hoặc email, chúng tôi ghi nhận lượt truy cập kèm địa chỉ IP đã mã hóa một chiều để đo hiệu quả, không dùng để nhận diện bạn.</li>
 			</ul>
 
@@ -80,7 +81,7 @@ get_header();
 				<li>Cá nhân hóa: gợi ý tin tuyển dụng, bộ đề và lộ trình theo tỉnh, ngành bạn quan tâm (suy ra từ mục tiêu, hồ sơ, đề đã làm và bộ đề đã tải).</li>
 				<li>Gửi thông báo và email liên quan đến tài khoản, tin phù hợp, nhắc hạn và bản tin ôn thi (xem mục 4).</li>
 				<li>Xử lý thanh toán, cấp quyền sử dụng gói đã mua và hỗ trợ khi có sự cố giao dịch.</li>
-				<li>Bảo mật, chống lạm dụng, chống phát tán trái phép tài liệu; thống kê tổng hợp để cải thiện nội dung và sản phẩm.</li>
+				<li>Bảo mật, chống lạm dụng, chống phát tán trái phép tài liệu; thống kê tổng hợp để cải thiện nội dung và sản phẩm (ví dụ biết đề nào hay bị bỏ dở, nội dung nào được tìm mà chưa có, giờ nào người dùng học nhiều để gửi nhắc ôn đúng lúc).</li>
 				<li>Thực hiện nghĩa vụ theo yêu cầu của cơ quan nhà nước có thẩm quyền khi pháp luật quy định.</li>
 			</ul>
 			<p>Chúng tôi không bán dữ liệu cá nhân và không dùng dữ liệu của bạn cho quảng cáo của bên thứ ba.</p>
@@ -95,6 +96,7 @@ get_header();
 			<h2 id="cookie">6. Cookie và lưu trữ trên trình duyệt</h2>
 			<ul>
 				<li><b>Cookie đăng nhập</b> (HttpOnly, chỉ máy chủ đọc được) để giữ phiên đăng nhập; cookie ngắn hạn để hiển thị thông báo sau thao tác.</li>
+				<li><b>Cookie đo hoạt động của chính website:</b> <code>cvc_ta</code> (mã đã ký gắn với tài khoản khi bạn đăng nhập, xóa khi đăng xuất), <code>cvc_vid</code> (mã ngẫu nhiên cho khách chưa đăng nhập, 12 tháng), <code>cvc_src</code> (nguồn đến lần đầu, 90 ngày). Dữ liệu chỉ gửi về máy chủ của Công Viên Chức, không chia sẻ cho bên quảng cáo.</li>
 				<li><b>Bộ nhớ trình duyệt</b> (localStorage / sessionStorage) để nhớ lựa chọn giao diện, một số trạng thái tạm thời, AI bạn chọn và hội thoại AI Coach trong phiên.</li>
 				<li>Chúng tôi hiện <b>không</b> dùng công cụ quảng cáo hay theo dõi của bên thứ ba (như pixel quảng cáo). Nếu thay đổi, chính sách này sẽ được cập nhật trước.</li>
 			</ul>
@@ -113,7 +115,8 @@ get_header();
 			<h2 id="luu-tru">8. Lưu trữ và bảo mật</h2>
 			<ul>
 				<li>Kết nối được mã hóa (HTTPS); mật khẩu được băm một chiều; khóa truy cập dịch vụ bên thứ ba không lưu trong mã nguồn.</li>
-				<li>Quyền quản trị phân theo vai trò; thao tác quản trị được ghi nhật ký.</li>
+				<li>Quyền quản trị phân theo vai trò; thao tác quản trị được ghi nhật ký, kể cả mỗi lần quản trị viên mở trang hoạt động của một người dùng.</li>
+				<li>Địa chỉ IP trong nhật ký đăng nhập chỉ giữ 30 ngày (sau đó chỉ còn tỉnh/thành ước tính); số liệu thời gian sử dụng theo từng người / từng khách giữ 180 ngày; số liệu tổng hợp theo trang và theo từ khóa (không gắn với người) được giữ lâu hơn để so sánh.</li>
 				<li>Liên kết tải file PDF chỉ có hiệu lực 10 phút; file in tên người tải (đã che bớt) và mã tải để hạn chế phát tán.</li>
 				<li>Dữ liệu tài khoản và lịch sử học được lưu trong thời gian tài khoản còn hoạt động; khi bạn yêu cầu xóa tài khoản, dữ liệu gắn với tài khoản sẽ bị xóa hoặc ẩn danh, trừ dữ liệu giao dịch phải lưu theo quy định về kế toán, thuế.</li>
 			</ul>

@@ -48,6 +48,9 @@ function cvc_set_auth_cookie( string $token, bool $remember = true ): void {
 }
 
 function cvc_clear_auth_cookie(): void {
+	if ( function_exists( 'cvc_track_set_cookie' ) && ! empty( $_COOKIE['cvc_ta'] ) ) {
+		cvc_track_set_cookie( '', time() - HOUR_IN_SECONDS ); // 28/10/2026: bỏ định danh đo hoạt động khi đăng xuất.
+	}
 	setcookie(
 		CVC_AUTH_COOKIE,
 		'',
@@ -257,6 +260,9 @@ function cvc_handle_register(): void {
 		$old['employer']  = $emp;
 	}
 
+	if ( function_exists( 'cvc_track_signup_fields' ) ) {
+		$body += cvc_track_signup_fields(); // 28/10/2026: nguồn đến lần đầu.
+	}
 	$result = ( new CVC_Api_Client() )->post( '/api/auth/register', $body );
 
 	if ( ! $result['ok'] ) {

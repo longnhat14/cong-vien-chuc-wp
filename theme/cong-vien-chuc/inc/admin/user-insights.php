@@ -16,6 +16,7 @@ const CVC_UI_STATUS = array(
 	'roi-bo'        => array( 'Rời bỏ', 'bg-slate-200 text-slate-700' ),
 	'chua-xac-minh' => array( 'Chưa xác minh email', 'bg-rose-100 text-rose-900' ),
 	'nhan-su'       => array( 'Nhân sự', 'bg-indigo-100 text-indigo-900' ),
+	'thu-nghiem'    => array( 'Tài khoản thử', 'bg-slate-100 text-slate-600' ),
 );
 
 function cvc_ui_n( $n ): string {
@@ -135,12 +136,12 @@ function cvc_ui_heatmap( array $heat, string $unit ): void {
 }
 
 /** Biểu đồ cột (hoạt động) + đường (người mới) theo ngày. */
-function cvc_ui_series_chart( array $series ): void {
+function cvc_ui_series_chart( array $series, string $bar = 'active', string $line = 'new_users', string $bar_l = 'Người hoạt động trong ngày', string $line_l = 'Người đăng ký mới' ): void {
 	$n = count( $series );
 	if ( ! $n ) {
 		return;
 	}
-	$max = max( 1, max( array_map( static fn ( $d ) => max( (int) $d['active'], (int) $d['new_users'] ), $series ) ) );
+	$max = max( 1, max( array_map( static fn ( $d ) => max( (int) ( $d[ $bar ] ?? 0 ), (int) ( $d[ $line ] ?? 0 ) ), $series ) ) );
 	$w   = 760;
 	$h   = 200;
 	$pl  = 34;
@@ -157,16 +158,16 @@ function cvc_ui_series_chart( array $series ): void {
 	}
 	foreach ( $series as $i => $d ) {
 		$x  = $pl + $i * $bw;
-		$a  = (int) $d['active'];
+		$a  = (int) ( $d[ $bar ] ?? 0 );
 		$yy = $y( $a );
-		echo '<rect x="' . esc_attr( (string) ( $x + 1 ) ) . '" y="' . esc_attr( (string) $yy ) . '" width="' . esc_attr( (string) max( 1, $bw - 2 ) ) . '" height="' . esc_attr( (string) ( 8 + $ch - $yy ) ) . '" fill="#9cc0e3"><title>' . esc_html( wp_date( 'd/m', strtotime( $d['date'] ) ) . ': ' . $a . ' người hoạt động, ' . (int) $d['new_users'] . ' người mới, ' . (int) $d['attempts'] . ' lượt làm bài' ) . '</title></rect>';
-		$pts[] = round( $x + $bw / 2, 1 ) . ',' . round( $y( (int) $d['new_users'] ), 1 );
+		echo '<rect x="' . esc_attr( (string) ( $x + 1 ) ) . '" y="' . esc_attr( (string) $yy ) . '" width="' . esc_attr( (string) max( 1, $bw - 2 ) ) . '" height="' . esc_attr( (string) ( 8 + $ch - $yy ) ) . '" fill="#9cc0e3"><title>' . esc_html( wp_date( 'd/m', strtotime( $d['date'] ) ) . ': ' . $bar_l . ' ' . $a . ' · ' . $line_l . ' ' . (int) ( $d[ $line ] ?? 0 ) ) . '</title></rect>';
+		$pts[] = round( $x + $bw / 2, 1 ) . ',' . round( $y( (int) ( $d[ $line ] ?? 0 ) ), 1 );
 		if ( 0 === $i % max( 1, (int) ceil( $n / 8 ) ) ) {
 			echo '<text x="' . esc_attr( (string) ( $x + $bw / 2 ) ) . '" y="' . (int) ( $h - 6 ) . '" font-size="11" text-anchor="middle" fill="#64748b">' . esc_html( wp_date( 'd/m', strtotime( $d['date'] ) ) ) . '</text>';
 		}
 	}
 	echo '<polyline points="' . esc_attr( implode( ' ', $pts ) ) . '" fill="none" stroke="#c2410c" stroke-width="2"/>';
-	echo '</svg></div><p class="ui-note"><span style="display:inline-block;width:10px;height:10px;background:#9cc0e3;border-radius:2px"></span> Người hoạt động trong ngày &nbsp; <span style="display:inline-block;width:14px;height:2px;background:#c2410c;vertical-align:middle"></span> Người đăng ký mới</p>';
+	echo '</svg></div><p class="ui-note"><span style="display:inline-block;width:10px;height:10px;background:#9cc0e3;border-radius:2px"></span> ' . esc_html( $bar_l ) . ' &nbsp; <span style="display:inline-block;width:14px;height:2px;background:#c2410c;vertical-align:middle"></span> ' . esc_html( $line_l ) . '</p>';
 }
 
 /* ================================================================== */
@@ -195,7 +196,7 @@ function cvc_ui_render_overview(): void {
 	<header class="flex flex-wrap items-end justify-between gap-3">
 		<div>
 			<h1 class="text-2xl font-black text-ink">Người dùng &amp; hoạt động</h1>
-			<p class="text-sm text-ink-muted">Không tính tài khoản nhân sự quản trị. Giờ theo giờ Việt Nam; số liệu làm mới mỗi 10 phút.</p>
+			<p class="text-sm text-ink-muted">Không tính tài khoản nhân sự quản trị và tài khoản thử. Giờ theo giờ Việt Nam; số liệu làm mới mỗi 10 phút.</p>
 		</div>
 		<nav class="flex gap-1 text-sm" aria-label="Khoảng thời gian">
 			<?php foreach ( array( 7, 30, 90 ) as $p ) : ?>
@@ -226,6 +227,29 @@ function cvc_ui_render_overview(): void {
 	</section>
 
 	<section class="ui-card"><h2>Hoạt động theo ngày</h2><?php cvc_ui_series_chart( (array) ( $d['series'] ?? array() ) ); ?></section>
+
+	<?php $tm = (array) ( $k['time'] ?? array() ); ?>
+	<section class="ui-card">
+		<h2>Thời gian ở lại &amp; khách chưa đăng nhập</h2>
+		<?php if ( empty( $tm['since'] ) ) : ?>
+			<p class="ui-note">Bắt đầu đo từ 28/10/2026 (chỉ tính khi tab đang mở và có thao tác trong 3 phút gần nhất). Số liệu xuất hiện sau vài giờ.</p>
+		<?php else : ?>
+			<div class="ui-kpis">
+				<?php
+				foreach ( array(
+					array( 'Thời gian học (thành viên)', cvc_ui_n( $tm['member_minutes'] ?? 0 ) . ' phút', cvc_ui_n( $tm['member_users'] ?? 0 ) . ' người' ),
+					array( 'TB mỗi người mỗi ngày', null !== ( $tm['avg_minutes_per_day'] ?? null ) ? str_replace( '.', ',', (string) $tm['avg_minutes_per_day'] ) . ' phút' : '—', 'ngày có mở web' ),
+					array( 'Khách (ẩn danh)', cvc_ui_n( $tm['guest_visitors'] ?? 0 ), cvc_ui_n( $tm['guest_pageviews'] ?? 0 ) . ' lượt xem trang' ),
+					array( 'TB thời gian mỗi khách', null !== ( $tm['guest_avg_minutes'] ?? null ) ? str_replace( '.', ',', (string) $tm['guest_avg_minutes'] ) . ' phút' : '—', 'trong kỳ' ),
+				) as $c ) :
+					?>
+					<div class="ui-kpi"><small><?php echo esc_html( $c[0] ); ?></small><b><?php echo esc_html( $c[1] ); ?></b><em><?php echo esc_html( $c[2] ); ?></em></div>
+				<?php endforeach; ?>
+			</div>
+			<?php cvc_ui_series_chart( (array) ( $d['series'] ?? array() ), 'minutes', 'visitors', 'Phút học của thành viên', 'Khách ẩn danh' ); ?>
+			<p class="ui-note">Đo từ <?php echo esc_html( cvc_ui_dt( (string) $tm['since'] . ' 00:00:00', 'd/m/Y' ) ); ?>. Khách được đếm theo mã ngẫu nhiên của trình duyệt, không gắn danh tính.</p>
+		<?php endif; ?>
+	</section>
 
 	<div class="ui-grid2">
 		<section class="ui-card">
@@ -291,6 +315,38 @@ function cvc_ui_render_overview(): void {
 		<?php endforeach; ?>
 	</div>
 
+	<div class="ui-grid2">
+		<section class="ui-card">
+			<h2>Trang được xem nhiều (gồm khách)</h2>
+			<?php $pages = (array) ( $d['pages'] ?? array() ); ?>
+			<?php if ( $pages ) : ?>
+				<table class="ui-tbl"><thead><tr><th>Trang</th><th class="n">Lượt xem</th><th class="n">Thành viên</th></tr></thead><tbody>
+					<?php foreach ( $pages as $pgx ) : ?><tr><td><a href="<?php echo esc_url( home_url( (string) $pgx['path'] ) ); ?>" target="_blank" rel="noopener"><?php echo esc_html( urldecode( (string) $pgx['path'] ) ); ?></a></td><td class="n"><?php echo (int) $pgx['views']; ?></td><td class="n"><?php echo (int) $pgx['member_views']; ?></td></tr><?php endforeach; ?>
+				</tbody></table>
+			<?php else : ?><p class="ui-note">Bắt đầu đo từ 28/10/2026.</p><?php endif; ?>
+		</section>
+		<section class="ui-card">
+			<h2>Từ khóa tìm kiếm</h2>
+			<?php $sq = (array) ( $d['searches'] ?? array() ); $zq = (array) ( $d['zero_searches'] ?? array() ); ?>
+			<?php if ( $sq ) : ?>
+				<table class="ui-tbl"><thead><tr><th>Từ khóa</th><th class="n">Lượt</th><th class="n">Kết quả</th></tr></thead><tbody>
+					<?php foreach ( $sq as $x ) : ?><tr><td><a href="<?php echo esc_url( add_query_arg( 's', rawurlencode( (string) $x['q'] ), home_url( '/' ) ) ); ?>" target="_blank" rel="noopener"><?php echo esc_html( (string) $x['q'] ); ?></a></td><td class="n"><?php echo (int) $x['n']; ?></td><td class="n" style="<?php echo 0 === (int) $x['results'] ? 'color:#b42318;font-weight:700' : ''; ?>"><?php echo (int) $x['results']; ?></td></tr><?php endforeach; ?>
+				</tbody></table>
+			<?php else : ?><p class="ui-note">Bắt đầu ghi từ 28/10/2026 (trang kết quả tìm kiếm, không tính gợi ý khi đang gõ).</p><?php endif; ?>
+			<?php if ( $zq ) : ?>
+				<p class="text-sm font-bold mt-3" style="color:#b42318">Tìm mà không ra kết quả - nội dung còn thiếu</p>
+				<p class="text-sm"><?php echo esc_html( implode( ' · ', array_map( static fn ( $x ) => $x['q'] . ' (' . $x['n'] . ')', $zq ) ) ); ?></p>
+			<?php endif; ?>
+		</section>
+	</div>
+
+	<section class="ui-card">
+		<h2>Nguồn đến của người đăng ký trong kỳ</h2>
+		<?php $srcs = (array) ( $d['sources'] ?? array() ); ?>
+		<?php if ( $srcs ) : ?><p class="text-sm"><?php echo esc_html( implode( ' · ', array_map( static fn ( $k2, $v2 ) => $k2 . ': ' . $v2, array_keys( $srcs ), $srcs ) ) ); ?></p><?php endif; ?>
+		<p class="ui-note">Ghi lần đầu người dùng vào web (utm_source / trang giới thiệu như google.com, zalo.me, facebook.com…), áp dụng cho tài khoản đăng ký từ 28/10/2026.</p>
+	</section>
+
 	<section class="ui-card">
 		<h2>Người dùng học vào lúc nào</h2>
 		<?php cvc_ui_heatmap( (array) ( $d['heatmap'] ?? array() ), 'người-ngày' ); ?>
@@ -355,7 +411,7 @@ function cvc_ui_render_list(): void {
 		<input id="ui-q" type="search" name="q" value="<?php echo esc_attr( $q ); ?>" placeholder="Tìm tên hoặc email" class="border border-slate-300 rounded-lg px-3 py-1.5 w-64 max-w-full">
 		<label for="ui-sort">Sắp xếp</label>
 		<select id="ui-sort" name="sap-xep" class="border border-slate-300 rounded-lg px-2 py-1.5">
-			<?php foreach ( array( 'last_seen' => 'Hoạt động gần nhất', 'registered' => 'Đăng ký mới nhất', 'attempts' => 'Làm bài nhiều nhất', 'logins' => 'Đăng nhập nhiều nhất', 'score' => 'Điểm TB cao nhất' ) as $k => $lbl ) : ?>
+			<?php foreach ( array( 'last_seen' => 'Hoạt động gần nhất', 'registered' => 'Đăng ký mới nhất', 'attempts' => 'Làm bài nhiều nhất', 'logins' => 'Đăng nhập nhiều nhất', 'score' => 'Điểm TB cao nhất', 'minutes' => 'Thời gian 30 ngày nhiều nhất' ) as $k => $lbl ) : ?>
 				<option value="<?php echo esc_attr( $k ); ?>"<?php selected( $sort, $k ); ?>><?php echo esc_html( $lbl ); ?></option>
 			<?php endforeach; ?>
 		</select>
@@ -363,14 +419,15 @@ function cvc_ui_render_list(): void {
 	</form>
 	<section class="ui-card ui-scroll">
 		<table class="ui-tbl">
-			<thead><tr><th>Người dùng</th><th>Trạng thái</th><th>Hoạt động gần nhất</th><th class="n">Đăng nhập</th><th class="n">Bài làm</th><th class="n">Điểm TB</th><th class="n">Xem</th><th class="n">Tải PDF</th><th>Tỉnh / mục tiêu</th><th>Đăng ký</th></tr></thead>
+			<thead><tr><th>Người dùng</th><th>Trạng thái</th><th>Hoạt động gần nhất</th><th class="n">Đăng nhập</th><th class="n">Phút (30 ngày)</th><th class="n">Bài làm</th><th class="n">Điểm TB</th><th class="n">Xem</th><th class="n">Tải PDF</th><th>Tỉnh / mục tiêu</th><th>Đăng ký</th></tr></thead>
 			<tbody>
-				<?php foreach ( (array) ( $d['items'] ?? array() ) as $u ) : $s = CVC_UI_STATUS[ $u['staff'] ? 'nhan-su' : $u['status'] ] ?? array( '', '' ); ?>
+				<?php foreach ( (array) ( $d['items'] ?? array() ) as $u ) : $s = CVC_UI_STATUS[ $u['staff'] ? 'nhan-su' : ( ! empty( $u['test'] ) ? 'thu-nghiem' : $u['status'] ) ] ?? array( '', '' ); ?>
 					<tr>
 						<td><a href="<?php echo esc_url( cvc_admin_url( 'nguoi-dung', (int) $u['id'] ) ); ?>"><?php echo esc_html( '' !== trim( (string) $u['name'] ) ? (string) $u['name'] : '(chưa đặt tên)' ); ?></a><small class="block text-ink-muted"><?php echo esc_html( (string) $u['email'] ); ?><?php echo $u['google'] ? ' · Google' : ''; ?><?php echo $u['verified'] ? '' : ' · chưa xác minh'; ?></small></td>
 						<td><span class="ui-pill <?php echo esc_attr( $s[1] ); ?>"><?php echo esc_html( $s[0] ); ?></span></td>
 						<td title="<?php echo esc_attr( cvc_ui_dt( $u['last_seen'] ) ); ?>"><?php echo esc_html( cvc_ui_ago( $u['last_seen'] ) ); ?></td>
 						<td class="n"><?php echo (int) $u['logins']; ?></td>
+						<td class="n"><?php echo null !== ( $u['minutes_30d'] ?? null ) ? (int) $u['minutes_30d'] : '—'; ?></td>
 						<td class="n"><?php echo (int) $u['attempts']; ?><?php echo (int) $u['attempts'] > (int) $u['submitted'] ? '<small class="text-ink-muted"> (' . (int) $u['submitted'] . ' nộp)</small>' : ''; ?></td>
 						<td class="n"><?php echo null !== $u['avg_pct'] ? (int) $u['avg_pct'] . '%' : '—'; ?></td>
 						<td class="n"><?php echo (int) $u['views']; ?></td>
@@ -379,7 +436,7 @@ function cvc_ui_render_list(): void {
 						<td><?php echo esc_html( cvc_ui_dt( $u['created_at'], 'd/m/Y' ) ); ?></td>
 					</tr>
 				<?php endforeach; ?>
-				<?php if ( empty( $d['items'] ) ) : ?><tr><td colspan="10" class="ui-note">Không có người dùng khớp bộ lọc.</td></tr><?php endif; ?>
+				<?php if ( empty( $d['items'] ) ) : ?><tr><td colspan="11" class="ui-note">Không có người dùng khớp bộ lọc.</td></tr><?php endif; ?>
 			</tbody>
 		</table>
 	</section>
@@ -414,6 +471,7 @@ function cvc_ui_render_profile( int $id ): void {
 			<?php foreach ( (array) ( $u['roles'] ?? array() ) as $r ) : ?><?php if ( 'USER' !== $r ) : ?><span class="ui-pill bg-indigo-100 text-indigo-900"><?php echo esc_html( (string) $r ); ?></span><?php endif; ?><?php endforeach; ?>
 		</p>
 		<p class="ui-note mt-2">Đăng ký <?php echo esc_html( cvc_ui_dt( $u['created_at'] ?? '' ) ); ?> · phiên đăng nhập dùng lần cuối <?php echo esc_html( cvc_ui_ago( $u['last_used_at'] ?? '' ) ); ?><?php if ( ! empty( $d['goal'] ) ) : $g = (array) $d['goal']; ?> · Mục tiêu: <?php echo esc_html( implode( ' · ', array_filter( array( (string) ( $g['title'] ?? '' ), (string) ( $g['family'] ?? '' ), (string) ( $g['province'] ?? '' ) ) ) ) ); ?><?php endif; ?></p>
+		<?php $sg = (array) ( $d['signup'] ?? array() ); if ( ! empty( $sg['source'] ) || ! empty( $sg['landing'] ) ) : ?><p class="ui-note">Nguồn đến khi đăng ký: <?php echo esc_html( (string) ( $sg['source'] ?? '—' ) ); ?><?php echo ! empty( $sg['landing'] ) ? ' · trang đầu tiên ' . esc_html( (string) $sg['landing'] ) : ''; ?></p><?php endif; ?>
 		<p class="ui-note">Lượt xem hồ sơ này đã được ghi vào nhật ký quản trị.</p>
 	</header>
 
@@ -426,6 +484,7 @@ function cvc_ui_render_profile( int $id ): void {
 			array( 'Điểm trung bình', null !== ( $s['avg_pct'] ?? null ) ? (int) $s['avg_pct'] . '%' : '—', 'cao nhất ' . ( null !== ( $s['best_pct'] ?? null ) ? (int) $s['best_pct'] . '%' : '—' ) ),
 			array( 'Câu đã trả lời', cvc_ui_n( $s['answers'] ?? 0 ), ( (int) ( $s['answers'] ?? 0 ) > 0 ? (int) round( (int) $s['correct'] / (int) $s['answers'] * 100 ) . '% đúng' : '' ) ),
 			array( 'Thời gian làm bài', cvc_ui_n( $s['study_minutes'] ?? 0 ) . ' phút', 'ước tính từ các lượt làm bài' ),
+			array( 'Thời gian trên web', cvc_ui_n( $s['site_minutes_90'] ?? 0 ) . ' phút', cvc_ui_n( $s['site_days_90'] ?? 0 ) . ' ngày · ' . cvc_ui_n( $s['pageviews_90'] ?? 0 ) . ' trang (90 ngày, đo từ 28/10)' ),
 			array( 'Xem / Tải PDF / Lưu', cvc_ui_n( $s['views'] ?? 0 ) . ' / ' . cvc_ui_n( $s['downloads'] ?? 0 ) . ' / ' . cvc_ui_n( $s['bookmarks'] ?? 0 ), cvc_ui_n( $s['emails'] ?? 0 ) . ' email đã nhận' ),
 		) as $c ) :
 			?>
@@ -433,6 +492,14 @@ function cvc_ui_render_profile( int $id ): void {
 		<?php endforeach; ?>
 	</section>
 
+	<?php
+	$dm = (array) ( $d['daily_minutes'] ?? array() );
+	if ( $dm && array_sum( $dm ) > 0 ) {
+		echo '<section class="ui-card"><h2>Phút trên web theo ngày (30 ngày)</h2>';
+		cvc_ui_series_chart( array_map( static fn ( $day, $m ) => array( 'date' => $day, 'm' => $m, 'z' => 0 ), array_keys( $dm ), $dm ), 'm', 'z', 'Phút trên web', '—' );
+		echo '</section>';
+	}
+	?>
 	<div class="ui-grid2">
 		<section class="ui-card">
 			<h2>Học vào lúc nào (90 ngày)</h2>
