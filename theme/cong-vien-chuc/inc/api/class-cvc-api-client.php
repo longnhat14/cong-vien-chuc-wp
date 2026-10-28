@@ -216,6 +216,11 @@ final class CVC_Api_Client {
 			if ( filter_var( $client_ip, FILTER_VALIDATE_IP ) ) {
 				$headers['X-CVC-Proxy-Key'] = CVC_PROXY_KEY;
 				$headers['X-CVC-Client-IP'] = $client_ip;
+				// 28/10/2026: user-agent thật (nhật ký đăng nhập: thiết bị / trình duyệt).
+				$client_ua = isset( $_SERVER['HTTP_USER_AGENT'] ) ? substr( preg_replace( '/[\r\n]+/', ' ', (string) $_SERVER['HTTP_USER_AGENT'] ), 0, 400 ) : '';
+				if ( '' !== $client_ua ) {
+					$headers['X-CVC-Client-UA'] = $client_ua;
+				}
 			}
 		}
 
