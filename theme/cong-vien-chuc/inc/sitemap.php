@@ -68,8 +68,8 @@ function cvc_sitemap_render(): void {
 	foreach ( function_exists( 'cvc_cat_tracks' ) ? cvc_cat_tracks() : array() as $t ) {
 		$rows[] = array( 'path' => '/' . $t['path'] . '/', 'lastmod' => cvc_sitemap_lastmod( $data['notices'] ) );
 	}
-	foreach ( array_keys( function_exists( 'cvc_rec_presets' ) ? cvc_rec_presets() : array() ) as $k ) {
-		$rows[] = array( 'path' => '/tuyen-dung/' . $k . '/', 'lastmod' => cvc_sitemap_lastmod( $data['notices'] ) );
+	foreach ( function_exists( 'cvc_rec_presets' ) ? cvc_rec_presets() : array() as $pr ) {
+		$rows[] = array( 'path' => '/' . $pr['path'] . '/', 'lastmod' => cvc_sitemap_lastmod( $data['notices'] ) );
 	}
 	$rows = array_merge( $rows, $data['notices'], $data['positions'] );
 

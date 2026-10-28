@@ -37,17 +37,27 @@ function cvc_ci_families(): array {
  * Trang tin tuyển dụng theo loại (28/10/2026): /tuyen-dung/{key}/ = danh sách lọc sẵn + tiêu đề / mô tả riêng (SEO).
  */
 function cvc_rec_presets(): array {
+	// 28/10/2026 (v2): mỗi loại là 1 trang chủ đề riêng với URL ngắn (path), số liệu thật từ api/career/hub (api),
+	// đề riêng theo tin (rp -> api/catalog/recruitment-exams) và trang ôn thi tương ứng (track -> cvc_cat_tracks).
 	return array(
-		'cong-chuc' => array( 'label' => 'Tin tuyển dụng công chức', 'chip' => 'Công chức', 'filter' => array( 'loai' => 'civil' ), 'h1' => 'Tuyển dụng công chức', 'title' => 'Tuyển dụng công chức 2026: thông báo thi tuyển còn hạn', 'desc' => 'Thông báo tuyển dụng công chức còn hạn nộp hồ sơ từ nguồn chính thức các bộ, ngành, tỉnh, thành; kèm đề trắc nghiệm, văn bản cần ôn và hạn nộp.' ),
-		'vien-chuc' => array( 'label' => 'Tin tuyển dụng viên chức', 'chip' => 'Viên chức', 'filter' => array( 'loai' => 'public' ), 'h1' => 'Tuyển dụng viên chức', 'title' => 'Tuyển dụng viên chức 2026: giáo viên, y tế, sự nghiệp công lập', 'desc' => 'Thông báo tuyển dụng viên chức còn hạn: giáo viên, bác sĩ, điều dưỡng, đơn vị sự nghiệp công lập; kèm đề trắc nghiệm riêng theo tin và lộ trình ôn tập.' ),
-		'hop-dong'  => array( 'label' => 'Tin tuyển hợp đồng', 'chip' => 'Hợp đồng', 'filter' => array( 'loai' => 'contract' ), 'h1' => 'Tuyển dụng lao động hợp đồng', 'title' => 'Tuyển dụng lao động hợp đồng trong cơ quan nhà nước 2026', 'desc' => 'Thông báo tuyển lao động hợp đồng tại cơ quan hành chính, đơn vị sự nghiệp công lập còn hạn nộp hồ sơ, cập nhật từ nguồn chính thức.' ),
-		'giao-vien' => array( 'label' => 'Tin tuyển giáo viên', 'chip' => 'Giáo viên', 'filter' => array( 'nhom' => 'education' ), 'h1' => 'Tuyển dụng giáo viên', 'title' => 'Tuyển dụng giáo viên 2026: mầm non, tiểu học, THCS, THPT', 'desc' => 'Thông báo tuyển dụng giáo viên mầm non, tiểu học, THCS, THPT, giảng viên còn hạn; kèm đề trắc nghiệm theo vị trí và văn bản ngành giáo dục cần ôn.' ),
-		'y-te'      => array( 'label' => 'Tin tuyển ngành y tế', 'chip' => 'Y tế', 'filter' => array( 'nhom' => 'health' ), 'h1' => 'Tuyển dụng ngành y tế', 'title' => 'Tuyển dụng ngành y tế 2026: bác sĩ, điều dưỡng, hộ sinh, dược', 'desc' => 'Thông báo tuyển dụng bác sĩ, điều dưỡng, hộ sinh, kỹ thuật y, dược tại bệnh viện, trung tâm y tế công lập còn hạn; kèm đề ôn theo luật ngành y.' ),
+		'cong-chuc' => array( 'path' => 'tuyen-cong-chuc', 'label' => 'Tin tuyển dụng công chức', 'chip' => 'Công chức', 'noun' => 'công chức', 'filter' => array( 'loai' => 'civil' ), 'api' => array( 'kind' => 'civil' ), 'rp' => array( 'type' => 'civil_servant' ), 'track' => 'cong-chuc', 'h1' => 'Tuyển dụng công chức', 'title' => 'Tuyển dụng công chức 2026: thông báo thi tuyển còn hạn', 'desc' => 'Thông báo tuyển dụng công chức còn hạn nộp hồ sơ từ nguồn chính thức các bộ, ngành, tỉnh, thành; kèm đề trắc nghiệm, văn bản cần ôn và hạn nộp.', 'lead' => 'Thông báo thi tuyển, xét tuyển công chức tại các bộ, ngành, tỉnh, thành phố còn hạn nộp hồ sơ, lấy từ nguồn chính thức. Mỗi tin kèm hạn nộp, đề trắc nghiệm để ôn và văn bản cần nắm.' ),
+		'vien-chuc' => array( 'path' => 'tuyen-vien-chuc', 'label' => 'Tin tuyển dụng viên chức', 'chip' => 'Viên chức', 'noun' => 'viên chức', 'filter' => array( 'loai' => 'public' ), 'api' => array( 'kind' => 'public' ), 'rp' => array( 'type' => 'public_employee' ), 'track' => 'vien-chuc', 'h1' => 'Tuyển dụng viên chức', 'title' => 'Tuyển dụng viên chức 2026: giáo viên, y tế, sự nghiệp công lập', 'desc' => 'Thông báo tuyển dụng viên chức còn hạn: giáo viên, bác sĩ, điều dưỡng, đơn vị sự nghiệp công lập; kèm đề trắc nghiệm riêng theo tin và văn bản cần ôn.', 'lead' => 'Thông báo tuyển dụng viên chức tại trường học, bệnh viện và đơn vị sự nghiệp công lập còn hạn nộp hồ sơ, lấy từ nguồn chính thức. Mỗi tin kèm hạn nộp, đề trắc nghiệm để ôn và văn bản cần nắm.' ),
+		'hop-dong'  => array( 'path' => 'tuyen-dung/hop-dong', 'label' => 'Tin tuyển hợp đồng', 'chip' => 'Hợp đồng', 'noun' => 'lao động hợp đồng', 'filter' => array( 'loai' => 'contract' ), 'api' => array( 'kind' => 'contract' ), 'rp' => array( 'type' => 'other' ), 'track' => '', 'h1' => 'Tuyển dụng lao động hợp đồng', 'title' => 'Tuyển dụng lao động hợp đồng trong cơ quan nhà nước 2026', 'desc' => 'Thông báo tuyển lao động hợp đồng tại cơ quan hành chính, đơn vị sự nghiệp công lập còn hạn nộp hồ sơ, cập nhật từ nguồn chính thức.', 'lead' => 'Thông báo tuyển lao động hợp đồng tại cơ quan hành chính và đơn vị sự nghiệp công lập còn hạn nộp hồ sơ, lấy từ nguồn chính thức.' ),
+		'giao-vien' => array( 'path' => 'tuyen-giao-vien', 'label' => 'Tin tuyển giáo viên', 'chip' => 'Giáo viên', 'noun' => 'giáo viên', 'filter' => array( 'nhom' => 'education' ), 'api' => array( 'job_family' => 'education' ), 'rp' => array( 'family' => 'education' ), 'track' => 'giao-vien', 'h1' => 'Tuyển dụng giáo viên', 'title' => 'Tuyển dụng giáo viên 2026: mầm non, tiểu học, THCS, THPT', 'desc' => 'Thông báo tuyển dụng giáo viên mầm non, tiểu học, THCS, THPT, giảng viên còn hạn; kèm đề trắc nghiệm theo vị trí và văn bản ngành giáo dục cần ôn.', 'lead' => 'Thông báo tuyển dụng giáo viên mầm non, tiểu học, THCS, THPT và giảng viên còn hạn nộp hồ sơ, lấy từ nguồn chính thức. Mỗi tin kèm hạn nộp, đề trắc nghiệm theo cấp học và văn bản ngành giáo dục.' ),
+		'y-te'      => array( 'path' => 'tuyen-dung-y-te', 'label' => 'Tin tuyển ngành y tế', 'chip' => 'Y tế', 'noun' => 'ngành y tế', 'filter' => array( 'nhom' => 'health' ), 'api' => array( 'job_family' => 'health' ), 'rp' => array( 'family' => 'health' ), 'track' => 'y-te', 'h1' => 'Tuyển dụng ngành y tế', 'title' => 'Tuyển dụng ngành y tế 2026: bác sĩ, điều dưỡng, hộ sinh, dược', 'desc' => 'Thông báo tuyển dụng bác sĩ, điều dưỡng, hộ sinh, kỹ thuật y, dược tại bệnh viện, trung tâm y tế công lập còn hạn; kèm đề ôn theo luật ngành y.', 'lead' => 'Thông báo tuyển dụng bác sĩ, điều dưỡng, hộ sinh, kỹ thuật y, dược tại bệnh viện và trung tâm y tế công lập còn hạn nộp hồ sơ, lấy từ nguồn chính thức.' ),
 	);
 }
 
-function cvc_rec_preset_url( string $key ): string {
-	return isset( cvc_rec_presets()[ $key ] ) ? home_url( '/tuyen-dung/' . $key . '/' ) : cvc_ci_url();
+/** URL trang chủ đề tuyển dụng theo loại (28/10/2026: URL ngắn /tuyen-vien-chuc/...; URL cũ /tuyen-dung/{key}/ chuyển 301). */
+function cvc_rec_preset_url( string $key, int $page = 1, array $args = array() ): string {
+	$p = cvc_rec_presets()[ $key ] ?? null;
+	if ( ! $p ) {
+		return cvc_ci_url();
+	}
+	$url  = home_url( '/' . $p['path'] . '/' . ( $page > 1 ? 'page/' . $page . '/' : '' ) );
+	$args = array_filter( $args, static fn ( $v ) => null !== $v && '' !== $v && 0 !== $v );
+
+	return $args ? add_query_arg( $args, $url ) : $url;
 }
 
 function cvc_ci_kinds(): array {
@@ -243,7 +253,7 @@ function cvc_ci_login_url(): string {
 }
 
 /** 1 thẻ tin tuyển dụng (danh sách). */
-function cvc_ci_render_job_card( array $r, bool $logged_in ): void {
+function cvc_ci_render_job_card( array $r, bool $logged_in, bool $hub = false ): void {
 	$st    = (array) ( $r['status'] ?? array() );
 	$exams = (array) ( $r['exams'] ?? array() );
 	$meta  = array_filter(
@@ -281,7 +291,11 @@ function cvc_ci_render_job_card( array $r, bool $logged_in ): void {
 			echo ! empty( $st['deadline'] ) ? 'Hạn nộp ' . esc_html( cvc_ci_date( (string) $st['deadline'] ) ) . ( ! empty( $st['deadline_verified'] ) ? '' : ' · cần đối chiếu' ) : 'Chưa công bố hạn nộp';
 			?></span>
 			<div class="ci-actions">
-				<button type="button" class="ci-btn" data-ci="related" data-id="<?php echo (int) $r['id']; ?>">Xem đề &amp; tài liệu ↗</button>
+				<?php if ( $hub ) : // Trang chủ đề tuyển dụng (28/10/2026): không có khung ghép nối, mở thẳng trang tin. ?>
+					<a class="ci-btn" href="<?php echo esc_url( cvc_recruitment_url( (string) $r['slug'] ) ); ?>">Xem chi tiết, đề &amp; tài liệu →</a>
+				<?php else : ?>
+					<button type="button" class="ci-btn" data-ci="related" data-id="<?php echo (int) $r['id']; ?>">Xem đề &amp; tài liệu ↗</button>
+				<?php endif; ?>
 				<?php if ( $logged_in ) : ?>
 					<button type="button" class="ci-btn<?php echo ! empty( $r['saved'] ) ? ' is-teal' : ''; ?>" data-ci="save" data-type="recruitment" data-id="<?php echo (int) $r['id']; ?>" aria-pressed="<?php echo ! empty( $r['saved'] ) ? 'true' : 'false'; ?>"><?php echo ! empty( $r['saved'] ) ? '♥ Đã lưu' : '♡ Lưu cơ hội'; ?></button>
 					<?php if ( ! empty( $st['is_open'] ) && ! empty( $st['deadline_verified'] ) ) : ?>
@@ -730,6 +744,9 @@ function cvc_ci_assets(): void {
 		return;
 	}
 	wp_enqueue_style( 'cvc-career', get_theme_file_uri( '/assets/css/career.css' ), array(), (string) filemtime( get_theme_file_path( '/assets/css/career.css' ) ) );
+	if ( 'recruitments' === $page && '' !== (string) get_query_var( 'cvc_rec_preset' ) ) {
+		wp_enqueue_style( 'cvc-rec-hub', get_theme_file_uri( '/assets/css/rec-hub.css' ), array( 'cvc-career' ), (string) filemtime( get_theme_file_path( '/assets/css/rec-hub.css' ) ) );
+	}
 	if ( 'exam-detail' === $page ) {
 		return;
 	}

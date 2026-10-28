@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 $paged     = max( 1, absint( get_query_var( 'cvc_paged' ) ) );
-// 28/10/2026: /tuyen-dung/{cong-chuc|vien-chuc|hop-dong|giao-vien|y-te}/ - lọc sẵn (cvc_rec_presets).
+// 28/10/2026: trang chủ đề theo loại (cvc_rec_presets) - xem template-rec-hub.php.
 $preset_key = (string) get_query_var( 'cvc_rec_preset' );
 $preset     = cvc_rec_presets()[ $preset_key ] ?? null;
 $f          = cvc_ci_filters_from_request( $preset ? $_GET + $preset['filter'] : $_GET ); // phpcs:ignore WordPress.Security.NonceVerification
@@ -21,6 +21,11 @@ $token     = cvc_auth_token();
 $logged_in = null !== $token;
 if ( $logged_in ) {
 	nocache_headers();
+}
+// 28/10/2026 (v2): trang chủ đề /tuyen-cong-chuc/, /tuyen-vien-chuc/... có bố cục riêng (template-rec-hub.php).
+if ( $preset ) {
+	require get_theme_file_path( 'template-rec-hub.php' );
+	return;
 }
 
 $overview_res = cvc_ci_api( '/api/career/overview', array(), null, 10, 300 );

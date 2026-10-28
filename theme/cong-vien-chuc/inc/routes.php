@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Tăng số này khi thêm/sửa rewrite rule để buộc flush lại đúng 1 lần.
-const CVC_REWRITE_VERSION = '26';
+const CVC_REWRITE_VERSION = '27';
 
 /**
  * Section hợp lệ của /tai-khoan/{section}/ (Phase 10) - map slug tiếng
@@ -52,9 +52,13 @@ function cvc_register_rewrite_rules(): void {
 		add_rewrite_rule( '^' . $cvc_p . '/page/([0-9]+)/?$', 'index.php?cvc_page=exams&cvc_exam_mode=on-tap&cvc_exam_track=' . $cvc_k . '&cvc_paged=$matches[1]', 'top' );
 		add_rewrite_rule( '^' . $cvc_p . '/?$', 'index.php?cvc_page=exams&cvc_exam_mode=on-tap&cvc_exam_track=' . $cvc_k, 'top' );
 	}
-	foreach ( array( 'cong-chuc', 'vien-chuc', 'hop-dong', 'giao-vien', 'y-te' ) as $cvc_k ) {
-		add_rewrite_rule( '^tuyen-dung/' . $cvc_k . '/page/([0-9]+)/?$', 'index.php?cvc_page=recruitments&cvc_rec_preset=' . $cvc_k . '&cvc_paged=$matches[1]', 'top' );
-		add_rewrite_rule( '^tuyen-dung/' . $cvc_k . '/?$', 'index.php?cvc_page=recruitments&cvc_rec_preset=' . $cvc_k, 'top' );
+	// 28/10/2026 (v2): trang chủ đề tuyển dụng URL ngắn (/tuyen-cong-chuc/, /tuyen-vien-chuc/, /tuyen-giao-vien/,
+	// /tuyen-dung-y-te/, /tuyen-dung/hop-dong/). URL cũ /tuyen-dung/{key}/ vẫn khớp để cvc_rec_legacy_redirect() chuyển 301.
+	foreach ( cvc_rec_presets() as $cvc_k => $cvc_pr ) {
+		foreach ( array_unique( array( $cvc_pr['path'], 'tuyen-dung/' . $cvc_k ) ) as $cvc_path ) {
+			add_rewrite_rule( '^' . $cvc_path . '/page/([0-9]+)/?$', 'index.php?cvc_page=recruitments&cvc_rec_preset=' . $cvc_k . '&cvc_paged=$matches[1]', 'top' );
+			add_rewrite_rule( '^' . $cvc_path . '/?$', 'index.php?cvc_page=recruitments&cvc_rec_preset=' . $cvc_k, 'top' );
+		}
 	}
 	// 19/10/2026: sitemap tin tuyển dụng + vị trí (inc/sitemap.php), gắn vào sitemap_index của Rank Math.
 	add_rewrite_rule( '^sitemap-tuyen-dung\.xml$', 'index.php?cvc_sitemap=tuyen-dung', 'top' );
@@ -822,6 +826,27 @@ function cvc_main_nav_items_default(): array {
  * QR ngắn trong đề PDF (28/10/2026): /q/T-XXXXXX (mã tải), /q/e{đề}, /q/r{tin} -> hỏi API đích + utm -> chuyển hướng 302.
  */
 add_action( 'template_redirect', 'cvc_qr_redirect', 1 );
+
+/**
+ * 28/10/2026: /tuyen-dung/{cong-chuc|vien-chuc|giao-vien|y-te}/(page/n/) -> URL ngắn mới (301), giữ tham số lọc.
+ */
+add_action( 'template_redirect', 'cvc_rec_legacy_redirect', 1 );
+function cvc_rec_legacy_redirect(): void {
+	$key = (string) get_query_var( 'cvc_rec_preset' );
+	if ( '' === $key || 'recruitments' !== get_query_var( 'cvc_page' ) || ! isset( cvc_rec_presets()[ $key ] ) ) {
+		return;
+	}
+	$want = '/' . cvc_rec_presets()[ $key ]['path'] . '/';
+	$path = (string) wp_parse_url( (string) ( $_SERVER['REQUEST_URI'] ?? '' ), PHP_URL_PATH );
+	if ( 0 === strpos( $path, $want ) ) {
+		return;
+	}
+	$query = (string) wp_parse_url( (string) ( $_SERVER['REQUEST_URI'] ?? '' ), PHP_URL_QUERY );
+	$to    = cvc_rec_preset_url( $key, max( 1, absint( get_query_var( 'cvc_paged' ) ) ) ) . ( '' !== $query ? '?' . $query : '' );
+	wp_safe_redirect( $to, 301, 'Cong Vien Chuc' );
+	exit;
+}
+
 
 function cvc_qr_redirect(): void {
 	$key = (string) get_query_var( 'cvc_qr' );
