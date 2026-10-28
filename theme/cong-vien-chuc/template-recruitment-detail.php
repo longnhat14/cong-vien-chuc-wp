@@ -946,7 +946,7 @@ get_header();
 				<?php endif; ?>
 				<?php foreach ( $subjects as $subject ) : ?>
 					<details class="rd-doctext">
-						<summary>Môn thi: <?php echo esc_html( (string) ( $subject['name'] ?? '' ) ); ?> <small>(<?php echo count( $subject['topics'] ?? array() ); ?> chủ đề)</small></summary>
+						<summary>Môn thi: <?php echo esc_html( (string) ( $subject['name'] ?? '' ) ); ?> <small>(<?php echo (int) ( $subject['topics_count'] ?? count( $subject['topics'] ?? array() ) ); ?> chủ đề)</small></summary>
 						<div class="rd-subject">
 							<?php if ( ! empty( $subject['topics'] ) ) : ?>
 								<p class="rd-tags"><?php foreach ( $subject['topics'] as $topic ) : ?><a class="rd-tag is-link" href="<?php echo esc_url( cvc_topic_url( (string) ( $topic['slug'] ?? '' ) ) ); ?>"><?php echo esc_html( (string) ( $topic['name'] ?? '' ) ); ?></a><?php endforeach; ?></p>
