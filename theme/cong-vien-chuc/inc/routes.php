@@ -765,7 +765,17 @@ function cvc_rec_nav_item(): array {
 	return array( 'key' => 'rec', 'label' => 'Tuyển dụng', 'hint' => 'Cơ hội mới nhất', 'url' => cvc_recruitments_url(), 'children' => $kids );
 }
 
+/** Menu chính: lấy từ Giao diện → Menu (vị trí Primary, inc/nav-menu.php); chưa gán thì dùng menu mặc định bên dưới. */
 function cvc_main_nav_items(): array {
+	static $memo = null;
+	if ( null === $memo ) {
+		$memo = ( function_exists( 'cvc_nav_from_wp_menu' ) ? cvc_nav_from_wp_menu() : null ) ?? cvc_main_nav_items_default();
+	}
+
+	return $memo;
+}
+
+function cvc_main_nav_items_default(): array {
 	$has_courses = function_exists( 'cvc_has_sellable_courses' ) && cvc_has_sellable_courses();
 
 	return array(

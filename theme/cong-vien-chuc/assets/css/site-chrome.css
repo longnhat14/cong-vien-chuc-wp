@@ -280,3 +280,30 @@
 :root .ch-brand-mark:after{display:none!important}
 :root .ch-brand-mark img{display:block;width:100%;height:100%;object-fit:contain}
 :root .ch-brand:hover .ch-brand-mark{transform:translateY(-1px);box-shadow:none!important}
+
+/* 28/10/2026: menu chính quản lý trong WordPress - nhiều mục (>= 5) thì thu gọn trên máy tính để không tràn ngang. */
+@media(min-width:761px){
+ :root .ch-nav-links.is-many{gap:2px}
+ :root .ch-nav-links.is-many a{padding:11px 8px;gap:6px;font-size:15px}
+ :root .ch-nav-links.is-many .ch-nav-icon{width:26px;height:26px}
+ :root .ch-nav-links.is-many .ch-nav-icon svg{width:15px;height:15px}
+}
+@media(min-width:761px) and (max-width:1400px){
+ :root .ch-nav-links.is-many .ch-nav-icon{display:none}
+ :root .ch-nav-links.is-many a:before{left:9px;right:9px}
+}
+@media(min-width:761px) and (max-width:1200px){
+ :root .ch-nav-links.is-many a{padding:10px 7px;font-size:14.5px}
+ :root .ch-brand-sub{display:none}
+}
+@media(min-width:761px) and (max-width:920px){
+ :root .ch-nav-links.is-many a{padding:9px 5px;font-size:13.5px}
+ :root .ch-nav .ch-brand-name{font-size:18px}
+}
+@media(min-width:761px){
+ :root .ch-nav-links.is-crowded a{padding:10px 6px;font-size:14px}
+ :root .ch-nav-links.is-crowded .ch-nav-icon{display:none}
+}
+@media(min-width:1401px){
+ :root :is(.ch-topline,.ch-header) .ch-container{width:min(1320px,calc(100% - 40px))}
+}

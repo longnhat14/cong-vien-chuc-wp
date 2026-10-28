@@ -68,6 +68,8 @@ function cvc_chrome_icons(): array {
 		'rec'    => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="7" width="17" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3.5 12h17M10 12v2h4v-2"/></svg>',
 		'legal'  => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3 20 7v5c0 4.5-3.1 7.4-8 9-4.9-1.6-8-4.5-8-9V7l8-4Z"/><path d="m8.5 12 2.2 2.2 4.8-5"/></svg>',
 		'docs'   => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3.5h8l4 4V20a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1Z"/><path d="M14 3.5V8h4M8 12h8M8 16h8"/></svg>',
+		'posts'  => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M7 8.5h10M7 12h4.5M7 15.5h4.5M14 12h3v3.5h-3z"/></svg>',
+		'link'   => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8.5"/><path d="M8.5 12h7M12.5 9l3 3-3 3"/></svg>',
 		'user'   => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>',
 	);
 }
@@ -114,10 +116,11 @@ function cvc_chrome_header(): void {
 	<header class="ch-header">
 		<div class="ch-container ch-nav">
 			<?php cvc_chrome_brand( $ico ); ?>
-			<nav class="ch-nav-links" id="chNavLinks" aria-label="Điều hướng chính">
+			<?php $cvc_nav_n = count( cvc_main_nav_items() ); ?>
+			<nav class="ch-nav-links<?php echo $cvc_nav_n >= 5 ? ' is-many' : ''; ?><?php echo $cvc_nav_n >= 6 ? ' is-crowded' : ''; ?>" id="chNavLinks" aria-label="Điều hướng chính">
 				<?php
 				foreach ( cvc_main_nav_items() as $nav ) :
-					$svg  = $ico[ $nav['key'] ] ?? '';
+					$svg  = $ico[ $nav['key'] ] ?? $ico['link'];
 					$kids = (array) ( $nav['children'] ?? array() );
 					$on   = $active( array_merge( array( $nav['url'] ), array_column( $kids, 'url' ) ) );
 					if ( $kids ) :
