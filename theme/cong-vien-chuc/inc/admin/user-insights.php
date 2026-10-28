@@ -56,6 +56,7 @@ function cvc_ui_tabs( string $cur ): void {
 	$tabs = array(
 		'tong-quan' => array( 'Tổng quan', cvc_admin_url( 'nguoi-dung' ) ),
 		'danh-sach' => array( 'Danh sách người dùng', cvc_admin_url( 'nguoi-dung', null, array( 'xem' => 'danh-sach' ) ) ),
+		'goi-y'     => array( 'Gợi ý & cảnh báo', cvc_admin_url( 'nguoi-dung', null, array( 'xem' => 'goi-y' ) ) ),
 	);
 	echo '<nav class="flex flex-wrap gap-2 text-sm" aria-label="Người dùng">';
 	foreach ( $tabs as $k => $t ) {
@@ -180,6 +181,10 @@ function cvc_admin_render_user_insights( string $item_param ): void {
 	$xem = sanitize_key( wp_unslash( $_GET['xem'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
 	if ( 'danh-sach' === $xem ) {
 		cvc_ui_render_list();
+		return;
+	}
+	if ( 'goi-y' === $xem ) {
+		cvc_ui_render_advice();
 		return;
 	}
 	cvc_ui_render_overview();
@@ -551,6 +556,179 @@ function cvc_ui_render_profile( int $id ): void {
 			<?php endforeach; ?>
 			<?php if ( empty( $d['timeline'] ) ) : ?><li><span></span><span></span><span class="ui-note">Chưa có hoạt động.</span></li><?php endif; ?>
 		</ol>
+	</section>
+	<?php
+}
+
+/* ================================================================== */
+/* Gợi ý & cảnh báo (giai đoạn 3)                                      */
+/* ================================================================== */
+add_action( 'admin_post_cvc_admin_insights', 'cvc_admin_handle_insights' );
+add_action( 'admin_post_nopriv_cvc_admin_insights', 'cvc_admin_handle_insights' );
+function cvc_admin_handle_insights(): void {
+	check_admin_referer( 'cvc_admin_insights' );
+	$token = cvc_admin_require_staff();
+	$back  = cvc_admin_url( 'nguoi-dung', null, array( 'xem' => 'goi-y' ) );
+	if ( ! cvc_admin_can( 'user.view' ) ) {
+		cvc_admin_redirect( $back, 'error', 'Bạn không có quyền.' );
+		return;
+	}
+	$res = ( new CVC_Api_Client( null, 60 ) )->post( '/api/admin/user-insights/weekly-report/test', array(), $token );
+	cvc_admin_redirect( $back, $res['ok'] ? 'success' : 'error', $res['ok'] ? (string) ( $res['data']['message'] ?? 'Đã gửi.' ) : cvc_admin_error_message( $res ) );
+}
+
+function cvc_ui_section_head( string $title, string $why ): void {
+	echo '<h2>' . esc_html( $title ) . '</h2><p class="ui-note" style="margin:-4px 0 8px">' . esc_html( $why ) . '</p>';
+}
+
+function cvc_ui_render_advice(): void {
+	$days = absint( $_GET['ky'] ?? 30 ); // phpcs:ignore WordPress.Security.NonceVerification
+	$days = in_array( $days, array( 7, 30, 90 ), true ) ? $days : 30;
+	$res  = cvc_admin_api_get( '/api/admin/user-insights/advice', array( 'days' => $days ) );
+	$d    = $res['ok'] ? (array) ( $res['data']['data'] ?? array() ) : array();
+	$g    = (array) ( $d['gaps'] ?? array() );
+	$q    = (array) ( $d['quality'] ?? array() );
+	$c    = (array) ( $d['churn'] ?? array() );
+	$an   = (array) ( $d['anomalies'] ?? array() );
+	$sum  = (array) ( $c['summary'] ?? array() );
+	$here = cvc_admin_url( 'nguoi-dung', null, array( 'xem' => 'goi-y', 'ky' => $days ) );
+	$can_rec = cvc_admin_can( 'recruitment.update' );
+	?>
+	<header class="flex flex-wrap items-end justify-between gap-3">
+		<div>
+			<h1 class="text-2xl font-black text-ink">Người dùng &amp; hoạt động</h1>
+			<p class="text-sm text-ink-muted">Gợi ý việc nên làm rút ra từ số liệu thật. Không tính nhân sự và tài khoản thử; làm mới mỗi 10 phút.</p>
+		</div>
+		<div class="flex flex-wrap gap-2 items-center text-sm">
+			<?php foreach ( array( 7, 30, 90 ) as $p ) : ?>
+				<a href="<?php echo esc_url( cvc_admin_url( 'nguoi-dung', null, array( 'xem' => 'goi-y', 'ky' => $p ) ) ); ?>" class="px-3 py-1.5 rounded-lg border <?php echo $p === $days ? 'bg-acc text-white border-acc font-bold' : 'bg-white border-slate-300'; ?>"><?php echo (int) $p; ?> ngày</a>
+			<?php endforeach; ?>
+			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+				<?php wp_nonce_field( 'cvc_admin_insights' ); ?><input type="hidden" name="action" value="cvc_admin_insights">
+				<button type="submit" class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white font-bold">✉ Gửi thử báo cáo tuần cho tôi</button>
+			</form>
+		</div>
+	</header>
+	<?php cvc_ui_tabs( 'goi-y' ); ?>
+	<?php if ( ! $res['ok'] ) : ?>
+		<p class="text-sm text-red-700"><?php echo esc_html( cvc_admin_error_message( $res ) ); ?></p>
+		<?php return; ?>
+	<?php endif; ?>
+	<p class="ui-note">Báo cáo tuần tự gửi email cho quản trị viên (SUPER_ADMIN, ADMIN) lúc 07:47 sáng thứ Hai.</p>
+
+	<section class="ui-kpis" aria-label="Mức tương tác 14 ngày">
+		<?php
+		foreach ( array(
+			array( 'Hoạt động 7 ngày', $sum['active_7d'] ?? 0, 'người' ),
+			array( 'Tương tác cao (≥ 50 điểm)', $sum['engaged'] ?? 0, 'học đều trong 14 ngày' ),
+			array( 'Tương tác vừa (20–49)', $sum['casual'] ?? 0, '' ),
+			array( 'Tương tác thấp (< 20)', $sum['light'] ?? 0, 'ghé qua 1–2 lần' ),
+			array( 'Sắp rời bỏ', $sum['at_risk'] ?? 0, 'học đều nhưng 7 ngày nay không vào' ),
+			array( 'Đăng ký chưa làm bài', $sum['no_attempt'] ?? 0, '14 ngày gần đây' ),
+		) as $k ) :
+			?>
+			<div class="ui-kpi"><small><?php echo esc_html( $k[0] ); ?></small><b><?php echo esc_html( cvc_ui_n( $k[1] ) ); ?></b><em><?php echo esc_html( $k[2] ); ?></em></div>
+		<?php endforeach; ?>
+	</section>
+	<p class="ui-note">Điểm tương tác 0–100 trong 14 ngày = số ngày có hoạt động × 9 + số lượt làm bài (tối đa 10) × 4 + phút trên web ÷ 10 (tối đa 30).</p>
+
+	<section class="ui-card">
+		<?php cvc_ui_section_head( '1. Khoảng trống nội dung: tin xem nhiều nhưng chưa có đề riêng', 'Bật "Tạo đề riêng" để tin có ngay đề trắc nghiệm theo vị trí (hệ thống dựng trong khoảng 30 phút). Tin xét tuyển thường không thi trắc nghiệm nên xếp sau.' ); ?>
+		<?php $recs = (array) ( $g['recruitments'] ?? array() ); ?>
+		<?php if ( ! $recs ) : ?><p class="ui-note">Không có tin đang nhận hồ sơ nào thiếu đề riêng mà được xem nhiều.</p><?php else : ?>
+			<div class="ui-scroll"><table class="ui-tbl"><thead><tr><th>Tin tuyển dụng</th><th class="n">Người xem</th><th>Hạn nộp</th><th>Trạng thái đề</th><th></th></tr></thead><tbody>
+				<?php foreach ( $recs as $r ) : ?>
+					<tr>
+						<td><a href="<?php echo esc_url( cvc_recruitment_url( (string) $r['slug'] ) ); ?>" target="_blank" rel="noopener"><?php echo esc_html( wp_trim_words( (string) $r['title'], 22 ) ); ?></a><?php if ( ! empty( $r['selection'] ) ) : ?> <span class="ui-pill bg-slate-100 text-slate-600">Xét tuyển</span><?php endif; ?></td>
+						<td class="n"><?php echo (int) $r['visitors']; ?></td>
+						<td><?php echo esc_html( ! empty( $r['deadline'] ) ? wp_date( 'd/m/Y', strtotime( (string) $r['deadline'] ) ) : '—' ); ?></td>
+						<td><?php echo 'on' === $r['mode'] ? '<span class="ui-pill bg-amber-100 text-amber-900">Đang tạo</span>' : '<span class="ui-pill bg-slate-100 text-slate-600">Chưa tạo</span>'; ?></td>
+						<td>
+							<?php if ( $can_rec && 'on' !== $r['mode'] ) : ?>
+								<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+									<?php wp_nonce_field( 'cvc_admin_personal_exams' ); ?>
+									<input type="hidden" name="action" value="cvc_admin_personal_exams"><input type="hidden" name="op" value="mode"><input type="hidden" name="mode" value="on">
+									<input type="hidden" name="id" value="<?php echo (int) $r['id']; ?>"><input type="hidden" name="back" value="<?php echo esc_url( $here ); ?>">
+									<button type="submit" class="px-2.5 py-1 rounded-lg bg-acc text-white text-xs font-bold whitespace-nowrap">Tạo đề riêng</button>
+								</form>
+							<?php else : ?><a class="text-xs" href="<?php echo esc_url( cvc_admin_url( 'recruitments', (int) $r['id'] ) . '#de-ca-nhan-hoa' ); ?>">Mở tin</a><?php endif; ?>
+						</td>
+					</tr>
+				<?php endforeach; ?>
+			</tbody></table></div>
+		<?php endif; ?>
+		<?php $zs = (array) ( $g['zero_searches'] ?? array() ); $fs = (array) ( $g['few_searches'] ?? array() ); ?>
+		<h2 class="mt-4">Từ khóa tìm không ra (hoặc rất ít) kết quả</h2>
+		<?php if ( $zs || $fs ) : ?>
+			<?php if ( $zs ) : ?><p class="text-sm"><b style="color:#b42318">0 kết quả:</b> <?php echo esc_html( implode( ' · ', array_map( static fn ( $x ) => $x['q'] . ' (' . $x['n'] . ')', $zs ) ) ); ?></p><?php endif; ?>
+			<?php if ( $fs ) : ?><p class="text-sm"><b>1–2 kết quả:</b> <?php echo esc_html( implode( ' · ', array_map( static fn ( $x ) => $x['q'] . ' (' . $x['n'] . ' lượt)', $fs ) ) ); ?></p><?php endif; ?>
+			<p class="ui-note">Nạp văn bản / tin còn thiếu, hoặc thêm từ viết tắt vào bộ tìm kiếm cho những từ khóa này.</p>
+		<?php else : ?><p class="ui-note">Chưa có (ghi từ 28/10/2026).</p><?php endif; ?>
+	</section>
+
+	<section class="ui-card">
+		<?php cvc_ui_section_head( '2. Chất lượng đề thi', 'Đề có ít nhất 3 lượt làm trong kỳ. Đề bị bỏ dở nhiều thường quá dài hoặc khó ngay từ đầu; đề quá dễ / quá khó nên trộn lại độ khó.' ); ?>
+		<?php
+		$blocks = array(
+			array( 'Bỏ dở nhiều (≥ 30%)', (array) ( $q['abandon'] ?? array() ), static fn ( $e ) => $e['abandon_rate'] . '% bỏ dở · ' . $e['attempts'] . ' lượt' ),
+			array( 'Quá khó (điểm TB ≤ 45%)', (array) ( $q['too_hard'] ?? array() ), static fn ( $e ) => 'điểm TB ' . $e['avg_pct'] . '% · ' . $e['submitted'] . ' bài nộp' ),
+			array( 'Quá dễ (điểm TB ≥ 92%)', (array) ( $q['too_easy'] ?? array() ), static fn ( $e ) => 'điểm TB ' . $e['avg_pct'] . '% · ' . $e['submitted'] . ' bài nộp' ),
+		);
+		foreach ( $blocks as $b ) :
+			?>
+			<p class="text-sm font-bold mt-2"><?php echo esc_html( $b[0] ); ?></p>
+			<?php if ( ! $b[1] ) : ?><p class="ui-note">Không có.</p><?php else : ?>
+				<ul class="text-sm"><?php foreach ( $b[1] as $e ) : ?><li class="flex justify-between gap-3 border-b border-slate-100 py-1"><a class="text-acc font-bold" href="<?php echo esc_url( cvc_exam_url( (string) $e['slug'] ) ); ?>" target="_blank" rel="noopener"><?php echo esc_html( wp_trim_words( (string) $e['title'], 18 ) ); ?></a><span class="whitespace-nowrap text-ink-muted"><?php echo esc_html( $b[2]( $e ) ); ?></span></li><?php endforeach; ?></ul>
+			<?php endif; ?>
+		<?php endforeach; ?>
+		<p class="text-sm font-bold mt-3">Câu bị trả lời sai nhiều nhất (≥ 6 lượt, sai ≥ 60%)</p>
+		<?php $hq = (array) ( $q['hard_questions'] ?? array() ); ?>
+		<?php if ( ! $hq ) : ?><p class="ui-note">Không có.</p><?php else : ?>
+			<table class="ui-tbl"><thead><tr><th>Câu hỏi</th><th class="n">Lượt</th><th class="n">Sai</th><th class="n">Báo sai</th></tr></thead><tbody>
+				<?php foreach ( $hq as $x ) : ?><tr><td><a href="<?php echo esc_url( cvc_admin_url( 'questions', (int) $x['id'] ) ); ?>"><?php echo esc_html( (string) $x['text'] ); ?></a></td><td class="n"><?php echo (int) $x['answered']; ?></td><td class="n" style="color:#b42318;font-weight:700"><?php echo (int) $x['wrong_rate']; ?>%</td><td class="n"><?php echo (int) $x['reports']; ?></td></tr><?php endforeach; ?>
+			</tbody></table>
+			<p class="ui-note">Sai nhiều có thể do câu khó thật hoặc đáp án / đề bài có vấn đề - mở câu để rà lại. Đang có <?php echo (int) ( $q['open_reports'] ?? 0 ); ?> báo câu sai chờ xử lý (Thu thập → Báo câu sai).</p>
+		<?php endif; ?>
+	</section>
+
+	<div class="ui-grid2">
+		<section class="ui-card">
+			<?php cvc_ui_section_head( '3. Sắp rời bỏ', 'Có hoạt động ≥ 2 ngày trong khoảng 8–28 ngày trước nhưng 7 ngày nay không vào. Email nhắc ôn tự gửi cho người 3 ngày không vào (tối đa 1 lần / 10 ngày).' ); ?>
+			<?php $risk = (array) ( $c['at_risk'] ?? array() ); ?>
+			<?php if ( ! $risk ) : ?><p class="ui-note">Không có ai.</p><?php else : ?>
+				<table class="ui-tbl"><thead><tr><th>Người dùng</th><th class="n">Điểm trước</th><th>Nhắc ôn</th></tr></thead><tbody>
+					<?php foreach ( $risk as $u ) : ?><tr><td><a href="<?php echo esc_url( cvc_admin_url( 'nguoi-dung', (int) $u['id'] ) ); ?>"><?php echo esc_html( (string) $u['name'] ?: (string) $u['email'] ); ?></a><small class="block text-ink-muted"><?php echo (int) $u['prev_days']; ?> ngày học · <?php echo (int) $u['prev_attempts']; ?> bài<?php echo $u['verified'] ? '' : ' · chưa xác minh email'; ?></small></td><td class="n"><?php echo (int) $u['score_before']; ?></td><td><?php echo ! empty( $u['reminded_at'] ) ? esc_html( 'đã gửi ' . cvc_ui_dt( $u['reminded_at'], 'd/m' ) ) : '<span class="text-amber-700">chưa gửi</span>'; ?></td></tr><?php endforeach; ?>
+				</tbody></table>
+			<?php endif; ?>
+		</section>
+		<section class="ui-card">
+			<?php cvc_ui_section_head( 'Đăng ký nhưng chưa làm bài nào', 'Đăng ký 1–14 ngày trước, chưa làm đề nào. Nên gợi ý 1 đề ngắn đúng tỉnh / nghề ngay sau khi đăng ký.' ); ?>
+			<?php $na = (array) ( $c['no_attempt'] ?? array() ); ?>
+			<?php if ( ! $na ) : ?><p class="ui-note">Không có ai.</p><?php else : ?>
+				<table class="ui-tbl"><tbody>
+					<?php foreach ( $na as $u ) : ?><tr><td><a href="<?php echo esc_url( cvc_admin_url( 'nguoi-dung', (int) $u['id'] ) ); ?>"><?php echo esc_html( (string) $u['name'] ?: (string) $u['email'] ); ?></a><small class="block text-ink-muted"><?php echo esc_html( 'đăng ký ' . cvc_ui_dt( $u['created_at'], 'd/m' ) . ( $u['verified'] ? '' : ' · chưa xác minh email' ) . ( ! empty( $u['source'] ) ? ' · ' . $u['source'] : '' ) ); ?></small></td></tr><?php endforeach; ?>
+				</tbody></table>
+			<?php endif; ?>
+			<h2 class="mt-4">Học chăm nhất 14 ngày</h2>
+			<?php foreach ( (array) ( $c['champions'] ?? array() ) as $u ) : ?><div class="flex justify-between text-sm border-b border-slate-100 py-1"><a class="text-acc font-bold" href="<?php echo esc_url( cvc_admin_url( 'nguoi-dung', (int) $u['id'] ) ); ?>"><?php echo esc_html( (string) $u['name'] ?: '#' . $u['id'] ); ?></a><span class="text-ink-muted"><?php echo esc_html( $u['score'] . ' điểm · ' . $u['days'] . ' ngày · ' . $u['attempts'] . ' bài' ); ?></span></div><?php endforeach; ?>
+		</section>
+	</div>
+
+	<section class="ui-card">
+		<?php cvc_ui_section_head( '4. Dấu hiệu bất thường', 'Chỉ là tín hiệu để xem xét, không tự động xử lý tài khoản.' ); ?>
+		<?php $fast = (array) ( $an['fast'] ?? array() ); $sh = (array) ( $an['shared_ip'] ?? array() ); $bk = (array) ( $an['bulk_pdf'] ?? array() ); ?>
+		<p class="text-sm font-bold">Thi thử quá nhanh mà điểm cao (dưới 6 giây / câu, ≥ 80%)</p>
+		<?php if ( ! $fast ) : ?><p class="ui-note">Không có.</p><?php else : ?>
+			<ul class="text-sm"><?php foreach ( $fast as $x ) : ?><li class="border-b border-slate-100 py-1"><a class="text-acc font-bold" href="<?php echo esc_url( cvc_admin_url( 'nguoi-dung', (int) $x['user_id'] ) ); ?>"><?php echo esc_html( (string) $x['name'] ); ?></a> · <?php echo esc_html( wp_trim_words( (string) $x['exam'], 12 ) . ' · ' . $x['questions'] . ' câu trong ' . $x['seconds'] . ' giây · ' . $x['pct'] . '%' ); ?></li><?php endforeach; ?></ul>
+		<?php endif; ?>
+		<p class="text-sm font-bold mt-2">Nhiều tài khoản đăng nhập cùng một IP (≥ 3 tài khoản)</p>
+		<?php if ( ! $sh ) : ?><p class="ui-note">Không có (dựa trên nhật ký đăng nhập từ 28/10/2026; mạng trường học, cơ quan dùng chung IP là bình thường).</p><?php else : ?>
+			<ul class="text-sm"><?php foreach ( $sh as $x ) : ?><li class="border-b border-slate-100 py-1"><?php echo esc_html( $x['ip'] . ' · ' . $x['users'] . ' tài khoản · ' ); ?><?php foreach ( array_slice( (array) $x['ids'], 0, 8 ) as $uid ) : ?><a class="text-acc" href="<?php echo esc_url( cvc_admin_url( 'nguoi-dung', (int) $uid ) ); ?>">#<?php echo (int) $uid; ?></a> <?php endforeach; ?></li><?php endforeach; ?></ul>
+		<?php endif; ?>
+		<p class="text-sm font-bold mt-2">Tải PDF hàng loạt (≥ 15 file / ngày)</p>
+		<?php if ( ! $bk ) : ?><p class="ui-note">Không có.</p><?php else : ?>
+			<ul class="text-sm"><?php foreach ( $bk as $x ) : ?><li class="border-b border-slate-100 py-1"><a class="text-acc font-bold" href="<?php echo esc_url( cvc_admin_url( 'nguoi-dung', (int) $x['user_id'] ) ); ?>"><?php echo esc_html( (string) $x['name'] ); ?></a> · <?php echo esc_html( $x['n'] . ' file ngày ' . wp_date( 'd/m', strtotime( (string) $x['day'] ) ) ); ?></li><?php endforeach; ?></ul>
+		<?php endif; ?>
 	</section>
 	<?php
 }

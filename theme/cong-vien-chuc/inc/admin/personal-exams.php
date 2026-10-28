@@ -17,6 +17,10 @@ function cvc_admin_handle_personal_exams(): void {
 	$id    = absint( $_POST['id'] ?? 0 );
 	$op    = sanitize_key( (string) ( $_POST['op'] ?? '' ) );
 	$back  = $id ? cvc_admin_url( 'recruitments', $id ) . '#de-ca-nhan-hoa' : cvc_admin_url( 'recruitments' );
+	// 28/10/2026: quay lại trang gọi (vd. Người dùng & hoạt động → Gợi ý & cảnh báo).
+	if ( ! empty( $_POST['back'] ) ) {
+		$back = wp_validate_redirect( esc_url_raw( wp_unslash( (string) $_POST['back'] ) ), $back );
+	}
 	$api   = new CVC_Api_Client( null, 110 );
 
 	if ( 'settings' === $op ) {
