@@ -31,7 +31,7 @@ function cvc_handle_exam_answer_ajax(): void {
 		wp_send_json_error( array( 'message' => 'Dữ liệu không hợp lệ.' ), 422 );
 	}
 
-	$payload = array( 'question_id' => $questionId );
+	$payload = array( 'question_id' => $questionId, 'lite' => 1 ); // 28/10/2026: phản hồi gọn, giải thích đã có sẵn ở trình duyệt.
 
 	if ( isset( $_POST['question_option_id'] ) && '' !== $_POST['question_option_id'] ) {
 		$payload['question_option_id'] = absint( $_POST['question_option_id'] );

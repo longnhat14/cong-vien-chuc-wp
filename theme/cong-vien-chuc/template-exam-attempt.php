@@ -153,6 +153,13 @@ $exam_links     = is_array( $attempt_res['data']['links'] ?? null ) ? $attempt_r
 // 19/10/2026: chế độ Thi thật / Ôn tập, đồng hồ do máy chủ tính, phản hồi ôn tập, thời điểm lưu gần nhất.
 $is_practice    = 'practice' === (string) ( $attempt_data['mode'] ?? '' );
 $api_clock      = is_array( $attempt_res['data']['clock'] ?? null ) ? $attempt_res['data']['clock'] : array();
+// 28/10/2026: khóa đáp án tải sẵn (Luyện thi: giải thích hiện ngay; Thi thử: chấm sơ bộ khi nộp).
+$key_by_q = array();
+foreach ( (array) ( $attempt_res['data']['answer_key'] ?? array() ) as $k ) {
+	if ( is_array( $k ) && ! empty( $k['question_id'] ) ) {
+		$key_by_q[ (int) $k['question_id'] ] = $k;
+	}
+}
 $fb_by_q        = array();
 foreach ( (array) ( $attempt_res['data']['practice_feedback'] ?? array() ) as $fb ) {
 	if ( is_array( $fb ) && ! empty( $fb['question_id'] ) ) {
@@ -213,6 +220,7 @@ foreach ( (array) ( $attempt_data['answers'] ?? array() ) as $answer ) {
 		'selected'   => $state['selected'] ?? null,
 		'flagged'    => ! empty( $state['is_flagged'] ),
 		'feedback'   => $fb_by_q[ $qid ] ?? null,
+		'key'        => $key_by_q[ $qid ] ?? null,
 	);
 	if ( $is_submitted && array_key_exists( 'is_correct', $answer ) ) {
 		// Câu bỏ trống: không tính là "sai" trên bản đồ câu hỏi.

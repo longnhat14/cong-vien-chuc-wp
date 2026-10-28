@@ -56,6 +56,18 @@
     }
     var o = (q.options || []).filter(function (x) { return x.correct === true; })[0]; return o ? o.key : null;
   }
+  /* 28/10/2026: chấm ngay trên trình duyệt từ khóa đáp án tải sẵn (q.key) - không chờ máy chủ. */
+  function localFeedback(q, optId) {
+    var k = q.key; if (!k || !optId) return null;
+    return { question_id: q.id, your_option_id: optId, correct_option_id: k.correct_option_id, correct_option_key: k.correct_option_key,
+      is_correct: k.correct_option_id ? optId === k.correct_option_id : null, explanation: k.explanation, article: k.article, knowledge: k.knowledge, local: true };
+  }
+  function optIdOf(q, key) { var o = (q.options || []).filter(function (x) { return x.key === key; })[0]; return o ? o.id : null; }
+  function localScore() {
+    var right = 0, keyed = 0;
+    Q.forEach(function (q) { if (!q.key || !q.key.correct_option_id) return; keyed++; if (q.selected && optIdOf(q, q.selected) === q.key.correct_option_id) right++; });
+    return keyed ? { right: right, total: TOTAL } : null;
+  }
   function revealed(q) { return submitted || (PRACTICE && !!q.feedback); }
   function verdictOf(q) {
     if (submitted) return q.is_correct;
@@ -108,7 +120,7 @@
       } else {
         var e = (res && res.data) || {};
         if (e.expired || e.ended) { persistPending(); onEnded(e.message); return; }
-        if (isAns && q && !changed) { q.selected = q.saved; }
+        if (isAns && q && !changed) { q.selected = q.saved; if (PRACTICE && q.feedback && q.feedback.local && !e.locked) q.feedback = null; }
         toast(e.message || 'Chưa lưu được thay đổi, vui lòng thử lại.');
       }
       persistPending(); render();
@@ -123,7 +135,7 @@
     Object.keys(pending).forEach(function (k) {
       var it = pending[k], q = byId[it && it.qid];
       if (!q) { delete pending[k]; return; }
-      if (k.charAt(0) === 'a') { if (PRACTICE && q.feedback) { delete pending[k]; return; } q.selected = it.key || null; }
+      if (k.charAt(0) === 'a') { if (PRACTICE && q.feedback) { delete pending[k]; return; } q.selected = it.key || null; if (PRACTICE && q.selected) { q.feedback = localFeedback(q, it.opt) || null; } }
       else { q.flagged = !!it.flag; }
     });
     persistPending();
@@ -140,6 +152,7 @@
     var opt = (q.options || []).filter(function (o) { return o.key === key; })[0];
     if (!opt) return;
     q.selected = key;
+    if (PRACTICE) { q.feedback = localFeedback(q, opt.id) || null; }
     render();
     queue('a' + q.id, { qid: q.id, opt: opt.id, key: key });
   }
@@ -179,7 +192,7 @@
       b.setAttribute('aria-pressed', q.selected === o.key ? 'true' : 'false');
       b.innerHTML = '<span class="sx-letter">' + esc(o.key) + '</span><span class="sx-copy"></span>' + (tag ? '<span class="sx-tag">' + esc(tag) + '</span>' : '<span class="sx-radio"></span>');
       b.querySelector('.sx-copy').textContent = o.text;
-      if (PRACTICE && !submitted && pending['a' + q.id] && q.selected === o.key) { tag = offline ? 'Chờ kết nối để chấm' : 'Đang chấm…'; b.innerHTML = '<span class="sx-letter">' + esc(o.key) + '</span><span class="sx-copy"></span><span class="sx-tag">' + esc(tag) + '</span>'; b.querySelector('.sx-copy').textContent = o.text; }
+      if (PRACTICE && !submitted && !q.feedback && pending['a' + q.id] && q.selected === o.key) { tag = offline ? 'Chờ kết nối để chấm' : 'Đang chấm…'; b.innerHTML = '<span class="sx-letter">' + esc(o.key) + '</span><span class="sx-copy"></span><span class="sx-tag">' + esc(tag) + '</span>'; b.querySelector('.sx-copy').textContent = o.text; }
       b.onclick = function () { if (show) { if (submitted) { openExplain(i); } else { toast('Câu này đã chấm - xem đáp án và giải thích bên dưới.'); } return; } choose(i, o.key); };
       el.appendChild(b);
     });
@@ -382,6 +395,8 @@
     $('#sx-submitDialog').classList.remove('show');
     $('#sx-submitTop').disabled = true;
     $('#sx-submitTop').textContent = auto ? 'Hết giờ - đang nộp bài…' : 'Đang nộp bài…';
+    var sc = !PRACTICE ? localScore() : null;
+    if (sc) { toast('Kết quả sơ bộ: đúng ' + sc.right + '/' + sc.total + ' câu - đang chấm chính thức và mở phân tích…'); }
     // Gửi nốt các thay đổi đang chờ trước khi chấm (tối đa 6 giây).
     var wait = pendingCount() && !offline ? Promise.race([flush(), new Promise(function (r) { setTimeout(r, 6000); })]) : Promise.resolve();
     wait.then(function () { return post('cvc_exam_submit', {}); }).then(function (res) {
@@ -396,7 +411,7 @@
       var p = res.data || {};
       try { sessionStorage.setItem(resultKey, JSON.stringify({ topic_stats: p.topic_stats || [], recommendations: p.recommendations || [] })); } catch (e) {}
       // Nộp xong -> mở thẳng trang Kết quả & Phân tích (/ket-qua-thi/{id}/).
-      if (D.result_url) { submitted = true; $('#sx-submitTop').textContent = 'Đã nộp — đang mở kết quả…'; toast('Đã nộp bài. Đang mở trang kết quả và phân tích…'); location.href = D.result_url; return; }
+      if (D.result_url) { submitted = true; $('#sx-submitTop').textContent = 'Đã nộp — đang mở kết quả…'; if (!sc) toast('Đã nộp bài. Đang mở trang kết quả và phân tích…'); location.href = D.result_url; return; }
       showResult(p.data || {}, true);
     }).catch(function () {
       busy = false; $('#sx-submitTop').disabled = false; $('#sx-submitTop').textContent = '▤ Nộp bài';
