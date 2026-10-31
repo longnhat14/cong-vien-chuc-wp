@@ -160,7 +160,7 @@ function cvc_book3d_render( array $doc, string $price_txt ): void {
 							</div>
 						</div>
 						<span class="bk-light" aria-hidden="true"></span>
-						<?php if ( '' !== $price_txt ) : ?><span class="bk-price"><small>BẢN PDF</small><?php echo esc_html( $price_txt ); ?></span><?php endif; ?>
+						<?php if ( '' !== $price_txt ) : ?><span class="bk-price"><small><?php echo esc_html( (string) ( $b['format_label'] ?? 'TÀI LIỆU' ) ); ?></small><?php echo esc_html( $price_txt ); ?></span><?php endif; ?>
 					</div>
 					<div class="bk-cover-inside" aria-hidden="true"><img src="<?php echo esc_url( $logo_w ); ?>" alt="" width="64" height="64"><span><?php echo esc_html( CVC_BOOK_DOMAIN ); ?></span></div>
 				</div>

@@ -92,3 +92,6 @@
 .cvc-gen blockquote{margin:10px 0;padding:8px 14px;background:#fbf5e8;border-left:4px solid #c9a052;border-radius:0 8px 8px 0}
 .cvc-gen sup.ref{font-size:11px;color:#7a5a17}
 .cvc-gen-refs{font-size:14.5px;color:#36414b}
+
+/* Bìa nhỏ của tài liệu (ảnh dựng tự động, 01/11/2026) */
+.lb-thumb{flex:none;width:40px;height:57px;border-radius:2px 4px 4px 2px;box-shadow:0 2px 6px rgba(15,42,74,.25);object-fit:cover;background:#0f2a4a}

@@ -44,6 +44,10 @@ cvc_seo_set_description( wp_strip_all_tags( (string) ( $doc['description'] ?? ''
 if ( $is_preview ) {
 	cvc_seo_set_noindex();
 }
+// 01/11/2026: ảnh chia sẻ = sách 3D có giá (dựng tự động phía backend).
+if ( ! empty( $doc['images']['og'] ) ) {
+	cvc_seo_set_og( array( 'image' => (string) $doc['images']['og'] ) );
+}
 $price_txt = $is_free ? 'Miễn phí' : number_format( $price, 0, ',', '.' ) . 'đ';
 if ( ! empty( $doc['book'] ) ) {
 	cvc_book3d_enqueue();
