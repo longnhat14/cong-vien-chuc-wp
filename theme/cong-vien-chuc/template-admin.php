@@ -45,6 +45,8 @@ if ( 'thanh-toan' === $resource_key ) {
 	$view = cvc_admin_can( 'employer.view' ) ? 'employers' : 'forbidden';
 } elseif ( 'nguoi-dung' === $resource_key ) {
 	$view = cvc_admin_can( 'user.view' ) ? 'insights' : 'forbidden';
+} elseif ( 'tai-lieu-ai' === $resource_key ) {
+	$view = cvc_admin_can( 'document.view' ) ? 'docgen' : 'forbidden';
 } elseif ( '' !== $resource_key ) {
 	if ( ! $res || ! cvc_admin_can( $res['module'] . '.view' ) ) {
 		$view = 'forbidden';
@@ -82,6 +84,8 @@ if ( 'list' === $view || 'form' === $view ) {
 	$page_title = 'Đơn vị tuyển dụng';
 } elseif ( 'insights' === $view ) {
 	$page_title = 'Người dùng & hoạt động';
+} elseif ( 'docgen' === $view ) {
+	$page_title = 'Tài liệu tự sinh';
 }
 
 cvc_seo_set_title( $page_title . ' | Quản trị' );
@@ -109,6 +113,9 @@ get_header();
 				<?php endif; ?>
 				<?php if ( cvc_admin_can( 'user.view' ) ) : ?>
 					<a href="<?php echo esc_url( cvc_admin_url( 'nguoi-dung' ) ); ?>" class="flex items-center gap-2 px-2.5 py-2 rounded-lg <?php echo 'insights' === $view ? 'bg-acc-soft text-acc font-bold' : 'text-ink-2 hover:bg-acc-soft'; ?>"><i class="fa-solid fa-users w-4" aria-hidden="true"></i> Người dùng &amp; hoạt động</a>
+				<?php endif; ?>
+				<?php if ( cvc_admin_can( 'document.view' ) ) : ?>
+					<a href="<?php echo esc_url( cvc_admin_url( 'tai-lieu-ai' ) ); ?>" class="flex items-center gap-2 px-2.5 py-2 rounded-lg <?php echo 'docgen' === $view ? 'bg-acc-soft text-acc font-bold' : 'text-ink-2 hover:bg-acc-soft'; ?>"><i class="fa-solid fa-book-open w-4" aria-hidden="true"></i> Tài liệu tự sinh</a>
 				<?php endif; ?>
 				<?php if ( cvc_admin_can( 'employer.view' ) ) : ?>
 					<a href="<?php echo esc_url( cvc_admin_url( 'don-vi' ) ); ?>" class="flex items-center gap-2 px-2.5 py-2 rounded-lg <?php echo 'employers' === $view ? 'bg-acc-soft text-acc font-bold' : 'text-ink-2 hover:bg-acc-soft'; ?>"><i class="fa-solid fa-building-columns w-4" aria-hidden="true"></i> Đơn vị tuyển dụng</a>
@@ -235,6 +242,9 @@ get_header();
 					</section>
 				</div>
 			<?php endif; ?>
+
+		<?php elseif ( 'docgen' === $view ) : ?>
+			<div class="space-y-4"><?php cvc_admin_render_docgen( $item_param ); ?></div>
 
 		<?php elseif ( 'insights' === $view ) : ?>
 			<div class="space-y-4"><?php cvc_admin_render_user_insights( $item_param ); ?></div>

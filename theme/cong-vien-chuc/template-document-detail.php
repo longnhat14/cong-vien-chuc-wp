@@ -38,6 +38,9 @@ $is_logged_in = cvc_is_logged_in();
 cvc_seo_set_title( ( $doc['title'] ?? 'Tài liệu' ) . ' — Kho Tài Liệu Công Viên Chức' );
 cvc_seo_set_description( wp_strip_all_tags( (string) ( $doc['description'] ?? '' ) ) );
 
+if ( ! empty( $doc['content_html'] ) ) {
+	wp_enqueue_style( 'cvc-library', get_theme_file_uri( '/assets/css/library.css' ), array(), (string) filemtime( get_theme_file_path( '/assets/css/library.css' ) ) );
+}
 get_header();
 ?>
 
@@ -114,6 +117,13 @@ get_header();
 			<?php endif; ?>
 
 		</div>
+
+		<?php if ( ! empty( $doc['content_html'] ) ) : // 31/10/2026: tài liệu tự sinh - bản đọc trực tuyến. ?>
+			<article class="dz-panel cvc-gen-read" aria-label="Đọc trực tuyến">
+				<h2 class="cvc-gen-h">Đọc trực tuyến</h2>
+				<?php echo wp_kses_post( (string) $doc['content_html'] ); ?>
+			</article>
+		<?php endif; ?>
 
 	</div>
 

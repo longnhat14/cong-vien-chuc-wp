@@ -75,3 +75,20 @@
  .lb-nav.is-cards{grid-template-columns:1fr}
  .lb-toc{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;white-space:nowrap}
 }
+
+/* Tài liệu tự sinh - bản đọc trực tuyến (31/10/2026) */
+.cvc-gen-read{font-size:17px;line-height:1.65;color:#1b2430}
+.cvc-gen-h{font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:#a8772a;margin:0 0 8px}
+.cvc-gen-meta{font-size:14px;color:#5b6470;margin:0 0 14px}
+.cvc-gen-toc{padding:12px 16px;border:1px solid #e6e0d2;border-radius:12px;background:#fffdf8;margin:0 0 20px}
+.cvc-gen-toc ol{margin:6px 0 0 20px;list-style:decimal}.cvc-gen-toc a{color:#17334f}
+.cvc-gen section{margin:0 0 26px;scroll-margin-top:90px}
+.cvc-gen section>h2{font-size:22px;color:#17334f;margin:0 0 10px;padding-bottom:6px;border-bottom:2px solid #e3bf7a}
+.cvc-gen h3{font-size:18px;color:#17334f;margin:16px 0 6px}
+.cvc-gen p{margin:0 0 10px}
+.cvc-gen ul{list-style:disc;margin:0 0 10px 22px}.cvc-gen ol{list-style:decimal;margin:0 0 10px 22px}
+.cvc-gen table{border-collapse:collapse;width:100%;margin:8px 0 14px;font-size:15px;display:block;overflow-x:auto}
+.cvc-gen th,.cvc-gen td{border:1px solid #d5dce3;padding:6px 9px;vertical-align:top}.cvc-gen th{background:#eef2f7}
+.cvc-gen blockquote{margin:10px 0;padding:8px 14px;background:#fbf5e8;border-left:4px solid #c9a052;border-radius:0 8px 8px 0}
+.cvc-gen sup.ref{font-size:11px;color:#7a5a17}
+.cvc-gen-refs{font-size:14.5px;color:#36414b}
