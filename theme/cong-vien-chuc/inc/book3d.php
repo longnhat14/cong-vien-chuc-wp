@@ -213,3 +213,26 @@ function cvc_book3d_short_link(): void {
 	wp_safe_redirect( $url . ( ! empty( $res['data']['data']['read'] ) ? '#doc-read' : '' ), 302 );
 	exit;
 }
+
+/* ------------------------------------------------------------------ */
+/* Đường dẫn cũ của tài liệu đã đổi slug -> 301 sang slug mới          */
+/* ------------------------------------------------------------------ */
+
+const CVC_DOCUMENT_SLUG_MOVES = array(
+	// 01/11/2026: Mẫu 01 theo NĐ 138/2020 (hết hiệu lực) đã thay bằng Mẫu số 01 NĐ 170/2025.
+	'phieu-dang-ky-du-tuyen-cong-chuc-mau-01-nd138bnv' => 'phieu-dang-ky-du-tuyen-cong-chuc-mau-01-nd-170-2025',
+);
+
+add_action( 'template_redirect', 'cvc_document_slug_moves', 2 );
+function cvc_document_slug_moves(): void {
+	$page = (string) get_query_var( 'cvc_page' );
+	if ( ! in_array( $page, array( 'document-detail', 'document-download' ), true ) ) {
+		return;
+	}
+	$slug = (string) get_query_var( 'cvc_document_slug' );
+	if ( isset( CVC_DOCUMENT_SLUG_MOVES[ $slug ] ) ) {
+		$to = cvc_document_url( CVC_DOCUMENT_SLUG_MOVES[ $slug ] );
+		wp_safe_redirect( 'document-download' === $page ? trailingslashit( $to ) . 'tai-xuong/' : $to, 301 );
+		exit;
+	}
+}
