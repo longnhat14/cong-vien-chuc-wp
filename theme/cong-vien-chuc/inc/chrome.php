@@ -125,34 +125,10 @@ function cvc_chrome_header(): void {
 					$on   = $active( array_merge( array( $nav['url'] ), array_column( $kids, 'url' ) ) );
 					if ( $kids ) :
 						?>
-				<div class="ch-nav-group">
+				<div class="ch-nav-group<?php echo ! empty( $kids[0]['group'] ) ? ' has-mg' : ''; ?>">
 					<a class="ch-nav-parent<?php echo $on ? ' is-active' : ''; ?>" href="<?php echo esc_url( $nav['url'] ); ?>" aria-haspopup="true" aria-expanded="false"<?php echo $on ? ' aria-current="true"' : ''; ?>><span class="ch-nav-icon"><?php echo $svg; // phpcs:ignore WordPress.Security.EscapeOutput ?></span><span><?php echo esc_html( $nav['label'] ); ?></span><i><?php echo esc_html( $nav['hint'] ); ?></i><em class="ch-nav-caret" aria-hidden="true">▾</em></a>
 					<?php if ( ! empty( $kids[0]['group'] ) ) : ?>
-					<?php
-					// Mega menu 2 cột (19/10/2026): Luyện tập · Đánh giá + hàng "Học thêm".
-					$cols = array( 'practice' => 'Luyện tập', 'assess' => 'Đánh giá' );
-					$rows = array(
-						'audience' => array( 'Theo đối tượng:', array_values( array_filter( $kids, static fn ( $k ) => 'audience' === ( $k['group'] ?? '' ) ) ) ),
-						'more'     => array( 'Học thêm:', array_values( array_filter( $kids, static fn ( $k ) => 'more' === ( $k['group'] ?? '' ) ) ) ),
-					);
-					?>
-					<div class="ch-nav-sub ch-mega">
-						<div class="ch-mega-cols">
-							<?php foreach ( $cols as $gk => $gl ) : ?>
-							<div class="ch-mega-col">
-								<p class="ch-mega-h"><?php echo esc_html( $gl ); ?></p>
-								<?php foreach ( $kids as $kid ) : if ( ( $kid['group'] ?? '' ) !== $gk ) { continue; } ?>
-								<a class="ch-mega-item<?php echo $active( array( $kid['url'] ) ) ? ' is-active' : ''; ?>" href="<?php echo esc_url( $kid['url'] ); ?>"<?php echo $active( array( $kid['url'] ) ) ? ' aria-current="page"' : ''; ?>><span class="ch-mega-sym" aria-hidden="true"><?php echo esc_html( (string) ( $kid['sym'] ?? '•' ) ); ?></span><span class="ch-mega-txt"><b><?php echo esc_html( $kid['label'] ); ?></b><?php if ( ! empty( $kid['desc'] ) ) : ?><small><?php echo esc_html( $kid['desc'] ); ?></small><?php endif; ?></span></a>
-								<?php endforeach; ?>
-							</div>
-							<?php endforeach; ?>
-						</div>
-						<?php foreach ( $rows as $row_key => $row_v ) : $more = $row_v[1]; if ( ! $more ) { continue; } ?>
-						<div class="ch-mega-more ch-mega-row-<?php echo esc_attr( $row_key ); ?>"><span><?php echo esc_html( $row_v[0] ); ?></span>
-							<?php foreach ( $more as $kid ) : ?><a href="<?php echo esc_url( $kid['url'] ); ?>"<?php echo $active( array( $kid['url'] ) ) ? ' class="is-active" aria-current="page"' : ''; ?>><?php echo esc_html( $kid['label'] ); ?><?php if ( ! empty( $kid['badge'] ) ) : ?> <small class="ch-nav-badge"><?php echo esc_html( $kid['badge'] ); ?></small><?php endif; ?></a><?php endforeach; ?>
-						</div>
-						<?php endforeach; ?>
-					</div>
+					<?php cvc_chrome_mega( (string) $nav['key'], $kids, $active ); ?>
 					<?php else : ?>
 					<div class="ch-nav-sub">
 						<?php foreach ( $kids as $kid ) : ?>
@@ -196,6 +172,96 @@ function cvc_chrome_header(): void {
 	if ( function_exists( 'cvc_email_verify_banner' ) ) {
 		cvc_email_verify_banner(); // 27/10/2026: nhắc xác minh email
 	}
+}
+
+/**
+ * Menu con dạng menu lớn v3 (31/10/2026): các cột theo nhóm (Luyện tập, Đánh giá, Theo đối tượng, Theo loại hình,
+ * Theo ngành & công cụ) + thẻ điểm nhấn bên phải + chân menu (Học thêm, liên kết chân). Icon nét SVG (cvc_nav_icon),
+ * số tin đang mở và số liệu thật (cvc_nav_stats). Dữ liệu từ menu WordPress - quy ước ở inc/nav-menu.php.
+ */
+function cvc_chrome_mega( string $key, array $kids, callable $active ): void {
+	$heads = array(
+		'practice' => 'Luyện tập',
+		'assess'   => 'Đánh giá',
+		'audience' => 'Theo đối tượng',
+		'type'     => 'Theo loại hình',
+		'field'    => 'Theo ngành & công cụ',
+	);
+	$by = array();
+	foreach ( $kids as $k ) {
+		$by[ (string) ( $k['group'] ?? '' ) ][] = $k;
+	}
+	$cols  = array_values( array_filter( array_keys( $heads ), static fn ( $g ) => ! empty( $by[ $g ] ) ) );
+	$cards = (array) ( $by['card'] ?? array() );
+	$more  = (array) ( $by['more'] ?? array() );
+	$foot  = (array) ( $by['foot'] ?? array() );
+	$has   = static function () {
+		return function_exists( 'cvc_nav_icon' );
+	};
+	$tile = static function ( array $k ) use ( $has ): string {
+		if ( '' !== (string) ( $k['icon'] ?? '' ) && $has() ) {
+			return '<span class="ch-mg-tile" aria-hidden="true">' . cvc_nav_icon( (string) $k['icon'] ) . '</span>';
+		}
+		return '<span class="ch-mg-tile is-sym" aria-hidden="true">' . esc_html( '' !== (string) ( $k['sym'] ?? '' ) ? (string) $k['sym'] : '•' ) . '</span>';
+	};
+	$go = $has() ? cvc_nav_icon( 'mui-ten' ) : '→';
+	?>
+	<div class="ch-nav-sub ch-mega ch-mg is-<?php echo esc_attr( $key ); ?><?php echo $cards ? ' has-card' : ''; ?><?php echo count( $cols ) <= 2 ? ' is-narrow' : ''; ?>" style="--mg-cols:<?php echo (int) max( 1, count( $cols ) ); ?>">
+		<div class="ch-mg-panel">
+			<i class="ch-mg-caret" aria-hidden="true"></i>
+			<div class="ch-mg-grid">
+				<?php foreach ( $cols as $g ) : ?>
+				<div class="ch-mg-col is-<?php echo esc_attr( $g ); ?>">
+					<p class="ch-mega-h"><?php echo esc_html( $heads[ $g ] ); ?></p>
+					<?php if ( 'audience' === $g ) : ?><div class="ch-mg-pills"><?php endif; ?>
+					<?php foreach ( $by[ $g ] as $k ) : ?>
+						<?php
+						$on  = $active( array( $k['url'] ) );
+						$cnt = ! empty( $k['count'] ) && function_exists( 'cvc_nav_count_for' ) ? cvc_nav_count_for( (string) $k['url'] ) : null;
+						?>
+						<a class="ch-mega-item<?php echo 'audience' === $g ? ' is-pill' : ''; ?><?php echo $on ? ' is-active' : ''; ?>" href="<?php echo esc_url( $k['url'] ); ?>"<?php echo $on ? ' aria-current="page"' : ''; ?><?php echo '_blank' === ( $k['target'] ?? '' ) ? ' target="_blank" rel="noopener"' : ''; ?>>
+							<?php echo $tile( $k ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+							<span class="ch-mega-txt"><b><?php echo esc_html( $k['label'] ); ?><?php if ( null !== $cnt ) : ?><em class="ch-mg-count" title="Tin đang nhận hồ sơ"><?php echo esc_html( number_format_i18n( $cnt ) ); ?></em><?php endif; ?><?php if ( ! empty( $k['badge'] ) ) : ?><small class="ch-nav-badge"><?php echo esc_html( $k['badge'] ); ?></small><?php endif; ?></b><?php if ( 'audience' !== $g && ! empty( $k['desc'] ) ) : ?><small><?php echo esc_html( $k['desc'] ); ?></small><?php endif; ?></span>
+							<?php if ( 'audience' !== $g ) : ?><span class="ch-mg-go" aria-hidden="true"><?php echo $go; // phpcs:ignore WordPress.Security.EscapeOutput ?></span><?php endif; ?>
+						</a>
+					<?php endforeach; ?>
+					<?php if ( 'audience' === $g ) : ?></div><?php endif; ?>
+				</div>
+				<?php endforeach; ?>
+				<?php if ( $cards ) : ?>
+				<div class="ch-mg-col is-card">
+					<?php foreach ( $cards as $c ) : ?>
+						<?php
+						$big  = '' !== (string) ( $c['sym'] ?? '' ) && function_exists( 'cvc_nav_fill' ) ? cvc_nav_fill( (string) $c['sym'] ) : null;
+						$para = '' !== (string) ( $c['desc'] ?? '' ) && function_exists( 'cvc_nav_fill' ) ? cvc_nav_fill( (string) $c['desc'] ) : null;
+						?>
+						<a class="ch-mg-card<?php echo 'bronze' === ( $c['variant'] ?? '' ) ? ' is-bronze' : ''; ?>" href="<?php echo esc_url( $c['url'] ); ?>">
+							<svg class="ch-mg-deco" viewBox="0 0 170 170" fill="none" aria-hidden="true"><circle cx="85" cy="85" r="80" stroke="#f0cf91" stroke-opacity=".35"/><circle cx="85" cy="85" r="58" stroke="#f0cf91" stroke-opacity=".25"/><circle cx="85" cy="85" r="36" stroke="#f0cf91" stroke-opacity=".18"/></svg>
+							<span class="ch-mg-eb"><?php echo function_exists( 'cvc_nav_icon' ) ? cvc_nav_icon( '' !== (string) ( $c['icon'] ?? '' ) ? (string) $c['icon'] : 'sao' ) : ''; // phpcs:ignore WordPress.Security.EscapeOutput ?><?php echo esc_html( $c['label'] ); ?></span>
+							<?php if ( null !== $big ) : ?><span class="ch-mg-big"><?php echo $big; // phpcs:ignore WordPress.Security.EscapeOutput ?></span><?php endif; ?>
+							<?php if ( null !== $para ) : ?><span class="ch-mg-p"><?php echo $para; // phpcs:ignore WordPress.Security.EscapeOutput ?></span><?php endif; ?>
+							<span class="ch-mg-cta"><?php echo esc_html( '' !== (string) ( $c['badge'] ?? '' ) ? (string) $c['badge'] : 'Xem ngay' ); ?> <?php echo $go; // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
+						</a>
+					<?php endforeach; ?>
+				</div>
+				<?php endif; ?>
+			</div>
+			<?php if ( $more || $foot ) : ?>
+			<div class="ch-mg-foot">
+				<?php if ( $more ) : ?>
+					<span class="ch-mg-foot-h">Học thêm</span>
+					<?php foreach ( $more as $k ) : ?><a class="ch-mg-dot<?php echo $active( array( $k['url'] ) ) ? ' is-active' : ''; ?>" href="<?php echo esc_url( $k['url'] ); ?>"><?php echo esc_html( $k['label'] ); ?><?php if ( ! empty( $k['badge'] ) ) : ?> <small class="ch-nav-badge"><?php echo esc_html( $k['badge'] ); ?></small><?php endif; ?></a><?php endforeach; ?>
+				<?php endif; ?>
+				<?php foreach ( $foot as $k ) : ?>
+					<?php $note = '' !== (string) ( $k['desc'] ?? '' ) && function_exists( 'cvc_nav_fill' ) ? cvc_nav_fill( (string) $k['desc'] ) : null; ?>
+					<?php if ( null !== $note ) : ?><span class="ch-mg-note"><?php echo $note; // phpcs:ignore WordPress.Security.EscapeOutput ?></span><?php endif; ?>
+					<a class="ch-mg-all" href="<?php echo esc_url( $k['url'] ); ?>"><?php echo esc_html( $k['label'] ); ?> <?php echo $go; // phpcs:ignore WordPress.Security.EscapeOutput ?></a>
+				<?php endforeach; ?>
+			</div>
+			<?php endif; ?>
+		</div>
+	</div>
+	<?php
 }
 
 function cvc_chrome_footer(): void {
