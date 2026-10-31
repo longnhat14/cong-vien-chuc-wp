@@ -19,7 +19,11 @@ if ( '' === $slug ) {
 }
 
 $token  = cvc_auth_token();
-$result = ( new CVC_Document_Service() )->find( $slug, $token );
+// 01/11/2026: biên tập viên xem trước tài liệu chưa xuất bản (?xem-truoc=1).
+$is_preview = isset( $_GET['xem-truoc'] ) && $token && cvc_admin_can( 'document.view' ); // phpcs:ignore WordPress.Security.NonceVerification
+$result     = $is_preview
+	? ( new CVC_Api_Client() )->get( '/api/admin/documents/preview/' . rawurlencode( $slug ), array(), $token )
+	: ( new CVC_Document_Service() )->find( $slug, $token );
 
 if ( ! $result['ok'] ) {
 	status_header( 404 === $result['status'] ? 404 : 500 );
@@ -37,6 +41,13 @@ $is_logged_in = cvc_is_logged_in();
 
 cvc_seo_set_title( ( $doc['title'] ?? 'Tài liệu' ) . ' — Kho Tài Liệu Công Viên Chức' );
 cvc_seo_set_description( wp_strip_all_tags( (string) ( $doc['description'] ?? '' ) ) );
+if ( $is_preview ) {
+	cvc_seo_set_noindex();
+}
+$price_txt = $is_free ? 'Miễn phí' : number_format( $price, 0, ',', '.' ) . 'đ';
+if ( ! empty( $doc['book'] ) ) {
+	cvc_book3d_enqueue();
+}
 
 if ( ! empty( $doc['content_html'] ) ) {
 	wp_enqueue_style( 'cvc-library', get_theme_file_uri( '/assets/css/library.css' ), array(), (string) filemtime( get_theme_file_path( '/assets/css/library.css' ) ) );
@@ -60,15 +71,26 @@ get_header();
 
 		<?php cvc_render_notice(); ?>
 
+		<?php if ( $is_preview ) : ?>
+			<p class="dz-panel text-sm" role="status"><b>Bản xem trước cho biên tập viên</b> - trạng thái: <?php echo esc_html( (string) ( $doc['status'] ?? '' ) ); ?>. Người đọc chưa thấy trang này nếu tài liệu chưa xuất bản.</p>
+		<?php endif; ?>
+
 		<div class="dz-panel space-y-6">
 
+			<div class="doc-hero<?php echo empty( $doc['book'] ) ? ' no-book' : ''; ?>">
+			<?php if ( ! empty( $doc['book'] ) ) : ?>
+				<div class="doc-hero-book"><?php cvc_book3d_render( $doc, $price_txt ); ?></div>
+			<?php endif; ?>
+			<div class="doc-hero-info space-y-5">
 			<div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4 border-b border-slate-300 pb-5">
 				<div class="flex items-start gap-4">
+					<?php if ( empty( $doc['book'] ) ) : ?>
 					<div class="w-14 h-14 rounded-2xl bg-acc-soft text-acc flex items-center justify-center text-2xl border border-acc-line shrink-0">
 						<i class="fa-solid fa-file-pdf"></i>
 					</div>
+					<?php endif; ?>
 					<div class="space-y-1.5">
-						<span class="text-[10px] font-bold text-acc uppercase tracking-wider"><?php echo esc_html( $doc['category'] ?? 'Tài liệu' ); ?></span>
+						<span class="text-[10px] font-bold text-acc uppercase tracking-wider"><?php echo esc_html( (string) ( $doc['book']['series']['label'] ?? ( $doc['category'] ?? 'Tài liệu' ) ) ); ?></span>
 						<h1 class="text-lg sm:text-xl font-black text-ink leading-snug"><?php echo esc_html( $doc['title'] ?? '' ); ?></h1>
 						<p class="text-[11px] text-ink-muted"><?php echo esc_html( number_format( (int) ( $doc['download_count'] ?? 0 ) ) ); ?> lượt tải &middot; <?php echo esc_html( size_format( (int) ( $doc['file_size'] ?? 0 ) ) ); ?></p>
 					</div>
@@ -106,6 +128,9 @@ get_header();
 				<?php endif; ?>
 			</div>
 
+			</div>
+			</div>
+
 			<?php if ( ! empty( $doc['recruitment'] ) || ! empty( $doc['exam_subject'] ) ) : ?>
 				<div class="pt-4 border-t border-slate-300 flex flex-wrap gap-3 text-[11px]">
 					<?php if ( ! empty( $doc['recruitment']['slug'] ) ) : ?>
@@ -119,7 +144,7 @@ get_header();
 		</div>
 
 		<?php if ( ! empty( $doc['content_html'] ) ) : // 31/10/2026: tài liệu tự sinh - bản đọc trực tuyến. ?>
-			<article class="dz-panel cvc-gen-read" aria-label="Đọc trực tuyến">
+			<article class="dz-panel cvc-gen-read" id="doc-read" aria-label="Đọc trực tuyến">
 				<h2 class="cvc-gen-h">Đọc trực tuyến</h2>
 				<?php echo wp_kses_post( (string) $doc['content_html'] ); ?>
 			</article>
