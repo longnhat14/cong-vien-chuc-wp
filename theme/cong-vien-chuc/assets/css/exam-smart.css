@@ -280,3 +280,61 @@ body.cvc-exam-legal{background:#fff!important;color:#111}
 .sx-revwarn{margin:14px 0 0;padding:10px 12px;border-left:3px solid var(--red);background:#fbeeee;color:var(--red-ink)!important;font-weight:bold}
 .sx-revok{margin:14px 0 0;padding:10px 12px;border-left:3px solid var(--green);background:#eef5ef}
 @media(prefers-reduced-motion:reduce){.sx-savebar.is-busy .sx-savedot{animation:none}}
+
+/* ===== 31/10/2026: chế độ làm bài gọn cho điện thoại (body.sx-mob do exam-smart.js bật ở <= 760px) ===== */
+.sx-mbar,.sx-mnav,.sx-sheethead,.sx-mtools,.sx-fbtoggle,.sx-fbkey{display:none}
+.sx-sheetback[hidden]{display:none!important}
+.sx-autonext{display:flex;align-items:center;gap:8px;margin:10px 0 12px;font-size:15px;cursor:pointer}
+.sx-autonext input{width:18px;height:18px;flex:none}
+body.sx-mob .ch-topline,body.sx-mob .ch-header,body.sx-mob .ch-footer,body.sx-mob .aic-launcher{display:none!important}
+body.sx-mob .sx-toolbar,body.sx-mob .sx-left,body.sx-mob .sx-qtop,body.sx-mob #sx-hintline,body.sx-mob .sx-main .sx-actions,body.sx-mob .sx-main .sx-nav,body.sx-mob .sx-fbnext,body.sx-mob .sx-fbline{display:none!important}
+body.sx-mob .sx-fbkey{display:inline;font-weight:normal;font-size:16px}
+body.sx-mob .cvc-smart-exam{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+/* Thanh trên */
+body.sx-mob .sx-mbar{display:grid;grid-template-columns:38px minmax(0,1fr) auto auto;align-items:center;gap:8px;position:sticky;top:0;z-index:50;min-height:52px;padding:6px 10px;padding-top:calc(6px + env(safe-area-inset-top,0px));background:#fff;border-bottom:1px solid var(--line)}
+.sx-mb-exit{display:grid;place-items:center;width:36px;height:36px;border:1px solid var(--line);border-radius:10px;color:var(--ink)!important;text-decoration:none!important;font-size:16px;line-height:1}
+.sx-mb-count{font-size:18px;font-weight:bold;color:var(--acc);white-space:nowrap}
+.sx-mb-stat{font-size:17px;font-weight:bold;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--ink)}
+.sx-mb-stat.warn{color:var(--red)}
+.sx-mb-stat b.ok{color:var(--green)}.sx-mb-stat b.no{color:var(--red);margin-left:4px}
+.sx-mb-menu{display:inline-flex;align-items:center;gap:5px;min-height:38px;padding:4px 10px;border:1px solid var(--accline);border-radius:10px;background:var(--accsoft);color:var(--acc);font-size:17px;font-weight:bold;line-height:1;cursor:pointer}
+.sx-mb-menu small{font-size:13px;font-variant-numeric:tabular-nums}
+.sx-mb-prog{position:absolute;left:0;right:0;bottom:-1px;height:3px;background:#eef1f4}
+.sx-mb-prog i{display:block;height:100%;width:0;background:var(--acc2);transition:width .25s}
+/* Khung câu hỏi */
+body.sx-mob .sx-page{display:block;margin:0;padding:0}
+body.sx-mob .sx-mainpanel{border:0}
+body.sx-mob .sx-main{padding:14px 14px 10px}
+body.sx-mob .sx-qtext{margin-top:0;font-size:19px;line-height:1.42}
+body.sx-mob .fs-2 .sx-qtext{font-size:21px}body.sx-mob .fs-3 .sx-qtext{font-size:23px}
+body.sx-mob .sx-answers{gap:9px;margin-top:12px}
+body.sx-mob .sx-answer{min-height:54px;border-radius:10px}
+body.sx-mob .sx-feedback{margin-top:12px;border-radius:10px;scroll-margin-bottom:96px;scroll-margin-top:64px}
+body.sx-mob .sx-feedback h3{font-size:18px}
+body.sx-mob .sx-fbmore:not(.open){max-height:6.6em;overflow:hidden;-webkit-mask-image:linear-gradient(#000 55%,transparent);mask-image:linear-gradient(#000 55%,transparent)}
+body.sx-mob .sx-fbtoggle{display:inline-block;margin:4px 0 0;padding:6px 0;border:0;background:none;color:var(--acc2);font-size:15px;font-weight:bold;cursor:pointer}
+body.sx-mob .sx-feedback .sx-group .sx-btn{min-width:0}
+body.sx-mob .sx-notes{margin:10px 14px 0}
+/* Thanh dưới */
+body.sx-mob .sx-mnav{display:grid;grid-template-columns:1fr .9fr 1.5fr;gap:8px;position:fixed;left:0;right:0;bottom:0;z-index:55;padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px));background:#fff;border-top:1px solid var(--line);box-shadow:0 -6px 18px rgba(0,0,0,.06)}
+body.sx-mob .sx-mnav .sx-btn{min-width:0;min-height:48px;margin:0;justify-content:center;font-size:16px;border-radius:10px;white-space:nowrap}
+body.sx-mob #sx-mFlag.active{color:var(--flag);border-color:var(--flag);background:#fff4f5}
+body.sx-mob #sx-mNext.is-ready{box-shadow:0 0 0 3px rgba(23,103,170,.28);animation:sxReady .9s ease-out 1}
+body.sx-mob #sx-mNext.is-submit{background:var(--red);border-color:var(--red)}
+@keyframes sxReady{0%{transform:scale(1)}40%{transform:scale(1.04)}100%{transform:scale(1)}}
+body.sx-mob .sx-toast{bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+/* Ngăn kéo: cột phải trượt từ dưới lên */
+body.sx-mob .sx-side{position:fixed!important;left:0;right:0;top:auto;bottom:0;z-index:65;width:auto;max-height:86vh;overflow-y:auto;overscroll-behavior:contain;padding:0 12px calc(16px + env(safe-area-inset-bottom,0px));background:#fff;border-radius:16px 16px 0 0;box-shadow:0 -18px 50px rgba(0,0,0,.2);transform:translateY(105%);visibility:hidden;transition:transform .22s ease,visibility 0s linear .22s}
+body.sx-mob .sx-side.sheet-open{transform:none;visibility:visible;transition:transform .22s ease}
+body.sx-mob .sx-sheethead{display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:2;margin:0 -12px;padding:16px 12px 8px;background:#fff;border-bottom:1px solid var(--line2)}
+body.sx-mob .sx-sheethead strong{font-size:18px}
+body.sx-mob .sx-sheethead .sx-btn{min-width:0;flex:none;width:38px;height:38px;padding:0;justify-content:center}
+.sx-sheetgrip{position:absolute;left:50%;top:6px;width:40px;height:4px;margin-left:-20px;border-radius:4px;background:#cfd4d9}
+body.sx-mob .sx-mtools{display:flex;flex-wrap:wrap;gap:6px}
+body.sx-mob .sx-mtools .sx-btn{flex:1 1 auto;min-width:0;min-height:42px;justify-content:center;font-size:15px}
+body.sx-mob .sx-side .sx-panel{border-radius:10px}
+body.sx-mob .sx-side .sx-linkswrap{display:block!important;margin:0;padding:0}
+body.sx-mob .sx-sheetback{position:fixed;inset:0;z-index:64;background:rgba(0,0,0,.4)}
+body.sx-sheet-lock{overflow:hidden}
+@media(prefers-reduced-motion:reduce){body.sx-mob .sx-side,body.sx-mob #sx-mNext.is-ready{transition:none;animation:none}}
+.sx-sr{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}

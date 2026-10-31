@@ -274,6 +274,21 @@ $doc_icon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H
 
 <div class="cvc-smart-exam" id="cvc-smart-exam" data-total="<?php echo (int) $total_q; ?>">
 
+	<?php
+	/*
+	 * 31/10/2026: chế độ làm bài gọn cho điện thoại (<= 760px, JS bật lớp body.sx-mob): thanh trên mỏng (thoát · câu ·
+	 * đồng hồ / đúng-sai · ☰), thanh dưới cố định (Trước · Đánh dấu · Câu tiếp / Nộp bài), cột phải thành ngăn kéo.
+	 */
+	$sx_exit = ! empty( $exam_info['slug'] ) ? cvc_exam_url( (string) $exam_info['slug'] ) : cvc_exams_url();
+	?>
+	<div class="sx-mbar" id="sx-mbar">
+		<a class="sx-mb-exit" href="<?php echo esc_url( $sx_exit ); ?>" aria-label="Thoát (bài làm đã được lưu)" title="Thoát - bài làm đã được lưu">✕</a>
+		<span class="sx-mb-count" id="sx-mbCount">Câu 1/<?php echo (int) $total_q; ?></span>
+		<span class="sx-mb-stat<?php echo $is_practice && ! $is_submitted ? ' is-score' : ''; ?>" id="sx-mbStat" aria-live="off"></span>
+		<button type="button" class="sx-mb-menu" id="sx-mbMenu" aria-controls="sx-side" aria-expanded="false"><span aria-hidden="true">☰</span> <small id="sx-mbAns">0/<?php echo (int) $total_q; ?></small><span class="sx-sr"> - bản đồ câu, thời gian và nộp bài</span></button>
+		<span class="sx-mb-prog" aria-hidden="true"><i id="sx-mbProg"></i></span>
+	</div>
+
 	<nav class="sx-toolbar" aria-label="Đề thi và chế độ làm bài">
 		<div class="sx-examtitle" title="<?php echo esc_attr( $exam_title ); ?>"><?php echo $doc_icon; // phpcs:ignore WordPress.Security.EscapeOutput ?><span>Đề thi: <?php echo esc_html( $exam_title ); ?></span></div>
 		<div class="sx-meta">
@@ -363,7 +378,15 @@ $doc_icon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H
 			</section>
 		</main>
 
-		<aside class="sx-side" id="sx-side">
+		<aside class="sx-side" id="sx-side" aria-label="Bản đồ câu, thời gian và nộp bài">
+			<div class="sx-sheethead"><span class="sx-sheetgrip" aria-hidden="true"></span><strong>Bài làm</strong><button type="button" class="sx-btn" id="sx-sheetClose" aria-label="Đóng">✕</button></div>
+			<div class="sx-mtools">
+				<?php if ( $is_practice || $is_submitted ) : ?><button type="button" class="sx-btn" data-mt="explain">▤ Đáp án &amp; căn cứ</button><?php endif; ?>
+				<button type="button" class="sx-btn" data-mt="note">✎ Ghi chú</button>
+				<?php if ( ! $is_practice && ! $is_submitted ) : ?><button type="button" class="sx-btn" data-mt="clear">× Bỏ chọn</button><?php endif; ?>
+				<button type="button" class="sx-btn" data-mt="font">A<sup>+</sup> Cỡ chữ</button>
+				<?php if ( function_exists( 'cvc_aic_enabled' ) && cvc_aic_enabled() ) : ?><button type="button" class="sx-btn" data-mt="ai" data-open-ai>✦ AI Coach</button><?php endif; ?>
+			</div>
 			<section class="sx-panel sx-exam-control">
 				<div class="sx-head"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><h2>Thời gian &amp; nộp bài</h2></div>
 				<div class="sx-body">
@@ -375,6 +398,7 @@ $doc_icon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H
 					<?php if ( ! $is_submitted ) : ?>
 						<div class="sx-savebar" id="sx-savebar" aria-live="polite"><span class="sx-savedot" aria-hidden="true"></span><span id="sx-sideSave">Đáp án được lưu lên máy chủ ngay khi chọn</span></div>
 						<button type="button" class="sx-btn sx-submit-wide sx-reviewbtn" id="sx-reviewTop">☑ Rà soát bài làm <small id="sx-reviewHint"></small></button>
+						<?php if ( ! $is_practice ) : ?><label class="sx-check sx-autonext"><input type="checkbox" id="sx-autonext"> Tự sang câu sau khi chọn đáp án</label><?php endif; ?>
 					<?php endif; ?>
 					<button type="button" class="sx-btn sx-danger sx-submit-wide" id="sx-submitTop"<?php echo $is_submitted ? ' disabled' : ''; ?>>▤ <?php echo $is_submitted ? 'Đã nộp bài' : 'Nộp bài'; ?></button>
 					<p class="sx-muted sx-submit-note"><?php echo $is_submitted ? 'Bài đã nộp - mở từng câu để xem đáp án và giải thích.' : ( 'countdown' === $timer_mode ? 'Đồng hồ do máy chủ kiểm soát: hết giờ hệ thống tự nộp với các đáp án đã lưu.' : 'Bạn có thể nộp bài bất cứ lúc nào, kể cả khi đang ở câu cuối.' ); ?></p>
@@ -496,6 +520,13 @@ $doc_icon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H
 	<div class="sx-overlay" id="sx-submitDialog"><div class="sx-dialog sx-review" role="dialog" aria-modal="true" aria-labelledby="sx-submitTitle"><h2 id="sx-submitTitle">Rà soát trước khi nộp</h2><div id="sx-reviewBody"></div><p id="sx-submitMessage"></p><div class="sx-dialogactions"><button type="button" class="sx-btn" id="sx-cancel">Quay lại làm tiếp</button><button type="button" class="sx-btn sx-danger" id="sx-confirm">Nộp bài</button></div></div></div>
 	<div class="sx-overlay" id="sx-resultDialog"><div class="sx-dialog" role="dialog" aria-labelledby="sx-resultTitle"><h2 id="sx-resultTitle">Kết quả bài thi</h2><div id="sx-resultBody"></div><div class="sx-dialogactions"><button type="button" class="sx-btn" id="sx-closeResult">Xem lại bài làm</button><button type="button" class="sx-btn sx-primary" id="sx-showAnalysis">Xem phân tích</button></div></div></div>
 	<div class="sx-toast" id="sx-toast" role="status" aria-live="polite"></div>
+
+	<nav class="sx-mnav" id="sx-mnav" aria-label="Chuyển câu">
+		<button type="button" class="sx-btn" id="sx-mPrev">‹ Trước</button>
+		<button type="button" class="sx-btn" id="sx-mFlag" aria-pressed="false">⚑ Xem lại</button>
+		<button type="button" class="sx-btn sx-primary" id="sx-mNext">Câu tiếp ›</button>
+	</nav>
+	<div class="sx-sheetback" id="sx-sheetBack" hidden></div>
 </div>
 
 <script>window.CVC_SMART_EXAM = <?php echo wp_json_encode( $smart_payload, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP ); ?>;</script>
