@@ -50,9 +50,10 @@ $documents  = is_array( $pagination ) ? ( $pagination['data'] ?? array() ) : arr
 $currentPg  = (int) ( $pagination['current_page'] ?? $paged );
 $lastPg     = (int) ( $pagination['last_page'] ?? 1 );
 
-cvc_seo_set_title( 'Kho Tài Liệu Ôn Thi Công Chức, Viên Chức 2026' );
+cvc_seo_set_title( 'Thư viện tài liệu ôn thi công chức, viên chức 2026' );
 cvc_seo_set_description( 'Bộ đề thi thử, sơ đồ tư duy, sổ tay ôn tập Kiến thức chung công chức — có tài liệu miễn phí, có tài liệu trả phí chất lượng cao.' );
 cvc_seo_set_listing_pagination_state( $currentPg, 'cvc_documents_url' );
+wp_enqueue_style( 'cvc-library', get_theme_file_uri( '/assets/css/library.css' ), array(), (string) filemtime( get_theme_file_path( '/assets/css/library.css' ) ) );
 
 get_header();
 
@@ -77,11 +78,14 @@ function cvc_document_price_badge( array $doc ): string {
 		)
 	);
 	cvc_render_listing_hero(
-		'Tài liệu',
-		'Kho tài liệu ôn thi công chức, viên chức',
-		'Mẫu hồ sơ dự tuyển, văn bản tham khảo và tài liệu ôn tập — có tài liệu miễn phí và tài liệu trả phí biên soạn chuyên sâu.',
-		isset( $pagination['total'] ) ? array( array( number_format_i18n( (int) $pagination['total'] ), 'tài liệu' ) ) : array()
+		'Thư viện tài liệu',
+		'Thư viện tài liệu ôn thi công chức, viên chức',
+		'Tài liệu theo kỳ thi, ngành nghề, địa phương; văn bản pháp luật, bộ câu hỏi có đáp án, tóm tắt kiến thức, biểu mẫu - và tài liệu tải về.',
+		isset( $pagination['total'] ) ? array( array( number_format_i18n( (int) $pagination['total'] ), 'tài liệu tải về' ) ) : array()
 	);
+	if ( function_exists( 'cvc_library_render_nav' ) && 1 === $currentPg && '' === $filter && '' === $format ) {
+		cvc_library_render_nav( '', true ); // Thư viện 10 mục (31/10/2026)
+	}
 	if ( function_exists( 'cvc_pdf_render_docs_banner' ) ) {
 		cvc_pdf_render_docs_banner(); // Bộ đề PDF (27/10/2026)
 	}
@@ -119,7 +123,7 @@ function cvc_document_price_badge( array $doc ): string {
 			<?php cvc_render_listing_explore_nav( 'documents' ); ?>
 		</aside>
 		<div class="dz-colmain">
-			<div class="dz-h2"><h2>Danh mục tài liệu<?php echo '' !== $format ? ' · ' . esc_html( $cvc_formats[ $format ] ) : ''; ?></h2><span class="dz-muted" style="font-size:15px">Trang <?php echo (int) $currentPg; ?>/<?php echo (int) max( 1, $lastPg ); ?></span></div>
+			<div class="dz-h2"><h2>Tài liệu tải về<?php echo '' !== $format ? ' · ' . esc_html( $cvc_formats[ $format ] ) : ''; ?></h2><span class="dz-muted" style="font-size:15px">Trang <?php echo (int) $currentPg; ?>/<?php echo (int) max( 1, $lastPg ); ?></span></div>
 			<?php if ( ! $ok ) : ?>
 				<?php cvc_render_error_state( 'Không thể tải danh sách tài liệu lúc này.' ); ?>
 			<?php elseif ( empty( $documents ) ) : ?>

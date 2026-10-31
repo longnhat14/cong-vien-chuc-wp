@@ -51,6 +51,7 @@ require_once __DIR__ . '/inc/admin/exam-pdf.php';
 require_once __DIR__ . '/inc/admin/user-insights.php';
 require_once __DIR__ . '/inc/track.php';
 require_once __DIR__ . '/inc/nav-menu.php';
+require_once __DIR__ . '/inc/library.php'; // Thư viện tài liệu 10 mục (31/10/2026)
 require_once __DIR__ . '/inc/admin/email-retention.php'; // Email giữ chân (27/10/2026)
 require_once __DIR__ . '/inc/recruitment-fulltext.php';
 require_once __DIR__ . '/inc/payment-sepay.php';

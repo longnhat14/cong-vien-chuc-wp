@@ -16,7 +16,9 @@
  *    thành cột thẻ; lớp "ico-<tên>" chọn icon (xem cvc_nav_icon); "dem-tin" hiện số tin đang mở theo URL;
  *    "the-noi-bat" = thẻ điểm nhấn bên phải (Nhãn "Dòng nhỏ | Chữ nút", Thuộc tính tiêu đề = dòng lớn, Mô tả = đoạn ngắn;
  *    "mau-dong" = nền đồng); "chan-trang" = liên kết ở chân menu (Mô tả = câu dẫn). Dòng lớn / mô tả nhận
- *    {tin-mo} {sap-het-han} {vi-tri} {tin-de-rieng} {de-rieng} = số liệu thật (cvc_nav_stats).
+ *    {tin-mo} {sap-het-han} {vi-tri} {tin-de-rieng} {de-rieng} {tai-lieu-moi} = số liệu thật (cvc_nav_stats).
+ *  - Menu Tài liệu (31/10/2026): cột "nhom-tl-ky-thi" (Theo kỳ thi & đối tượng), "nhom-tl-loai" (Theo loại tài liệu);
+ *    lớp "sap-co-neu-trong" = tự gắn nhãn "Sắp có" khi trang của mục chưa có nội dung.
  *  - Chưa gán menu nào cho vị trí Primary -> dùng menu mặc định trong code (cvc_main_nav_items_default).
  * Màn hình Giao diện → Menu tự hiện các ô Mô tả / Lớp CSS / Thuộc tính tiêu đề.
  */
@@ -32,6 +34,8 @@ const CVC_NAV_GROUPS = array(
 	'nhom-theo-loai'  => 'type',
 	'nhom-theo-nganh' => 'field',
 	'nhom-hoc-them'   => 'more',
+	'nhom-tl-ky-thi'  => 'lib_exam',
+	'nhom-tl-loai'    => 'lib_kind',
 	'the-noi-bat'     => 'card',
 	'chan-trang'      => 'foot',
 );
@@ -113,6 +117,10 @@ function cvc_nav_from_wp_menu(): ?array {
 				if ( 0 === strpos( $c, 'ico-' ) ) {
 					$icon = substr( $c, 4 );
 				}
+			}
+			// 31/10/2026: lớp "sap-co-neu-trong" - mục chưa có nội dung (đếm theo URL) tự gắn nhãn "Sắp có".
+			if ( in_array( 'sap-co-neu-trong', $classes, true ) && '' === $row['badge'] && function_exists( 'cvc_nav_count_for' ) && 0 === cvc_nav_count_for( $row['url'] ) ) {
+				$row['badge'] = 'Sắp có';
 			}
 			$children[ (int) $it->menu_item_parent ][] = $row + array(
 				'group'   => $group,
@@ -231,6 +239,19 @@ function cvc_nav_stats_refresh(): void {
 			$ok = false;
 		}
 	}
+	// Thư viện tài liệu (31/10/2026): số mục của từng trang + tài liệu mới 7 ngày.
+	$lib = $get( '/api/library/overview' );
+	if ( $lib ) {
+		foreach ( (array) ( $lib['counts'] ?? array() ) as $lk => $lc ) {
+			$lp = 'van-ban-phap-luat' === $lk ? '/van-ban-phap-luat/' : ( 'tai-lieu' === $lk ? null : '/tai-lieu/' . $lk . '/' );
+			if ( $lp ) {
+				$s['by_path'][ $lp ] = (int) $lc;
+			}
+		}
+		$s['tai-lieu-moi'] = (int) ( $lib['counts']['moi'] ?? 0 );
+	} else {
+		$ok = false;
+	}
 	// Đề riêng: chỉ tính tin đang nhận hồ sơ (cộng exams_count từng tin).
 	$tin  = 0;
 	$de   = 0;
@@ -322,6 +343,11 @@ function cvc_nav_icon( string $name ): string {
 		'van-ban'        => '<path d="M12 4v16M7 20h10M5 7h14M7.5 7l-3 6.2a3 3 0 0 0 6 0zM16.5 7l-3 6.2a3 3 0 0 0 6 0z"/>',
 		'tai-lieu'       => '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M8.5 12.5h7M8.5 16h5"/>',
 		'mui-ten'        => '<path d="M5 12h14M13.5 6.5L19 12l-5.5 5.5"/>',
+		'nganh'          => '<rect x="3.5" y="7.5" width="17" height="12.5" rx="2"/><path d="M9 7.5V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1.5M3.5 13h17M10.5 13v1.6h3V13"/>',
+		'ban-do'         => '<path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/>',
+		'so-do'          => '<circle cx="12" cy="12" r="2.6"/><circle cx="4.8" cy="6" r="1.8"/><circle cx="19.2" cy="6" r="1.8"/><circle cx="4.8" cy="18" r="1.8"/><circle cx="19.2" cy="18" r="1.8"/><path d="M6.3 7.1l3.6 3.2M17.7 7.1l-3.6 3.2M6.3 16.9l3.6-3.2M17.7 16.9l-3.6-3.2"/>',
+		'sach'           => '<path d="M12 6.5C10.3 5 7.8 4.5 4 4.8v13.4c3.8-.3 6.3.2 8 1.7 1.7-1.5 4.2-2 8-1.7V4.8c-3.8-.3-6.3.2-8 1.7z"/><path d="M12 6.5v13.4"/>',
+		'bieu-mau'       => '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M8.5 11.5h2M12.5 11.5h3M8.5 15h2M12.5 15h3"/>',
 	);
 	$d = $p[ $name ] ?? '<circle cx="12" cy="12" r="3.2"/>';
 

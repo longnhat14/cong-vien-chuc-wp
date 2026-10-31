@@ -68,6 +68,24 @@ function cvc_sitemap_render(): void {
 	foreach ( function_exists( 'cvc_cat_tracks' ) ? cvc_cat_tracks() : array() as $t ) {
 		$rows[] = array( 'path' => '/' . $t['path'] . '/', 'lastmod' => cvc_sitemap_lastmod( $data['notices'] ) );
 	}
+	// Thư viện tài liệu (31/10/2026): 9 trang + trang ngành + trang tỉnh có dữ liệu.
+	if ( function_exists( 'cvc_library_views' ) ) {
+		foreach ( cvc_library_views() as $lk => $lv ) {
+			if ( empty( $lv['external'] ) ) {
+				$rows[] = array( 'path' => '/' . $lv['path'] . '/', 'lastmod' => cvc_sitemap_lastmod( $data['notices'] ) );
+			}
+		}
+		foreach ( (array) ( cvc_library_api( 'nganh' )['data']['families'] ?? array() ) as $lf ) {
+			if ( (int) ( $lf['total'] ?? 0 ) >= 5 ) {
+				$rows[] = array( 'path' => '/tai-lieu/nganh/' . $lf['slug'] . '/', 'lastmod' => cvc_sitemap_lastmod( $data['notices'] ) );
+			}
+		}
+		foreach ( (array) ( cvc_library_api( 'tinh' )['data']['provinces'] ?? array() ) as $lpv ) {
+			if ( (int) ( $lpv['total'] ?? 0 ) >= 5 ) {
+				$rows[] = array( 'path' => '/tai-lieu/tinh/' . $lpv['slug'] . '/', 'lastmod' => cvc_sitemap_lastmod( $data['notices'] ) );
+			}
+		}
+	}
 	foreach ( function_exists( 'cvc_rec_presets' ) ? cvc_rec_presets() : array() as $pr ) {
 		$rows[] = array( 'path' => '/' . $pr['path'] . '/', 'lastmod' => cvc_sitemap_lastmod( $data['notices'] ) );
 	}

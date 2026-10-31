@@ -186,6 +186,8 @@ function cvc_chrome_mega( string $key, array $kids, callable $active ): void {
 		'audience' => 'Theo đối tượng',
 		'type'     => 'Theo loại hình',
 		'field'    => 'Theo ngành & công cụ',
+		'lib_exam' => 'Theo kỳ thi & đối tượng',
+		'lib_kind' => 'Theo loại tài liệu',
 	);
 	$by = array();
 	foreach ( $kids as $k ) {

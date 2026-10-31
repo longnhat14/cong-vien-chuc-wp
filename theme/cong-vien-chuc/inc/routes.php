@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Tăng số này khi thêm/sửa rewrite rule để buộc flush lại đúng 1 lần.
-const CVC_REWRITE_VERSION = '27';
+const CVC_REWRITE_VERSION = '28';
 
 /**
  * Section hợp lệ của /tai-khoan/{section}/ (Phase 10) - map slug tiếng
@@ -47,6 +47,10 @@ function cvc_account_primary_sections(): array {
 add_action( 'init', 'cvc_register_rewrite_rules' );
 
 function cvc_register_rewrite_rules(): void {
+	// 31/10/2026: thư viện tài liệu /tai-lieu/{cong-chuc|vien-chuc|nganh|tinh|...}/ (inc/library.php) - trước luật /tai-lieu/{slug}/.
+	if ( function_exists( 'cvc_library_rewrite_rules' ) ) {
+		cvc_library_rewrite_rules();
+	}
 	// 28/10/2026 (phải đứng trước luật chi tiết tin /tuyen-dung/{slug}/): ôn thi theo đối tượng (cvc_cat_tracks) + tin tuyển dụng theo loại (cvc_rec_presets).
 	foreach ( array( 'on-thi-cong-chuc' => 'cong-chuc', 'on-thi-vien-chuc' => 'vien-chuc', 'on-thi-vien-chuc-giao-vien' => 'giao-vien', 'on-thi-vien-chuc-y-te' => 'y-te' ) as $cvc_p => $cvc_k ) {
 		add_rewrite_rule( '^' . $cvc_p . '/page/([0-9]+)/?$', 'index.php?cvc_page=exams&cvc_exam_mode=on-tap&cvc_exam_track=' . $cvc_k . '&cvc_paged=$matches[1]', 'top' );
@@ -503,6 +507,7 @@ function cvc_template_include( string $template ): string {
 		'account'               => 'template-account.php',
 		'exam-attempt'          => 'template-exam-attempt.php',
 		'documents'             => 'template-documents.php',
+		'library'               => 'template-library.php',
 		'document-detail'       => 'template-document-detail.php',
 		'order-result'          => 'template-order-result.php',
 		'payment'               => 'template-payment.php',
