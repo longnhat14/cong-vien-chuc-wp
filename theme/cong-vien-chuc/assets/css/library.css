@@ -95,3 +95,14 @@
 
 /* Bìa nhỏ của tài liệu (ảnh dựng tự động, 01/11/2026) */
 .lb-thumb{flex:none;width:40px;height:57px;border-radius:2px 4px 4px 2px;box-shadow:0 2px 6px rgba(15,42,74,.25);object-fit:cover;background:#0f2a4a}
+/* Kệ sách: lưới ảnh sách 3D dựng sẵn (01/11/2026) */
+.lb-shelf{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:18px}
+.lb-shelf a{display:flex;flex-direction:column;gap:6px;height:100%;color:inherit;text-decoration:none}
+.lb-shelf-img{display:block;aspect-ratio:3/4;border-radius:10px;overflow:hidden;background:#e4eaf2}
+.lb-shelf-img img{width:100%;height:100%;display:block;object-fit:cover;transform:scale(1.22);transition:transform .3s ease}
+.lb-shelf a:hover .lb-shelf-img img,.lb-shelf a:focus-visible .lb-shelf-img img{transform:scale(1.3)}
+.lb-shelf a:focus-visible{outline:3px solid #c9a052;outline-offset:3px;border-radius:10px}
+.lb-shelf b{font-size:15px;line-height:1.35;color:#0f2a4a}
+.lb-shelf small{font-size:13px;color:#5b6676}
+.lb-shelf .lb-price{margin-top:auto;align-self:flex-start}
+@media (prefers-reduced-motion:reduce){.lb-shelf-img img{transition:none}}

@@ -97,3 +97,4 @@
 /* Trang dùng font Times cho toàn bộ (cvc-doc.css, !important); bìa sách giữ font thương hiệu như bản PDF. */
 #main .bk,#main .bk *:not(svg):not(svg *){font-family:"Be Vietnam Pro","Segoe UI",Arial,sans-serif!important}
 #main .bk .bk-sub{font-family:Tinos,"Times New Roman",serif!important}
+.bk-art-img{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:cover}

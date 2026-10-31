@@ -135,6 +135,17 @@ $lb_block = static function ( array $b ) use ( $lb_more, $lb_date ): void {
 					<li><a class="lb-card is-set" href="<?php echo esc_url( cvc_pdf_set_url( (string) $s['slug'] ) ); ?>"><span class="lb-pill<?php echo ! empty( $s['is_open'] ) ? ' is-open' : ''; ?>"><?php echo ! empty( $s['is_open'] ) ? 'Đang nhận hồ sơ' : 'Đã hết hạn nộp'; ?></span><b><?php echo esc_html( (string) $s['title'] ); ?></b><small><?php echo esc_html( implode( ' · ', array_filter( array( (string) ( $s['subtitle'] ?? '' ), (int) $s['exams'] . ' đề', number_format_i18n( (int) $s['questions'] ) . ' câu' ) ) ) ); ?></small></a></li>
 				<?php endforeach; ?>
 			</ul>
+		<?php elseif ( 'docs' === $type && array_filter( array_column( $items, 'card' ) ) ) : // 01/11/2026: kệ sách - ảnh sách 3D dựng sẵn ?>
+			<ul class="lb-shelf">
+				<?php foreach ( $items as $d ) : ?>
+					<li><a href="<?php echo esc_url( cvc_document_url( (string) $d['slug'] ) ); ?>">
+						<span class="lb-shelf-img"><?php if ( ! empty( $d['card'] ) ) : ?><img src="<?php echo esc_url( (string) $d['card'] ); ?>" alt="" width="600" height="800" loading="lazy" decoding="async"><?php endif; ?></span>
+						<b><?php echo esc_html( (string) $d['title'] ); ?></b>
+						<small><?php echo esc_html( implode( ' · ', array_filter( array( (string) $d['category_label'], (int) $d['downloads'] ? number_format_i18n( (int) $d['downloads'] ) . ' lượt tải' : '' ) ) ) ); ?></small>
+						<span class="lb-price<?php echo ! empty( $d['is_free'] ) ? ' is-free' : ''; ?>"><?php echo ! empty( $d['is_free'] ) ? 'Miễn phí' : esc_html( number_format( (float) $d['price'], 0, ',', '.' ) . 'đ' ); ?></span>
+					</a></li>
+				<?php endforeach; ?>
+			</ul>
 		<?php elseif ( 'docs' === $type ) : ?>
 			<ul class="lb-list">
 				<?php foreach ( $items as $d ) : ?>

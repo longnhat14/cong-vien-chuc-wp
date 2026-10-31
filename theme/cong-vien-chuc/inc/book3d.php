@@ -82,12 +82,14 @@ function cvc_book3d_render( array $doc, string $price_txt ): void {
 	$fp     = is_array( $b['fingerprint'] ?? null ) ? $b['fingerprint'] : null;
 	$toc    = (array) ( $b['toc'] ?? array() );
 	$eyebrow = ! empty( $b['version'] ) ? 'PHIÊN BẢN ' . (int) $b['version'] : ( ! empty( $b['pages'] ) ? (int) $b['pages'] . ' TRANG' : 'TÀI LIỆU ÔN THI' );
+	$dark   = ! isset( $b['dark'] ) || ! empty( $b['dark'] );
+	$cover  = (string) ( $doc['images']['cover'] ?? '' ); // ảnh bìa dựng sẵn theo phong cách bộ sách (backend Imagick)
 	$style  = sprintf(
 		'--bk-ground:%s;--bk-accent:%s;--bk-soft:%s;--bk-muted:%s;--bk-t:%s',
-		esc_attr( (string) ( $p['ground'] ?? '#0f2a4a' ) ),
-		esc_attr( (string) ( $p['accent'] ?? '#c9a052' ) ),
+		esc_attr( (string) ( $p['spine'] ?? ( $p['ground'] ?? '#0f2a4a' ) ) ),
+		esc_attr( $dark ? (string) ( $p['accent'] ?? '#c9a052' ) : '#dcbc6e' ),
 		esc_attr( (string) ( $p['soft'] ?? '#e8d6ac' ) ),
-		esc_attr( (string) ( $p['muted'] ?? '#c7d3e2' ) ),
+		esc_attr( $dark ? (string) ( $p['muted'] ?? '#c7d3e2' ) : '#c7d3e2' ),
 		esc_attr( (string) (float) ( $b['thickness'] ?? 0.07 ) )
 	);
 	$logo   = get_theme_file_uri( '/assets/brand/icon-128.png' );
@@ -124,6 +126,9 @@ function cvc_book3d_render( array $doc, string $price_txt ): void {
 				</div>
 				<div class="bk-cover">
 					<div class="bk-cover-front">
+						<?php if ( '' !== $cover ) : ?>
+						<img class="bk-art-img" src="<?php echo esc_url( $cover ); ?>" alt="<?php echo esc_attr( 'Bìa ' . $plain ); ?>" width="794" height="1123" decoding="async">
+						<?php else : ?>
 						<div class="bk-art">
 							<div class="bk-grid" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
 							<div class="bk-head">
@@ -159,6 +164,7 @@ function cvc_book3d_render( array $doc, string $price_txt ): void {
 								</div>
 							</div>
 						</div>
+						<?php endif; ?>
 						<span class="bk-light" aria-hidden="true"></span>
 						<?php if ( '' !== $price_txt ) : ?><span class="bk-price"><small><?php echo esc_html( (string) ( $b['format_label'] ?? 'TÀI LIỆU' ) ); ?></small><?php echo esc_html( $price_txt ); ?></span><?php endif; ?>
 					</div>
