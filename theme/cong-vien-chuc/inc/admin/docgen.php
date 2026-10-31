@@ -134,6 +134,9 @@ function cvc_dg_render_detail( int $id ): void {
 			<?php if ( in_array( $st, array( 'writing', 'verifying' ), true ) ) : ?>
 				<?php cvc_dg_form_open( $id, 'step' ); ?><button class="dg-btn">▶ Chạy bước tiếp ngay</button></form>
 			<?php endif; ?>
+			<?php if ( in_array( $st, array( 'review', 'rendered' ), true ) && (int) ( $c['verified'] ?? 0 ) > 0 ) : ?>
+				<?php cvc_dg_form_open( $id, 'approve_verified' ); ?><button class="dg-btn" onclick="return confirm('Duyệt <?php echo (int) $c['verified']; ?> phần đã qua kiểm chứng? Hãy chắc bạn đã đọc các phần này.')">✓ Duyệt <?php echo (int) $c['verified']; ?> phần đã kiểm chứng</button></form>
+			<?php endif; ?>
 			<?php if ( in_array( $st, array( 'review', 'rendered' ), true ) ) : ?>
 				<?php cvc_dg_form_open( $id, 'render' ); ?><button class="dg-btn is-primary"<?php echo $all_ok ? '' : ' disabled title="Duyệt hết các phần trước"'; ?>>⎙ Dựng PDF<?php echo 'rendered' === $st ? ' lại' : ''; ?></button></form>
 			<?php endif; ?>
