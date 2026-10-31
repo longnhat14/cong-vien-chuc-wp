@@ -20,8 +20,8 @@
 .bk-page1-in{height:100%;box-sizing:border-box;padding:9% 8% 7% 10%;display:flex;flex-direction:column;gap:calc(var(--W)*.02);font-size:calc(var(--bk-w)*.041px)}
 .bk-page1-k{margin:0;font-size:.82em;font-weight:600;letter-spacing:.18em;color:color-mix(in srgb,var(--bk-accent) 70%,#000)}
 .bk-page1-h{margin:0 0 .3em;font-size:1.9em;font-weight:800;color:var(--bk-ground);border-bottom:2px solid var(--bk-accent);padding-bottom:.25em}
-.bk-toc{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.18em;flex:1;min-height:0;overflow:hidden}
-.bk-toc a{display:flex;gap:.6em;color:#1b2b40;text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.55;border-bottom:1px dotted #d8ccb0}
+.bk-toc{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:0;flex:1;min-height:0;overflow:hidden}
+.bk-toc a{display:flex;gap:.6em;color:#1b2b40;text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.5;border-bottom:1px dotted #d8ccb0}
 .bk-toc a:hover,.bk-toc a:focus-visible{color:var(--bk-ground);text-decoration:underline}
 .bk-toc span{flex:0 0 1.6em;font-weight:800;color:color-mix(in srgb,var(--bk-accent) 70%,#000)}
 .bk-page1-p{margin:0;line-height:1.6;flex:1}
