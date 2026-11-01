@@ -247,6 +247,10 @@ get_header();
 			Toàn văn dưới đây là bản gốc khi ban hành — đối chiếu văn bản sửa đổi khi ôn thi.</div>
 	<?php endif; ?>
 
+	<?php if ( in_array( trim( $doc_number ), cvc_vtvl_doc_numbers(), true ) ) : ?>
+		<div class="ld-alert" role="note" style="border-color:#bfdbfe;background:#eff6ff"><b>Thuộc nhóm văn bản về vị trí việc làm.</b> Xem <a href="<?php echo esc_url( cvc_vtvl_url() ); ?>">toàn bộ văn bản theo từng nhóm</a><?php if ( false !== strpos( $doc_number, '232/2026' ) ) : ?> và <a href="<?php echo esc_url( home_url( '/bai-viet/phe-duyet-vi-tri-viec-lam-vien-chuc-nghi-dinh-232-2026/' ) ); ?>">hướng dẫn đơn vị sự nghiệp cần làm gì</a><?php endif; ?>.</div>
+	<?php endif; ?>
+
 	<!-- ============ ĐIỂM XÁC MINH ============ -->
 	<section class="ld-scorestrip" aria-label="Điểm xác minh">
 		<div class="ld-scorecard <?php echo esc_attr( $vclass ); ?>">

@@ -635,6 +635,11 @@ function cvc_legal_documents_url( int $paged = 1 ): string {
 	return home_url( '/' . $path );
 }
 
+/** Số hiệu các văn bản thuộc trang Vị trí việc làm (khớp VTVL_GROUPS ở backend). */
+function cvc_vtvl_doc_numbers(): array {
+	return array( '361/2025/NĐ-CP', '12/2022/TT-BNV', '62/2020/NĐ-CP', '232/2026/NĐ-CP', '19/2023/TT-BGDĐT', '20/2023/TT-BGDĐT', '10/2023/TT-BVHTTDL', '106/2020/NĐ-CP', '107-KL/TW', '07-HD/BTCTW', '80/2025/QH15', '129/2025/QH15' );
+}
+
 function cvc_vtvl_url(): string {
 	return home_url( '/vi-tri-viec-lam/' );
 }

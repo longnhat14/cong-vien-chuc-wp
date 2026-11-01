@@ -520,6 +520,7 @@ $GLOBALS['cvc_home17_cfg'] = array(
    <a class="start-path" href="<?php $a( $u['legal'] ); ?>"><span class="start-path-num">02</span><span><strong>Cập nhật kiến thức pháp luật</strong><small>Tìm văn bản theo số hiệu, chủ đề và kiểm tra thông tin hiệu lực trước khi học.</small><span class="path-arrow">Mở kho văn bản →</span></span></a>
    <a class="start-path" href="<?php $a( $u['rec'] ); ?>"><span class="start-path-num">03</span><span><strong>Tìm cơ hội phù hợp</strong><small>Khám phá thông báo tuyển dụng và rà soát điều kiện, hồ sơ, thời hạn.</small><span class="path-arrow">Tìm tuyển dụng →</span></span></a>
   </div>
+  <p style="margin:14px 0 0;font-size:15px;text-align:center">📌 Mới: <a href="<?php echo esc_url( cvc_vtvl_url() ); ?>"><b>Vị trí việc làm</b> — văn bản về công chức, viên chức và hướng dẫn của Trung ương, có tóm tắt từng Điều</a></p>
  </div>
 </section>
 
