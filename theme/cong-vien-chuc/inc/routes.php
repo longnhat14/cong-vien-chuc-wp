@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Tăng số này khi thêm/sửa rewrite rule để buộc flush lại đúng 1 lần.
-const CVC_REWRITE_VERSION = '29';
+const CVC_REWRITE_VERSION = '30';
 
 /**
  * Section hợp lệ của /tai-khoan/{section}/ (Phase 10) - map slug tiếng
@@ -189,6 +189,12 @@ function cvc_register_rewrite_rules(): void {
 	add_rewrite_rule(
 		'^thi-trac-nghiem/?$',
 		'index.php?cvc_page=exams',
+		'top'
+	);
+
+	add_rewrite_rule(
+		'^vi-tri-viec-lam/?$',
+		'index.php?cvc_page=vtvl',
 		'top'
 	);
 
@@ -498,6 +504,7 @@ function cvc_template_include( string $template ): string {
 		'exams'                 => 'template-exams.php',
 		'exam-detail'           => 'template-exam-detail.php',
 		'legal-documents'       => 'template-legal-documents.php',
+		'vtvl'                  => 'template-vtvl.php',
 		'legal-document-detail' => 'template-legal-document-detail.php',
 		'search'                => 'template-search.php',
 		'login'                 => 'template-login.php',
@@ -626,6 +633,10 @@ function cvc_legal_documents_url( int $paged = 1 ): string {
 	}
 
 	return home_url( '/' . $path );
+}
+
+function cvc_vtvl_url(): string {
+	return home_url( '/vi-tri-viec-lam/' );
 }
 
 function cvc_legal_document_url( string $slug ): string {

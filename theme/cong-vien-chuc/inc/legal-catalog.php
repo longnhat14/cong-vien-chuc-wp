@@ -10,7 +10,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 add_action( 'wp_enqueue_scripts', 'cvc_legal_catalog_assets', 55 );
 
 function cvc_legal_catalog_assets(): void {
-	if ( 'legal-documents' !== (string) get_query_var( 'cvc_page' ) ) {
+	$page = (string) get_query_var( 'cvc_page' );
+	if ( ! in_array( $page, array( 'legal-documents', 'vtvl' ), true ) ) {
 		return;
 	}
 	$css = get_theme_file_path( '/assets/css/legal-catalog.css' );

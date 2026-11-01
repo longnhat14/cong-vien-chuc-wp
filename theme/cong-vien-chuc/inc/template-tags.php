@@ -142,7 +142,7 @@ function cvc_is_nav_section_active( string $section ): bool {
 		case 'exams':
 			return in_array( $page, array( 'exams', 'exam-detail' ), true );
 		case 'legal-documents':
-			return in_array( $page, array( 'legal-documents', 'legal-document-detail' ), true );
+			return in_array( $page, array( 'legal-documents', 'legal-document-detail', 'vtvl' ), true );
 	}
 
 	return false;

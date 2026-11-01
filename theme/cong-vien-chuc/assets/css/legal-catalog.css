@@ -169,3 +169,17 @@ a.lg-source:hover{text-decoration:underline}
 	.lg .lg-docbody h3{font-size:16.5px}
 }
 @media (prefers-reduced-motion:reduce){.lg .lg-btn{transition:none}.lg .lg-btn:hover{transform:none}}
+
+/* Vị trí việc làm (01/11/2026) - dùng lại bộ lớp .lg, chỉ thêm khối riêng */
+.vt-two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:0 0 18px}
+.vt-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.lg .vt-card h2{font-size:18px;color:var(--nd);margin-bottom:6px}
+.vt-card p{color:#303e49}
+.vt-group{margin:0 0 22px}
+.vt-note{margin-top:6px!important;font-size:14px;color:#745317}
+.vt-links{list-style:none;margin:0 0 10px;padding:0;display:grid;gap:8px}
+.vt-links li{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 14px;display:grid;gap:3px}
+.vt-links a{color:var(--n)}
+.vt-links a:hover{text-decoration:underline}
+.vt-links span{font-size:14px;color:var(--mut)}
+@media (max-width:760px){.vt-two{grid-template-columns:1fr}}
