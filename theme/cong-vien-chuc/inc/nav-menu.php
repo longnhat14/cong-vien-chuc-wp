@@ -122,12 +122,35 @@ function cvc_nav_from_wp_menu(): ?array {
 			if ( in_array( 'sap-co-neu-trong', $classes, true ) && '' === $row['badge'] && function_exists( 'cvc_nav_count_for' ) && 0 === cvc_nav_count_for( $row['url'] ) ) {
 				$row['badge'] = 'Sắp có';
 			}
+			// 01/11/2026: nhãn "Mới" đỏ. Lớp moi-den-YYYYMMDD = mới đến hết ngày đó; moi-tin / moi-de / moi-van-ban / moi-tai-lieu = mới khi có số liệu thật.
+			$is_new    = false;
+			$new_title = '';
+			$stats_now = cvc_nav_stats();
+			$auto      = array(
+				'moi-tin'      => array( 'tin-hom-nay', '%d tin mới đăng hôm nay' ),
+				'moi-de'       => array( 'de-moi', '%d đề mới trong 7 ngày qua' ),
+				'moi-van-ban'  => array( 'van-ban-moi', '%d văn bản mới ban hành hoặc mới bổ sung' ),
+				'moi-tai-lieu' => array( 'tai-lieu-moi', '%d tài liệu mới trong 7 ngày qua' ),
+			);
+			foreach ( $classes as $c ) {
+				if ( preg_match( '/^moi-den-(\d{4})(\d{2})(\d{2})$/', $c, $m ) && current_time( 'Y-m-d' ) <= $m[1] . '-' . $m[2] . '-' . $m[3] ) {
+					$is_new = true;
+				} elseif ( isset( $auto[ $c ] ) && (int) ( $stats_now[ $auto[ $c ][0] ] ?? 0 ) > 0 ) {
+					$is_new    = true;
+					$new_title = sprintf( $auto[ $c ][1], (int) $stats_now[ $auto[ $c ][0] ] );
+				}
+			}
+			if ( $is_new && '' === $row['badge'] ) {
+				$row['badge'] = 'Mới';
+			}
 			$children[ (int) $it->menu_item_parent ][] = $row + array(
 				'group'   => $group,
 				'sym'     => trim( (string) $it->attr_title ),
 				'icon'    => $icon,
 				'count'   => in_array( 'dem-tin', $classes, true ),
 				'variant' => in_array( 'mau-dong', $classes, true ) ? 'bronze' : '',
+				'new'     => $is_new && 'Mới' === $row['badge'],
+				'new_tip' => $new_title,
 			);
 		}
 	}
@@ -179,7 +202,7 @@ add_action(
 			. 'nhãn dạng <code>Tên | Nhãn nhỏ</code> để hiện huy hiệu. Bỏ gán vị trí Primary → web dùng menu mặc định.</p>'
 			. '<p><b>Menu con v3:</b> <code>nhom-theo-loai</code> / <code>nhom-theo-nganh</code> = 2 cột menu Tuyển dụng; <code>ico-&lt;tên&gt;</code> = icon '
 			. '(luyen-thi, thi-thu, ngan-hang, da-luu, pdf, xep-hang, tien-do, cong-chuc, vien-chuc, giao-vien, y-te, hop-dong, tat-ca, tim-vi-tri, ngoai-cong-lap, loa, sao, chu-de, van-ban, tai-lieu); '
-			. '<code>dem-tin</code> = hiện số tin đang mở; <code>the-noi-bat</code> = thẻ điểm nhấn (Nhãn <code>Dòng nhỏ | Chữ nút</code>, Thuộc tính tiêu đề = dòng lớn, Mô tả = đoạn ngắn, thêm <code>mau-dong</code> = nền đồng); '
+			. '<code>dem-tin</code> = hiện số tin đang mở; <code>moi-den-20261231</code> = nhãn Mới đỏ đến hết ngày đó, <code>moi-tin</code> / <code>moi-de</code> / <code>moi-van-ban</code> / <code>moi-tai-lieu</code> = nhãn Mới tự bật khi có tin / đề / văn bản / tài liệu mới; <code>the-noi-bat</code> = thẻ điểm nhấn (Nhãn <code>Dòng nhỏ | Chữ nút</code>, Thuộc tính tiêu đề = dòng lớn, Mô tả = đoạn ngắn, thêm <code>mau-dong</code> = nền đồng); '
 			. '<code>chan-trang</code> = liên kết ở chân menu (Mô tả = câu dẫn). Mã số liệu dùng được trong dòng lớn / mô tả: <code>{tin-mo}</code> <code>{sap-het-han}</code> <code>{vi-tri}</code> <code>{tin-de-rieng}</code> <code>{de-rieng}</code>.</p></div>';
 	}
 );
@@ -193,7 +216,7 @@ function cvc_nav_stats(): array {
 	if ( null !== $memo ) {
 		return $memo;
 	}
-	$fresh = get_transient( 'cvc_nav_stats_v1' );
+	$fresh = get_transient( 'cvc_nav_stats_v2' );
 	if ( is_array( $fresh ) ) {
 		return $memo = $fresh;
 	}
@@ -228,6 +251,10 @@ function cvc_nav_stats_refresh(): void {
 		$s['sap-het-han'] = (int) ( $ov['counts']['closing_soon'] ?? 0 );
 		$s['vi-tri']      = (int) ( $ov['counts']['open_positions'] ?? 0 );
 		$s['by_path']['/tuyen-dung/'] = $s['tin-mo'];
+		// 01/11/2026: số liệu cho nhãn "Mới" (lớp moi-tin / moi-de / moi-van-ban).
+		$s['tin-hom-nay'] = (int) ( $ov['counts']['new_today'] ?? 0 );
+		$s['de-moi']      = (int) ( $ov['counts']['new_exams_7d'] ?? 0 );
+		$s['van-ban-moi'] = (int) ( $ov['counts']['new_legal_30d'] ?? 0 );
 	} else {
 		$ok = false;
 	}
@@ -276,11 +303,11 @@ function cvc_nav_stats_refresh(): void {
 	}
 	$s['at'] = time();
 	if ( $ok ) {
-		set_transient( 'cvc_nav_stats_v1', $s, 20 * MINUTE_IN_SECONDS );
+		set_transient( 'cvc_nav_stats_v2', $s, 20 * MINUTE_IN_SECONDS );
 		update_option( 'cvc_nav_stats_last', $s, false );
 	} else {
 		// Lỗi API: giữ bản cũ thêm 5 phút rồi thử lại.
-		set_transient( 'cvc_nav_stats_v1', (array) get_option( 'cvc_nav_stats_last', array() ), 5 * MINUTE_IN_SECONDS );
+		set_transient( 'cvc_nav_stats_v2', (array) get_option( 'cvc_nav_stats_last', array() ), 5 * MINUTE_IN_SECONDS );
 	}
 	delete_transient( 'cvc_nav_stats_lock' );
 }

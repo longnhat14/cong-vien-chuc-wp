@@ -401,3 +401,13 @@
 }
 @media(max-width:1100px){:root .ch-nav-links.open{background:#fffefa}}
 :root .ch-mg .ch-mega-txt b .ch-nav-badge{display:inline-block;margin-left:7px;padding:0 6px;font-size:11.5px;font-weight:bold;line-height:1.6;color:#8a5a17;background:#fff7e6;border:1px solid #e6d3aa;border-radius:6px;vertical-align:2px}
+
+/* Nhãn "Mới" đỏ (01/11/2026): đập nhẹ, tắt khi người dùng chọn giảm chuyển động */
+:root .ch-nav-badge.is-new,:root .ch-mg .ch-mega-txt .ch-nav-badge.is-new,:root .ch-mg .ch-mega-txt b .ch-nav-badge.is-new{display:inline-block;margin-left:7px;padding:0 7px;font-size:11px;font-weight:bold;line-height:1.6;letter-spacing:.4px;text-transform:uppercase;color:#fff;background:#d92d2d;border:1px solid #d92d2d;border-radius:99px;vertical-align:2px;animation:ch-new-pulse 1.8s ease-in-out infinite}
+@keyframes ch-new-pulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(217,45,45,.45)}50%{transform:scale(1.08);box-shadow:0 0 0 5px rgba(217,45,45,0)}}
+@media (prefers-reduced-motion:reduce){:root .ch-nav-badge.is-new{animation:none}}
+
+/* Icon cho menu con dạng danh sách (01/11/2026) */
+:root .ch-nav-sub .ch-sub-lb{display:inline-flex;align-items:center;gap:10px}
+:root .ch-nav-sub .ch-sub-ico{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:9px;background:#e7f3ef;color:#10635e;flex-shrink:0;font-style:normal}
+:root .ch-nav-sub .ch-sub-ico svg{width:18px;height:18px;display:block}
