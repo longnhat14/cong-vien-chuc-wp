@@ -41,7 +41,9 @@
 		var h = document.querySelector('header');
 		if (!h) { return 0; }
 		var cs = window.getComputedStyle(h);
-		return (cs.position === 'fixed' || cs.position === 'sticky') ? Math.max(0, h.getBoundingClientRect().bottom) : 0;
+		// Đầu trang dính (sticky top:0): khi đã dính, mép dưới = top + chiều cao - KHÔNG lấy vị trí lúc đầu trang
+		// (còn thanh thông báo phía trên làm thanh công cụ "rơi xuống" khi cuộn).
+		return (cs.position === 'fixed' || cs.position === 'sticky') ? (parseFloat(cs.top) || 0) + h.offsetHeight : 0;
 	}
 	function syncTop() { root.style.setProperty('--rd-top', hdrH() + 'px'); }
 	function topOffset() { return hdrH() + bar.offsetHeight + 10; }
@@ -103,7 +105,22 @@
 			if (found) { setCur(found); }
 		}
 	}
-	function onScroll() { if (!ticking) { ticking = true; window.requestAnimationFrame(detect); } }
+	// Điện thoại: cuộn xuống thì thu thanh công cụ, cuộn lên thì hiện lại (dành chỗ cho trang sách).
+	var lastY = window.pageYOffset;
+	function tuck() {
+		var y = isFull() ? root.scrollTop : window.pageYOffset;
+		var narrow = window.innerWidth <= 700;
+		var busy = bar.classList.contains('is-more') || qa('.cvc-rd-panel').some(function (p) { return !p.hidden; });
+		if (!narrow || busy) {
+			bar.classList.remove('is-tucked');
+		} else if (y > lastY + 6 && root.getBoundingClientRect().top < 0) {
+			bar.classList.add('is-tucked');
+		} else if (y < lastY - 6) {
+			bar.classList.remove('is-tucked');
+		}
+		lastY = y;
+	}
+	function onScroll() { if (!ticking) { ticking = true; window.requestAnimationFrame(function () { detect(); tuck(); }); } }
 	window.addEventListener('scroll', onScroll, { passive: true });
 	root.addEventListener('scroll', onScroll, { passive: true });
 	window.addEventListener('resize', function () { syncTop(); onScroll(); });
@@ -159,6 +176,11 @@
 	}
 
 	/* ---------- Bảng: mục lục / ảnh thu nhỏ / tìm ---------- */
+	function setMore(on) {
+		bar.classList.toggle('is-more', on);
+		var m = q('.cvc-rd-more');
+		if (m) { m.setAttribute('aria-expanded', on ? 'true' : 'false'); }
+	}
 	function closePanels(all) {
 		qa('.cvc-rd-panel').forEach(function (p) { p.hidden = true; });
 		qa('[data-act="panel"]').forEach(function (b) { b.setAttribute('aria-expanded', 'false'); });
@@ -398,6 +420,14 @@
 		if (t.matches('.cvc-rd-thumbs button')) { closePanels(); goPage(parseInt(t.getAttribute('data-page'), 10)); return; }
 		var act = t.getAttribute('data-act');
 		var v = t.getAttribute('data-v');
+		if (act === 'more') {
+			var open = !bar.classList.contains('is-more');
+			closePanels();
+			bar.classList.toggle('is-more', open);
+			t.setAttribute('aria-expanded', open ? 'true' : 'false');
+			return;
+		}
+		if (t.closest('.cvc-rd-tools') && bar.classList.contains('is-more')) { setMore(false); }
 		if (act === 'mode') { setMode(v); if (t.closest('.cvc-rd-hint')) { q('.cvc-rd-hint').hidden = true; store.set('cvc-rd-hint', 1); } } else if (act === 'prev') { goPage(cur - step()); } else if (act === 'next') { goPage(cur + step()); } else if (act === 'panel') { openPanel(v, t); } else if (act === 'full') { setFull(!isFull()); } else if (act === 'dim') { setDim(!root.classList.contains('is-dim')); } else if (act === 'spread') { setSpread(!pagesView.classList.contains('is-spread')); } else if (act === 'resume') {
 			var box = q('.cvc-rd-resume');
 			box.hidden = true;
@@ -424,7 +454,7 @@
 		if (!isFull() && (r.bottom < 0 || r.top > window.innerHeight)) { return; }
 		if (e.key === 'ArrowRight') { e.preventDefault(); goPage(cur + step()); } else if (e.key === 'ArrowLeft') { e.preventDefault(); goPage(cur - step()); }
 	});
-	document.addEventListener('click', function (e) { if (!root.contains(e.target)) { closePanels(); } });
+	document.addEventListener('click', function (e) { if (!root.contains(e.target)) { closePanels(); setMore(false); } });
 	var warned = false;
 	figs.forEach(function (f) {
 		var im = q('img', f);

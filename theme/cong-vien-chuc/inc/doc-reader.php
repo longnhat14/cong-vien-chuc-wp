@@ -108,6 +108,7 @@ function cvc_doc_reader_render( array $doc, string $slug, bool $is_logged_in, st
 				<label class="cvc-rd-num"><span class="sr-only">Trang</span><input type="number" min="1" max="<?php echo (int) $total; ?>" value="1" inputmode="numeric" id="cvc-rd-page" aria-label="Đi tới trang"><span>/ <?php echo (int) $total; ?></span></label>
 				<button type="button" class="cvc-rd-ic" data-act="next" aria-label="Trang sau"><i class="fa-solid fa-chevron-right" aria-hidden="true"></i></button>
 			</div>
+			<button type="button" class="cvc-rd-ic cvc-rd-more" data-act="more" aria-expanded="false" aria-label="Công cụ đọc khác" title="Công cụ"><i class="fa-solid fa-ellipsis" aria-hidden="true"></i></button>
 			<div class="cvc-rd-tools">
 				<?php if ( count( $toc ) >= 2 ) : ?><button type="button" class="cvc-rd-ic" data-act="panel" data-v="toc" aria-expanded="false" title="Mục lục" aria-label="Mục lục"><i class="fa-solid fa-list-ul" aria-hidden="true"></i><span>Mục lục</span></button><?php endif; ?>
 				<button type="button" class="cvc-rd-ic" data-act="panel" data-v="thumbs" data-only="pages" aria-expanded="false" title="Các trang" aria-label="Ảnh thu nhỏ các trang"><i class="fa-solid fa-table-cells" aria-hidden="true"></i><span>Các trang</span></button>

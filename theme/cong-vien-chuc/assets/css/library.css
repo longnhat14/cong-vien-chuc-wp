@@ -153,7 +153,6 @@
 .cvc-rd-range{order:3;flex:1 1 140px;min-width:120px;width:auto;margin:0 4px;accent-color:#b08a3e;height:18px}
 .cvc-rd-link{border:0;background:none;padding:0;color:var(--rd-ink);font-weight:700;text-decoration:underline;cursor:pointer}
 @media (max-width:899px){.cvc-rd-wide{display:none!important}}
-@media (max-width:760px){.cvc-rd-ic span{display:none}.cvc-rd-ic{padding:7px 9px}.cvc-rd-tools{margin-left:0;flex-basis:100%;justify-content:space-between}.cvc-rd-bar{gap:6px;padding:6px 8px}.cvc-rd-range{display:none}.cvc-rd-seg button{padding:6px 9px;font-size:13px}.cvc-rd-nav{margin-left:auto;gap:0}.cvc-rd-nav .cvc-rd-ic{padding:6px 7px}.cvc-rd-num{gap:4px;font-size:13px}.cvc-rd-num input{width:42px;padding:4px 2px;font-size:13px}}
 .cvc-rd[data-mode="pages"] .cvc-rd-text{display:none}
 .cvc-rd[data-mode="text"] .cvc-rd-pages,.cvc-rd[data-mode="text"] [data-only="pages"]{display:none!important}
 /* bảng thả xuống dưới thanh công cụ */
@@ -279,3 +278,33 @@ html.cvc-rd-lock,html.cvc-rd-lock body{overflow:hidden}
 .cvc-rd-text .cvc-up table{display:block;overflow-x:auto}
 .cvc-rd.is-dim .cvc-up aside{background:#2a3139;color:#dfe4ea}
 .cvc-rd[data-bg="sepia"] .cvc-up aside.box{background:#eef1e6}
+/* 01/11/2026: thanh công cụ gọn - một hàng; điện thoại: tràn viền, công cụ phụ trong nút "…", tự thu khi cuộn xuống */
+.cvc-rd-sticky{z-index:15;transition:transform .22s ease}
+.cvc-rd-sticky.is-tucked{transform:translateY(calc(-100% - 12px))}
+.cvc-rd-more{display:none;order:5}
+.cvc-rd[data-mode="pages"] [data-only="text"]{display:none!important}
+.cvc-rd[data-mode="text"] .cvc-rd-more{margin-left:auto}
+@media (min-width:701px){
+	.cvc-rd-bar{flex-wrap:nowrap;gap:10px;padding:6px 8px}
+	.cvc-rd-seg button{padding:6px 12px;font-size:14px}
+	.cvc-rd-ic span{display:none}
+	.cvc-rd-ic{width:36px;height:36px;padding:0;justify-content:center}
+	.cvc-rd-tools{flex-wrap:nowrap;gap:2px;margin-left:0}
+	.cvc-rd-range{flex:1 1 auto;min-width:80px}
+}
+@media (max-width:700px){
+	.cvc-rd-sticky{width:100vw;margin-left:calc(50% - 50vw);margin-bottom:10px}
+	.cvc-rd-bar{flex-wrap:nowrap;border-radius:0;border-left:0;border-right:0;padding:6px 10px;gap:6px;box-shadow:0 2px 10px rgba(15,42,74,.08)}
+	.cvc-rd-seg button{padding:5px 9px;font-size:13px}
+	.cvc-rd-nav{margin-left:auto;gap:0}
+	.cvc-rd-nav .cvc-rd-ic{width:30px;height:32px;padding:0;justify-content:center}
+	.cvc-rd-num{gap:4px;font-size:13px}
+	.cvc-rd-num input{width:42px;padding:4px 2px;font-size:13px}
+	.cvc-rd-range{display:none}
+	.cvc-rd-more{display:inline-flex;width:36px;height:34px;padding:0;justify-content:center;flex:none}
+	.cvc-rd-tools{display:none;position:absolute;left:8px;right:8px;top:calc(100% + 6px);grid-template-columns:repeat(3,1fr);gap:6px;padding:10px;background:#fff;border:1px solid var(--rd-line);border-radius:12px;box-shadow:0 14px 34px rgba(15,42,74,.18);margin:0}
+	.cvc-rd-sticky.is-more .cvc-rd-tools{display:grid}
+	.cvc-rd-tools .cvc-rd-ic{flex-direction:column;gap:4px;padding:10px 4px;font-size:12px;background:#f6f7f9}
+	.cvc-rd-tools .cvc-rd-ic span{display:block!important}
+	.cvc-rd-panel{left:8px;right:8px}
+}
