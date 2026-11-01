@@ -4,8 +4,8 @@
  * URL: /vi-tri-viec-lam/ ; menu con của "Văn bản pháp luật".
  *
  * Dữ liệu thật từ GET /api/legal-documents/vtvl (danh sách văn bản chọn theo số hiệu, hiệu lực, số bài tóm tắt theo Điều).
- * Văn bản của Trung ương (Kết luận 107-KL/TW, Hướng dẫn 07-HD/BTCTW...) chưa có toàn văn chính thức trong kho
- * nên chỉ dẫn liên kết tham khảo tới Cổng Thông tin điện tử Đảng Cộng sản Việt Nam, không tóm tắt.
+ * Kết luận 107-KL/TW và Hướng dẫn 07-HD/BTCTW được nhập từ Cổng Thông tin điện tử Đảng Cộng sản Việt Nam
+ * (nguồn chính thức); các Kế hoạch 70, 71 chưa có toàn văn nên chỉ dẫn liên kết tham khảo.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -69,7 +69,7 @@ get_header();
 			<p class="lg-actions">
 				<a class="lg-btn is-primary" href="#nhom-cong-chuc">§ Công chức</a>
 				<a class="lg-btn" href="#nhom-vien-chuc">◎ Viên chức</a>
-				<a class="lg-btn" href="#trung-uong">▣ Chỉ đạo của Trung ương</a>
+				<a class="lg-btn" href="#nhom-trung-uong">▣ Chỉ đạo của Trung ương</a>
 			</p>
 		</div>
 		<aside class="lg-hero-stat">
@@ -99,7 +99,7 @@ get_header();
 			if ( ! $items ) {
 				continue;
 			}
-			$anchor = array( 'cong-chuc' => 'nhom-cong-chuc', 'vien-chuc' => 'nhom-vien-chuc', 'can-cu-chung' => 'nhom-can-cu-chung' )[ (string) $g['key'] ] ?? 'nhom-' . sanitize_title( (string) $g['key'] );
+			$anchor = array( 'cong-chuc' => 'nhom-cong-chuc', 'vien-chuc' => 'nhom-vien-chuc', 'trung-uong' => 'nhom-trung-uong', 'can-cu-chung' => 'nhom-can-cu-chung' )[ (string) $g['key'] ] ?? 'nhom-' . sanitize_title( (string) $g['key'] );
 			?>
 			<section class="vt-group" id="<?php echo esc_attr( $anchor ); ?>">
 				<div class="lg-listhead"><div><h2><?php echo esc_html( (string) $g['label'] ); ?></h2><p><?php echo (int) count( $items ); ?> văn bản</p></div></div>
@@ -136,14 +136,14 @@ get_header();
 		<?php endforeach; ?>
 	<?php endif; ?>
 
-	<section class="vt-group" id="trung-uong">
-		<div class="lg-listhead"><div><h2>Chỉ đạo của Trung ương (tham khảo)</h2><p>Kết luận 107-KL/TW, Hướng dẫn 07-HD/BTCTW và các Kế hoạch 70, 71 về cơ sở dữ liệu vị trí việc làm.</p></div><span class="lg-pill">Chưa có toàn văn chính thức trong kho</span></div>
+	<section class="vt-group" id="huong-dan-tham-khao">
+		<div class="lg-listhead"><div><h2>Tài liệu hướng dẫn thêm</h2><p>Bài hướng dẫn và công cụ kê khai trên Cổng Thông tin điện tử Đảng Cộng sản Việt Nam.</p></div></div>
 		<ul class="vt-links">
 			<?php foreach ( $central as $c ) : ?>
 				<li><a href="<?php echo esc_url( $c[1] ); ?>" target="_blank" rel="noopener nofollow"><b><?php echo esc_html( $c[0] ); ?> ↗</b></a><span><?php echo esc_html( $c[2] ); ?></span></li>
 			<?php endforeach; ?>
 		</ul>
-		<p class="lg-note">Các liên kết trên là bài đăng trên Cổng Thông tin điện tử Đảng Cộng sản Việt Nam, không phải bản toàn văn văn bản. Khi có toàn văn chính thức, trang sẽ bổ sung và tóm tắt từng nội dung.</p>
+		<p class="lg-note">Các liên kết trên là bài đăng và tài liệu hướng dẫn trên Cổng Thông tin điện tử Đảng Cộng sản Việt Nam, chưa phải toàn văn văn bản; các Kế hoạch 70, 71 sẽ được bổ sung khi có bản toàn văn.</p>
 	</section>
 
 	<p class="lg-note">Văn bản có giá trị pháp lý là bản do cơ quan có thẩm quyền ban hành. Hãy kiểm tra văn bản sửa đổi, thay thế mới nhất và hướng dẫn của cơ quan quản lý ngành trước khi áp dụng.</p>
