@@ -124,3 +124,43 @@
 @media print{.cvc-nocopy{display:none!important}}
 #cvc-nocopy-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);opacity:0;pointer-events:none;background:#0f2a4a;color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;z-index:9999;transition:all .2s}
 #cvc-nocopy-toast.is-on{opacity:1;transform:translateX(-50%) translateY(0)}
+/* 01/11/2026: Đọc thử bằng ảnh trang gốc (claude/ke-hoach-doc-thu-dep.md) */
+.cvc-pv-sub{margin:-4px 0 16px;font-size:14px;color:#5b6470}
+.cvc-pv-toc{margin:0 0 20px;padding:14px 18px;border:1px solid #e6e0d2;border-radius:12px;background:#fffdf8;font-size:15px}
+.cvc-pv-toc>b{display:block;margin-bottom:6px;color:#17334f;letter-spacing:.02em}
+.cvc-pv-toc ol{margin:0;padding:0;list-style:none;counter-reset:pv}
+@media (min-width:720px){.cvc-pv-toc ol{columns:2;column-gap:28px}}
+.cvc-pv-toc li{break-inside:avoid;counter-increment:pv}
+.cvc-pv-toc li>a,.cvc-pv-toc li>span{display:flex;align-items:baseline;gap:8px;padding:5px 0;border-bottom:1px dotted #ddd5c3;color:#17334f;text-decoration:none;line-height:1.4}
+.cvc-pv-toc li>a::before,.cvc-pv-toc li>span::before{content:counter(pv,decimal-leading-zero);font-size:12px;font-weight:700;color:#b08a3e;font-variant-numeric:tabular-nums;min-width:20px}
+.cvc-pv-toc .t{flex:1;min-width:0}
+.cvc-pv-toc .n{font-size:13px;color:#5b6470;font-variant-numeric:tabular-nums;white-space:nowrap}
+.cvc-pv-toc a:hover .t{text-decoration:underline;text-underline-offset:3px}
+.cvc-pv-toc a:focus-visible{outline:2px solid #c9a052;outline-offset:2px;border-radius:4px}
+.cvc-pv-toc .is-locked{color:#7c8592}
+.cvc-pv-toc .is-locked .n i{font-size:11px;color:#b08a3e}
+.cvc-pv-pages{display:flex;flex-direction:column;align-items:center;gap:22px;padding:22px 14px;margin:0 -4px;background:#e9edf2;border-radius:14px}
+.cvc-pv-page{margin:0;width:100%;max-width:760px;scroll-margin-top:90px}
+.cvc-pv-zoom{display:block;width:100%;padding:0;border:0;background:#fff;cursor:zoom-in;border-radius:3px;box-shadow:0 1px 2px rgba(15,42,74,.12),0 8px 24px rgba(15,42,74,.12)}
+.cvc-pv-zoom:focus-visible{outline:3px solid #c9a052;outline-offset:3px}
+.cvc-pv-zoom img{display:block;width:100%;height:auto;border-radius:3px;-webkit-user-drag:none}
+.cvc-pv-page figcaption{margin-top:8px;text-align:center;font-size:12px;color:#5b6470;font-variant-numeric:tabular-nums}
+.cvc-pv-next{position:relative;width:100%;max-width:760px;border-radius:3px;overflow:hidden;box-shadow:0 8px 24px rgba(15,42,74,.12);background:#fff;min-height:260px}
+.cvc-pv-next>img{display:block;width:100%;height:auto;max-height:560px;object-fit:cover;object-position:top}
+.cvc-pv-cta{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:10px;padding:24px 24px 44px;text-align:center;background:linear-gradient(180deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.5) 35%,rgba(255,255,255,.96) 70%)}
+.cvc-pv-cta .k{font-size:22px;font-weight:800;color:#17334f;margin:0}
+.cvc-pv-cta p{margin:0;max-width:420px;font-size:15px;color:#2b3542}
+.cvc-pv-text{margin-top:22px;border:1px solid #e6e0d2;border-radius:12px;background:#fffdf8}
+.cvc-pv-text>summary{cursor:pointer;padding:12px 16px;font-weight:700;color:#17334f;font-size:15px}
+.cvc-pv-text[open]>summary{border-bottom:1px solid #e6e0d2}
+.cvc-pv-text>.cvc-gen{padding:4px 18px 14px;font-size:16px}
+.cvc-pv-text .cvc-gen-toc{display:none}
+.cvc-pv-dlg{padding:0;border:0;background:transparent;max-width:100vw;max-height:100vh;width:100vw;height:100vh;margin:0}
+.cvc-pv-dlg::backdrop{background:rgba(10,20,35,.86)}
+.cvc-pv-dlg-body{height:100%;overflow:auto;-webkit-overflow-scrolling:touch;padding:56px 12px 24px}
+.cvc-pv-dlg-body img{display:block;margin:0 auto;width:min(100%,1240px);max-width:none;height:auto;background:#fff}
+@media (max-width:640px){.cvc-pv-dlg-body img{width:180%}}
+.cvc-pv-close{position:fixed;top:12px;right:14px;width:40px;height:40px;border-radius:50%;border:0;background:#fff;color:#0f2a4a;font-size:26px;line-height:1;cursor:pointer;z-index:2}
+.cvc-pv-close:focus-visible{outline:3px solid #c9a052}
+@media (max-width:640px){.cvc-pv-pages{padding:14px 8px;gap:14px;margin:0 -8px}}
+@media print{.cvc-pv-pages,.cvc-pv-dlg{display:none!important}}

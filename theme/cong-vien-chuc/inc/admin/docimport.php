@@ -34,6 +34,7 @@ function cvc_di_option_labels(): array {
 		'legal_check'  => array( 'Soát căn cứ pháp lý', array( 'full' => 'Đầy đủ (văn bản hết hiệu lực thì khóa xuất bản)', 'warn' => 'Chỉ cảnh báo (công khai nhãn "Tài liệu tham khảo")', 'skip' => 'Bỏ qua (chỉ bộ không pháp lý)' ) ),
 		'ocr'          => array( 'OCR PDF ảnh quét', array( 'all' => 'Toàn bộ (≤ 400 trang)', 'first' => 'Chỉ N trang đầu', 'off' => 'Tắt (không có bản đọc)' ) ),
 		'reading'      => array( 'Bản đọc trực tuyến', array( 'full' => 'Đầy đủ', 'preview' => 'Chỉ xem trước 15% / tối đa 10 trang', 'off' => 'Tắt' ) ),
+		'preview_style' => array( 'Kiểu đọc thử', array( 'pages' => 'Ảnh trang gốc (giống hệt bản in, có dấu chìm)', 'text' => 'Bản chữ' ) ),
 	);
 }
 
