@@ -195,6 +195,8 @@ function cvc_chrome_mega( string $key, array $kids, callable $active ): void {
 	}
 	$cols  = array_values( array_filter( array_keys( $heads ), static fn ( $g ) => ! empty( $by[ $g ] ) ) );
 	$cards = (array) ( $by['card'] ?? array() );
+	// 01/11/2026: menu Tài liệu có thêm cột "Sách & cẩm nang" (inc/book-shelf.php).
+	$books = ( 'docs' === $key || ! empty( $by['lib_kind'] ) ) && function_exists( 'cvc_book_menu' ) ? cvc_book_menu() : '';
 	$more  = (array) ( $by['more'] ?? array() );
 	$foot  = (array) ( $by['foot'] ?? array() );
 	$has   = static function () {
@@ -208,7 +210,7 @@ function cvc_chrome_mega( string $key, array $kids, callable $active ): void {
 	};
 	$go = $has() ? cvc_nav_icon( 'mui-ten' ) : '→';
 	?>
-	<div class="ch-nav-sub ch-mega ch-mg is-<?php echo esc_attr( $key ); ?><?php echo $cards ? ' has-card' : ''; ?><?php echo count( $cols ) <= 2 ? ' is-narrow' : ''; ?>" style="--mg-cols:<?php echo (int) max( 1, count( $cols ) ); ?>">
+	<div class="ch-nav-sub ch-mega ch-mg is-<?php echo esc_attr( $key ); ?><?php echo $cards ? ' has-card' : ''; ?><?php echo count( $cols ) + ( '' !== $books ? 1 : 0 ) <= 2 ? ' is-narrow' : ''; ?>" style="--mg-cols:<?php echo (int) max( 1, count( $cols ) + ( '' !== $books ? 1 : 0 ) ); ?>">
 		<div class="ch-mg-panel">
 			<i class="ch-mg-caret" aria-hidden="true"></i>
 			<div class="ch-mg-grid">
@@ -230,6 +232,7 @@ function cvc_chrome_mega( string $key, array $kids, callable $active ): void {
 					<?php if ( 'audience' === $g ) : ?></div><?php endif; ?>
 				</div>
 				<?php endforeach; ?>
+				<?php echo $books; // phpcs:ignore WordPress.Security.EscapeOutput ?>
 				<?php if ( $cards ) : ?>
 				<div class="ch-mg-col is-card">
 					<?php foreach ( $cards as $c ) : ?>

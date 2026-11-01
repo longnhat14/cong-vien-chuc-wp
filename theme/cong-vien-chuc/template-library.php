@@ -22,10 +22,45 @@ if ( 'nganh' === $lb_view && '' !== $lb_param ) {
 if ( 'tinh' === $lb_view && '' !== $lb_param ) {
 	$lb_q['province'] = $lb_param;
 }
-$lb_res  = '' !== $lb_view ? cvc_library_api( $lb_view, $lb_q ) : array( 'ok' => false, 'status' => 404, 'data' => array() );
+// 01/11/2026: Tủ sách (/tai-lieu/tu-sach/) - lấy từ GET /api/documents/books, không qua /api/library.
+$lb_is_books = 'tu-sach' === $lb_view;
+$lb_bk_f     = array();
+if ( $lb_is_books ) {
+	// phpcs:disable WordPress.Security.NonceVerification
+	$g = static fn ( string $k ): string => isset( $_GET[ $k ] ) ? sanitize_key( wp_unslash( $_GET[ $k ] ) ) : '';
+	// phpcs:enable
+	$lb_bk_f = array(
+		'doi-tuong' => in_array( $g( 'doi-tuong' ), array( 'cong-chuc', 'vien-chuc' ), true ) ? $g( 'doi-tuong' ) : '',
+		'gia'       => in_array( $g( 'gia' ), array( 'mien-phi', 'tra-phi' ), true ) ? $g( 'gia' ) : '',
+		'sap-xep'   => in_array( $g( 'sap-xep' ), array( 'moi', 'tai' ), true ) ? $g( 'sap-xep' ) : '',
+	);
+	$lb_bk = cvc_books(
+		'all',
+		array(
+			'audience' => array( 'cong-chuc' => 'civil', 'vien-chuc' => 'public' )[ $lb_bk_f['doi-tuong'] ] ?? '',
+			'free'     => array( 'mien-phi' => '1', 'tra-phi' => '0' )[ $lb_bk_f['gia'] ] ?? '',
+			'sort'     => $lb_bk_f['sap-xep'],
+		),
+		48
+	);
+	$lb_res = array( 'ok' => true, 'status' => 200, 'data' => array() );
+} else {
+	$lb_res = '' !== $lb_view ? cvc_library_api( $lb_view, $lb_q ) : array( 'ok' => false, 'status' => 404, 'data' => array() );
+}
 $lb      = $lb_res['data'];
 $lb_404  = '' === $lb_view || 404 === $lb_res['status'];
 $lb_secs = array_values( array_filter( (array) ( $lb['sections'] ?? array() ), 'is_array' ) );
+// 01/11/2026: sách đã tách lên kệ sách đầu trang -> bỏ khối "tài liệu" rỗng, bỏ luôn phần không còn khối nào.
+foreach ( $lb_secs as $i => $s ) {
+	$lb_secs[ $i ]['blocks'] = array_values( array_filter( (array) ( $s['blocks'] ?? array() ), static fn ( $b ) => is_array( $b ) && ! ( 'docs' === ( $b['type'] ?? '' ) && empty( $b['items'] ) ) ) );
+}
+$lb_secs = array_values( array_filter( $lb_secs, static fn ( $s ) => ! empty( $s['blocks'] ) ) );
+
+// Kệ sách đầu mục (trừ Biểu mẫu và Tủ sách).
+$lb_shelf = array( 'items' => array(), 'total' => 0, 'scope' => 'general' );
+if ( ! $lb_is_books && '' !== $lb_view && 'bieu-mau' !== $lb_view && function_exists( 'cvc_books' ) ) {
+	$lb_shelf = cvc_books( $lb_view, $lb_q, 8 );
+}
 
 // Tiêu đề theo trang con (ngành / tỉnh).
 $lb_h1    = $lb_cfg['h1'] ?? 'Thư viện tài liệu';
@@ -53,8 +88,27 @@ if ( ! empty( $lb['family'] ) ) {
 	$lb_crumb[] = array( 'label' => $lb_cfg['label'] );
 }
 
+$lb_shelf_t = array(
+	'cong-chuc'         => 'Sách & cẩm nang ôn thi công chức',
+	'vien-chuc'         => 'Sách & cẩm nang ôn thi viên chức',
+	'tom-tat-kien-thuc' => 'Sổ tay & tóm tắt kiến thức',
+	'giao-trinh'        => 'Giáo trình & sách tham khảo',
+	'moi'               => 'Sách & cẩm nang mới',
+)[ $lb_view ] ?? 'Sách & cẩm nang ôn thi';
+if ( ! empty( $lb['family'] ) ) {
+	$lb_shelf_t = 'Sách & cẩm nang ngành ' . mb_strtolower( (string) $lb['family']['label'], 'UTF-8' );
+} elseif ( ! empty( $lb['province'] ) ) {
+	$lb_shelf_t = 'Sách & cẩm nang ôn thi tại ' . $lb['province']['name'];
+}
+$lb_shelf_sub = 'Xem bìa, mục lục, số trang; đọc trực tuyến ngay trên trang hoặc tải về máy.';
+if ( 'general' === $lb_shelf['scope'] ) {
+	$lb_shelf_t   = 'Sách & cẩm nang được đọc nhiều';
+	$lb_shelf_sub = 'Các cuốn dùng chung cho kỳ thi công chức, viên chức - mục này chưa có sách riêng.';
+}
+
 $lb_total = array_sum( array_map( static fn ( $s ) => (int) ( $s['total'] ?? 0 ), $lb_secs ) )
-	+ count( (array) ( $lb['families'] ?? array() ) ) * 10 + count( (array) ( $lb['provinces'] ?? array() ) ) * 10;
+	+ count( (array) ( $lb['families'] ?? array() ) ) * 10 + count( (array) ( $lb['provinces'] ?? array() ) ) * 10
+	+ ( 'exact' === $lb_shelf['scope'] ? (int) $lb_shelf['total'] : 0 );
 
 if ( $lb_404 ) {
 	status_header( 404 );
@@ -67,7 +121,19 @@ if ( $lb_404 ) {
 		cvc_seo_set_canonical( cvc_library_url( $lb_view, $lb_param ) );
 	}
 	// Trang mỏng: ít nội dung, hoặc mục chính (section đầu) chưa có gì (vd. Giáo trình chưa có sách) -> noindex.
-	if ( $lb_total < 5 || ( $lb_secs && 0 === (int) ( $lb_secs[0]['total'] ?? 0 ) ) || ! empty( $_GET ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+	if ( $lb_is_books ) {
+		// Tủ sách: chỉ trang gốc được lập chỉ mục (bộ lọc -> noindex), cần ít nhất 3 cuốn.
+		if ( (int) $lb_bk['total'] < 3 || ! empty( $_GET ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+			cvc_seo_set_noindex();
+		}
+		if ( $lb_bk['items'] ) {
+			$lb_ld = array();
+			foreach ( $lb_bk['items'] as $i => $it ) {
+				$lb_ld[] = array( '@type' => 'ListItem', 'position' => $i + 1, 'url' => cvc_document_url( (string) $it['slug'] ), 'name' => (string) $it['title'] );
+			}
+			cvc_seo_add_json_ld( array( '@context' => 'https://schema.org', '@type' => 'ItemList', 'name' => 'Tủ sách Công Viên Chức', 'numberOfItems' => count( $lb_ld ), 'itemListElement' => $lb_ld ) );
+		}
+	} elseif ( $lb_total < 5 || ( $lb_secs && 0 === (int) ( $lb_secs[0]['total'] ?? 0 ) && 'exact' !== $lb_shelf['scope'] ) || ! empty( $_GET ) ) { // phpcs:ignore WordPress.Security.NonceVerification
 		cvc_seo_set_noindex();
 	}
 }
@@ -186,7 +252,46 @@ get_header();
 	<?php else : ?>
 		<?php cvc_render_listing_hero( 'Thư viện tài liệu · ' . ( $lb_cfg['no'] ?? '' ), $lb_h1, $lb_lead ); ?>
 		<?php cvc_library_render_nav( $lb_view ); ?>
-		<?php if ( ! $lb_res['ok'] ) : ?>
+		<?php if ( $lb_shelf['items'] ) { cvc_book_shelf( $lb_shelf, array( 'title' => $lb_shelf_t, 'sub' => $lb_shelf_sub ) ); } ?>
+		<?php if ( $lb_is_books ) : ?>
+			<?php
+			$lb_bk_url = static function ( string $k, string $v ) use ( $lb_bk_f ): string {
+				return add_query_arg( array_filter( array( $k => $v ) + $lb_bk_f ), cvc_book_tu_sach_url() );
+			};
+			$lb_bk_grp = array(
+				'doi-tuong' => array( 'Đối tượng', array( '' => 'Tất cả', 'cong-chuc' => 'Công chức', 'vien-chuc' => 'Viên chức' ) ),
+				'gia'       => array( 'Giá', array( '' => 'Mọi giá', 'mien-phi' => 'Miễn phí', 'tra-phi' => 'Trả phí' ) ),
+				'sap-xep'   => array( 'Sắp xếp', array( '' => 'Đọc nhiều', 'moi' => 'Mới nhất', 'tai' => 'Tải nhiều' ) ),
+			);
+			?>
+			<div class="dl-bar" style="margin-top:4px">
+				<?php foreach ( $lb_bk_grp as $gk => $gv ) : ?>
+					<div class="dl-grp<?php echo 'sap-xep' === $gk ? ' dl-sort' : ''; ?>" role="group" aria-label="<?php echo esc_attr( $gv[0] ); ?>">
+						<?php if ( 'sap-xep' === $gk ) : ?><span class="dl-lb">Sắp xếp:</span><?php endif; ?>
+						<?php foreach ( $gv[1] as $ov => $ol ) : ?>
+							<a class="dl-chip<?php echo $lb_bk_f[ $gk ] === $ov ? ' is-on' : ''; ?>" href="<?php echo esc_url( $lb_bk_url( $gk, $ov ) ); ?>" rel="nofollow"<?php echo $lb_bk_f[ $gk ] === $ov ? ' aria-current="true"' : ''; ?>><?php echo esc_html( $ol ); ?></a>
+						<?php endforeach; ?>
+					</div>
+				<?php endforeach; ?>
+			</div>
+			<?php if ( ! $lb_bk['items'] ) : ?>
+				<?php cvc_render_empty_state( array_filter( $lb_bk_f ) ? 'Chưa có cuốn nào khớp bộ lọc này.' : 'Tủ sách đang được biên soạn.' ); ?>
+			<?php else : ?>
+				<?php
+				cvc_book_shelf(
+					$lb_bk,
+					array(
+						'kicker' => number_format_i18n( (int) $lb_bk['total'] ) . ' CUỐN',
+						'title'  => array_filter( $lb_bk_f ) ? 'Kết quả lọc' : 'Tất cả sách & cẩm nang',
+						'sub'    => 'Bấm vào bìa để xem mục lục, đọc thử hoặc đọc toàn bộ.',
+						'more'   => false,
+						'layout' => 'grid',
+					)
+				);
+				?>
+			<?php endif; ?>
+			<p class="dz-muted" style="font-size:14px;margin:0 0 24px">Tìm thêm đề cương, bộ đề, biểu mẫu tại <a href="<?php echo esc_url( cvc_documents_url() ); ?>">kho tài liệu tải về</a>.</p>
+		<?php elseif ( ! $lb_res['ok'] ) : ?>
 			<?php cvc_render_error_state( 'Không tải được thư viện lúc này, vui lòng thử lại sau ít phút.' ); ?>
 		<?php elseif ( ! empty( $lb['families'] ) ) : ?>
 			<ul class="lb-tiles">

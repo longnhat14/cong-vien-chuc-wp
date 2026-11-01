@@ -1096,6 +1096,8 @@ get_header();
 			</div>
 		<?php endif; ?>
 
+		<?php // 01/11/2026: sách nổi bật cho tin này (claude/ke-hoach-sach-cam-nang-noi-bat.md). ?>
+		<?php if ( function_exists( 'cvc_book_side' ) ) { cvc_book_side( cvc_book_side_items( 'recruitment', array( 'slug' => (string) ( $recruitment['slug'] ?? '' ) ) ), 'Sách ôn thi nổi bật', 'h2', array( 'static' => true ) ); } ?>
 		<div class="rd-scard">
 			<h2><span class="rd-ico is-gold" aria-hidden="true">ⓘ</span>Gợi ý nhanh</h2>
 			<p class="rd-small rd-muted">Đừng chỉ dựa vào bản tóm tắt. Hãy kiểm tra điều kiện, thời hạn và phụ lục trong văn bản gốc trước khi chuẩn bị hồ sơ; khi có điều chỉnh, cơ quan sẽ ban hành văn bản mới.</p>

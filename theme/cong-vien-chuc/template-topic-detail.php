@@ -176,6 +176,8 @@ get_header();
 							<a href="<?php echo esc_url( cvc_legal_document_url( (string) $t_doc['slug'] ) . '#toan-van' ); ?>" class="inline-block text-acc font-semibold">Đọc toàn văn &rarr;</a>
 						</div>
 					<?php endif; ?>
+					<?php // 01/11/2026: sách nổi bật theo chủ đề (claude/ke-hoach-sach-cam-nang-noi-bat.md). ?>
+					<?php if ( $is_found && function_exists( 'cvc_book_side' ) ) { cvc_book_side( cvc_book_side_items( 'exam', array( 'topics' => array( (string) $topic['name'] ) ) ), 'Sách nổi bật', 'h2' ); } ?>
 				</aside>
 
 			</div>

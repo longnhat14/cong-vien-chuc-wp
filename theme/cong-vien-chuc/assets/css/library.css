@@ -363,3 +363,9 @@ html.cvc-rd-lock,html.cvc-rd-lock body{overflow:hidden}
 	.dl-meta{gap:4px 0}
 	.dl-meta>span+span::before{margin:0 8px}
 }
+
+/* 01/11/2026: mục "Tủ sách" nổi bật trong hàng mục thư viện (inc/library.php) */
+.lb-nav-item.is-books{border-color:#d9c393;background:linear-gradient(180deg,#fffaf0,#fbf1dc)}
+.lb-nav-item.is-books .lb-nav-ic{background:linear-gradient(150deg,#163a60,#0b2039);color:#f0cf91}
+.lb-nav-item.is-books.is-on{background:var(--lb-navy);border-color:var(--lb-navy)}
+.lb-nav.is-cards .lb-nav-item.is-books{border-width:2px;background:linear-gradient(180deg,#fffaf0,#fbf1dc)}

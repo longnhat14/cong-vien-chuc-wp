@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Tăng số này khi thêm/sửa rewrite rule để buộc flush lại đúng 1 lần.
-const CVC_REWRITE_VERSION = '30';
+const CVC_REWRITE_VERSION = '31';
 
 /**
  * Section hợp lệ của /tai-khoan/{section}/ (Phase 10) - map slug tiếng
