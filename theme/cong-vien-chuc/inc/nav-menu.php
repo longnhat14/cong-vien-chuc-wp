@@ -381,3 +381,22 @@ function cvc_nav_icon( string $name ): string {
 	return '<svg class="ch-mg-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' . $d . '</svg>';
 }
 
+
+
+/**
+ * 01/11/2026: đo lượt bấm vào mục menu "Vị trí việc làm" (sự kiện GA4 vtvl_menu_click, không có dữ liệu cá nhân).
+ */
+add_action(
+	'wp_footer',
+	static function () {
+		if ( is_admin() ) {
+			return;
+		}
+		?>
+<script>
+document.addEventListener('click',function(e){var a=e.target&&e.target.closest?e.target.closest('.ch-nav-sub a'):null;if(!a||!a.getAttribute('href')||a.getAttribute('href').indexOf('/vi-tri-viec-lam/')<0){return;}try{if(typeof window.gtag==='function'){window.gtag('event','vtvl_menu_click',{from_path:location.pathname});}}catch(x){}});
+</script>
+		<?php
+	},
+	99
+);

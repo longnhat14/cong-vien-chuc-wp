@@ -115,7 +115,7 @@ get_header();
 						<article class="lg-doc<?php echo $stale ? ' is-stale' : ''; ?>">
 							<div class="lg-code"><a href="<?php echo esc_url( $url ); ?>"><?php echo esc_html( (string) $d['document_number'] ); ?></a><small><?php echo esc_html( (string) ( $d['document_type'] ?? '' ) ); ?></small></div>
 							<div class="lg-docbody">
-								<h3><a href="<?php echo esc_url( $url ); ?>"><?php echo esc_html( (string) $d['title'] ); ?></a></h3>
+								<h3><a href="<?php echo esc_url( $url ); ?>" data-vt-doc="<?php echo esc_attr( (string) $d['document_number'] ); ?>" data-vt-group="<?php echo esc_attr( (string) $g['key'] ); ?>"><?php echo esc_html( (string) $d['title'] ); ?></a></h3>
 								<p class="lg-meta">
 									<?php echo ! empty( $d['verified'] ) ? '<span class="lg-tag is-green">✓ Đã đối chiếu nguồn</span>' : '<span class="lg-tag is-gold">◷ Cần rà soát nguồn</span>'; ?>
 									<?php echo $state_tag( $d ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
@@ -127,7 +127,7 @@ get_header();
 								<?php if ( ! empty( $d['note'] ) ) : ?><p class="vt-note"><?php echo esc_html( (string) $d['note'] ); ?></p><?php endif; ?>
 							</div>
 							<div class="lg-docactions">
-								<a class="lg-btn is-primary" href="<?php echo esc_url( $url ); ?>">Xem tóm tắt ↗</a>
+								<a class="lg-btn is-primary" href="<?php echo esc_url( $url ); ?>" data-vt-doc="<?php echo esc_attr( (string) $d['document_number'] ); ?>" data-vt-group="<?php echo esc_attr( (string) $g['key'] ); ?>">Xem tóm tắt ↗</a>
 							</div>
 						</article>
 					<?php endforeach; ?>
@@ -140,7 +140,7 @@ get_header();
 		<div class="lg-listhead"><div><h2>Tài liệu hướng dẫn thêm</h2><p>Bài hướng dẫn và công cụ kê khai trên Cổng Thông tin điện tử Đảng Cộng sản Việt Nam.</p></div></div>
 		<ul class="vt-links">
 			<?php foreach ( $central as $c ) : ?>
-				<li><a href="<?php echo esc_url( $c[1] ); ?>" target="_blank" rel="noopener nofollow"><b><?php echo esc_html( $c[0] ); ?> ↗</b></a><span><?php echo esc_html( $c[2] ); ?></span></li>
+				<li><a href="<?php echo esc_url( $c[1] ); ?>" target="_blank" rel="noopener nofollow" data-vt-ext="1"><b><?php echo esc_html( $c[0] ); ?> ↗</b></a><span><?php echo esc_html( $c[2] ); ?></span></li>
 			<?php endforeach; ?>
 		</ul>
 		<p class="lg-note">Các liên kết trên là bài đăng và tài liệu hướng dẫn trên Cổng Thông tin điện tử Đảng Cộng sản Việt Nam, chưa phải toàn văn văn bản; các Kế hoạch 70, 71 sẽ được bổ sung khi có bản toàn văn.</p>
@@ -149,5 +149,31 @@ get_header();
 	<p class="lg-note">Văn bản có giá trị pháp lý là bản do cơ quan có thẩm quyền ban hành. Hãy kiểm tra văn bản sửa đổi, thay thế mới nhất và hướng dẫn của cơ quan quản lý ngành trước khi áp dụng.</p>
 </div>
 </main>
+<script>
+/* Đo nhu cầu trang Vị trí việc làm (GA4 sẵn có): chỉ gửi sự kiện ẩn danh, không có dữ liệu cá nhân. */
+( function () {
+	'use strict';
+	function send( name, params ) {
+		try {
+			if ( typeof window.gtag === 'function' ) {
+				window.gtag( 'event', name, params );
+			}
+		} catch ( e ) {}
+	}
+	document.addEventListener( 'click', function ( e ) {
+		var a = e.target && e.target.closest ? e.target.closest( 'a' ) : null;
+		if ( ! a ) {
+			return;
+		}
+		if ( a.hasAttribute( 'data-vt-doc' ) ) {
+			send( 'vtvl_doc_open', { document_number: a.getAttribute( 'data-vt-doc' ), doc_group: a.getAttribute( 'data-vt-group' ) } );
+		} else if ( a.hasAttribute( 'data-vt-ext' ) ) {
+			send( 'vtvl_ext_link', { link_url: a.href } );
+		} else if ( a.getAttribute( 'href' ) && a.getAttribute( 'href' ).charAt( 0 ) === '#' ) {
+			send( 'vtvl_jump', { target: a.getAttribute( 'href' ) } );
+		}
+	} );
+}() );
+</script>
 <?php
 get_footer();
