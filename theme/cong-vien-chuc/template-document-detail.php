@@ -96,6 +96,16 @@ if ( ! $is_preview && false !== ( $doc['is_indexable'] ?? true ) ) {
 			array_slice( (array) $doc_book['toc'], 0, 30 )
 		);
 	}
+	// 01/11/2026: số lượt đọc / tải thật (InteractionCounter) - chỉ khi đã có.
+	$doc_stats = array();
+	foreach ( array( 'ReadAction' => (int) ( $doc['read_count'] ?? 0 ), 'DownloadAction' => (int) ( $doc['download_count'] ?? 0 ) ) as $act => $cnt ) {
+		if ( $cnt > 0 ) {
+			$doc_stats[] = array( '@type' => 'InteractionCounter', 'interactionType' => array( '@type' => $act ), 'userInteractionCount' => $cnt );
+		}
+	}
+	if ( $doc_stats ) {
+		$article['interactionStatistic'] = $doc_stats;
+	}
 	if ( ! empty( $doc['legal_basis'] ) ) {
 		$article['citation'] = array_map(
 			static function ( $l ) {
@@ -183,7 +193,7 @@ get_header();
 					<div class="space-y-1.5">
 						<span class="text-[10px] font-bold text-acc uppercase tracking-wider"><?php echo esc_html( (string) ( $doc['book']['series']['label'] ?? ( $doc['category'] ?? 'Tài liệu' ) ) ); ?></span>
 						<h1 class="text-lg sm:text-xl font-black text-ink leading-snug"><?php echo esc_html( $doc['title'] ?? '' ); ?></h1>
-						<p class="text-[11px] text-ink-muted"><?php echo esc_html( number_format( (int) ( $doc['download_count'] ?? 0 ) ) ); ?> lượt tải &middot; <?php echo esc_html( size_format( (int) ( $doc['file_size'] ?? 0 ) ) ); ?></p>
+						<p class="text-[11px] text-ink-muted doc-stats"><?php echo cvc_doc_reads_html( (int) ( $doc['read_count'] ?? 0 ) ); // phpcs:ignore WordPress.Security.EscapeOutput ?> &middot; <?php echo esc_html( number_format( (int) ( $doc['download_count'] ?? 0 ), 0, ',', '.' ) ); ?> lượt tải &middot; <?php echo esc_html( size_format( (int) ( $doc['file_size'] ?? 0 ) ) ); ?></p>
 					</div>
 				</div>
 				<div class="shrink-0">
@@ -280,4 +290,10 @@ get_header();
 
 </main>
 
-<?php get_footer(); ?>
+<?php
+// 01/11/2026: đếm lượt đọc (mở trang) - không tính bản xem trước / biên tập viên.
+if ( ! $is_preview && ! ( $token && function_exists( 'cvc_admin_can' ) && cvc_admin_can( 'document.view' ) ) ) {
+	cvc_doc_view_beacon( $slug, $is_logged_in );
+}
+get_footer();
+?>

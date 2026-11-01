@@ -258,3 +258,36 @@ function cvc_doc_reading_list( array $rows, int $max = 3 ): void {
 	</style>
 	<?php
 }
+
+/** Lượt đọc (01/11/2026): dưới ngưỡng này hiện nhãn "Mới" thay cho số (anh Nhật chốt). */
+const CVC_DOC_READS_MIN = 5;
+
+function cvc_doc_reads_text( int $n ): string {
+	return $n < CVC_DOC_READS_MIN ? 'Mới' : number_format( $n, 0, ',', '.' ) . ' lượt đọc';
+}
+
+function cvc_doc_reads_html( int $n ): string {
+	return $n < CVC_DOC_READS_MIN
+		? '<span class="dl-new">Mới</span>'
+		: '<i class="fa-regular fa-eye" aria-hidden="true"></i> ' . esc_html( number_format( $n, 0, ',', '.' ) ) . ' lượt đọc';
+}
+
+/**
+ * Tín hiệu "đã mở trang" để đếm lượt đọc (anh Nhật chốt: mở trang là tính). Gửi thẳng tới API bằng sendBeacon
+ * (dạng form - không cần CORS); máy chủ chặn trùng 1 thiết bị / tài liệu / ngày và bỏ bot. Không gửi với bản xem trước
+ * và tài khoản biên tập / quản trị.
+ */
+function cvc_doc_view_beacon( string $slug, bool $member ): void {
+	$url = rtrim( (string) cvc_api_base_url(), '/' ) . '/api/documents/' . rawurlencode( $slug ) . '/view';
+	?>
+	<script>
+	(function () {
+		if (!navigator.sendBeacon || /bot|crawl|spider|headless|lighthouse/i.test(navigator.userAgent)) { return; }
+		var m = document.cookie.match(/(?:^|; )cvc_ta=([^;]*)/);
+		var v = m ? decodeURIComponent(m[1]) : '';
+		if (!v) { try { v = localStorage.getItem('cvc_vid') || ''; if (!v) { v = 'l' + Math.random().toString(36).slice(2) + Date.now().toString(36); localStorage.setItem('cvc_vid', v); } } catch (e) { v = ''; } }
+		try { navigator.sendBeacon(<?php echo wp_json_encode( $url ); ?>, new URLSearchParams({ v: v.slice(0, 64), m: '<?php echo $member ? '1' : '0'; ?>' })); } catch (e) { /* bỏ qua */ }
+	})();
+	</script>
+	<?php
+}
