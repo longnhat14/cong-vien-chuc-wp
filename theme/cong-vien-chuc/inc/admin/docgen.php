@@ -82,6 +82,7 @@ function cvc_admin_render_docgen( string $item_param ): void {
 		</form>
 		<p class="dg-muted mt-2">Lập khung tốn khoảng 200-500 ₫. Biên soạn trọn cuốn khoảng 15-25 nghìn ₫, chạy nền 30-60 phút sau khi duyệt khung. Tiêu đề gần giống tài liệu đã có sẽ được cảnh báo để lên phiên bản thay vì tạo cuốn mới.</p>
 	</section>
+	<?php cvc_dg_render_gd4( $plan ); ?>
 	<?php if ( function_exists( 'cvc_di_render_upload_and_list' ) ) { cvc_di_render_upload_and_list(); } ?>
 	<details class="dg-card">
 		<summary class="font-black text-ink cursor-pointer">Khung viết sẵn</summary>
@@ -116,6 +117,80 @@ function cvc_admin_render_docgen( string $item_param ): void {
 			<?php endforeach; ?>
 		</tbody></table></div>
 		<?php endif; ?>
+	</section>
+	<?php
+}
+
+/** GĐ4: hạn mức ngày, nhập hàng loạt, hàng đợi lập khung, tài liệu cần cập nhật. */
+function cvc_dg_render_gd4( array $plan ): void {
+	$b   = (array) ( $plan['budget'] ?? array() );
+	$pct = (int) min( 100, round( 100 * (int) ( $b['spent'] ?? 0 ) / max( 1, (int) ( $b['budget'] ?? 1 ) ) ) );
+	$nu  = (array) ( $plan['needs_update'] ?? array() );
+	?>
+	<?php if ( $nu ) : ?>
+	<section class="dg-card" style="border-color:#e3bf7a">
+		<h2 class="font-black text-ink mb-2">Cần cập nhật (<?php echo count( $nu ); ?>)</h2>
+		<p class="dg-muted">Văn bản căn cứ của các tài liệu này đã bị sửa đổi / thay thế sau khi biên soạn. Trang tài liệu đang hiện thông báo "Đang cập nhật theo văn bản mới".</p>
+		<div style="overflow-x:auto"><table class="dg-tbl"><thead><tr><th>Tài liệu</th><th>Văn bản thay đổi</th><th></th></tr></thead><tbody>
+		<?php foreach ( $nu as $x ) : ?>
+			<tr>
+				<td><a class="font-bold text-acc" href="<?php echo esc_url( cvc_document_url( (string) $x['slug'] ) ); ?>" target="_blank" rel="noopener"><?php echo esc_html( (string) $x['title'] ); ?></a><br><span class="dg-muted"><?php echo 'uploaded' === ( $x['source_kind'] ?? '' ) ? 'Tải lên' : 'Tự sinh'; ?> · từ <?php echo esc_html( function_exists( 'cvc_ui_dt' ) ? cvc_ui_dt( $x['needs_update_at'] ) : (string) $x['needs_update_at'] ); ?></span></td>
+				<td class="text-sm"><?php foreach ( (array) ( $x['update_reasons'] ?? array() ) as $r ) : ?><div><?php echo esc_html( (string) ( $r['text'] ?? '' ) ); ?></div><?php endforeach; ?></td>
+				<td>
+					<?php if ( 'uploaded' === ( $x['source_kind'] ?? '' ) ) : ?>
+						<a class="dg-btn" href="<?php echo esc_url( cvc_admin_url( 'tai-lieu-tai-len', (int) $x['id'] ) ); ?>">Thay tệp mới →</a>
+					<?php elseif ( ! empty( $x['latest_generation_id'] ) ) : ?>
+						<a class="dg-btn" href="<?php echo esc_url( cvc_admin_url( 'tai-lieu-ai', (int) $x['latest_generation_id'] ) ); ?>">Lên phiên bản mới →</a>
+					<?php endif; ?>
+				</td>
+			</tr>
+		<?php endforeach; ?>
+		</tbody></table></div>
+	</section>
+	<?php endif; ?>
+	<section class="dg-card">
+		<div class="flex flex-wrap gap-6" style="align-items:flex-start">
+			<div style="flex:1 1 260px">
+				<h2 class="font-black text-ink mb-2">Hạn mức hôm nay</h2>
+				<p class="text-sm">Cuốn bắt đầu viết: <b><?php echo (int) ( $b['books'] ?? 0 ); ?>/<?php echo (int) ( $b['books_max'] ?? 0 ); ?></b></p>
+				<p class="text-sm">Chi phí AI (biên soạn, kiểm chứng, nghiên cứu, OCR): <b><?php echo esc_html( number_format_i18n( (int) ( $b['spent'] ?? 0 ) ) ); ?> / <?php echo esc_html( number_format_i18n( (int) ( $b['budget'] ?? 0 ) ) ); ?> ₫</b></p>
+				<div style="height:8px;background:#edf0f3;border-radius:6px;overflow:hidden;margin:6px 0;max-width:320px"><div style="height:8px;background:<?php echo $pct >= 100 ? '#b42318' : '#1f7a5c'; ?>;width:<?php echo (int) $pct; ?>%"></div></div>
+				<p class="dg-muted">Hết ngân sách thì việc biên soạn, OCR, lập khung tạm dừng và chạy tiếp ngày mai (giờ Việt Nam).</p>
+				<?php if ( cvc_admin_can( 'settings.update' ) ) : ?>
+					<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="flex flex-wrap gap-2 items-end mt-2">
+						<?php wp_nonce_field( 'cvc_admin_docgen' ); ?><input type="hidden" name="action" value="cvc_admin_docgen"><input type="hidden" name="op" value="limits">
+						<label class="text-sm">Cuốn / ngày<br><input type="number" name="daily_books" min="0" max="50" value="<?php echo (int) ( $b['books_max'] ?? 3 ); ?>" class="border border-slate-300 rounded-lg px-2 py-1 text-sm" style="width:80px"></label>
+						<label class="text-sm">Ngân sách ₫ / ngày<br><input type="number" name="daily_budget_vnd" min="0" step="10000" value="<?php echo (int) ( $b['budget'] ?? 100000 ); ?>" class="border border-slate-300 rounded-lg px-2 py-1 text-sm" style="width:120px"></label>
+						<button class="dg-btn">Lưu hạn mức</button>
+					</form>
+				<?php endif; ?>
+			</div>
+			<div style="flex:2 1 380px">
+				<h2 class="font-black text-ink mb-2">Nhập hàng loạt</h2>
+				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+					<?php wp_nonce_field( 'cvc_admin_docgen' ); ?><input type="hidden" name="action" value="cvc_admin_docgen"><input type="hidden" name="op" value="batch">
+					<textarea name="inputs" class="dg-ta" style="min-height:110px;font-family:inherit;font-size:14px" placeholder="Mỗi dòng một tiêu đề / từ khóa (tối đa 10)&#10;vd. Cẩm nang thi viên chức giáo viên tiểu học 2026&#10;Sổ tay ôn thi kế toán viên 2026"></textarea>
+					<div class="flex flex-wrap gap-2 items-end mt-2">
+						<select name="category" class="border border-slate-300 rounded-lg px-2 py-1.5 text-sm"><option value="">Bộ sách: để AI chọn</option><?php foreach ( (array) ( $plan['categories'] ?? array() ) as $k => $v ) : ?><option value="<?php echo esc_attr( (string) $k ); ?>"><?php echo esc_html( (string) $v ); ?></option><?php endforeach; ?></select>
+						<select name="length" class="border border-slate-300 rounded-lg px-2 py-1.5 text-sm"><?php foreach ( (array) ( $plan['lengths'] ?? array() ) as $k => $v ) : ?><option value="<?php echo esc_attr( (string) $k ); ?>"<?php selected( 'vua', $k ); ?>><?php echo esc_html( (string) $v ); ?></option><?php endforeach; ?></select>
+						<button class="dg-btn is-primary">Xếp vào hàng đợi</button>
+					</div>
+				</form>
+				<p class="dg-muted mt-1">Hệ thống lập khung 2 tiêu đề mỗi 2 phút. Mỗi khung chờ bạn duyệt rồi mới viết; không tự xuất bản.</p>
+				<?php $queue = (array) ( $plan['queue'] ?? array() ); ?>
+				<?php if ( $queue ) : ?>
+					<details class="mt-2" <?php echo array_filter( $queue, static fn ( $q ) => 'queued' === $q['status'] ) ? 'open' : ''; ?>><summary class="text-sm font-bold cursor-pointer">Hàng đợi (<?php echo count( array_filter( $queue, static fn ( $q ) => 'queued' === $q['status'] ) ); ?> đang chờ)</summary>
+						<table class="dg-tbl mt-1"><tbody>
+						<?php foreach ( $queue as $q ) : ?>
+							<tr><td><?php echo esc_html( (string) $q['input'] ); ?></td>
+								<td class="dg-muted"><?php echo esc_html( array( 'queued' => 'đang chờ', 'done' => 'đã lập khung', 'failed' => 'lỗi' )[ $q['status'] ] ?? (string) $q['status'] ); ?><?php echo ! empty( $q['error'] ) ? ': ' . esc_html( (string) $q['error'] ) : ''; ?></td>
+								<td><?php if ( ! empty( $q['generation_id'] ) ) : ?><a class="text-acc" href="<?php echo esc_url( cvc_admin_url( 'tai-lieu-ai', (int) $q['generation_id'] ) ); ?>">Xem khung →</a><?php endif; ?></td></tr>
+						<?php endforeach; ?>
+						</tbody></table>
+					</details>
+				<?php endif; ?>
+			</div>
+		</div>
 	</section>
 	<?php
 }
@@ -248,6 +323,15 @@ function cvc_dg_render_detail( int $id ): void {
 		</div>
 	</header>
 	<?php if ( ! empty( $g['error'] ) ) : ?><p class="text-sm text-red-700 mt-2"><?php echo esc_html( (string) $g['error'] ); ?></p><?php endif; ?>
+	<?php if ( ! empty( $g['update_reasons'] ) ) : ?>
+		<div class="dg-issue mt-2" style="border-left-color:#c9a052;background:#fbf5e8"><b>Cần cập nhật:</b>
+			<?php foreach ( (array) $g['update_reasons'] as $r ) : ?><div><?php echo esc_html( (string) ( $r['text'] ?? '' ) ); ?></div><?php endforeach; ?>
+			<?php if ( empty( $g['newer_generation'] ) && in_array( $st, array( 'published', 'rendered' ), true ) ) : ?>
+				<?php cvc_dg_form_open( $id, 'new_version' ); ?><button class="dg-btn is-primary mt-2" onclick="return confirm('Tạo phiên bản mới? Các phần dẫn văn bản thay đổi sẽ được AI viết lại (tính vào hạn mức ngày), các phần còn lại giữ nguyên chờ bạn duyệt lại. Trang công khai giữ bản cũ tới khi bạn xuất bản phiên bản mới.')">↻ Lên phiên bản mới</button></form>
+			<?php endif; ?>
+		</div>
+	<?php endif; ?>
+	<?php if ( ! empty( $g['newer_generation'] ) ) : ?><p class="dg-muted mt-2">Đã có phiên bản mới hơn: <a class="text-acc" href="<?php echo esc_url( cvc_admin_url( 'tai-lieu-ai', (int) $g['newer_generation'] ) ); ?>">bản biên soạn #<?php echo (int) $g['newer_generation']; ?> →</a></p><?php endif; ?>
 	<?php if ( ! empty( $g['publish_problems'] ) ) : ?><p class="dg-issue mt-2"><b>Chưa xuất bản được:</b> <?php echo esc_html( implode( '; ', (array) $g['publish_problems'] ) ); ?>.</p><?php endif; ?>
 	<?php if ( 'outline_review' === $st && ! empty( $g['meta']['plan'] ) ) { cvc_dg_render_plan( $id, $g ); } ?>
 	<section class="dg-grid">
@@ -358,6 +442,20 @@ function cvc_admin_handle_docgen(): void {
 		cvc_admin_redirect( $new ? cvc_admin_url( 'tai-lieu-ai', $new ) : $back, $res['ok'] ? 'success' : 'error', $res['ok'] ? (string) ( $res['data']['message'] ?? 'Đã lập khung.' ) : cvc_admin_error_message( $res ) );
 		return;
 	}
+	if ( 'batch' === $op ) {
+		$res = $cli->post( '/api/admin/docgen/batch', array(
+			'inputs'   => sanitize_textarea_field( wp_unslash( (string) ( $_POST['inputs'] ?? '' ) ) ),
+			'category' => sanitize_key( (string) ( $_POST['category'] ?? '' ) ),
+			'length'   => sanitize_key( (string) ( $_POST['length'] ?? 'vua' ) ),
+		), $token );
+		cvc_admin_redirect( $back, $res['ok'] ? 'success' : 'error', $res['ok'] ? (string) ( $res['data']['message'] ?? 'Đã xếp hàng.' ) : cvc_admin_error_message( $res ) );
+		return;
+	}
+	if ( 'limits' === $op ) {
+		$res = $cli->post( '/api/admin/docgen/limits', array( 'daily_books' => absint( $_POST['daily_books'] ?? 3 ), 'daily_budget_vnd' => absint( $_POST['daily_budget_vnd'] ?? 100000 ) ), $token );
+		cvc_admin_redirect( $back, $res['ok'] ? 'success' : 'error', $res['ok'] ? (string) ( $res['data']['message'] ?? 'Đã lưu.' ) : cvc_admin_error_message( $res ) );
+		return;
+	}
 	if ( 'create' === $op ) {
 		$res = $cli->post( '/api/admin/docgen', array( 'blueprint' => sanitize_key( (string) ( $_POST['blueprint'] ?? '' ) ) ), $token );
 		$new = (int) ( $res['data']['data']['id'] ?? 0 );
@@ -392,9 +490,17 @@ function cvc_admin_handle_docgen(): void {
 			$body['briefs'] = array_map( static fn ( $v ) => sanitize_textarea_field( wp_unslash( (string) $v ) ), (array) ( $_POST['briefs'] ?? array() ) );
 		}
 		$res = $cli->post( '/api/admin/docgen/' . $id . '/action', $body, $token );
+		if ( 'new_version' === $op && $res['ok'] && preg_match( '/\(#(\d+)\)/', (string) ( $res['data']['message'] ?? '' ), $m ) ) {
+			$back = cvc_admin_url( 'tai-lieu-ai', (int) $m[1] );
+		}
 		// Xuất bản xong: quét lại sitemap ngoài (pctech-ai-seo) để tài liệu mới vào pcseo-sitemaps/tai_lieu ngay.
-		if ( 'publish' === $op && $res['ok'] && class_exists( 'PCSEO_Scanner' ) && ! PCSEO_Scanner::is_running() ) {
-			PCSEO_Scanner::start( 'tai-lieu' );
+		if ( 'publish' === $op && $res['ok'] ) {
+			if ( class_exists( 'PCSEO_Scanner' ) && ! PCSEO_Scanner::is_running() ) {
+				PCSEO_Scanner::start( 'tai-lieu' );
+			}
+			if ( preg_match( '#/tai-lieu/([a-z0-9-]+)/#', (string) ( $res['data']['message'] ?? '' ), $m ) ) {
+				cvc_xuong_indexnow( cvc_document_url( $m[1] ) );
+			}
 		}
 	}
 	cvc_admin_redirect( $back, $res['ok'] ? 'success' : 'error', $res['ok'] ? (string) ( $res['data']['message'] ?? 'Đã xong.' ) : cvc_admin_error_message( $res ) );
@@ -418,4 +524,19 @@ function cvc_admin_handle_docgen_pdf(): void {
 	header( 'Content-Disposition: inline; filename="tai-lieu-' . absint( $_GET['id'] ?? 0 ) . '.pdf"' );
 	echo wp_remote_retrieve_body( $r ); // phpcs:ignore WordPress.Security.EscapeOutput
 	exit;
+}
+
+/**
+ * Báo IndexNow (Bing, Yandex, Seznam...) khi tài liệu xuất bản / đổi nội dung - dùng khóa IndexNow sẵn có của Rank Math
+ * (tệp khóa phục vụ ở /{khóa}.txt), lịch sử gửi hiện trong Rank Math → Instant Indexing. (GĐ4, 01/11/2026)
+ */
+function cvc_xuong_indexnow( string $url ): bool {
+	if ( ! class_exists( 'RankMath\\Instant_Indexing\\Api' ) ) {
+		return false;
+	}
+	try {
+		return (bool) \RankMath\Instant_Indexing\Api::get()->submit( array( $url ), false );
+	} catch ( \Throwable $e ) {
+		return false;
+	}
 }

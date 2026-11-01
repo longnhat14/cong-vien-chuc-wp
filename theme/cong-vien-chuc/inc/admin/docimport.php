@@ -68,7 +68,7 @@ function cvc_di_render_upload_and_list(): void {
 				<?php $lc = (array) $x['legal_counts']; ?>
 				<tr>
 					<td><a class="font-bold text-acc" href="<?php echo esc_url( cvc_admin_url( 'tai-lieu-tai-len', (int) $x['id'] ) ); ?>"><?php echo esc_html( (string) $x['title'] ); ?></a><br><span class="dg-muted"><?php echo esc_html( (string) $x['original_name'] ); ?></span></td>
-					<td><?php echo cvc_di_stage_badge( $x['stage'] ?? null ); // phpcs:ignore WordPress.Security.EscapeOutput ?></td>
+					<td><?php echo cvc_di_stage_badge( $x['stage'] ?? null ); // phpcs:ignore WordPress.Security.EscapeOutput ?><?php echo ! empty( $x['needs_update'] ) ? '<br><span class="inline-block px-2 py-0.5 rounded-md text-xs font-bold bg-amber-100 text-amber-900 mt-1">Cần cập nhật</span>' : ''; ?></td>
 					<td class="dg-muted"><?php
 					$parts = array();
 					foreach ( CVC_DI_LEGAL as $k => $l ) {
@@ -133,6 +133,12 @@ function cvc_admin_render_docimport( string $item_param ): void {
 			<?php endif; ?>
 		</div>
 	</header>
+	<?php if ( ! empty( $d['update_reasons'] ) ) : ?>
+		<div class="dg-issue mt-2" style="border-left-color:#c9a052;background:#fbf5e8"><b>Cần cập nhật</b> (văn bản căn cứ thay đổi sau khi xuất bản):
+			<?php foreach ( (array) $d['update_reasons'] as $r ) : ?><div><?php echo esc_html( (string) ( $r['text'] ?? '' ) ); ?></div><?php endforeach; ?>
+			<span class="dg-muted">Hộp "Lưu ý về căn cứ pháp lý" trên bản đọc đã tự cập nhật. Sửa tệp gốc rồi tải phiên bản mới ở mục bên dưới.</span>
+		</div>
+	<?php endif; ?>
 	<?php if ( ! empty( $ing['blocked'] ) ) : ?><p class="dg-issue mt-2"><b>Bị chặn:</b> <?php echo esc_html( (string) $ing['blocked'] ); ?></p><?php endif; ?>
 	<?php if ( $probs && 'published' !== (string) $d['status'] ) : ?><p class="dg-issue mt-2"><b>Chưa xuất bản được:</b> <?php echo esc_html( implode( '; ', $probs ) ); ?>.</p><?php endif; ?>
 	<?php $ocr = (array) ( $ing['ocr'] ?? array() ); ?>
@@ -213,6 +219,16 @@ function cvc_admin_render_docimport( string $item_param ): void {
 		<?php endif; ?>
 	</section>
 
+	<section class="dg-card">
+		<h2 class="font-black text-ink mb-2">Thay tệp (phiên bản mới)<?php echo ! empty( $ing['version'] ) ? ' · hiện là phiên bản ' . (int) $ing['version'] : ''; ?></h2>
+		<form method="post" enctype="multipart/form-data" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="flex flex-wrap gap-2 items-end">
+			<?php wp_nonce_field( 'cvc_admin_docimport' ); ?><input type="hidden" name="action" value="cvc_admin_docimport"><input type="hidden" name="op" value="replace"><input type="hidden" name="id" value="<?php echo (int) $id; ?>">
+			<input type="file" name="file" accept=".docx,.pdf" required>
+			<button class="dg-btn">⇪ Tải phiên bản mới</button>
+		</form>
+		<p class="dg-muted mt-1">Giữ nguyên địa chỉ trang, giá, nguồn. Hệ thống trích xuất và soát căn cứ lại; trang công khai dùng tệp cũ cho tới khi bạn bấm "Dựng bản phát hành".</p>
+	</section>
+
 	<details class="dg-card" open>
 		<summary class="font-black text-ink cursor-pointer">Bản đọc trực tuyến (xem trước)</summary>
 		<div class="dg-preview mt-2"><?php echo wp_kses_post( (string) $d['content_html'] ); ?></div>
@@ -260,6 +276,17 @@ function cvc_admin_handle_docimport(): void {
 		cvc_admin_redirect( $new ? cvc_admin_url( 'tai-lieu-tai-len', $new ) : $back, $res['ok'] ? 'success' : 'error', $res['ok'] ? (string) ( $res['data']['message'] ?? 'Đã tải lên.' ) : cvc_admin_error_message( $res ) );
 		return;
 	}
+	if ( 'replace' === $op ) {
+		$f = $_FILES['file'] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+		if ( ! is_array( $f ) || UPLOAD_ERR_OK !== (int) ( $f['error'] ?? 1 ) || ! is_uploaded_file( (string) $f['tmp_name'] ) ) {
+			cvc_admin_redirect( $back, 'error', 'Chưa nhận được tệp (.docx ≤ 20 MB, .pdf ≤ 40 MB).' );
+			return;
+		}
+		$name = sanitize_file_name( (string) $f['name'] );
+		$res  = $cli->post_multipart( '/api/admin/doc-imports/' . $id . '/replace', array(), array( 'file' => array( (string) $f['tmp_name'], $name, str_ends_with( strtolower( $name ), '.pdf' ) ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ) ), $token );
+		cvc_admin_redirect( $back, $res['ok'] ? 'success' : 'error', $res['ok'] ? (string) ( $res['data']['message'] ?? 'Đã nhận.' ) : cvc_admin_error_message( $res ) );
+		return;
+	}
 	$body = array( 'action' => $op );
 	if ( 'save' === $op ) {
 		$body += array(
@@ -278,6 +305,10 @@ function cvc_admin_handle_docimport(): void {
 	$res = $cli->post( '/api/admin/doc-imports/' . $id . '/action', $body, $token );
 	if ( 'publish' === $op && $res['ok'] && class_exists( 'PCSEO_Scanner' ) && ! PCSEO_Scanner::is_running() ) {
 		PCSEO_Scanner::start( 'tai-lieu' ); // đưa tài liệu mới vào sitemap
+	}
+	// Xuất bản, hoặc dựng lại tài liệu đang công khai -> báo IndexNow.
+	if ( $res['ok'] && ( 'publish' === $op || ( 'build' === $op && 'published' === ( $res['data']['data']['status'] ?? '' ) ) ) && function_exists( 'cvc_xuong_indexnow' ) ) {
+		cvc_xuong_indexnow( cvc_document_url( (string) ( $res['data']['data']['slug'] ?? '' ) ) );
 	}
 	cvc_admin_redirect( $back, $res['ok'] ? 'success' : 'error', $res['ok'] ? (string) ( $res['data']['message'] ?? 'Đã xong.' ) : cvc_admin_error_message( $res ) );
 }

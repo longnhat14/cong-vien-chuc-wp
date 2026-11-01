@@ -152,6 +152,13 @@ get_header();
 
 		<?php cvc_render_notice(); ?>
 
+		<?php if ( ! empty( $doc['update_notice'] ) ) : ?>
+			<div class="dz-panel text-sm" role="status" style="border-left:4px solid #c9a052;background:#fbf5e8">
+				<b>Đang cập nhật theo văn bản mới.</b> Sau ngày biên soạn, một số văn bản căn cứ của tài liệu đã thay đổi:
+				<ul style="margin:6px 0 4px 20px;list-style:disc"><?php foreach ( (array) $doc['update_notice'] as $u ) : ?><li><?php echo esc_html( (string) $u ); ?></li><?php endforeach; ?></ul>
+				Khi dùng, hãy đối chiếu nội dung liên quan với văn bản mới; Công Viên Chức đang biên soạn phiên bản cập nhật.
+			</div>
+		<?php endif; ?>
 		<?php if ( $is_preview ) : ?>
 			<p class="dz-panel text-sm" role="status"><b>Bản xem trước cho biên tập viên</b> - trạng thái: <?php echo esc_html( (string) ( $doc['status'] ?? '' ) ); ?>. Người đọc chưa thấy trang này nếu tài liệu chưa xuất bản.</p>
 		<?php endif; ?>
