@@ -242,7 +242,7 @@ else :
 						<?php foreach ( (array) $q['correct'] as $o ) : ?><div class="answer key"><span class="letter"><?php $e( $o['key'] ); ?></span><span><b>Đáp án đúng:</b> <?php $e( $o['text'] ); ?></span></div><?php endforeach; ?>
 					<?php endif; ?>
 					<div class="explain">
-						<?php if ( ! empty( $q['explanation'] ) ) : ?><b>Giải thích:</b> <?php echo nl2br( esc_html( (string) $q['explanation'] ) ); ?><?php else : ?><b>Giải thích:</b> câu hỏi này chưa có phần giải thích trong ngân hàng.<?php endif; ?>
+						<?php if ( ! empty( $q['explanation'] ) ) : ?><b>Giải thích:</b> <?php echo cvc_ll_text( (string) $q['explanation'], true ); ?><?php else : ?><b>Giải thích:</b> câu hỏi này chưa có phần giải thích trong ngân hàng.<?php endif; ?>
 						<?php if ( ! empty( $q['source']['url'] ) ) : ?><br><a href="<?php $a( $rel( (string) $q['source']['url'] ) ); ?>" class="source" target="_blank" rel="noopener">Căn cứ: <?php $e( $q['source']['label'] ); ?> →</a><?php elseif ( ! empty( $q['source_reference'] ) ) : ?><br><span class="source-ref">Nguồn: <?php $e( $q['source_reference'] ); ?></span><?php endif; ?>
 						<?php if ( 'correct' !== $st ) : ?><br><button class="ask-ai" type="button" data-ask="<?php echo (int) $q['question_id']; ?>">✦ Hỏi AI Coach vì sao<?php echo 'blank' === $st ? '' : ' tôi sai'; ?></button><div class="ai-out" hidden></div><?php endif; ?>
 					</div>

@@ -68,6 +68,7 @@ get_header();
 			<?php
 			cvc_render_track_marker( 'knowledge_viewed', 'knowledge_item', (int) ( $item['id'] ?? 0 ) );
 			$legalDoc   = is_array( $item['legal_document'] ?? null ) ? $item['legal_document'] : null;
+			if ( $legalDoc && ! empty( $legalDoc['slug'] ) ) { cvc_ll_set_self( (string) $legalDoc['slug'] ); }
 			$article    = is_array( $item['article'] ?? null ) ? $item['article'] : null;
 			$key_points = array_values( array_filter( array_map( 'strval', is_array( $item['key_points'] ?? null ) ? $item['key_points'] : array() ) ) );
 			$practice   = is_array( $item['practice_exam'] ?? null ) ? $item['practice_exam'] : null;
@@ -146,7 +147,7 @@ get_header();
 					<?php if ( ! empty( $item['summary'] ) ) : ?>
 						<section id="tom-tat" class="scroll-mt-24 p-6 rounded-3xl border border-acc-line space-y-2">
 							<h2 class="font-black text-xs text-acc uppercase tracking-wider">Tóm tắt</h2>
-							<p class="text-sm text-ink leading-relaxed"><?php echo esc_html( (string) $item['summary'] ); ?></p>
+							<p class="text-sm text-ink leading-relaxed"><?php echo cvc_ll_text( (string) $item['summary'] ); ?></p>
 						</section>
 					<?php endif; ?>
 
@@ -173,7 +174,7 @@ get_header();
 					<?php if ( '' !== $content ) : ?>
 						<section id="giai-thich" class="dz-panel scroll-mt-24 space-y-3">
 							<h2 class="text-base font-black text-ink">Giải thích</h2>
-							<div class="text-sm text-ink-2 leading-relaxed whitespace-pre-line"><?php echo esc_html( $content ); ?></div>
+							<div class="text-sm text-ink-2 leading-relaxed whitespace-pre-line"><?php echo cvc_ll_text( $content ); ?></div>
 						</section>
 					<?php endif; ?>
 
@@ -181,7 +182,7 @@ get_header();
 						<section id="nguyen-van" class="dz-panel scroll-mt-24 space-y-3">
 							<details>
 								<summary class="cursor-pointer text-base font-black text-ink">Nguyên văn Điều <?php echo esc_html( (string) ( $article['number'] ?? '' ) ); ?><?php echo ! empty( $article['title'] ) ? '. ' . esc_html( (string) $article['title'] ) : ''; ?></summary>
-								<div class="mt-3 text-[13px] text-ink-2 leading-relaxed whitespace-pre-line"><?php echo esc_html( trim( (string) $article['content'] ) ); ?></div>
+								<div class="mt-3 text-[13px] text-ink-2 leading-relaxed whitespace-pre-line"><?php echo cvc_ll_text( trim( (string) $article['content'] ) ); ?></div>
 							</details>
 						</section>
 					<?php endif; ?>

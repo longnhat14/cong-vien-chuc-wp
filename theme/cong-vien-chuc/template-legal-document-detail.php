@@ -41,6 +41,7 @@ if ( null === $document ) {
 $doc_id      = (int) ( $document['id'] ?? 0 );
 $title       = (string) ( $document['title'] ?? '' );
 $doc_number  = (string) ( $document['document_number'] ?? '' );
+cvc_ll_set_self( (string) ( $document['slug'] ?? '' ) );
 $doc_type    = (string) ( $document['document_type'] ?? '' );
 $agency      = (string) ( $document['issuing_agency'] ?? '' );
 $summary     = trim( (string) ( $document['summary'] ?? '' ) );
@@ -390,7 +391,7 @@ get_header();
 									?>
 									<article class="ld-article" id="<?php echo esc_attr( $article_anchor( $a ) ); ?>" data-id="<?php echo (int) $aid; ?>" data-num="<?php echo esc_attr( $anum ); ?>">
 										<h3><?php if ( ! $is_appendix( $a ) ) : ?><span class="ld-num">ĐIỀU <?php echo esc_html( $anum ); ?></span> <?php echo esc_html( $a_title ); ?><?php else : ?><span class="ld-num">PHỤ LỤC</span> <?php echo esc_html( $a_title ?: $anum ); ?><?php endif; ?></h3>
-										<div class="ld-art-body"><?php echo esc_html( $legal_reflow( $a_content ) ); ?></div>
+										<div class="ld-art-body"><?php echo cvc_ll_text( $legal_reflow( $a_content ) ); ?></div>
 										<div class="ld-texttools ld-arttools">
 											<?php if ( $is_pdf ) : ?><button type="button" data-ld-pdf="<?php echo isset( $page_by_num[ $anum ] ) ? (int) $page_by_num[ $anum ] : ''; ?>">↗ Xem tại PDF<?php echo isset( $page_by_num[ $anum ] ) ? ' (tr. ' . (int) $page_by_num[ $anum ] . ')' : ''; ?></button><?php endif; ?>
 											<?php if ( $nq || $nk ) : ?><button type="button" data-ld-rel="q">? Câu hỏi liên quan<?php echo $nq ? ' (' . (int) $nq . ')' : ''; ?></button><?php endif; ?>
