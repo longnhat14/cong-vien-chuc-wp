@@ -85,7 +85,7 @@ if ( 'list' === $view || 'form' === $view ) {
 } elseif ( 'insights' === $view ) {
 	$page_title = 'Người dùng & hoạt động';
 } elseif ( 'docgen' === $view ) {
-	$page_title = 'Tài liệu tự sinh';
+	$page_title = 'Xưởng tài liệu';
 }
 
 cvc_seo_set_title( $page_title . ' | Quản trị' );
@@ -115,7 +115,7 @@ get_header();
 					<a href="<?php echo esc_url( cvc_admin_url( 'nguoi-dung' ) ); ?>" class="flex items-center gap-2 px-2.5 py-2 rounded-lg <?php echo 'insights' === $view ? 'bg-acc-soft text-acc font-bold' : 'text-ink-2 hover:bg-acc-soft'; ?>"><i class="fa-solid fa-users w-4" aria-hidden="true"></i> Người dùng &amp; hoạt động</a>
 				<?php endif; ?>
 				<?php if ( cvc_admin_can( 'document.view' ) ) : ?>
-					<a href="<?php echo esc_url( cvc_admin_url( 'tai-lieu-ai' ) ); ?>" class="flex items-center gap-2 px-2.5 py-2 rounded-lg <?php echo 'docgen' === $view ? 'bg-acc-soft text-acc font-bold' : 'text-ink-2 hover:bg-acc-soft'; ?>"><i class="fa-solid fa-book-open w-4" aria-hidden="true"></i> Tài liệu tự sinh</a>
+					<a href="<?php echo esc_url( cvc_admin_url( 'tai-lieu-ai' ) ); ?>" class="flex items-center gap-2 px-2.5 py-2 rounded-lg <?php echo 'docgen' === $view ? 'bg-acc-soft text-acc font-bold' : 'text-ink-2 hover:bg-acc-soft'; ?>"><i class="fa-solid fa-book-open w-4" aria-hidden="true"></i> Xưởng tài liệu</a>
 				<?php endif; ?>
 				<?php if ( cvc_admin_can( 'employer.view' ) ) : ?>
 					<a href="<?php echo esc_url( cvc_admin_url( 'don-vi' ) ); ?>" class="flex items-center gap-2 px-2.5 py-2 rounded-lg <?php echo 'employers' === $view ? 'bg-acc-soft text-acc font-bold' : 'text-ink-2 hover:bg-acc-soft'; ?>"><i class="fa-solid fa-building-columns w-4" aria-hidden="true"></i> Đơn vị tuyển dụng</a>

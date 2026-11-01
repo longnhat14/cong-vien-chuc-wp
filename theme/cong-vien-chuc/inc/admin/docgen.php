@@ -55,12 +55,35 @@ function cvc_admin_render_docgen( string $item_param ): void {
 	$d   = $res['ok'] ? (array) ( $res['data']['data'] ?? array() ) : array();
 	?>
 	<header>
-		<h1 class="text-2xl font-black text-ink">Tài liệu tự sinh</h1>
-		<p class="text-sm text-ink-muted">Cẩm nang, kỹ năng, lộ trình mang thương hiệu Công Viên Chức. AI viết từng phần có căn cứ điều luật, AI thứ hai kiểm chứng, biên tập viên duyệt rồi mới dựng PDF và xuất bản.</p>
+		<h1 class="text-2xl font-black text-ink">Xưởng tài liệu</h1>
+		<p class="text-sm text-ink-muted">Gõ tiêu đề hoặc từ khóa: hệ thống lập khung chỉ từ văn bản đang có hiệu lực, AI viết từng phần có căn cứ, AI thứ hai kiểm chứng. Biên tập viên duyệt 2 lần (khung, nội dung) rồi xuất bản một chạm: PDF, bản đọc, bìa, sách 3D, QR, SEO, sitemap.</p>
 	</header>
 	<?php if ( ! $res['ok'] ) : ?><p class="text-sm text-red-700"><?php echo esc_html( cvc_admin_error_message( $res ) ); ?></p><?php return; endif; ?>
+	<?php $plan = (array) ( $d['plan'] ?? array() ); ?>
 	<section class="dg-card">
-		<h2 class="font-black text-ink mb-2">Tạo tài liệu mới</h2>
+		<h2 class="font-black text-ink mb-2">Tạo từ tiêu đề / từ khóa</h2>
+		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="flex flex-wrap gap-2 items-end" onsubmit="this.querySelector('button').disabled=true;this.querySelector('button').textContent='Đang lập khung (khoảng 20-60 giây)…'">
+			<?php wp_nonce_field( 'cvc_admin_docgen' ); ?><input type="hidden" name="action" value="cvc_admin_docgen"><input type="hidden" name="op" value="plan">
+			<label class="text-sm" style="flex:1 1 320px">Tiêu đề hoặc từ khóa<br>
+				<input type="text" name="input" required minlength="6" maxlength="200" class="border border-slate-300 rounded-lg px-2 py-1.5 text-sm" style="width:100%" placeholder="vd. Sổ tay ôn thi viên chức y tế 2026">
+			</label>
+			<label class="text-sm">Bộ sách<br>
+				<select name="category" class="border border-slate-300 rounded-lg px-2 py-1.5 text-sm">
+					<option value="">Để AI chọn</option>
+					<?php foreach ( (array) ( $plan['categories'] ?? array() ) as $k => $v ) : ?><option value="<?php echo esc_attr( (string) $k ); ?>"><?php echo esc_html( (string) $v ); ?></option><?php endforeach; ?>
+				</select>
+			</label>
+			<label class="text-sm">Độ dài<br>
+				<select name="length" class="border border-slate-300 rounded-lg px-2 py-1.5 text-sm">
+					<?php foreach ( (array) ( $plan['lengths'] ?? array() ) as $k => $v ) : ?><option value="<?php echo esc_attr( (string) $k ); ?>"<?php selected( 'vua', $k ); ?>><?php echo esc_html( (string) $v ); ?></option><?php endforeach; ?>
+				</select>
+			</label>
+			<button type="submit" class="dg-btn is-primary">✦ Lập khung tài liệu</button>
+		</form>
+		<p class="dg-muted mt-2">Lập khung tốn khoảng 200-500 ₫. Biên soạn trọn cuốn khoảng 15-25 nghìn ₫, chạy nền 30-60 phút sau khi duyệt khung. Tiêu đề gần giống tài liệu đã có sẽ được cảnh báo để lên phiên bản thay vì tạo cuốn mới.</p>
+	</section>
+	<details class="dg-card">
+		<summary class="font-black text-ink cursor-pointer">Khung viết sẵn</summary>
 		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="flex flex-wrap gap-2 items-end">
 			<?php wp_nonce_field( 'cvc_admin_docgen' ); ?><input type="hidden" name="action" value="cvc_admin_docgen"><input type="hidden" name="op" value="create">
 			<label class="text-sm">Khung tài liệu<br>
@@ -73,7 +96,7 @@ function cvc_admin_render_docgen( string $item_param ): void {
 			<button type="submit" class="dg-btn is-primary">＋ Tạo bản biên soạn</button>
 		</form>
 		<p class="dg-muted mt-2">Tạo xong sẽ có dàn ý để sửa và duyệt. Sau khi duyệt dàn ý, hệ thống tự viết từng phần (mỗi 5 phút hoặc bấm "Chạy bước tiếp").</p>
-	</section>
+	</details>
 	<section class="dg-card">
 		<h2 class="font-black text-ink mb-2">Bản biên soạn</h2>
 		<?php $gens = (array) ( $d['generations'] ?? array() ); ?>
@@ -105,6 +128,71 @@ function cvc_dg_form_open( int $id, string $op, array $hidden = array() ): void 
 	}
 }
 
+/** Điểm duyệt 1 (Xưởng tài liệu): tiêu đề, bộ sách, cảnh báo trùng, bìa xem trước, văn bản căn cứ, bỏ phần. */
+function cvc_dg_render_plan( int $id, array $g ): void {
+	$p     = (array) $g['meta']['plan'];
+	$bp    = (array) ( $g['bp'] ?? array() );
+	$secs  = (array) ( $g['sections'] ?? array() );
+	$laws  = array();
+	foreach ( $secs as $s ) {
+		foreach ( (array) ( $s['legal'] ?? array() ) as $n ) {
+			$laws[ $n ] = ( $laws[ $n ] ?? 0 ) + 1;
+		}
+	}
+	arsort( $laws );
+	$titles = array_values( array_unique( array_merge( array( (string) $g['title'] ), (array) ( $p['titles'] ?? array() ) ) ) );
+	?>
+	<section class="dg-card">
+		<h2 class="font-black text-ink">Khung tài liệu <span class="dg-muted">· yêu cầu: “<?php echo esc_html( (string) ( $p['input'] ?? '' ) ); ?>”</span></h2>
+		<?php foreach ( (array) ( $p['duplicates'] ?? array() ) as $dup ) : ?>
+			<p class="dg-issue mt-2"><b>Gần giống (<?php echo (int) $dup['pct']; ?>%):</b>
+				<?php if ( 'document' === $dup['type'] ) : ?>tài liệu <a class="text-acc" href="<?php echo esc_url( cvc_document_url( (string) $dup['slug'] ) ); ?>" target="_blank" rel="noopener"><?php echo esc_html( (string) $dup['title'] ); ?></a> (<?php echo esc_html( (string) $dup['status'] ); ?>)
+				<?php else : ?>bản biên soạn <a class="text-acc" href="<?php echo esc_url( cvc_admin_url( 'tai-lieu-ai', (int) $dup['id'] ) ); ?>"><?php echo esc_html( (string) $dup['title'] ); ?></a><?php endif; ?>
+				. Cân nhắc lên phiên bản mới của cuốn này thay vì tạo cuốn trùng chủ đề.</p>
+		<?php endforeach; ?>
+		<div class="flex flex-wrap gap-4 mt-3" style="align-items:flex-start">
+			<div style="flex:0 0 220px">
+				<?php if ( ! empty( $g['cover_preview'] ) ) : ?>
+					<img src="data:image/jpeg;base64,<?php echo esc_attr( (string) $g['cover_preview'] ); ?>" alt="Bìa xem trước" style="width:220px;border-radius:6px;box-shadow:0 6px 18px rgba(15,42,74,.25)">
+				<?php else : ?>
+					<div class="dg-muted" style="width:220px;height:311px;border:1px dashed #cbd5df;border-radius:6px;display:flex;align-items:center;justify-content:center;text-align:center;padding:12px">Chưa có bìa xem trước</div>
+				<?php endif; ?>
+				<?php cvc_dg_form_open( $id, 'cover_preview' ); ?><button class="dg-btn mt-2" style="width:220px;justify-content:center">🖼 <?php echo empty( $g['cover_preview'] ) ? 'Dựng' : 'Dựng lại'; ?> bìa xem trước</button></form>
+				<p class="dg-muted mt-1">Bìa theo bộ sách + ngành; QR thật có sau khi xuất bản.</p>
+			</div>
+			<div style="flex:1 1 360px;min-width:0">
+				<?php cvc_dg_form_open( $id, 'plan_update' ); ?>
+					<p class="text-sm font-bold">Tiêu đề</p>
+					<?php foreach ( $titles as $i => $t ) : ?>
+						<label class="block text-sm"><input type="radio" name="title_pick" value="<?php echo esc_attr( $t ); ?>" <?php checked( 0, $i ); ?>> <?php echo esc_html( $t ); ?></label>
+					<?php endforeach; ?>
+					<label class="block text-sm"><input type="radio" name="title_pick" value="__custom"> Tự đặt: <input type="text" name="title_custom" maxlength="120" class="border border-slate-300 rounded-lg px-2 py-1 text-sm" style="width:70%"></label>
+					<label class="block text-sm mt-2 font-bold">Phụ đề<br><input type="text" name="subtitle" maxlength="250" value="<?php echo esc_attr( (string) $g['subtitle'] ); ?>" class="border border-slate-300 rounded-lg px-2 py-1.5 text-sm" style="width:100%"></label>
+					<label class="block text-sm mt-2 font-bold">Bộ sách (quyết định phong cách bìa)<br>
+						<select name="category" class="border border-slate-300 rounded-lg px-2 py-1.5 text-sm">
+							<?php foreach ( (array) ( $g['categories'] ?? array() ) as $k => $v ) : ?><option value="<?php echo esc_attr( (string) $k ); ?>" <?php selected( (string) ( $bp['category'] ?? '' ), (string) $k ); ?>><?php echo esc_html( (string) $v ); ?></option><?php endforeach; ?>
+						</select>
+						<span class="dg-muted">Người đọc: <?php echo esc_html( (string) ( $bp['reader'] ?? '' ) ); ?> · ngành: <?php echo esc_html( (string) ( $bp['job_family'] ?? '' ) ); ?></span>
+					</label>
+					<p class="text-sm font-bold mt-3">Văn bản căn cứ (chỉ văn bản đang có hiệu lực trong kho; bỏ chọn để loại khỏi mọi phần)</p>
+					<input type="hidden" name="laws_present" value="1">
+					<?php foreach ( $laws as $n => $cnt ) : ?>
+						<label class="inline-block text-sm mr-3"><input type="checkbox" name="laws[]" value="<?php echo esc_attr( (string) $n ); ?>" checked> <?php echo esc_html( (string) $n ); ?> <span class="dg-muted">(<?php echo (int) $cnt; ?> phần)</span></label>
+					<?php endforeach; ?>
+					<p class="text-sm font-bold mt-3">Các phần (tích để bỏ)</p>
+					<?php foreach ( $secs as $s ) : ?>
+						<label class="block text-sm"><input type="checkbox" name="remove[]" value="<?php echo (int) $s['id']; ?>"> <?php echo (int) $s['idx'] . '. ' . esc_html( (string) $s['heading'] ); ?>
+							<span class="dg-muted">· <?php echo esc_html( (string) $s['kind'] ); ?><?php echo ! empty( $s['legal'] ) ? ' · ' . esc_html( implode( ', ', (array) $s['legal'] ) ) : ''; ?><?php echo ! empty( $s['data_keys'] ) ? ' · dữ liệu: ' . esc_html( implode( ', ', (array) $s['data_keys'] ) ) : ''; ?></span></label>
+					<?php endforeach; ?>
+					<button class="dg-btn mt-3">💾 Lưu khung</button>
+				</form>
+			</div>
+		</div>
+		<p class="dg-muted mt-3">Sửa yêu cầu từng phần ở mục Dàn ý bên dưới, rồi bấm "Duyệt dàn ý &amp; bắt đầu viết".</p>
+	</section>
+	<?php
+}
+
 function cvc_dg_render_detail( int $id ): void {
 	$res = cvc_admin_api_get( '/api/admin/docgen/' . $id );
 	if ( ! $res['ok'] ) {
@@ -120,7 +208,7 @@ function cvc_dg_render_detail( int $id ): void {
 	$all_written = $secs && count( array_filter( $secs, static fn ( $s ) => '' !== trim( (string) ( $s['content'] ?? '' ) ) ) ) === count( $secs );
 	$pv_url = wp_nonce_url( admin_url( 'admin-post.php?action=cvc_admin_docgen_pdf&preview=1&id=' . $id ), 'cvc_admin_docgen_pdf' );
 	?>
-	<p class="text-sm"><a class="text-acc" href="<?php echo esc_url( cvc_admin_url( 'tai-lieu-ai' ) ); ?>">← Tài liệu tự sinh</a></p>
+	<p class="text-sm"><a class="text-acc" href="<?php echo esc_url( cvc_admin_url( 'tai-lieu-ai' ) ); ?>">← Xưởng tài liệu</a></p>
 	<header class="flex flex-wrap items-start justify-between gap-3">
 		<div>
 			<h1 class="text-2xl font-black text-ink"><?php echo esc_html( $g['title'] ); ?> <span class="dg-muted">v<?php echo (int) $g['version']; ?></span></h1>
@@ -150,7 +238,8 @@ function cvc_dg_render_detail( int $id ): void {
 				<a class="dg-btn" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=cvc_admin_docgen_pdf&id=' . $id ), 'cvc_admin_docgen_pdf' ) ); ?>" target="_blank" rel="noopener">👁 Xem PDF</a>
 			<?php endif; ?>
 			<?php if ( 'rendered' === $st ) : ?>
-				<?php cvc_dg_form_open( $id, 'publish' ); ?><button class="dg-btn is-ok" onclick="return confirm('Xuất bản tài liệu lên thư viện?')">⇪ Xuất bản</button></form>
+				<?php $pp = (array) ( $g['publish_problems'] ?? array() ); ?>
+				<?php cvc_dg_form_open( $id, 'publish' ); ?><button class="dg-btn is-ok"<?php echo $pp ? ' disabled title="' . esc_attr( implode( '; ', $pp ) ) . '"' : ''; ?> onclick="return confirm('Xuất bản tài liệu lên thư viện? Hệ thống sẽ dựng bìa, sách 3D, ảnh chia sẻ và cập nhật sitemap.')">⇪ Xuất bản</button></form>
 			<?php endif; ?>
 			<?php if ( 'published' === $st && ! empty( $g['document_slug'] ) ) : ?>
 				<a class="dg-btn is-ok" href="<?php echo esc_url( cvc_document_url( (string) $g['document_slug'] ) ); ?>" target="_blank" rel="noopener">Xem trên thư viện ↗</a>
@@ -158,6 +247,8 @@ function cvc_dg_render_detail( int $id ): void {
 		</div>
 	</header>
 	<?php if ( ! empty( $g['error'] ) ) : ?><p class="text-sm text-red-700 mt-2"><?php echo esc_html( (string) $g['error'] ); ?></p><?php endif; ?>
+	<?php if ( ! empty( $g['publish_problems'] ) ) : ?><p class="dg-issue mt-2"><b>Chưa xuất bản được:</b> <?php echo esc_html( implode( '; ', (array) $g['publish_problems'] ) ); ?>.</p><?php endif; ?>
+	<?php if ( 'outline_review' === $st && ! empty( $g['meta']['plan'] ) ) { cvc_dg_render_plan( $id, $g ); } ?>
 	<section class="dg-grid">
 		<div class="dg-kpi"><small>Phần đã viết</small><b><?php echo (int) $g['total'] - (int) ( $c['pending'] ?? 0 ); ?>/<?php echo (int) $g['total']; ?></b></div>
 		<div class="dg-kpi"><small>Đã duyệt</small><b><?php echo (int) ( $c['approved'] ?? 0 ); ?></b></div>
@@ -256,6 +347,16 @@ function cvc_admin_handle_docgen(): void {
 		return;
 	}
 	$cli = new CVC_Api_Client( null, 175 );
+	if ( 'plan' === $op ) {
+		$res = $cli->post( '/api/admin/docgen/plan', array(
+			'input'    => sanitize_text_field( wp_unslash( (string) ( $_POST['input'] ?? '' ) ) ),
+			'category' => sanitize_key( (string) ( $_POST['category'] ?? '' ) ),
+			'length'   => sanitize_key( (string) ( $_POST['length'] ?? 'vua' ) ),
+		), $token );
+		$new = (int) ( $res['data']['data']['id'] ?? 0 );
+		cvc_admin_redirect( $new ? cvc_admin_url( 'tai-lieu-ai', $new ) : $back, $res['ok'] ? 'success' : 'error', $res['ok'] ? (string) ( $res['data']['message'] ?? 'Đã lập khung.' ) : cvc_admin_error_message( $res ) );
+		return;
+	}
 	if ( 'create' === $op ) {
 		$res = $cli->post( '/api/admin/docgen', array( 'blueprint' => sanitize_key( (string) ( $_POST['blueprint'] ?? '' ) ) ), $token );
 		$new = (int) ( $res['data']['data']['id'] ?? 0 );
@@ -276,10 +377,24 @@ function cvc_admin_handle_docgen(): void {
 		if ( 'research' === $op ) {
 			$body['urls'] = (string) wp_unslash( $_POST['urls'] ?? '' );
 		}
+		if ( 'plan_update' === $op ) {
+			$pick            = sanitize_text_field( wp_unslash( (string) ( $_POST['title_pick'] ?? '' ) ) );
+			$body['title']    = '__custom' === $pick ? sanitize_text_field( wp_unslash( (string) ( $_POST['title_custom'] ?? '' ) ) ) : $pick;
+			$body['subtitle'] = sanitize_text_field( wp_unslash( (string) ( $_POST['subtitle'] ?? '' ) ) );
+			$body['category'] = sanitize_key( (string) ( $_POST['category'] ?? '' ) );
+			$body['remove']   = array_map( 'absint', (array) ( $_POST['remove'] ?? array() ) );
+			if ( ! empty( $_POST['laws_present'] ) ) {
+				$body['laws'] = array_map( static fn ( $v ) => sanitize_text_field( wp_unslash( (string) $v ) ), (array) ( $_POST['laws'] ?? array() ) );
+			}
+		}
 		if ( 'brief' === $op ) {
 			$body['briefs'] = array_map( static fn ( $v ) => sanitize_textarea_field( wp_unslash( (string) $v ) ), (array) ( $_POST['briefs'] ?? array() ) );
 		}
 		$res = $cli->post( '/api/admin/docgen/' . $id . '/action', $body, $token );
+		// Xuất bản xong: quét lại sitemap ngoài (pctech-ai-seo) để tài liệu mới vào pcseo-sitemaps/tai_lieu ngay.
+		if ( 'publish' === $op && $res['ok'] && class_exists( 'PCSEO_Scanner' ) && ! PCSEO_Scanner::is_running() ) {
+			PCSEO_Scanner::start( 'tai-lieu' );
+		}
 	}
 	cvc_admin_redirect( $back, $res['ok'] ? 'success' : 'error', $res['ok'] ? (string) ( $res['data']['message'] ?? 'Đã xong.' ) : cvc_admin_error_message( $res ) );
 }
