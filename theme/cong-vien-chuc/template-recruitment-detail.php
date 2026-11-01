@@ -984,6 +984,20 @@ get_header();
 
 	<div class="rd-legacy"><?php cvc_render_candidate_kit( $recruitment ); ?></div>
 
+	<?php
+	// 01/11/2026: tài liệu được đọc nhiều khớp kỳ tuyển (công chức / viên chức, ngành, tỉnh).
+	$rd_pop = cvc_doc_popular( 'recruitment', array( 'slug' => (string) ( $recruitment['slug'] ?? '' ) ), 6 );
+	if ( $rd_pop['items'] ) :
+		?>
+		<section class="rd-card" id="tai-lieu-on" aria-labelledby="rd-pop-h">
+			<div class="rd-card-head"><h2 id="rd-pop-h"><span class="rd-ico" aria-hidden="true">▤</span>Tài liệu ôn cho kỳ tuyển này</h2><a class="rd-link" style="font-size:14px;font-weight:bold;color:var(--t-ink);text-decoration:underline;text-underline-offset:3px;white-space:nowrap" href="<?php echo esc_url( cvc_documents_url() ); ?>">Kho tài liệu →</a></div>
+			<div class="rd-card-body">
+				<p class="rd-muted" style="margin:0 0 10px">Ưu tiên tài liệu đúng loại kỳ thi, nhóm ngành và được thí sinh đọc nhiều.</p>
+				<?php cvc_doc_popular_row( $rd_pop['items'], array( 'place' => 'tin-tuyen-dung' ) ); ?>
+			</div>
+		</section>
+	<?php endif; ?>
+
 	<!-- ============ BẮT ĐẦU CHUẨN BỊ ============ -->
 	<section class="rd-card" id="chuan-bi" aria-labelledby="rd-prep-h">
 		<div class="rd-card-head"><h2 id="rd-prep-h"><span class="rd-ico" aria-hidden="true">▣</span>Bắt đầu chuẩn bị kỳ thi</h2></div>

@@ -465,6 +465,18 @@ $GLOBALS['cvc_home17_cfg'] = array(
   </div>
  </div>
 </section>
+<?php
+// 01/11/2026: tài liệu được đọc nhiều (điểm = 2 × lượt đọc + lượt tải, mọi lúc).
+$home_pop = function_exists( 'cvc_doc_popular' ) ? cvc_doc_popular( 'home', array(), 8 ) : array( 'items' => array() );
+if ( $home_pop['items'] ) :
+	?>
+<section class="section-soft" id="tai-lieu-doc-nhieu">
+ <div class="container">
+  <div class="section-head"><div><div class="section-label">THÍ SINH ĐANG ĐỌC</div><h2>Tài liệu được đọc nhiều</h2><p>Cẩm nang, mẹo ôn và mẫu hồ sơ được thí sinh đọc, tải nhiều nhất trên Công Viên Chức.</p></div><a class="btn btn-outline" href="<?php $a( $u['docs'] ); ?>">Xem tất cả <span>→</span></a></div>
+  <?php cvc_doc_popular_row( $home_pop['items'], array( 'place' => 'trang-chu' ) ); ?>
+ </div>
+</section>
+<?php endif; ?>
 <?php if ( function_exists( 'cvc_pdf_render_home_block' ) ) { cvc_pdf_render_home_block(); } // Bộ đề PDF (27/10/2026) ?>
 <section class="section-soft">
  <div class="container">

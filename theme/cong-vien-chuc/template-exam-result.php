@@ -181,6 +181,18 @@ else :
 		<button class="primary" id="improve" type="button">✦　Tạo kế hoạch cải thiện điểm số</button>
 	</div></section>
 
+	<?php
+	// 01/11/2026: ôn lại phần sai bằng tài liệu được đọc nhiều (khớp chủ đề yếu + nhóm ngành của đề).
+	$er_weak = array_values( array_map( static fn ( $t ) => (string) $t['name'], array_filter( $topics, static fn ( $t ) => in_array( $t['level'] ?? '', array( 'weak', 'medium' ), true ) ) ) );
+	$er_pop  = cvc_doc_popular( 'exam', array( 'slug' => empty( $ex['personal'] ) ? (string) ( $ex['slug'] ?? '' ) : '', 'topics' => array_slice( $er_weak, 0, 6 ) ), 6 );
+	if ( $er_pop['items'] ) :
+		?>
+		<section class="card" id="on-lai-tai-lieu"><div class="pad">
+			<div class="card-head"><div><h2>Ôn lại phần sai</h2><p>Tài liệu được thí sinh đọc nhiều<?php echo $er_weak ? ', ưu tiên tài liệu có chủ đề bạn còn yếu' : ''; ?>.</p></div><a class="small-tag" href="<?php $a( cvc_documents_url() ); ?>">Kho tài liệu →</a></div>
+			<?php cvc_doc_popular_row( $er_pop['items'], array( 'place' => 'ket-qua-thi' ) ); ?>
+		</div></section>
+	<?php endif; ?>
+
 	<section class="card"><div class="pad progress-center" id="progress-center">
 		<div class="card-head"><div><h2>Trung tâm tiến bộ cá nhân</h2><p>Theo dõi tiến bộ và biến điểm số thành kế hoạch học tập hằng ngày.</p></div><span class="small-tag">Lưu theo tài khoản</span></div>
 		<div class="progress-overview">

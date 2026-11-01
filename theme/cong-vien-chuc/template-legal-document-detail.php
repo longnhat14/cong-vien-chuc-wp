@@ -462,6 +462,16 @@ get_header();
 			</section>
 
 			<?php if ( function_exists( 'cvc_pdf_render_legal_block' ) ) { cvc_pdf_render_legal_block( $doc_id, '' !== $doc_number ? $doc_number : $title ); } // Bộ đề PDF (27/10/2026) ?>
+			<?php
+			// 01/11/2026: tài liệu ôn thi có dẫn văn bản này (soát căn cứ tệp tải lên + chú thích tài liệu tự sinh).
+			$ld_pop = '' !== $doc_number ? cvc_doc_popular( 'legal', array( 'number' => $doc_number ), 6 ) : array( 'items' => array() );
+			if ( $ld_pop['items'] ) :
+				?>
+				<section class="ld-section" id="tai-lieu-dan">
+					<div class="ld-section-title"><div><h2>Tài liệu ôn thi có dẫn văn bản này</h2><p>Xếp theo lượt đọc và lượt tải của thí sinh</p></div></div>
+					<div class="ld-section-body"><?php cvc_doc_popular_row( $ld_pop['items'], array( 'place' => 'van-ban' ) ); ?></div>
+				</section>
+			<?php endif; ?>
 			<section class="ld-section" id="lien-quan">
 				<div class="ld-section-title"><div><h2>Văn bản &amp; tài liệu liên quan</h2><p>Kết nối theo văn bản sửa đổi – thay thế, căn cứ pháp lý của tin tuyển dụng và nội dung ôn thi</p></div></div>
 				<div class="ld-section-body">

@@ -265,6 +265,15 @@ get_header();
 				<?php endif; ?>
 			</article>
 		<?php endif; ?>
+		<?php
+		// 01/11/2026: "Người đọc tài liệu này cũng đọc" / cùng chuyên mục (không lặp chính tài liệu này).
+		$dd_pop = $is_preview ? array( 'items' => array() ) : cvc_doc_popular( 'doc', array( 'slug' => $slug ), 6 );
+		if ( $dd_pop['items'] ) :
+			?>
+			<section class="dz-panel" aria-label="Tài liệu liên quan">
+				<?php cvc_doc_popular_row( $dd_pop['items'], array( 'place' => 'chi-tiet-tai-lieu', 'head' => true, 'title' => (string) ( $dd_pop['heading'] ?? 'Tài liệu được đọc nhiều' ), 'more' => cvc_documents_url() ) ); ?>
+			</section>
+		<?php endif; ?>
 		<?php if ( ! empty( $doc['reader']['pages'] ) || ! empty( $doc['content_html'] ) ) : ?>
 			<?php if ( ! empty( $doc['copy_protect'] ) ) : // 01/11/2026 hồ sơ phát hành: chống sao chép bản đọc (rào cản, không chặn được chụp màn hình). ?>
 				<script>
