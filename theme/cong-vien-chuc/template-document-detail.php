@@ -238,7 +238,7 @@ get_header();
 		</div>
 
 		<?php if ( ! empty( $doc['content_html'] ) ) : // 31/10/2026: tài liệu tự sinh - bản đọc trực tuyến. ?>
-			<article class="dz-panel cvc-gen-read" id="doc-read" aria-label="Đọc trực tuyến">
+			<article class="dz-panel cvc-gen-read<?php echo ! empty( $doc['copy_protect'] ) ? ' cvc-nocopy' : ''; ?>" id="doc-read" aria-label="Đọc trực tuyến"<?php echo ! empty( $doc['copy_protect'] ) ? ' data-nocopy="1"' : ''; ?>>
 				<h2 class="cvc-gen-h"><?php echo ! empty( $doc['reading_locked'] ) ? 'Đọc thử' : 'Đọc trực tuyến'; ?></h2>
 				<?php if ( ! empty( $doc['reference_label'] ) ) : ?><p class="cvc-ref-label"><b><?php echo esc_html( (string) $doc['reference_label'] ); ?></b> – không dùng thay cho quy định hiện hành.</p><?php endif; ?>
 				<?php echo wp_kses_post( (string) $doc['content_html'] ); ?>
@@ -249,6 +249,24 @@ get_header();
 					</div>
 				<?php endif; ?>
 			</article>
+			<?php if ( ! empty( $doc['copy_protect'] ) ) : // 01/11/2026 hồ sơ phát hành: chống sao chép bản đọc (rào cản, không chặn được chụp màn hình). ?>
+				<script>
+				(function () {
+					var el = document.getElementById('doc-read');
+					if (!el) { return; }
+					var note = function () {
+						var t = document.getElementById('cvc-nocopy-toast');
+						if (!t) { t = document.createElement('div'); t.id = 'cvc-nocopy-toast'; t.setAttribute('role', 'status'); t.textContent = 'Nội dung tài liệu được bảo vệ bản quyền - vui lòng không sao chép.'; document.body.appendChild(t); }
+						t.classList.add('is-on'); clearTimeout(t._h); t._h = setTimeout(function () { t.classList.remove('is-on'); }, 2200);
+					};
+					['copy', 'cut', 'contextmenu', 'dragstart'].forEach(function (ev) { el.addEventListener(ev, function (e) { e.preventDefault(); note(); }); });
+					document.addEventListener('keydown', function (e) {
+						var k = (e.key || '').toLowerCase();
+						if ((e.ctrlKey || e.metaKey) && (k === 'c' || k === 'x' || k === 'a' || k === 's' || k === 'p') && el.contains(document.activeElement || document.body) || ((e.ctrlKey || e.metaKey) && k === 'c' && window.getSelection && el.contains(window.getSelection().anchorNode))) { e.preventDefault(); note(); }
+					});
+				})();
+				</script>
+			<?php endif; ?>
 		<?php endif; ?>
 
 	</div>

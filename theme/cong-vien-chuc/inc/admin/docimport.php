@@ -28,7 +28,7 @@ const CVC_DI_LEGAL = array(
 function cvc_di_option_labels(): array {
 	return array(
 		'cover_source' => array( 'Bìa', array( 'auto' => 'Tự động theo bộ sách', 'upload' => 'Ảnh tải lên (giữ dải logo + QR)', 'page1' => 'Trang 1 của PDF' ) ),
-		'release'      => array( 'Tệp PDF tải về', array( 'cover' => 'Chèn bìa Công Viên Chức vào đầu', 'keep' => 'Giữ nguyên tệp gốc 100%' ) ),
+		'release'      => array( 'Tệp PDF tải về', array( 'cover' => 'Chèn thêm bìa Công Viên Chức vào đầu', 'replace' => 'Thay trang 1 (bìa cũ) bằng bìa mới', 'keep' => 'Giữ nguyên tệp gốc 100%' ) ),
 		'docx_release' => array( 'Tệp Word tải lên sẽ phát hành', array( 'pdf' => 'PDF dàn trang Công Viên Chức', 'docx' => 'Giữ DOCX gốc', 'both' => 'Cả PDF và DOCX' ) ),
 		'toc'          => array( 'Mục lục', array( 'auto' => 'Tự động', 'bookmarks' => 'Dùng bookmark có sẵn trong PDF', 'manual' => 'Tự nhập', 'none' => 'Không có' ) ),
 		'legal_check'  => array( 'Soát căn cứ pháp lý', array( 'full' => 'Đầy đủ (văn bản hết hiệu lực thì khóa xuất bản)', 'warn' => 'Chỉ cảnh báo (công khai nhãn "Tài liệu tham khảo")', 'skip' => 'Bỏ qua (chỉ bộ không pháp lý)' ) ),
@@ -46,6 +46,7 @@ function cvc_di_option_flags(): array {
 		'buyer_stamp'    => 'Đóng dấu người mua ở chân trang khi tải (tài liệu trả phí)',
 		'login_required' => 'Tài liệu miễn phí vẫn cần đăng nhập để tải',
 		'noindex'        => 'Tài liệu nội bộ: không cho Google tìm thấy, không vào sitemap',
+		'copy_protect'   => 'Chống sao chép: khóa chép chữ / chỉnh sửa trong PDF (vẫn in được), chặn bôi đen & sao chép trên bản đọc web',
 	);
 }
 
@@ -68,6 +69,18 @@ function cvc_di_collect_options(): array {
 	}
 
 	return $out;
+}
+
+/** Mẫu hồ sơ phát hành: [tên, mô tả]. */
+function cvc_di_presets(): array {
+	return array(
+		'sach'     => array( 'Sách / cẩm nang', 'chèn bìa Công Viên Chức + trang mục lục, soát căn cứ đầy đủ, AI tóm tắt.' ),
+		'chi_bia'  => array( 'Chỉ thay bìa – giữ nguyên nội dung', 'thay trang 1 (bìa cũ) bằng bìa mới, giữ toàn bộ nội dung, tự tạo mục lục (bookmark), chống sao chép; căn cứ chỉ cảnh báo, không chặn.' ),
+		'mau_bieu' => array( 'Mẫu biểu (cần điền)', 'tải về cả PDF và Word, không mục lục.' ),
+		'van_ban'  => array( 'Văn bản / Công báo', 'giữ nguyên tệp gốc 100% (không làm hỏng chữ ký số), không dùng AI.' ),
+		'luu_tru'  => array( 'Tài liệu lưu trữ / tham khảo', 'chỉ cảnh báo văn bản cũ, trang công khai ghi "Tài liệu tham khảo".' ),
+		'tra_phi'  => array( 'Tài liệu trả phí', 'đọc thử 15% / 10 trang, đóng dấu người mua, chống sao chép.' ),
+	);
 }
 
 /** Ô chọn / ô tích của hồ sơ phát hành. $o = giá trị hiện tại; $blank = có lựa chọn "theo mẫu". */
@@ -125,9 +138,14 @@ function cvc_di_render_upload_and_list(): void {
 			<label class="text-sm">Tệp PDF đi kèm (không bắt buộc)<br><input type="file" name="pair" accept=".pdf,application/pdf"><br><span class="dg-muted">Tải cặp: DOCX cho bản đọc + PDF giữ dàn trang để tải về.</span></label>
 			<label class="text-sm">Mẫu hồ sơ phát hành<br>
 				<select name="preset" class="border border-slate-300 rounded-lg px-2 py-1.5 text-sm" style="width:100%">
-					<?php foreach ( array( 'sach' => 'Sách / cẩm nang', 'mau_bieu' => 'Mẫu biểu (cần điền)', 'van_ban' => 'Văn bản / Công báo (giữ nguyên)', 'luu_tru' => 'Tài liệu lưu trữ / tham khảo', 'tra_phi' => 'Tài liệu trả phí' ) as $pk => $pl ) : ?><option value="<?php echo esc_attr( $pk ); ?>"><?php echo esc_html( $pl ); ?></option><?php endforeach; ?>
+					<?php foreach ( cvc_di_presets() as $pk => $pd ) : ?><option value="<?php echo esc_attr( $pk ); ?>"><?php echo esc_html( $pd[0] ); ?></option><?php endforeach; ?>
 				</select>
 			</label>
+			<label class="text-sm">Ảnh bìa mới (không bắt buộc)<br><input type="file" name="cover_image" accept=".jpg,.jpeg,.png,.webp,image/*"><br><span class="dg-muted">JPG/PNG ≥ 600×800, nên 1240×1754 (A4). Hệ thống giữ dải logo + QR + congvienchuc.com.</span></label>
+			<div class="text-sm dg-muted" style="grid-column:1/-1">
+				<b>Các mẫu:</b>
+				<?php foreach ( cvc_di_presets() as $pd ) : ?><div>• <b><?php echo esc_html( $pd[0] ); ?></b>: <?php echo esc_html( $pd[1] ); ?></div><?php endforeach; ?>
+			</div>
 			<details class="text-sm" style="grid-column:1/-1"><summary class="font-bold cursor-pointer">Tùy chọn nâng cao (để trống = theo mẫu)</summary><div class="mt-2"><?php cvc_di_option_fields( array(), true ); ?></div></details>
 			<label class="text-sm"><input type="checkbox" name="rights" value="1" required> Tôi xác nhận Công Viên Chức có quyền phát hành tài liệu này (không lấy từ trang khác khi chưa được phép).</label>
 			<div><button type="submit" class="dg-btn is-primary">⇪ Tải lên &amp; phân tích</button></div>
@@ -292,15 +310,31 @@ function cvc_admin_render_docimport( string $item_param ): void {
 		<?php if ( ! $legal ) : ?><p class="dg-muted">Không thấy số hiệu văn bản pháp luật nào trong tệp.</p><?php else : ?>
 		<div style="overflow-x:auto"><table class="dg-tbl"><thead><tr><th>Số hiệu</th><th>Tình trạng</th><th>Lần nhắc</th><th>Ghi chú</th></tr></thead><tbody>
 			<?php foreach ( $legal as $l ) : ?>
-				<?php $st = CVC_DI_LEGAL[ $l['state'] ] ?? array( $l['state'], '#5b6470' ); ?>
+				<?php
+				$st = CVC_DI_LEGAL[ $l['state'] ] ?? array( $l['state'], '#5b6470' );
+				if ( 'dead' === $l['state'] && ! empty( $l['mention_only'] ) ) {
+					$st = array( 'ℹ Hết hiệu lực – chỉ nhắc tên', '#3b5b8a' );
+				}
+				?>
 				<tr>
 					<td><b><?php echo esc_html( (string) $l['number'] ); ?></b><?php if ( ! empty( $l['title'] ) ) : ?><br><span class="dg-muted"><?php echo esc_html( wp_trim_words( (string) $l['title'], 18 ) ); ?></span><?php endif; ?></td>
 					<td style="color:<?php echo esc_attr( $st[1] ); ?>;font-weight:bold;white-space:nowrap"><?php echo esc_html( $st[0] ); ?></td>
 					<td><?php echo (int) $l['count']; ?></td>
-					<td class="dg-muted"><?php echo esc_html( (string) $l['note'] ); ?></td>
+					<td class="dg-muted"><?php echo esc_html( (string) $l['note'] ); ?>
+						<?php if ( 'dead' === $l['state'] && empty( $l['mention_only'] ) ) : ?>
+							<br><label style="color:#1b2430"><input type="checkbox" form="di-ack" name="legal_ack[]" value="<?php echo esc_attr( (string) $l['number'] ); ?>" <?php checked( in_array( (string) $l['number'], (array) ( $ing['legal_ack'] ?? array() ), true ) ); ?>> Đây chỉ là nhắc tên văn bản cũ, không phải căn cứ</label>
+						<?php endif; ?>
+					</td>
 				</tr>
 			<?php endforeach; ?>
 		</tbody></table></div>
+		<?php if ( array_filter( $legal, static fn ( $l ) => 'dead' === $l['state'] && empty( $l['mention_only'] ) ) ) : ?>
+			<form id="di-ack" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="mt-2">
+				<?php wp_nonce_field( 'cvc_admin_docimport' ); ?><input type="hidden" name="action" value="cvc_admin_docimport"><input type="hidden" name="op" value="ack"><input type="hidden" name="id" value="<?php echo (int) $id; ?>">
+				<button class="dg-btn">✓ Lưu xác nhận văn bản chỉ nhắc tên</button>
+				<span class="dg-muted">Hệ thống tự bỏ qua số hiệu nằm trong phương án trắc nghiệm hoặc câu nói về văn bản cũ; ô này dành cho trường hợp còn lại.</span>
+			</form>
+		<?php endif; ?>
 		<?php endif; ?>
 		<?php if ( ! empty( $ai['concerns'] ) ) : ?>
 			<p class="font-bold text-sm mt-3">AI lưu ý biên tập viên kiểm tra:</p>
@@ -360,6 +394,8 @@ function cvc_admin_handle_docimport(): void {
 				static fn ( $v ) => '' !== $v
 			),
 			array( 'file' => array( (string) $f['tmp_name'], $name, str_ends_with( strtolower( $name ), '.pdf' ) ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ) )
+				+ ( ( is_array( $_FILES['cover_image'] ?? null ) && UPLOAD_ERR_OK === (int) ( $_FILES['cover_image']['error'] ?? 1 ) && is_uploaded_file( (string) $_FILES['cover_image']['tmp_name'] ) ) // phpcs:ignore
+					? array( 'cover' => array( (string) $_FILES['cover_image']['tmp_name'], sanitize_file_name( (string) $_FILES['cover_image']['name'] ), (string) ( wp_check_filetype( (string) $_FILES['cover_image']['name'] )['type'] ?: 'image/jpeg' ) ) ) : array() )
 				+ ( ( is_array( $_FILES['pair'] ?? null ) && UPLOAD_ERR_OK === (int) ( $_FILES['pair']['error'] ?? 1 ) && is_uploaded_file( (string) $_FILES['pair']['tmp_name'] ) ) // phpcs:ignore
 					? array( 'pair' => array( (string) $_FILES['pair']['tmp_name'], sanitize_file_name( (string) $_FILES['pair']['name'] ), 'application/pdf' ) ) : array() ),
 			$token
@@ -390,6 +426,9 @@ function cvc_admin_handle_docimport(): void {
 		return;
 	}
 	$body = array( 'action' => $op );
+	if ( 'ack' === $op ) {
+		$body['legal_ack'] = array_map( static fn ( $v ) => sanitize_text_field( wp_unslash( (string) $v ) ), (array) ( $_POST['legal_ack'] ?? array() ) );
+	}
 	if ( 'save' === $op ) {
 		$body += array(
 			'title'         => sanitize_text_field( wp_unslash( (string) ( $_POST['title'] ?? '' ) ) ),
