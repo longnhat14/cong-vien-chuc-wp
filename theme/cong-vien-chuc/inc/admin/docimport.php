@@ -37,10 +37,10 @@ function cvc_di_render_upload_and_list(): void {
 	$cats = (array) ( $d['categories'] ?? array() );
 	?>
 	<section class="dg-card">
-		<h2 class="font-black text-ink mb-2">Tải tệp sách lên (.docx)</h2>
+		<h2 class="font-black text-ink mb-2">Tải tệp sách lên (.docx hoặc .pdf)</h2>
 		<form method="post" enctype="multipart/form-data" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="grid gap-2" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr));align-items:end" onsubmit="this.querySelector('button').disabled=true;this.querySelector('button').textContent='Đang tải và trích xuất…'">
 			<?php wp_nonce_field( 'cvc_admin_docimport' ); ?><input type="hidden" name="action" value="cvc_admin_docimport"><input type="hidden" name="op" value="upload">
-			<label class="text-sm">Tệp .docx (≤ 20 MB)<br><input type="file" name="file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" required></label>
+			<label class="text-sm">Tệp .docx (≤ 20 MB) hoặc .pdf (≤ 40 MB)<br><input type="file" name="file" accept=".docx,.pdf,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" required></label>
 			<label class="text-sm">Tiêu đề (bỏ trống để hệ thống đề xuất)<br><input type="text" name="title" maxlength="200" class="border border-slate-300 rounded-lg px-2 py-1.5 text-sm" style="width:100%"></label>
 			<label class="text-sm">Bộ sách<br>
 				<select name="category" class="border border-slate-300 rounded-lg px-2 py-1.5 text-sm" style="width:100%"><option value="">Để AI chọn</option>
@@ -55,7 +55,7 @@ function cvc_di_render_upload_and_list(): void {
 			<label class="text-sm"><input type="checkbox" name="rights" value="1" required> Tôi xác nhận Công Viên Chức có quyền phát hành tài liệu này (không lấy từ trang khác khi chưa được phép).</label>
 			<div><button type="submit" class="dg-btn is-primary">⇪ Tải lên &amp; phân tích</button></div>
 		</form>
-		<p class="dg-muted mt-2">Hệ thống trích mục lục từ Heading của Word, soát mọi số hiệu văn bản pháp luật trong tệp với kho (còn hiệu lực / đã sửa đổi / hết hiệu lực), AI đề xuất tiêu đề, mô tả, tóm tắt (khoảng 50-500 ₫). Tài liệu chỉ lên thư viện sau khi bạn duyệt và bấm Xuất bản.</p>
+		<p class="dg-muted mt-2">Hệ thống trích mục lục (Heading của Word, hoặc dòng "Phần / Chương / 1." trong PDF), soát mọi số hiệu văn bản pháp luật trong tệp với kho (còn hiệu lực / đã sửa đổi / hết hiệu lực), AI đề xuất tiêu đề, mô tả, tóm tắt (khoảng 50-500 ₫). PDF ảnh quét được OCR nền bằng AI đọc ảnh (khoảng 25 ₫/trang, tối đa 400 trang). PDF giữ nguyên các trang gốc và được chèn bìa Công Viên Chức ở trang đầu. Tài liệu chỉ lên thư viện sau khi bạn duyệt và bấm Xuất bản.</p>
 	</section>
 	<section class="dg-card">
 		<h2 class="font-black text-ink mb-2">Tài liệu tải lên</h2>
@@ -135,7 +135,18 @@ function cvc_admin_render_docimport( string $item_param ): void {
 	</header>
 	<?php if ( ! empty( $ing['blocked'] ) ) : ?><p class="dg-issue mt-2"><b>Bị chặn:</b> <?php echo esc_html( (string) $ing['blocked'] ); ?></p><?php endif; ?>
 	<?php if ( $probs && 'published' !== (string) $d['status'] ) : ?><p class="dg-issue mt-2"><b>Chưa xuất bản được:</b> <?php echo esc_html( implode( '; ', $probs ) ); ?>.</p><?php endif; ?>
-	<?php if ( 'analyzing' === $stage ) : ?><p class="dg-muted mt-2">AI đang phân tích (khoảng 30 giây). Tải lại trang để xem gợi ý.</p><?php endif; ?>
+	<?php $ocr = (array) ( $ing['ocr'] ?? array() ); ?>
+	<?php if ( $ocr ) : ?>
+		<div class="dg-card mt-2">
+			<p class="text-sm"><b>OCR (AI đọc ảnh):</b> <?php echo (int) ( $ocr['done'] ?? 0 ); ?>/<?php echo (int) ( $ocr['pages'] ?? 0 ); ?> trang<?php echo (int) ( $ocr['total'] ?? 0 ) > (int) ( $ocr['pages'] ?? 0 ) ? ' (trong tổng ' . (int) $ocr['total'] . ' trang)' : ''; ?> · chi phí <?php echo esc_html( number_format_i18n( (float) ( $ocr['cost_vnd'] ?? 0 ) ) ); ?> ₫ ·
+				<?php echo esc_html( array( 'queued' => 'đang chờ', 'running' => 'đang chạy', 'done' => 'xong', 'paused' => 'tạm dừng' )[ $ocr['status'] ?? '' ] ?? (string) ( $ocr['status'] ?? '' ) ); ?></p>
+			<?php if ( (int) ( $ocr['pages'] ?? 0 ) > 0 ) : ?><div style="height:8px;background:#edf0f3;border-radius:6px;overflow:hidden;margin:6px 0"><div style="height:8px;background:#1f7a5c;width:<?php echo (int) round( 100 * (int) ( $ocr['done'] ?? 0 ) / max( 1, (int) $ocr['pages'] ) ); ?>%"></div></div><?php endif; ?>
+			<?php if ( ! empty( $ocr['error'] ) ) : ?><p class="dg-issue">OCR tạm dừng: <?php echo esc_html( (string) $ocr['error'] ); ?> (kiểm tra Cấu hình AI → nhà cung cấp đọc công văn / ngân sách).</p><?php endif; ?>
+			<?php if ( 'done' !== ( $ocr['status'] ?? '' ) ) : ?><?php cvc_di_form_open( $id, 'ocr' ); ?><button class="dg-btn">▶ Chạy tiếp OCR ngay</button></form> <span class="dg-muted">Hệ thống tự chạy 2 phút/lần; xong sẽ tự phân tích.</span><?php endif; ?>
+		</div>
+	<?php endif; ?>
+	<?php if ( ! empty( $ing['build_note'] ) ) : ?><p class="dg-muted mt-2">Lần dựng gần nhất: <?php echo esc_html( (string) $ing['build_note'] ); ?></p><?php endif; ?>
+	<?php if ( 'analyzing' === $stage && ! $ocr ) : ?><p class="dg-muted mt-2">AI đang phân tích (khoảng 30 giây). Tải lại trang để xem gợi ý.</p><?php endif; ?>
 	<?php if ( ! empty( $ing['ai_error'] ) ) : ?><p class="dg-issue mt-2">AI chưa phân tích được: <?php echo esc_html( (string) $ing['ai_error'] ); ?>. Có thể điền tay hoặc bấm Phân tích lại.</p><?php endif; ?>
 	<?php foreach ( (array) ( $ing['warnings'] ?? array() ) as $w ) : ?><p class="dg-issue mt-2" style="border-left-color:#c9a052;background:#fbf5e8"><?php echo esc_html( (string) $w ); ?></p><?php endforeach; ?>
 
@@ -146,6 +157,12 @@ function cvc_admin_render_docimport( string $item_param ): void {
 					<img src="<?php echo esc_url( (string) $d['images']['cover'] ); ?>" alt="Bìa" style="width:220px;border-radius:6px;box-shadow:0 6px 18px rgba(15,42,74,.25)">
 				<?php else : ?><div class="dg-muted" style="width:220px;height:311px;border:1px dashed #cbd5df;border-radius:6px;display:flex;align-items:center;justify-content:center">Bìa đang dựng</div><?php endif; ?>
 				<p class="dg-muted mt-1">Bìa tự đổi theo tiêu đề, bộ sách, ngành sau khi lưu.</p>
+				<?php if ( ! empty( $ing['previews'] ) ) : ?>
+					<p class="text-sm font-bold mt-3">Trang đầu tệp gốc</p>
+					<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;width:220px">
+						<?php foreach ( (array) $ing['previews'] as $pv ) : ?><img src="<?php echo esc_url( (string) $pv ); ?>" alt="" loading="lazy" style="width:100%;border:1px solid #dfe5eb;border-radius:4px"><?php endforeach; ?>
+					</div>
+				<?php endif; ?>
 			</div>
 			<div style="flex:1 1 380px;min-width:0">
 				<?php cvc_di_form_open( $id, 'save' ); ?>
@@ -158,7 +175,11 @@ function cvc_admin_render_docimport( string $item_param ): void {
 						<label class="text-sm font-bold">Đối tượng<br><select name="audience" class="border border-slate-300 rounded-lg px-2 py-1.5 text-sm"><?php foreach ( array( '' => '—', 'civil' => 'Công chức', 'public' => 'Viên chức', 'both' => 'Cả hai' ) as $k => $v ) : ?><option value="<?php echo esc_attr( $k ); ?>" <?php selected( (string) $d['audience'], $k ); ?>><?php echo esc_html( $v ); ?></option><?php endforeach; ?></select></label>
 						<label class="text-sm font-bold">Giá<br><select name="is_free" class="border border-slate-300 rounded-lg px-2 py-1.5 text-sm"><option value="1" <?php selected( ! empty( $d['is_free'] ) ); ?>>Miễn phí</option><option value="0" <?php selected( empty( $d['is_free'] ) ); ?>>Có phí</option></select>
 							<input type="number" name="price" min="0" step="1000" value="<?php echo esc_attr( (string) (int) $d['price'] ); ?>" class="border border-slate-300 rounded-lg px-2 py-1.5 text-sm" style="width:110px"> ₫</label>
+						<?php if ( 'pdf' === ( $ing['kind'] ?? 'docx' ) ) : ?>
+							<input type="hidden" name="release" value="pdf"><p class="text-sm"><b>Tệp tải về</b><br>PDF gốc + bìa Công Viên Chức ở trang đầu</p>
+						<?php else : ?>
 						<label class="text-sm font-bold">Tệp tải về<br><select name="release" class="border border-slate-300 rounded-lg px-2 py-1.5 text-sm"><option value="pdf" <?php selected( 'pdf', $ing['release'] ?? 'pdf' ); ?>>PDF có bìa Công Viên Chức</option><option value="docx" <?php selected( 'docx', $ing['release'] ?? 'pdf' ); ?>>Giữ DOCX gốc (mẫu biểu cần điền)</option></select></label>
+						<?php endif; ?>
 					</div>
 					<label class="block text-sm mt-2"><input type="checkbox" name="use_summary" value="1" <?php checked( $ing['use_summary'] ?? true ); ?>> Hiện hộp "Tóm tắt nhanh" (AI tạo, bạn đã đọc) đầu bản đọc</label>
 					<?php if ( in_array( 'dead', array_column( (array) ( $ing['legal'] ?? array() ), 'state' ), true ) ) : ?>
@@ -215,7 +236,7 @@ function cvc_admin_handle_docimport(): void {
 	if ( 'upload' === $op ) {
 		$f = $_FILES['file'] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 		if ( ! is_array( $f ) || UPLOAD_ERR_OK !== (int) ( $f['error'] ?? 1 ) || ! is_uploaded_file( (string) $f['tmp_name'] ) ) {
-			cvc_admin_redirect( $back, 'error', 'Chưa nhận được tệp (kiểm tra dung lượng ≤ 20 MB).' );
+			cvc_admin_redirect( $back, 'error', 'Chưa nhận được tệp (kiểm tra dung lượng: .docx ≤ 20 MB, .pdf ≤ 40 MB).' );
 			return;
 		}
 		$name = sanitize_file_name( (string) $f['name'] );
@@ -232,7 +253,7 @@ function cvc_admin_handle_docimport(): void {
 				),
 				static fn ( $v ) => '' !== $v
 			),
-			array( 'file' => array( (string) $f['tmp_name'], $name, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ) ),
+			array( 'file' => array( (string) $f['tmp_name'], $name, str_ends_with( strtolower( $name ), '.pdf' ) ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ) ),
 			$token
 		);
 		$new = (int) ( $res['data']['data']['id'] ?? 0 );
