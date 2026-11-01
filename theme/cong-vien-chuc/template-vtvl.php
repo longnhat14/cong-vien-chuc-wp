@@ -34,8 +34,6 @@ $crumbs = array(
 );
 cvc_seo_set_title( 'Vị trí việc làm công chức, viên chức: văn bản, hiệu lực, tóm tắt từng Điều' );
 cvc_seo_set_description( 'Văn bản về xây dựng, phê duyệt và quản lý vị trí việc làm của công chức, viên chức: Nghị định 361/2025/NĐ-CP, Nghị định 232/2026/NĐ-CP, thông tư hướng dẫn, hiệu lực và tóm tắt từng Điều.' );
-// Chưa lập chỉ mục trong giai đoạn kiểm chứng nội dung (đổi bằng cách bỏ dòng này khi đủ nội dung).
-cvc_seo_set_noindex();
 cvc_seo_set_canonical( cvc_vtvl_url() );
 cvc_seo_add_breadcrumb_jsonld( $crumbs );
 if ( ! $ok ) {
