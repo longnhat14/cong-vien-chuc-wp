@@ -293,6 +293,8 @@
 	document.addEventListener('fullscreenchange', function () { syncFullBtn(); syncTop(); });
 	function setDim(on) {
 		root.classList.toggle('is-dim', on);
+		if (on) { prefs.bg = 'dark'; } else if (prefs.bg === 'dark') { prefs.bg = 'white'; }
+		if (typeof applyType === 'function' && setDim.ready) { applyType(); }
 		q('[data-act="dim"]').setAttribute('aria-pressed', on ? 'true' : 'false');
 		prefs.dim = on;
 		store.set('cvc-rd-prefs', prefs);
@@ -320,20 +322,90 @@
 		dlg.addEventListener('click', function (e) { if (e.target === dlg) { dlg.close(); } });
 	}
 
+	/* ---------- Điện thoại: chạm đúp phóng to tại chỗ (ảnh nét), nút xem toàn màn hình ---------- */
+	var coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+	var lastTap = { el: null, t: 0 };
+	function inlineZoom(box, e) {
+		var fig = box.closest('.cvc-rd-page');
+		var img = q('img', box);
+		var on = !fig.classList.contains('is-zoomed');
+		var r = box.getBoundingClientRect();
+		var fx = e && e.clientX ? (e.clientX - r.left) / r.width : 0.5;
+		var fy = e && e.clientY ? (e.clientY - r.top) / r.height : 0.3;
+		var y0 = r.top + fy * r.height;
+		if (on) {
+			if (!img.getAttribute('data-lo')) { img.setAttribute('data-lo', img.src); }
+			img.src = box.getAttribute('data-src');
+		}
+		fig.classList.toggle('is-zoomed', on);
+		fig.style.setProperty('--z', on ? '2' : '1');
+		window.requestAnimationFrame(function () {
+			var r2 = box.getBoundingClientRect();
+			if (on) { box.scrollLeft = Math.max(0, fx * box.scrollWidth - box.clientWidth / 2); }
+			var y1 = r2.top + fy * r2.height;
+			if (isFull()) { root.scrollTop += y1 - y0; } else { window.scrollBy(0, y1 - y0); }
+		});
+		if (on) { say('Chạm đúp lần nữa để thu nhỏ.'); }
+	}
+	function zoomFrom(box) { zoom(box.getAttribute('data-src'), box.getAttribute('aria-label')); }
+	root.addEventListener('keydown', function (e) {
+		var box = e.target.closest && e.target.closest('.cvc-rd-zoom');
+		if (box && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); zoomFrom(box); }
+	});
+	(function hint() {
+		var h = q('.cvc-rd-hint');
+		if (h && coarse && !store.get('cvc-rd-hint')) { h.hidden = false; }
+	})();
+
+	/* ---------- Đọc dễ: cỡ chữ, giãn dòng, nền, kiểu chữ ---------- */
+	var FS_MIN = 14, FS_MAX = 28;
+	function applyType() {
+		var fs = Math.max(FS_MIN, Math.min(FS_MAX, parseInt(prefs.fs, 10) || (window.innerWidth < 700 ? 18 : 17)));
+		root.style.setProperty('--rt-fs', fs + 'px');
+		root.style.setProperty('--rt-lh', String(prefs.lh || 1.75));
+		root.setAttribute('data-ff', prefs.ff || 'serif');
+		root.setAttribute('data-bg', prefs.bg || 'white');
+		var o = q('.cvc-rd-fs');
+		if (o) { o.textContent = fs; }
+		qa('.cvc-rd-type [data-act]').forEach(function (b) {
+			var a = b.getAttribute('data-act');
+			var v = b.getAttribute('data-v');
+			if (a === 'fs') { return; }
+			var cur = a === 'lh' ? String(prefs.lh || 1.75) : (a === 'bg' ? (prefs.bg || 'white') : (prefs.ff || 'serif'));
+			b.setAttribute('aria-pressed', String(v) === String(cur) ? 'true' : 'false');
+		});
+		store.set('cvc-rd-prefs', prefs);
+	}
+	function typeAct(a, v) {
+		if (a === 'fs') { prefs.fs = Math.max(FS_MIN, Math.min(FS_MAX, (parseInt(prefs.fs, 10) || (window.innerWidth < 700 ? 18 : 17)) + parseInt(v, 10))); }
+		if (a === 'lh') { prefs.lh = parseFloat(v); }
+		if (a === 'ff') { prefs.ff = v; }
+		if (a === 'bg') { prefs.bg = v; setDim(v === 'dark'); }
+		applyType();
+	}
+
 	/* ---------- Sự kiện ---------- */
 	root.addEventListener('click', function (e) {
 		var t = e.target.closest('[data-act], .cvc-rd-zoom, .cvc-rd-toc a, .cvc-rd-thumbs button');
 		if (!t || !root.contains(t)) { return; }
-		if (t.classList.contains('cvc-rd-zoom')) { zoom(t.getAttribute('data-src'), t.getAttribute('aria-label')); return; }
+		if (t.classList.contains('cvc-rd-zoom')) {
+			if (!coarse) { zoomFrom(t); return; }
+			var now = Date.now();
+			if (lastTap.el === t && now - lastTap.t < 350) { lastTap = { el: null, t: 0 }; inlineZoom(t, e); } else { lastTap = { el: t, t: now }; }
+			return;
+		}
 		if (t.matches('.cvc-rd-toc a')) { e.preventDefault(); tocJump(parseInt(t.getAttribute('data-page'), 10), q('.t', t).textContent); return; }
 		if (t.matches('.cvc-rd-thumbs button')) { closePanels(); goPage(parseInt(t.getAttribute('data-page'), 10)); return; }
 		var act = t.getAttribute('data-act');
 		var v = t.getAttribute('data-v');
-		if (act === 'mode') { setMode(v); } else if (act === 'prev') { goPage(cur - step()); } else if (act === 'next') { goPage(cur + step()); } else if (act === 'panel') { openPanel(v, t); } else if (act === 'full') { setFull(!isFull()); } else if (act === 'dim') { setDim(!root.classList.contains('is-dim')); } else if (act === 'spread') { setSpread(!pagesView.classList.contains('is-spread')); } else if (act === 'resume') {
+		if (act === 'mode') { setMode(v); if (t.closest('.cvc-rd-hint')) { q('.cvc-rd-hint').hidden = true; store.set('cvc-rd-hint', 1); } } else if (act === 'prev') { goPage(cur - step()); } else if (act === 'next') { goPage(cur + step()); } else if (act === 'panel') { openPanel(v, t); } else if (act === 'full') { setFull(!isFull()); } else if (act === 'dim') { setDim(!root.classList.contains('is-dim')); } else if (act === 'spread') { setSpread(!pagesView.classList.contains('is-spread')); } else if (act === 'resume') {
 			var box = q('.cvc-rd-resume');
 			box.hidden = true;
 			goPage(parseInt(box.getAttribute('data-page'), 10));
-		} else if (act === 'resume-hide') { q('.cvc-rd-resume').hidden = true; }
+		} else if (act === 'resume-hide') { q('.cvc-rd-resume').hidden = true; } else if (act === 'hint-hide') {
+			q('.cvc-rd-hint').hidden = true;
+			store.set('cvc-rd-hint', 1);
+		} else if (act === 'expand') { zoomFrom(q('.cvc-rd-zoom', t.closest('.cvc-rd-page'))); } else if (act === 'fs' || act === 'lh' || act === 'bg' || act === 'ff') { typeAct(act, v); }
 	});
 	if (input) {
 		input.addEventListener('change', function () { goPage(input.value); });
@@ -361,7 +433,9 @@
 
 	/* ---------- Khởi tạo ---------- */
 	syncTop();
-	if (prefs.dim) { setDim(true); }
+	applyType();
+	setDim.ready = true;
+	if (prefs.dim || prefs.bg === 'dark') { setDim(true); }
 	if (prefs.spread && wide()) { pagesView.classList.add('is-spread'); q('[data-act="spread"]').setAttribute('aria-pressed', 'true'); }
 	if (prefs.mode === 'text') { setMode('text', true); }
 	detect();

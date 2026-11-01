@@ -205,7 +205,7 @@ get_header();
 					</a>
 					<?php foreach ( array_slice( $dls, 1 ) as $dl ) : // 01/11/2026: nhiều định dạng (vd. mẫu biểu kèm Word để điền) ?>
 						<a href="<?php echo esc_url( add_query_arg( 'dinh-dang', (string) $dl['format'], cvc_document_download_url( $slug ) ) ); ?>" class="inline-flex items-center gap-2 px-5 py-3 font-black text-sm rounded-xl border border-slate-300 bg-white hover:border-acc-2 text-ink-2 ml-2">
-							<i class="fa-solid fa-file-word"></i> Tải <?php echo esc_html( (string) $dl['label'] ); ?>
+							<i class="fa-solid <?php echo 'epub' === ( $dl['format'] ?? '' ) ? 'fa-book-open' : 'fa-file-word'; ?>"></i> Tải <?php echo esc_html( (string) $dl['label'] ); ?>
 						</a>
 					<?php endforeach; ?>
 				<?php elseif ( ! $is_logged_in ) : ?>

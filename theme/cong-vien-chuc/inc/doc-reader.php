@@ -2,7 +2,9 @@
 /**
  * TRÌNH ĐỌC BẢN GỐC (01/11/2026, claude/ke-hoach-doc-thu-dep.md đợt 2 - anh Nhật chốt):
  *  - mặc định "Bản gốc" (ảnh trang PDF phát hành, có dấu chìm; tài liệu đã mua in dấu chìm theo người mua),
- *    nút chuyển "Bản chữ" (luôn có sẵn trong HTML cho Google / tìm kiếm / trình đọc màn hình);
+ *    nút chuyển "Đọc dễ" (bản chữ tự co giãn - luôn có sẵn trong HTML cho Google / tìm kiếm / trình đọc màn hình;
+ *    chỉnh cỡ chữ, giãn dòng, nền, kiểu chữ);
+ *  - điện thoại: ảnh tràn viền + cắt lề trắng chung của tài liệu, chạm đúp phóng to tại chỗ (ảnh nét), nút xem toàn màn hình;
  *  - thanh công cụ: số trang + thanh kéo, mục lục, ảnh thu nhỏ, tìm trong sách, 1/2 trang (sách mở), giảm sáng,
  *    toàn màn hình; "Đọc tiếp từ trang N" (lưu theo tài khoản qua admin-ajax -> API).
  * Dữ liệu: $doc['reader'] từ API (DocAccess::viewer), $doc['content_html'] (bản chữ - đã cắt nếu đang đọc thử).
@@ -84,6 +86,10 @@ function cvc_doc_reader_render( array $doc, string $slug, bool $is_logged_in, st
 				?>
 			</p>
 			<?php if ( ! empty( $doc['reference_label'] ) ) : ?><p class="cvc-ref-label"><b><?php echo esc_html( (string) $doc['reference_label'] ); ?></b> – không dùng thay cho quy định hiện hành.</p><?php endif; ?>
+			<div class="cvc-rd-hint" hidden>
+				<span><b>Mẹo đọc trên điện thoại:</b> chạm đúp vào trang để phóng to, hoặc chọn <button type="button" class="cvc-rd-link" data-act="mode" data-v="text">Đọc dễ</button> để chữ tự co giãn theo màn hình.</span>
+				<button type="button" class="cvc-rd-x" data-act="hint-hide" aria-label="Ẩn mẹo">&times;</button>
+			</div>
 			<div class="cvc-rd-resume" hidden>
 				<span>Lần trước bạn đọc đến <b>trang <span class="cvc-rd-resume-n"></span></b>.</span>
 				<button type="button" class="cvc-rd-btn is-primary" data-act="resume">Đọc tiếp</button>
@@ -95,7 +101,7 @@ function cvc_doc_reader_render( array $doc, string $slug, bool $is_logged_in, st
 		<div class="cvc-rd-bar" role="toolbar" aria-label="Công cụ đọc">
 			<div class="cvc-rd-seg" role="group" aria-label="Kiểu hiển thị">
 				<button type="button" data-act="mode" data-v="pages" aria-pressed="true">Bản gốc</button>
-				<button type="button" data-act="mode" data-v="text" aria-pressed="false">Bản chữ</button>
+				<button type="button" data-act="mode" data-v="text" aria-pressed="false">Đọc dễ</button>
 			</div>
 			<div class="cvc-rd-nav" data-only="pages">
 				<button type="button" class="cvc-rd-ic" data-act="prev" aria-label="Trang trước"><i class="fa-solid fa-chevron-left" aria-hidden="true"></i></button>
@@ -107,6 +113,7 @@ function cvc_doc_reader_render( array $doc, string $slug, bool $is_logged_in, st
 				<button type="button" class="cvc-rd-ic" data-act="panel" data-v="thumbs" data-only="pages" aria-expanded="false" title="Các trang" aria-label="Ảnh thu nhỏ các trang"><i class="fa-solid fa-table-cells" aria-hidden="true"></i><span>Các trang</span></button>
 				<button type="button" class="cvc-rd-ic" data-act="panel" data-v="find" aria-expanded="false" title="Tìm trong sách" aria-label="Tìm trong sách"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><span>Tìm</span></button>
 				<button type="button" class="cvc-rd-ic cvc-rd-wide" data-act="spread" data-only="pages" aria-pressed="false" title="Sách mở 2 trang" aria-label="Sách mở 2 trang"><i class="fa-solid fa-book-open" aria-hidden="true"></i><span>2 trang</span></button>
+				<button type="button" class="cvc-rd-ic" data-act="panel" data-v="type" data-only="text" aria-expanded="false" title="Cỡ chữ, nền, kiểu chữ" aria-label="Cỡ chữ, nền, kiểu chữ"><i class="fa-solid fa-font" aria-hidden="true"></i><span>Cỡ chữ</span></button>
 				<button type="button" class="cvc-rd-ic" data-act="dim" aria-pressed="false" title="Giảm sáng" aria-label="Giảm sáng"><i class="fa-solid fa-moon" aria-hidden="true"></i><span>Giảm sáng</span></button>
 				<button type="button" class="cvc-rd-ic" data-act="full" aria-pressed="false" title="Toàn màn hình" aria-label="Toàn màn hình"><i class="fa-solid fa-expand" aria-hidden="true"></i><span>Toàn màn hình</span></button>
 			</div>
@@ -135,6 +142,12 @@ function cvc_doc_reader_render( array $doc, string $slug, bool $is_logged_in, st
 				</button>
 			<?php endforeach; ?>
 		</div>
+		<div class="cvc-rd-panel cvc-rd-type" data-panel="type" hidden>
+			<div class="row"><span class="lb">Cỡ chữ</span><div class="ctl"><button type="button" data-act="fs" data-v="-1" aria-label="Chữ nhỏ hơn">A−</button><output class="cvc-rd-fs" aria-live="polite">18</output><button type="button" data-act="fs" data-v="1" aria-label="Chữ to hơn">A+</button></div></div>
+			<div class="row"><span class="lb">Giãn dòng</span><div class="ctl" role="group"><button type="button" data-act="lh" data-v="1.5">Hẹp</button><button type="button" data-act="lh" data-v="1.75">Vừa</button><button type="button" data-act="lh" data-v="2">Rộng</button></div></div>
+			<div class="row"><span class="lb">Nền</span><div class="ctl" role="group"><button type="button" data-act="bg" data-v="white">Trắng</button><button type="button" data-act="bg" data-v="sepia">Ngà</button><button type="button" data-act="bg" data-v="dark">Tối</button></div></div>
+			<div class="row"><span class="lb">Kiểu chữ</span><div class="ctl" role="group"><button type="button" data-act="ff" data-v="serif" class="ff-serif">Có chân</button><button type="button" data-act="ff" data-v="sans" class="ff-sans">Không chân</button></div></div>
+		</div>
 		<div class="cvc-rd-panel cvc-rd-find" data-panel="find" hidden>
 			<label for="cvc-rd-q" class="sr-only">Tìm trong sách</label>
 			<input type="search" id="cvc-rd-q" placeholder="<?php echo esc_attr( $preview ? 'Tìm trong phần đọc thử…' : 'Tìm trong sách…' ); ?>" autocomplete="off">
@@ -143,12 +156,25 @@ function cvc_doc_reader_render( array $doc, string $slug, bool $is_logged_in, st
 		</div>
 		</div>
 
-		<div class="cvc-rd-pages" data-view="pages">
+		<?php
+		$crop = is_array( $rd['crop'] ?? null ) && count( $rd['crop'] ) === 4 ? array_map( 'floatval', $rd['crop'] ) : null;
+		$pv_style = $crop ? sprintf( '--cx:%s;--cy:%s;--cw:%s;--ch:%s', $crop[0], $crop[1], $crop[2], $crop[3] ) : '';
+		?>
+		<div class="cvc-rd-pages<?php echo $crop ? ' has-crop' : ''; ?>" data-view="pages"<?php echo $pv_style ? ' style="' . esc_attr( $pv_style ) . '"' : ''; ?>>
 			<?php foreach ( $pages as $i => $pg ) : ?>
-				<figure class="cvc-rd-page" id="pg-<?php echo (int) $pg['n']; ?>" data-page="<?php echo (int) $pg['n']; ?>">
-					<button type="button" class="cvc-rd-zoom" data-src="<?php echo esc_url( (string) $pg['src'] ); ?>" aria-label="<?php echo esc_attr( sprintf( 'Phóng to trang %d', (int) $pg['n'] ) ); ?>">
+				<?php
+				$pw  = max( 1, (int) $pg['w'] );
+				$ph  = max( 1, (int) $pg['h'] );
+				$fst = sprintf( '--hw:%.4F', $ph / $pw );
+				if ( $crop && empty( $pg['bleed'] ) ) {
+					$fst .= sprintf( ';--ar:%.4F', ( $crop[2] * $pw ) / max( 0.01, $crop[3] * $ph ) );
+				}
+				?>
+				<figure class="cvc-rd-page<?php echo ! empty( $pg['bleed'] ) ? ' is-bleed' : ''; ?>" id="pg-<?php echo (int) $pg['n']; ?>" data-page="<?php echo (int) $pg['n']; ?>" style="<?php echo esc_attr( $fst ); ?>">
+					<div class="cvc-rd-zoom" role="button" tabindex="0" data-src="<?php echo esc_url( (string) ( $pg['hd'] ?? $pg['src'] ) ); ?>" aria-label="<?php echo esc_attr( sprintf( 'Phóng to trang %d', (int) $pg['n'] ) ); ?>">
 						<img src="<?php echo esc_url( (string) $pg['src'] ); ?>" width="<?php echo (int) $pg['w']; ?>" height="<?php echo (int) $pg['h']; ?>" alt="<?php echo esc_attr( sprintf( 'Trang %d – %s', (int) $pg['n'], (string) ( $doc['title'] ?? '' ) ) ); ?>"<?php echo $i > 1 ? ' loading="lazy"' : ''; ?> decoding="async" draggable="false">
-					</button>
+					</div>
+					<button type="button" class="cvc-rd-exp" data-act="expand" aria-label="<?php echo esc_attr( sprintf( 'Xem trang %d toàn màn hình', (int) $pg['n'] ) ); ?>"><i class="fa-solid fa-up-right-and-down-left-from-center" aria-hidden="true"></i></button>
 					<figcaption><?php echo esc_html( sprintf( 'Trang %d / %d', (int) $pg['n'], $total ) ); ?></figcaption>
 				</figure>
 			<?php endforeach; ?>
@@ -162,7 +188,7 @@ function cvc_doc_reader_render( array $doc, string $slug, bool $is_logged_in, st
 					</div>
 				</div>
 			<?php elseif ( ! empty( $rd['building'] ) ) : ?>
-				<p class="cvc-rd-wait" role="status">Đang chuẩn bị bản gốc các trang <?php echo (int) ( $ready + 1 ); ?>–<?php echo (int) $total; ?>. Bạn có thể đọc tiếp ở <button type="button" data-act="mode" data-v="text" class="cvc-rd-link">Bản chữ</button> hoặc tải lại trang sau ít phút.</p>
+				<p class="cvc-rd-wait" role="status">Đang chuẩn bị bản gốc các trang <?php echo (int) ( $ready + 1 ); ?>–<?php echo (int) $total; ?>. Bạn có thể đọc tiếp ở <button type="button" data-act="mode" data-v="text" class="cvc-rd-link">Đọc dễ</button> hoặc tải lại trang sau ít phút.</p>
 			<?php endif; ?>
 		</div>
 

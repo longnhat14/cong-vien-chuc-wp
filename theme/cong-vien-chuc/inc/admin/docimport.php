@@ -48,6 +48,7 @@ function cvc_di_option_flags(): array {
 		'login_required' => 'Tài liệu miễn phí vẫn cần đăng nhập để tải',
 		'noindex'        => 'Tài liệu nội bộ: không cho Google tìm thấy, không vào sitemap',
 		'copy_protect'   => 'Chống sao chép: khóa chép chữ / chỉnh sửa trong PDF (vẫn in được), chặn bôi đen & sao chép trên bản đọc web',
+		'epub'           => 'Cho tải EPUB để đọc trên điện thoại (cần bản Đọc dễ đã duyệt với tệp PDF; tài liệu trả phí ghi tên người mua)',
 	);
 }
 
@@ -303,6 +304,63 @@ function cvc_admin_render_docimport( string $item_param ): void {
 				</form>
 			</div>
 		</div>
+	</section>
+
+	<?php
+	// 01/11/2026 đợt 3: bản Đọc dễ do AI dựng lại từ ảnh trang (chờ duyệt mới dùng cho bản chữ trên web + EPUB).
+	$rf      = (array) ( $ing['reflow'] ?? array() );
+	$rf_st   = (string) ( $rf['status'] ?? '' );
+	$rf_pdf  = 'pdf' === ( $ing['kind'] ?? '' );
+	$rf_cost = (int) ( $ing['pages_hint'] ?? ( $d['page_count'] ?? 0 ) ) * 25;
+	$rf_lbl  = array(
+		'queued'   => 'Đang chờ dựng',
+		'running'  => 'Đang dựng',
+		'review'   => 'Đã dựng xong - chờ duyệt',
+		'approved' => 'Đã duyệt - đang dùng cho bản chữ trên web và EPUB',
+	);
+	?>
+	<section class="dg-card" id="doc-reflow">
+		<h2 class="font-black text-ink mb-2">Bản Đọc dễ (AI dựng lại từ ảnh trang)</h2>
+		<?php if ( ! $rf_pdf ) : ?>
+			<p class="dg-muted">Tệp Word giữ sẵn tiêu đề, bảng, chữ đậm nên không cần AI dựng lại - bản chữ và EPUB dùng trực tiếp nội dung Word.</p>
+		<?php else : ?>
+			<p class="dg-muted">AI đọc ảnh từng trang và chép lại thành bản chữ có cấu trúc (tiêu đề, hộp mẹo, bảng, chữ đậm, câu trắc nghiệm) để đọc trên điện thoại và xuất EPUB. Khoảng 25 ₫/trang, tính vào ngân sách AI ngày. Chỉ dùng sau khi bạn duyệt.</p>
+			<p class="text-sm mt-2"><b>Trạng thái:</b>
+				<?php
+				if ( '' === $rf_st ) {
+					echo 'Chưa dựng.';
+				} else {
+					echo esc_html( ( $rf_lbl[ $rf_st ] ?? $rf_st ) . ' · ' . (int) ( $rf['done'] ?? 0 ) . '/' . (int) ( $rf['pages'] ?? 0 ) . ' trang · chi phí ' . number_format( (float) ( $rf['cost_vnd'] ?? 0 ), 0, ',', '.' ) . ' ₫' );
+					if ( ! empty( $rf['error'] ) ) {
+						echo ' · <span class="text-red-700">' . esc_html( 'daily_budget' === $rf['error'] ? 'tạm dừng: hết ngân sách AI hôm nay, mai chạy tiếp' : 'tạm dừng: ' . (string) $rf['error'] ) . '</span>';
+					}
+				}
+				?>
+			</p>
+			<div class="flex flex-wrap gap-2 mt-3">
+				<?php if ( '' === $rf_st ) : ?>
+					<?php cvc_di_form_open( (int) $d['id'], 'reflow' ); ?><button class="dg-btn is-primary">✨ Dựng bản Đọc dễ bằng AI (~<?php echo esc_html( number_format( $rf_cost, 0, ',', '.' ) ); ?> ₫)</button></form>
+				<?php endif; ?>
+				<?php if ( 'review' === $rf_st ) : ?>
+					<?php cvc_di_form_open( (int) $d['id'], 'reflow_approve' ); ?><button class="dg-btn is-ok">✓ Duyệt và dùng bản này</button></form>
+				<?php endif; ?>
+				<?php if ( 'approved' === $rf_st ) : ?>
+					<?php cvc_di_form_open( (int) $d['id'], 'reflow_unapprove' ); ?><button class="dg-btn">Bỏ duyệt</button></form>
+				<?php endif; ?>
+				<?php if ( in_array( $rf_st, array( 'review', 'approved', 'running', 'queued' ), true ) ) : ?>
+					<?php cvc_di_form_open( (int) $d['id'], 'reflow_restart' ); ?><button class="dg-btn" onclick="return confirm('Dựng lại toàn bộ bằng AI (tốn thêm khoảng <?php echo esc_attr( number_format( $rf_cost, 0, ',', '.' ) ); ?> ₫)?');">↻ Dựng lại từ đầu</button></form>
+				<?php endif; ?>
+			</div>
+			<?php if ( ! empty( $ing['reflow_body'] ) ) : ?>
+				<link rel="stylesheet" href="<?php echo esc_url( get_theme_file_uri( '/assets/css/library.css' ) . '?v=' . filemtime( get_theme_file_path( '/assets/css/library.css' ) ) ); ?>">
+				<details class="mt-3" <?php echo 'review' === $rf_st ? 'open' : ''; ?>>
+					<summary class="font-bold text-sm cursor-pointer">Xem bản Đọc dễ để duyệt (đối chiếu với tệp gốc)</summary>
+					<div class="cvc-rd-text cvc-gen cvc-up" style="max-height:640px;overflow:auto;border:1px solid #e6e0d2;border-radius:12px;padding:12px 18px;margin-top:8px;font-size:16px;line-height:1.7">
+						<?php echo wp_kses_post( (string) $ing['reflow_body'] ); ?>
+					</div>
+				</details>
+			<?php endif; ?>
+		<?php endif; ?>
 	</section>
 
 	<section class="dg-card">
