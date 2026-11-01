@@ -55,7 +55,7 @@ function cvc_admin_render_docgen( string $item_param ): void {
 	$d   = $res['ok'] ? (array) ( $res['data']['data'] ?? array() ) : array();
 	?>
 	<header>
-		<h1 class="text-2xl font-black text-ink">Xưởng tài liệu</h1>
+		<div class="flex flex-wrap items-center justify-between gap-2"><h1 class="text-2xl font-black text-ink">Xưởng tài liệu</h1><a class="dg-btn" href="<?php echo esc_url( cvc_admin_url( 'thiet-ke-sach' ) ); ?>">🎨 Thiết kế sách (bìa, trang, gáy, 3D)</a></div>
 		<p class="text-sm text-ink-muted">Gõ tiêu đề hoặc từ khóa: hệ thống lập khung chỉ từ văn bản đang có hiệu lực, AI viết từng phần có căn cứ, AI thứ hai kiểm chứng. Biên tập viên duyệt 2 lần (khung, nội dung) rồi xuất bản một chạm: PDF, bản đọc, bìa, sách 3D, QR, SEO, sitemap.</p>
 	</header>
 	<?php if ( ! $res['ok'] ) : ?><p class="text-sm text-red-700"><?php echo esc_html( cvc_admin_error_message( $res ) ); ?></p><?php return; endif; ?>
@@ -312,6 +312,7 @@ function cvc_dg_render_detail( int $id ): void {
 			<?php endif; ?>
 			<?php if ( ! empty( $g['document_id'] ) ) : ?>
 				<a class="dg-btn" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=cvc_admin_docgen_pdf&id=' . $id ), 'cvc_admin_docgen_pdf' ) ); ?>" target="_blank" rel="noopener">👁 Xem PDF</a>
+				<a class="dg-btn" href="<?php echo esc_url( cvc_admin_url( 'thiet-ke-sach', (int) $g['document_id'] ) ); ?>">🎨 Thiết kế sách</a>
 			<?php endif; ?>
 			<?php if ( 'rendered' === $st ) : ?>
 				<?php $pp = (array) ( $g['publish_problems'] ?? array() ); ?>

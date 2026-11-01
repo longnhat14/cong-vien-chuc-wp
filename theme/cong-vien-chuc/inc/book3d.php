@@ -96,7 +96,8 @@ function cvc_book3d_render( array $doc, string $price_txt ): void {
 	$logo_w = get_theme_file_uri( '/assets/brand/icon-light-128.png' );
 	$qr     = cvc_book3d_qr( (string) ( $b['qr_svg'] ?? '' ) );
 	?>
-	<figure class="bk<?php echo $hard ? ' is-hard' : ' is-soft'; ?>" style="<?php echo $style; // phpcs:ignore WordPress.Security.EscapeOutput -- đã esc_attr từng giá trị ?>" data-bk>
+	<?php $bk_mode = in_array( (string) ( $b['display_detail'] ?? '' ), array( 'flat', 'corner' ), true ) ? (string) $b['display_detail'] : 'tilt'; // 02/11/2026: kiểu hiển thị (Thiết kế sách) ?>
+	<figure class="bk<?php echo $hard ? ' is-hard' : ' is-soft'; ?> is-d-<?php echo esc_attr( $bk_mode ); ?>" style="<?php echo $style; // phpcs:ignore WordPress.Security.EscapeOutput -- đã esc_attr từng giá trị ?>" data-bk data-ry="<?php echo esc_attr( array( 'tilt' => '24', 'flat' => '6', 'corner' => '46' )[ $bk_mode ] ); ?>">
 		<div class="bk-stage">
 			<div class="bk-book">
 				<div class="bk-face bk-back" aria-hidden="true"></div>

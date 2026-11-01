@@ -260,6 +260,7 @@ function cvc_admin_render_docimport( string $item_param ): void {
 					<img src="<?php echo esc_url( (string) $d['images']['cover'] ); ?>" alt="Bìa" style="width:220px;border-radius:6px;box-shadow:0 6px 18px rgba(15,42,74,.25)">
 				<?php else : ?><div class="dg-muted" style="width:220px;height:311px;border:1px dashed #cbd5df;border-radius:6px;display:flex;align-items:center;justify-content:center">Bìa đang dựng</div><?php endif; ?>
 				<p class="dg-muted mt-1">Bìa tự đổi theo tiêu đề, bộ sách, ngành sau khi lưu.</p>
+				<a class="dg-btn mt-1" style="width:220px;justify-content:center" href="<?php echo esc_url( cvc_admin_url( 'thiet-ke-sach', $id ) ); ?>">🎨 Thiết kế bìa, trang, gáy, 3D</a>
 				<form method="post" enctype="multipart/form-data" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="mt-2" style="width:220px">
 					<?php wp_nonce_field( 'cvc_admin_docimport' ); ?><input type="hidden" name="action" value="cvc_admin_docimport"><input type="hidden" name="op" value="cover"><input type="hidden" name="id" value="<?php echo (int) $id; ?>">
 					<input type="file" name="image" accept="image/jpeg,image/png,image/webp" required style="width:220px">

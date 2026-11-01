@@ -98,3 +98,7 @@
 #main .bk,#main .bk *:not(svg):not(svg *){font-family:"Be Vietnam Pro","Segoe UI",Arial,sans-serif!important}
 #main .bk .bk-sub{font-family:Tinos,"Times New Roman",serif!important}
 .bk-art-img{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:cover}
+
+/* 02/11/2026: kiểu hiển thị theo Thiết kế sách (Phẳng / Góc chéo; mặc định Nghiêng) */
+.bk.is-d-flat{--bk-ry:6deg}
+.bk.is-d-corner{--bk-ry:46deg}

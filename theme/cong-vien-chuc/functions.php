@@ -51,6 +51,7 @@ require_once __DIR__ . '/inc/admin/exam-pdf.php';
 require_once __DIR__ . '/inc/admin/user-insights.php';
 require_once __DIR__ . '/inc/admin/docgen.php'; // Tài liệu tự sinh (31/10/2026)
 require_once __DIR__ . '/inc/admin/docimport.php'; // Xưởng tài liệu - tải tệp sách (01/11/2026)
+require_once __DIR__ . '/inc/admin/book-design.php'; // Thiết kế sách: bìa, header/footer, gáy, kiểu 3D (02/11/2026)
 require_once __DIR__ . '/inc/track.php';
 require_once __DIR__ . '/inc/nav-menu.php';
 require_once __DIR__ . '/inc/library.php'; // Thư viện tài liệu 10 mục (31/10/2026)

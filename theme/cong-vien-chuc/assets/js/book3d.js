@@ -26,7 +26,7 @@
 					if (bk.classList.contains('is-open') || e.pointerType !== 'mouse') { return; }
 					var r = stage.getBoundingClientRect();
 					var x = (e.clientX - r.left) / r.width - 0.5;
-					bk.style.setProperty('--bk-ry', (24 + x * 16).toFixed(1) + 'deg');
+					bk.style.setProperty('--bk-ry', (parseFloat(bk.getAttribute('data-ry') || '24') + x * 16).toFixed(1) + 'deg');
 				});
 				stage.addEventListener('pointerleave', function () { bk.style.removeProperty('--bk-ry'); });
 			}

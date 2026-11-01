@@ -260,7 +260,7 @@ function cvc_book_side( array $items, string $title = 'Sách nổi bật', strin
 	<div class="bk-side<?php echo ! empty( $o['static'] ) ? ' is-static' : ''; ?>" role="complementary" aria-label="<?php echo esc_attr( $title ); ?>">
 		<<?php echo $tag; // phpcs:ignore ?>><?php echo esc_html( $title ); ?></<?php echo $tag; // phpcs:ignore ?>>
 		<a class="bk-main" href="<?php echo esc_url( cvc_document_url( (string) $top['slug'] ) ); ?>">
-			<span class="bk-art"><img src="<?php echo esc_url( (string) ( $top['card'] ?? $top['thumb'] ?? '' ) ); ?>" alt="" width="600" height="800" loading="lazy" decoding="async"></span>
+			<span class="bk-art"><img src="<?php echo esc_url( (string) ( ( $top['card_side'] ?? '' ) ?: ( $top['card'] ?? $top['thumb'] ?? '' ) ) ); ?>" alt="" width="600" height="800" loading="lazy" decoding="async"></span>
 			<span class="bk-tags" style="margin-top:8px"><?php echo cvc_book_tags( $top ); // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
 			<b><?php echo esc_html( (string) $top['title'] ); ?></b>
 			<span class="bk-meta"><?php echo esc_html( cvc_book_meta( $top ) ); ?></span>
