@@ -155,12 +155,61 @@ add_filter(
 	}
 );
 
+/*
+ * 01/11/2026: hậu tố tiêu đề = thương hiệu "Công Viên Chức" (trước là tên site "Công chức - Viên chức",
+ * làm tiêu đề dài và lặp từ khóa); tiêu đề đã có thương hiệu thì không nối thêm.
+ */
+const CVC_SEO_BRAND = 'Công Viên Chức';
+
 function cvc_seo_filter_title( string $title ): string {
 	if ( ! empty( $GLOBALS['cvc_seo']['title'] ) ) {
-		return $GLOBALS['cvc_seo']['title'] . ' - ' . get_bloginfo( 'name' );
+		$t = (string) $GLOBALS['cvc_seo']['title'];
+
+		return false !== mb_stripos( $t, CVC_SEO_BRAND ) ? $t : $t . ' | ' . CVC_SEO_BRAND;
 	}
 
 	return $title;
+}
+
+/**
+ * URL hiện tại không kèm query string - canonical mặc định cho trang theme chưa tự đặt.
+ */
+function cvc_seo_current_url(): string {
+	$path = (string) wp_parse_url( (string) ( $_SERVER['REQUEST_URI'] ?? '/' ), PHP_URL_PATH ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+
+	return home_url( '' === $path ? '/' : $path );
+}
+
+/*
+ * 01/11/2026 (SEO): trang theme tự quản SEO (đã gọi cvc_seo_set_title) -> gỡ phần đầu trang của Rank Math
+ * (canonical + og:url về trang chủ, description trùng, robots, schema Person/CollectionPage sai loại).
+ * Giữ thẻ <title> (Rank Math in qua rank_math/head) và mã xác minh webmaster.
+ */
+add_action( 'wp_head', 'cvc_seo_take_over_head', 0 );
+
+function cvc_seo_take_over_head(): void {
+	// Trang 404 (WP hoặc template tự đặt mã 404): không index, không canonical về trang chủ.
+	if ( is_404() || 404 === http_response_code() ) {
+		cvc_seo_set_noindex();
+		$GLOBALS['cvc_seo']['canonical'] = null;
+		$GLOBALS['cvc_seo']['og']['url'] = null;
+		if ( empty( $GLOBALS['cvc_seo']['title'] ) ) {
+			cvc_seo_set_title( 'Không tìm thấy trang' );
+		}
+	}
+	if ( empty( $GLOBALS['cvc_seo']['title'] ) || empty( $GLOBALS['wp_filter']['rank_math/head'] ) ) {
+		return;
+	}
+	$keep = array( '_wp_render_title_tag', 'webmaster_tools_authentication' );
+	foreach ( $GLOBALS['wp_filter']['rank_math/head']->callbacks as $priority => $callbacks ) {
+		foreach ( $callbacks as $cb ) {
+			$fn   = $cb['function'];
+			$name = is_string( $fn ) ? $fn : ( is_array( $fn ) && is_string( $fn[1] ?? null ) ? $fn[1] : '' );
+			if ( ! in_array( $name, $keep, true ) ) {
+				remove_action( 'rank_math/head', $fn, $priority );
+			}
+		}
+	}
 }
 
 add_action( 'wp_head', 'cvc_seo_output_meta', 1 );
@@ -170,6 +219,11 @@ function cvc_seo_output_meta(): void {
 
 	if ( ! empty( $seo['description'] ) ) {
 		printf( '<meta name="description" content="%s">' . "\n", esc_attr( $seo['description'] ) );
+	}
+
+	// 01/11/2026: trang theme chưa đặt canonical -> URL hiện tại (không query); trang noindex thì không cần.
+	if ( empty( $seo['canonical'] ) && empty( $seo['noindex'] ) && ! empty( $seo['title'] ) ) {
+		$seo['canonical'] = cvc_seo_current_url();
 	}
 
 	if ( ! empty( $seo['canonical'] ) ) {
@@ -186,6 +240,9 @@ function cvc_seo_output_meta(): void {
 
 	if ( ! empty( $seo['noindex'] ) ) {
 		echo '<meta name="robots" content="noindex, follow">' . "\n";
+	} elseif ( ! empty( $seo['title'] ) ) {
+		// Thay robots của Rank Math (đã gỡ ở cvc_seo_take_over_head): cho phép ảnh lớn / đoạn trích đầy đủ.
+		echo '<meta name="robots" content="index, follow, max-snippet:-1, max-video-preview:-1, max-image-preview:large">' . "\n";
 	}
 
 	/*
@@ -225,6 +282,10 @@ function cvc_seo_output_meta(): void {
 		}
 	}
 
+	printf( '<meta property="og:site_name" content="%s">' . "\n", esc_attr( CVC_SEO_BRAND ) );
+	echo '<meta property="og:locale" content="vi_VN">' . "\n";
+	echo '<meta name="twitter:card" content="summary_large_image">' . "\n";
+
 	/*
 	 * JSON-LD - mỗi phần tử là 1 schema độc lập, xuất thành 1 <script>
 	 * riêng. wp_json_encode() escape đúng UTF-8/tiếng Việt; tự thay thế
@@ -248,3 +309,59 @@ function cvc_seo_output_meta(): void {
 		);
 	}
 }
+
+/**
+ * Tổ chức xuất bản (dùng cho trang chủ và làm publisher/author của tài liệu). Không bịa sameAs:
+ * chỉ thêm khi có trang mạng xã hội chính thức.
+ *
+ * @return array<string, mixed>
+ */
+function cvc_seo_organization(): array {
+	return array(
+		'@type' => 'Organization',
+		'@id'   => home_url( '/#organization' ),
+		'name'  => CVC_SEO_BRAND,
+		'url'   => home_url( '/' ),
+		'logo'  => array(
+			'@type'  => 'ImageObject',
+			'url'    => function_exists( 'cvc_brand_url' ) ? cvc_brand_url( 'icon-512.png' ) : '',
+			'width'  => 512,
+			'height' => 512,
+		),
+	);
+}
+
+/*
+ * 01/11/2026: trang chủ - WebSite (hộp tìm kiếm /tim-kiem/?q=) + Organization, thay schema Rank Math đã gỡ.
+ * Chạy trước cvc_seo_output_meta (ưu tiên 1).
+ */
+add_action(
+	'wp_head',
+	static function () {
+		if ( ! function_exists( 'cvc_is_home17' ) || ! cvc_is_home17() || empty( $GLOBALS['cvc_seo']['title'] ) ) {
+			return;
+		}
+		cvc_seo_add_json_ld(
+			array(
+				'@context' => 'https://schema.org',
+				'@graph'   => array(
+					cvc_seo_organization(),
+					array(
+						'@type'           => 'WebSite',
+						'@id'             => home_url( '/#website' ),
+						'name'            => CVC_SEO_BRAND,
+						'url'             => home_url( '/' ),
+						'inLanguage'      => 'vi',
+						'publisher'       => array( '@id' => home_url( '/#organization' ) ),
+						'potentialAction' => array(
+							'@type'       => 'SearchAction',
+							'target'      => home_url( '/tim-kiem/' ) . '?q={search_term_string}',
+							'query-input' => 'required name=search_term_string',
+						),
+					),
+				),
+			)
+		);
+	},
+	0
+);

@@ -39,14 +39,91 @@ $can_download = ! empty( $doc['can_download'] );
 $price        = (float) ( $doc['effective_price'] ?? 0 );
 $is_logged_in = cvc_is_logged_in();
 
-cvc_seo_set_title( ( $doc['title'] ?? 'Tài liệu' ) . ' — Kho Tài Liệu Công Viên Chức' );
+// 01/11/2026 (SEO): tiêu đề gọn (hậu tố thương hiệu do cvc_seo_filter_title thêm), canonical đúng trang,
+// schema Article + BreadcrumbList; citation = văn bản pháp luật thực sự được dẫn trong nội dung.
+$doc_title = (string) ( $doc['title'] ?? 'Tài liệu' );
+$doc_url   = cvc_document_url( $slug );
+cvc_seo_set_title( $doc_title );
 cvc_seo_set_description( wp_strip_all_tags( (string) ( $doc['description'] ?? '' ) ) );
 if ( $is_preview ) {
 	cvc_seo_set_noindex();
+} else {
+	cvc_seo_set_canonical( $doc_url );
 }
 // 01/11/2026: ảnh chia sẻ = sách 3D có giá (dựng tự động phía backend).
 if ( ! empty( $doc['images']['og'] ) ) {
-	cvc_seo_set_og( array( 'image' => (string) $doc['images']['og'] ) );
+	cvc_seo_set_og( array( 'image' => (string) $doc['images']['og'], 'type' => 'article' ) );
+}
+if ( ! $is_preview ) {
+	$doc_book = (array) ( $doc['book'] ?? array() );
+	$article  = array(
+		'@context'            => 'https://schema.org',
+		'@type'               => 'Article',
+		'@id'                 => $doc_url . '#tai-lieu',
+		'mainEntityOfPage'    => $doc_url,
+		'headline'            => mb_strimwidth( $doc_title, 0, 110, '…' ),
+		'name'                => $doc_title,
+		'description'         => cvc_seo_trim( (string) ( $doc['description'] ?? '' ), 300 ),
+		'inLanguage'          => 'vi',
+		'isAccessibleForFree' => $is_free,
+		'author'              => cvc_seo_organization(),
+		'publisher'           => cvc_seo_organization(),
+		'url'                 => $doc_url,
+	);
+	if ( ! empty( $doc['published_at'] ) ) {
+		$article['datePublished'] = (string) $doc['published_at'];
+	}
+	if ( ! empty( $doc['updated_at'] ) ) {
+		$article['dateModified'] = (string) $doc['updated_at'];
+	}
+	$doc_images = array_values( array_filter( array( $doc['images']['og'] ?? null, $doc['images']['cover'] ?? null ) ) );
+	if ( $doc_images ) {
+		$article['image'] = $doc_images;
+	}
+	if ( ! empty( $doc_book['pages'] ) ) {
+		$article['pagination'] = (string) (int) $doc_book['pages'] . ' trang';
+	}
+	if ( ! empty( $doc_book['version'] ) ) {
+		$article['version'] = (string) $doc_book['version'];
+	}
+	if ( ! empty( $doc_book['toc'] ) ) {
+		$article['hasPart'] = array_map(
+			static fn ( $t ) => array(
+				'@type' => 'WebPageElement',
+				'name'  => (string) ( $t['t'] ?? '' ),
+				'url'   => $doc_url . (string) ( $t['href'] ?? '' ),
+			),
+			array_slice( (array) $doc_book['toc'], 0, 30 )
+		);
+	}
+	if ( ! empty( $doc['legal_basis'] ) ) {
+		$article['citation'] = array_map(
+			static function ( $l ) {
+				$item = array(
+					'@type'                 => 'Legislation',
+					'name'                  => (string) ( $l['title'] ?? '' ),
+					'legislationIdentifier' => (string) ( $l['number'] ?? '' ),
+				);
+				if ( ! empty( $l['slug'] ) ) {
+					$item['url'] = cvc_legal_document_url( (string) $l['slug'] );
+				}
+				if ( ! empty( $l['source_url'] ) ) {
+					$item['sameAs'] = (string) $l['source_url'];
+				}
+
+				return $item;
+			},
+			(array) $doc['legal_basis']
+		);
+	}
+	cvc_seo_add_json_ld( $article );
+	cvc_seo_add_breadcrumb_jsonld(
+		array(
+			array( 'label' => 'Trang chủ', 'url' => home_url( '/' ) ),
+			array( 'label' => 'Kho Tài Liệu', 'url' => cvc_documents_url() ),
+			array( 'label' => $doc_title, 'url' => $doc_url ),
+		)
+	);
 }
 $price_txt = $is_free ? 'Miễn phí' : number_format( $price, 0, ',', '.' ) . 'đ';
 if ( ! empty( $doc['book'] ) ) {
