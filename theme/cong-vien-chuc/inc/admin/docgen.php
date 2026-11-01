@@ -82,6 +82,7 @@ function cvc_admin_render_docgen( string $item_param ): void {
 		</form>
 		<p class="dg-muted mt-2">Lập khung tốn khoảng 200-500 ₫. Biên soạn trọn cuốn khoảng 15-25 nghìn ₫, chạy nền 30-60 phút sau khi duyệt khung. Tiêu đề gần giống tài liệu đã có sẽ được cảnh báo để lên phiên bản thay vì tạo cuốn mới.</p>
 	</section>
+	<?php if ( function_exists( 'cvc_di_render_upload_and_list' ) ) { cvc_di_render_upload_and_list(); } ?>
 	<details class="dg-card">
 		<summary class="font-black text-ink cursor-pointer">Khung viết sẵn</summary>
 		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="flex flex-wrap gap-2 items-end">
