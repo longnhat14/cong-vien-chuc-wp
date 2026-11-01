@@ -130,7 +130,10 @@ if ( ! empty( $doc['book'] ) ) {
 	cvc_book3d_enqueue();
 }
 
-if ( ! empty( $doc['content_html'] ) ) {
+if ( ! empty( $doc['reader']['pages'] ) ) {
+	cvc_doc_reader_enqueue();
+}
+if ( ! empty( $doc['content_html'] ) || ! empty( $doc['reader']['pages'] ) ) {
 	wp_enqueue_style( 'cvc-library', get_theme_file_uri( '/assets/css/library.css' ), array(), (string) filemtime( get_theme_file_path( '/assets/css/library.css' ) ) );
 }
 get_header();
@@ -237,86 +240,22 @@ get_header();
 
 		</div>
 
-		<?php if ( ! empty( $doc['content_html'] ) ) : // 31/10/2026: tài liệu tự sinh - bản đọc trực tuyến. ?>
+		<?php if ( ! empty( $doc['reader']['pages'] ) ) : // 01/11/2026: trình đọc bản gốc (ảnh trang) + nút chuyển bản chữ. ?>
+			<?php cvc_doc_reader_render( $doc, $slug, $is_logged_in, $price_txt ); ?>
+		<?php elseif ( ! empty( $doc['content_html'] ) ) : // 31/10/2026: bản đọc chữ (tài liệu chưa có PDF / chọn kiểu bản chữ). ?>
 			<article class="dz-panel cvc-gen-read<?php echo ! empty( $doc['copy_protect'] ) ? ' cvc-nocopy' : ''; ?>" id="doc-read" aria-label="Đọc trực tuyến"<?php echo ! empty( $doc['copy_protect'] ) ? ' data-nocopy="1"' : ''; ?>>
 				<h2 class="cvc-gen-h"><?php echo ! empty( $doc['reading_locked'] ) ? 'Đọc thử' : 'Đọc trực tuyến'; ?></h2>
 				<?php if ( ! empty( $doc['reference_label'] ) ) : ?><p class="cvc-ref-label"><b><?php echo esc_html( (string) $doc['reference_label'] ); ?></b> – không dùng thay cho quy định hiện hành.</p><?php endif; ?>
-				<?php
-				$pv = ! empty( $doc['reading_pages']['pages'] ) ? (array) $doc['reading_pages'] : null;
-				if ( $pv ) : // 01/11/2026: đọc thử bằng ảnh trang gốc (có dấu chìm) - giống hệt bản in; bản chữ ở khối thu gọn bên dưới.
-					$pv_total = (int) $pv['total'];
-					$pv_limit = (int) $pv['limit'];
-					$pv_buy   = $is_logged_in ? '#main' : cvc_login_url( cvc_document_url( $slug ) );
-					?>
-					<p class="cvc-pv-sub"><?php echo esc_html( sprintf( 'Xem %d/%d trang đầu, hiển thị đúng như bản gốc. Chạm vào trang để phóng to.', $pv_limit, $pv_total ) ); ?></p>
-					<?php if ( count( (array) $pv['toc'] ) >= 2 ) : ?>
-						<nav class="cvc-pv-toc" aria-label="Mục lục tài liệu">
-							<b>Mục lục</b>
-							<ol>
-								<?php foreach ( (array) $pv['toc'] as $t ) : ?>
-									<li>
-										<?php if ( ! empty( $t['open'] ) ) : ?>
-											<a href="#trang-<?php echo (int) $t['page']; ?>"><span class="t"><?php echo esc_html( (string) $t['t'] ); ?></span><span class="n"><?php echo (int) $t['page']; ?></span></a>
-										<?php elseif ( ! empty( $t['page'] ) ) : ?>
-											<span class="is-locked" title="Có trong bản đầy đủ"><span class="t"><?php echo esc_html( (string) $t['t'] ); ?></span><span class="n"><i class="fa-solid fa-lock" aria-hidden="true"></i> <?php echo (int) $t['page']; ?></span></span>
-										<?php else : ?>
-											<span><span class="t"><?php echo esc_html( (string) $t['t'] ); ?></span></span>
-										<?php endif; ?>
-									</li>
-								<?php endforeach; ?>
-							</ol>
-						</nav>
-					<?php endif; ?>
-					<div class="cvc-pv-pages">
-						<?php foreach ( (array) $pv['pages'] as $i => $pg ) : ?>
-							<figure class="cvc-pv-page" id="trang-<?php echo (int) $pg['n']; ?>">
-								<button type="button" class="cvc-pv-zoom" data-src="<?php echo esc_url( (string) $pg['src'] ); ?>" aria-label="<?php echo esc_attr( sprintf( 'Phóng to trang %d', (int) $pg['n'] ) ); ?>">
-									<img src="<?php echo esc_url( (string) $pg['src'] ); ?>" width="<?php echo (int) $pg['w']; ?>" height="<?php echo (int) $pg['h']; ?>" alt="<?php echo esc_attr( sprintf( 'Trang %d – %s', (int) $pg['n'], (string) ( $doc['title'] ?? '' ) ) ); ?>"<?php echo $i > 1 ? ' loading="lazy"' : ''; ?> decoding="async" draggable="false">
-								</button>
-								<figcaption><?php echo esc_html( sprintf( 'Trang %d / %d', (int) $pg['n'], $pv_total ) ); ?></figcaption>
-							</figure>
-						<?php endforeach; ?>
-						<?php if ( $pv_total > $pv_limit ) : ?>
-							<div class="cvc-pv-next">
-								<?php if ( ! empty( $pv['teaser'] ) ) : ?><img src="<?php echo esc_url( (string) $pv['teaser'] ); ?>" alt="" aria-hidden="true" loading="lazy" draggable="false"><?php endif; ?>
-								<div class="cvc-pv-cta" role="note">
-									<p class="k">Còn <?php echo (int) ( $pv_total - $pv_limit ); ?> trang nữa</p>
-									<p>Mua tài liệu (<?php echo esc_html( $price_txt ); ?>) để đọc trọn bản trực tuyến và tải tệp PDF đầy đủ.</p>
-									<a href="<?php echo esc_url( $pv_buy ); ?>" class="inline-flex items-center gap-2 px-5 py-2.5 text-white font-black text-sm rounded-xl bg-acc hover:bg-acc-deep"><i class="fa-solid fa-cart-shopping"></i> <?php echo esc_html( $is_logged_in ? 'Mua để đọc tiếp' : 'Đăng nhập để mua' ); ?></a>
-								</div>
-							</div>
-						<?php endif; ?>
-					</div>
-					<details class="cvc-pv-text">
-						<summary>Nội dung dạng chữ của phần đọc thử</summary>
-						<?php echo wp_kses_post( str_replace( 'id="trang-', 'data-trang="', (string) $doc['content_html'] ) ); ?>
-					</details>
-					<dialog class="cvc-pv-dlg" id="cvc-pv-dlg" aria-label="Xem trang phóng to">
-						<button type="button" class="cvc-pv-close" aria-label="Đóng">&times;</button>
-						<div class="cvc-pv-dlg-body"><img alt="" draggable="false"></div>
-					</dialog>
-					<script>
-					(function () {
-						var root = document.getElementById('doc-read'), dlg = document.getElementById('cvc-pv-dlg');
-						if (!root || !dlg || typeof dlg.showModal !== 'function') { return; }
-						var img = dlg.querySelector('img');
-						root.querySelectorAll('.cvc-pv-zoom').forEach(function (b) {
-							b.addEventListener('click', function () { img.src = b.getAttribute('data-src'); img.alt = b.getAttribute('aria-label') || ''; dlg.showModal(); });
-						});
-						dlg.querySelector('.cvc-pv-close').addEventListener('click', function () { dlg.close(); });
-						dlg.addEventListener('click', function (e) { if (e.target === dlg) { dlg.close(); } });
-					})();
-					</script>
-				<?php else : ?>
 				<?php echo wp_kses_post( (string) $doc['content_html'] ); ?>
-				<?php endif; ?>
-				<?php if ( ! empty( $doc['reading_locked'] ) && ! $pv ) : // 01/11/2026: tài liệu trả phí - máy chủ chỉ gửi phần xem trước. ?>
+				<?php if ( ! empty( $doc['reading_locked'] ) ) : // tài liệu trả phí - máy chủ chỉ gửi phần xem trước. ?>
 					<div class="cvc-locked" role="note">
 						<p><b>Bạn đang đọc thử khoảng <?php echo (int) ( $doc['reading_preview_pct'] ?? 15 ); ?>% đầu tài liệu.</b> Mua tài liệu để đọc trọn bản trực tuyến và tải tệp đầy đủ.</p>
 						<a href="#main" class="inline-flex items-center gap-2 px-5 py-2.5 text-white font-black text-sm rounded-xl bg-acc hover:bg-acc-deep"><i class="fa-solid fa-cart-shopping"></i> <?php echo esc_html( $is_logged_in ? 'Mua tài liệu' : 'Đăng nhập để mua' ); ?></a>
 					</div>
 				<?php endif; ?>
 			</article>
+		<?php endif; ?>
+		<?php if ( ! empty( $doc['reader']['pages'] ) || ! empty( $doc['content_html'] ) ) : ?>
 			<?php if ( ! empty( $doc['copy_protect'] ) ) : // 01/11/2026 hồ sơ phát hành: chống sao chép bản đọc (rào cản, không chặn được chụp màn hình). ?>
 				<script>
 				(function () {

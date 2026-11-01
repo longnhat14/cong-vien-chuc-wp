@@ -86,6 +86,7 @@ require_once __DIR__ . '/inc/catalog.php';
 require_once __DIR__ . '/inc/chrome.php';
 require_once __DIR__ . '/inc/documents.php';
 require_once __DIR__ . '/inc/book3d.php'; // Sách 3D + link ngắn QR (01/11/2026)
+require_once __DIR__ . '/inc/doc-reader.php'; // Trình đọc bản gốc / bản chữ (01/11/2026)
 require_once __DIR__ . '/inc/admin-settings.php';
 require_once __DIR__ . '/inc/combo.php';
 require_once __DIR__ . '/inc/course-purchase.php';

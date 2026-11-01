@@ -31,4 +31,9 @@ final class CVC_Document_Service extends CVC_Api_Service {
 	public function mine( string $token ): array {
 		return $this->client->get( '/api/my-documents', array(), $token );
 	}
+
+	/** Tài liệu đang đọc dở gần đây (01/11/2026 - "Đọc tiếp từ trang N"). */
+	public function reading( string $token ): array {
+		return $this->client->get( '/api/me/reading', array(), $token );
+	}
 }

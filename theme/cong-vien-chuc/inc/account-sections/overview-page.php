@@ -181,6 +181,16 @@ get_header();
 				</article>
 			</section>
 
+			<?php
+			// 01/11/2026: tài liệu đang đọc dở - "Đọc tiếp từ trang N" (trình đọc bản gốc).
+			$ad_reads = ( new CVC_Document_Service() )->reading( $token );
+			$ad_reads = $ad_reads['ok'] ? (array) ( $ad_reads['data']['data'] ?? array() ) : array();
+			if ( $ad_reads ) :
+				?>
+				<div class="ad-sect"><div><h2>Đọc tiếp</h2><p>Tài liệu bạn đang đọc dở, mở lại đúng trang đã dừng.</p></div><a class="ad-btn is-sm" href="<?php echo esc_url( cvc_account_url( 'my-documents' ) ); ?>">Tài liệu của tôi</a></div>
+				<?php cvc_doc_reading_list( $ad_reads, 3 ); ?>
+			<?php endif; ?>
+
 			<div class="ad-sect"><div><h2>Tổng quan tiến độ</h2><p>Nhịp làm bài và điểm số theo thời gian.</p></div>
 				<label class="ad-sr" for="ad-period">Khoảng thời gian</label>
 				<select class="ad-select" id="ad-period" data-ad-period><option value="7d">7 ngày gần nhất</option><option value="30d">30 ngày gần nhất</option><option value="90d">3 tháng gần nhất</option></select>

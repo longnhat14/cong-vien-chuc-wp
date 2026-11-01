@@ -19,6 +19,9 @@ if ( ! $result['ok'] ) {
 }
 
 $documents = $result['data']['data'] ?? array();
+// 01/11/2026: tài liệu đang đọc dở (cả tài liệu miễn phí) - "Đọc tiếp".
+$reads = ( new CVC_Document_Service() )->reading( $token );
+$reads = $reads['ok'] ? (array) ( $reads['data']['data'] ?? array() ) : array();
 ?>
 
 <div class="space-y-6">
@@ -32,6 +35,13 @@ $documents = $result['data']['data'] ?? array();
 			+ Mua Thêm Tài Liệu
 		</a>
 	</div>
+
+	<?php if ( $reads ) : ?>
+		<section aria-labelledby="cvc-reading-h">
+			<h3 id="cvc-reading-h" class="text-sm font-extrabold text-ink mb-2">Đang đọc</h3>
+			<?php cvc_doc_reading_list( $reads, 6 ); ?>
+		</section>
+	<?php endif; ?>
 
 	<?php if ( empty( $documents ) ) : ?>
 		<?php cvc_render_empty_state( 'Bạn chưa mua tài liệu nào. Ghé qua Kho Tài Liệu để chọn bộ đề hoặc sổ tay phù hợp.' ); ?>
@@ -50,7 +60,11 @@ $documents = $result['data']['data'] ?? array();
 					</div>
 					<p class="text-[11px] text-ink-muted line-clamp-2"><?php echo esc_html( $doc['description'] ?? '' ); ?></p>
 					<div class="pt-2 border-t border-slate-300 flex items-center justify-between text-xs">
-						<span class="text-ink-muted text-[10px]"><?php echo esc_html( size_format( (int) ( $doc['file_size'] ?? 0 ) ) ); ?></span>
+						<?php if ( ! empty( $doc['reading_page'] ) ) : ?>
+							<a href="<?php echo esc_url( cvc_document_url( (string) $doc['slug'] ) . '#doc-read' ); ?>" class="text-[11px] font-bold text-acc hover:underline">Đọc tiếp trang <?php echo (int) $doc['reading_page']; ?></a>
+						<?php else : ?>
+							<a href="<?php echo esc_url( cvc_document_url( (string) $doc['slug'] ) . '#doc-read' ); ?>" class="text-[11px] font-bold text-acc hover:underline">Đọc trực tuyến</a>
+						<?php endif; ?>
 						<a href="<?php echo esc_url( cvc_document_download_url( $doc['slug'] ) ); ?>" class="px-3 py-1 bg-acc hover:bg-acc-deep text-white font-black rounded-lg text-xs flex items-center gap-1">
 							<i class="fa-solid fa-download text-[10px]"></i> Tải Về
 						</a>
