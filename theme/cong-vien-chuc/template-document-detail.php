@@ -45,7 +45,7 @@ $doc_title = (string) ( $doc['title'] ?? 'Tài liệu' );
 $doc_url   = cvc_document_url( $slug );
 cvc_seo_set_title( $doc_title );
 cvc_seo_set_description( wp_strip_all_tags( (string) ( $doc['description'] ?? '' ) ) );
-if ( $is_preview ) {
+if ( $is_preview || false === ( $doc['is_indexable'] ?? true ) ) { // tài liệu nội bộ (hồ sơ phát hành) không lập chỉ mục
 	cvc_seo_set_noindex();
 } else {
 	cvc_seo_set_canonical( $doc_url );
@@ -54,7 +54,7 @@ if ( $is_preview ) {
 if ( ! empty( $doc['images']['og'] ) ) {
 	cvc_seo_set_og( array( 'image' => (string) $doc['images']['og'], 'type' => 'article' ) );
 }
-if ( ! $is_preview ) {
+if ( ! $is_preview && false !== ( $doc['is_indexable'] ?? true ) ) {
 	$doc_book = (array) ( $doc['book'] ?? array() );
 	$article  = array(
 		'@context'            => 'https://schema.org',
@@ -196,9 +196,15 @@ get_header();
 
 			<div class="pt-2">
 				<?php if ( $can_download ) : ?>
+					<?php $dls = (array) ( $doc['downloads'] ?? array() ); ?>
 					<a href="<?php echo esc_url( cvc_document_download_url( $slug ) ); ?>" class="inline-flex items-center gap-2 px-6 py-3 text-white font-black text-sm rounded-xl transition-transform hover:scale-[1.02] bg-acc hover:bg-acc-deep">
-						<i class="fa-solid fa-download"></i> Tải Về Ngay
+						<i class="fa-solid fa-download"></i> Tải Về Ngay<?php echo count( $dls ) > 1 ? ' (' . esc_html( (string) $dls[0]['label'] ) . ')' : ''; ?>
 					</a>
+					<?php foreach ( array_slice( $dls, 1 ) as $dl ) : // 01/11/2026: nhiều định dạng (vd. mẫu biểu kèm Word để điền) ?>
+						<a href="<?php echo esc_url( add_query_arg( 'dinh-dang', (string) $dl['format'], cvc_document_download_url( $slug ) ) ); ?>" class="inline-flex items-center gap-2 px-5 py-3 font-black text-sm rounded-xl border border-slate-300 bg-white hover:border-acc-2 text-ink-2 ml-2">
+							<i class="fa-solid fa-file-word"></i> Tải <?php echo esc_html( (string) $dl['label'] ); ?>
+						</a>
+					<?php endforeach; ?>
 				<?php elseif ( ! $is_logged_in ) : ?>
 					<a href="<?php echo esc_url( cvc_login_url( cvc_document_url( $slug ) ) ); ?>" class="inline-flex items-center gap-2 px-6 py-3 text-white font-black text-sm rounded-xl transition-transform hover:scale-[1.02] bg-acc hover:bg-acc-deep">
 						<i class="fa-solid fa-right-to-bracket"></i> Đăng Nhập Để Mua Tài Liệu
@@ -233,8 +239,15 @@ get_header();
 
 		<?php if ( ! empty( $doc['content_html'] ) ) : // 31/10/2026: tài liệu tự sinh - bản đọc trực tuyến. ?>
 			<article class="dz-panel cvc-gen-read" id="doc-read" aria-label="Đọc trực tuyến">
-				<h2 class="cvc-gen-h">Đọc trực tuyến</h2>
+				<h2 class="cvc-gen-h"><?php echo ! empty( $doc['reading_locked'] ) ? 'Đọc thử' : 'Đọc trực tuyến'; ?></h2>
+				<?php if ( ! empty( $doc['reference_label'] ) ) : ?><p class="cvc-ref-label"><b><?php echo esc_html( (string) $doc['reference_label'] ); ?></b> – không dùng thay cho quy định hiện hành.</p><?php endif; ?>
 				<?php echo wp_kses_post( (string) $doc['content_html'] ); ?>
+				<?php if ( ! empty( $doc['reading_locked'] ) ) : // 01/11/2026: tài liệu trả phí - máy chủ chỉ gửi phần xem trước. ?>
+					<div class="cvc-locked" role="note">
+						<p><b>Bạn đang đọc thử khoảng <?php echo (int) ( $doc['reading_preview_pct'] ?? 15 ); ?>% đầu tài liệu.</b> Mua tài liệu để đọc trọn bản trực tuyến và tải tệp đầy đủ.</p>
+						<a href="#main" class="inline-flex items-center gap-2 px-5 py-2.5 text-white font-black text-sm rounded-xl bg-acc hover:bg-acc-deep"><i class="fa-solid fa-cart-shopping"></i> <?php echo esc_html( $is_logged_in ? 'Mua tài liệu' : 'Đăng nhập để mua' ); ?></a>
+					</div>
+				<?php endif; ?>
 			</article>
 		<?php endif; ?>
 

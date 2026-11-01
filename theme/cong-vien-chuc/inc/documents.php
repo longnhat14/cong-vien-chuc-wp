@@ -30,6 +30,10 @@ function cvc_handle_document_download_proxy(): void {
 
 	$token   = cvc_auth_token();
 	$url     = rtrim( cvc_api_base_url(), '/' ) . '/api/documents/' . rawurlencode( $slug ) . '/download';
+	$fmt     = sanitize_key( (string) ( $_GET['dinh-dang'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification -- 01/11/2026: nhiều định dạng tải về
+	if ( '' !== $fmt ) {
+		$url = add_query_arg( 'format', $fmt, $url );
+	}
 	$headers = array( 'Accept' => '*/*' );
 
 	if ( null !== $token && '' !== $token ) {
@@ -39,7 +43,7 @@ function cvc_handle_document_download_proxy(): void {
 	$response = wp_remote_get(
 		$url,
 		array(
-			'timeout' => 30,
+			'timeout' => 120, // tài liệu trả phí: lần đầu đóng dấu người mua lên từng trang
 			'headers' => $headers,
 		)
 	);

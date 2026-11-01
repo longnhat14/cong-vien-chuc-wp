@@ -115,3 +115,7 @@
 .cvc-gen blockquote.cvc-note a{color:#17334f;text-decoration:underline}
 .cvc-notes{font-size:14.5px;color:#36414b;margin-top:20px}.cvc-notes h3{font-size:16px}
 .cvc-up .pg{display:block;height:0;scroll-margin-top:90px}
+/* 01/11/2026 hồ sơ phát hành: nhãn tài liệu tham khảo, khóa bản đọc tài liệu trả phí */
+.cvc-ref-label{margin:0 0 14px;padding:10px 14px;border-radius:10px;background:#fdf3f2;border-left:4px solid #b42318;color:#5b1a14;font-size:15px}
+.cvc-locked{position:relative;margin-top:-60px;padding:80px 18px 18px;text-align:center;background:linear-gradient(180deg,rgba(255,255,255,0),#fff 60px);border-top:0}
+.cvc-locked p{margin:0 0 12px;font-size:15.5px;color:#1b2430}
