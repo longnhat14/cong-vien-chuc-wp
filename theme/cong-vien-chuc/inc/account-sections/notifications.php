@@ -90,6 +90,7 @@ $notifications = $pagination['data'] ?? array();
 $cvc_ep  = ( new CVC_Api_Client( null, 10 ) )->get( '/api/me/email-preferences', array(), $token );
 $cvc_epd = ! empty( $cvc_ep['ok'] ) ? (array) ( $cvc_ep['data']['data'] ?? array() ) : array();
 ?>
+<?php if ( function_exists( 'cvc_study_settings_section' ) ) { cvc_study_settings_section(); } // 02/11/2026: nhắc ôn hằng ngày ?>
 <section class="cvc-account-section" id="email">
 	<div class="cvc-section-header-row"><h2>Email muốn nhận</h2></div>
 	<?php if ( ! $cvc_epd ) : ?>

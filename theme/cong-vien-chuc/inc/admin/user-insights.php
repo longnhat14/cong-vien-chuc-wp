@@ -256,6 +256,8 @@ function cvc_ui_render_overview(): void {
 		<?php endif; ?>
 	</section>
 
+	<?php cvc_ui_trial_section( $days, $pct ); ?>
+
 	<div class="ui-grid2">
 		<section class="ui-card">
 			<h2>Phễu người đăng ký trong <?php echo (int) $days; ?> ngày</h2>
@@ -732,3 +734,63 @@ function cvc_ui_render_advice(): void {
 	</section>
 	<?php
 }
+
+/** Khách làm thử 5 câu không cần đăng nhập (02/11/2026): làm tiếp hay rời đi, chuyển thành tài khoản. */
+function cvc_ui_trial_section( int $days, callable $pct ): void {
+	$res = cvc_admin_api_get( '/api/admin/trial-funnel', array( 'days' => $days ) );
+	if ( ! $res['ok'] ) {
+		return;
+	}
+	$d   = (array) ( $res['data']['data'] ?? array() );
+	$t   = (array) ( $d['totals'] ?? array() );
+	$n   = (int) ( $t['started'] ?? 0 );
+	$src = array( 'home' => 'Trang chủ', 'exam' => 'Trang đề', 'recruitment' => 'Trang tin tuyển dụng', 'practice' => 'Trang Luyện thi', 'on-hom-nay' => 'Trang Ôn hôm nay' );
+	?>
+	<section class="ui-card">
+		<h2>Khách làm thử 5 câu (chưa đăng nhập)</h2>
+		<?php if ( 0 === $n ) : ?>
+			<p class="ui-note">Bắt đầu đo từ 02/11/2026. Chưa có lượt làm thử nào trong <?php echo (int) $days; ?> ngày.</p>
+		<?php else : ?>
+			<div class="ui-grid2">
+				<div>
+					<?php
+					foreach ( array(
+						'started'   => 'Bắt đầu làm thử',
+						'a1'        => 'Trả lời câu 1',
+						'a3'        => 'Trả lời tới câu 3',
+						'finished'  => 'Làm xong 5 câu',
+						'cta'       => 'Bấm lưu kết quả / đăng ký',
+						'converted' => 'Đăng nhập & gắn kết quả',
+					) as $key => $lbl ) :
+						$v = (int) ( $t[ $key ] ?? 0 );
+						?>
+						<div class="mb-2"><div class="flex justify-between text-sm"><span><?php echo esc_html( $lbl ); ?></span><b class="tabular-nums"><?php echo esc_html( cvc_ui_n( $v ) . ' · ' . $pct( $v, $n ) ); ?></b></div><div class="ui-bar"><span style="width:<?php echo (int) round( $v / max( 1, $n ) * 100 ); ?>%"></span></div></div>
+					<?php endforeach; ?>
+				</div>
+				<div class="ui-kpis" style="align-content:start">
+					<?php
+					$conv = (int) ( $t['converted'] ?? 0 );
+					foreach ( array(
+						array( 'Rời đi giữa chừng', cvc_ui_n( $t['left_early'] ?? 0 ), $pct( (int) ( $t['left_early'] ?? 0 ), $n ) . ' số lượt bắt đầu' ),
+						array( 'Tài khoản mới từ làm thử', cvc_ui_n( $t['new_accounts'] ?? 0 ), 'trên ' . cvc_ui_n( $conv ) . ' lượt gắn' ),
+						array( 'Ôn tiếp trong 7 ngày', cvc_ui_n( $d['continued'] ?? 0 ), $pct( (int) ( $d['continued'] ?? 0 ), $conv ) . ' người đã gắn' ),
+						array( 'Học từ 2 ngày', cvc_ui_n( $d['active_2_days'] ?? 0 ), $pct( (int) ( $d['active_2_days'] ?? 0 ), $conv ) . ' người đã gắn' ),
+						array( 'Đúng TB (làm xong)', null !== ( $t['avg_correct'] ?? null ) ? str_replace( '.', ',', (string) round( (float) $t['avg_correct'], 1 ) ) . '/5' : '—', cvc_ui_n( $t['visitors'] ?? 0 ) . ' trình duyệt khác nhau' ),
+					) as $c ) :
+						?>
+						<div class="ui-kpi"><small><?php echo esc_html( $c[0] ); ?></small><b><?php echo esc_html( $c[1] ); ?></b><em><?php echo esc_html( $c[2] ); ?></em></div>
+					<?php endforeach; ?>
+				</div>
+			</div>
+			<div class="ui-scroll mt-3"><table class="ui-tbl"><thead><tr><th>Nơi làm thử</th><th class="n">Bắt đầu</th><th class="n">Làm xong</th><th class="n">Gắn tài khoản</th></tr></thead><tbody>
+				<?php foreach ( array_merge( (array) ( $d['by_source'] ?? array() ), array_map( static fn ( $r ) => (array) $r + array( 'source' => 'device:' . ( $r['device'] ?? '' ) ), (array) ( $d['by_device'] ?? array() ) ) ) as $r ) : ?>
+					<?php $r = (array) $r; $s = (string) ( $r['source'] ?? '' ); ?>
+					<tr><td><?php echo esc_html( 0 === strpos( $s, 'device:' ) ? ( 'mobile' === substr( $s, 7 ) ? 'Điện thoại (mọi nơi)' : 'Máy tính (mọi nơi)' ) : ( $src[ $s ] ?? $s ) ); ?></td><td class="n"><?php echo (int) $r['started']; ?></td><td class="n"><?php echo esc_html( (int) $r['finished'] . ' · ' . $pct( (int) $r['finished'], (int) $r['started'] ) ); ?></td><td class="n"><?php echo esc_html( (int) $r['converted'] . ' · ' . $pct( (int) $r['converted'], (int) $r['started'] ) ); ?></td></tr>
+				<?php endforeach; ?>
+			</tbody></table></div>
+			<p class="ui-note">"Rời đi giữa chừng": đóng / rời trang khi chưa làm xong 5 câu. "Ôn tiếp trong 7 ngày": có lượt làm bài trong 7 ngày sau khi đăng nhập. Không tính trình duyệt tự động (bot).</p>
+		<?php endif; ?>
+	</section>
+	<?php
+}
+

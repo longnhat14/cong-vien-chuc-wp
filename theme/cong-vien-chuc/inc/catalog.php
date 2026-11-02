@@ -958,6 +958,7 @@ function cvc_cat_render_rp( string $mode, ?string $token, array $rp = array(), s
 			<?php endif; ?>
 		<?php endif; ?>
 		<?php if ( null === $token ) : // Khách: không in nonce vào trang có thể bị cache. ?>
+			<?php if ( function_exists( 'cvc_trial_widget' ) ) { cvc_trial_widget( array( 'source' => 'practice', 'ref' => $is_test ? 'thi-thu' : 'luyen-thi', 'title' => 'Làm thử 5 câu ngay - không cần đăng nhập', 'continue' => $base ) ); } // 02/11/2026 ?>
 			<div class="ec-rp-quick">
 				<span><b><?php echo $is_test ? 'Thi nhanh' : 'Luyện nhanh'; ?></b> câu ngẫu nhiên từ ngân hàng câu hỏi:</span>
 				<a class="ec-btn" href="<?php echo esc_url( cvc_login_url( $base ) ); ?>" rel="nofollow">Đăng nhập để bắt đầu</a>

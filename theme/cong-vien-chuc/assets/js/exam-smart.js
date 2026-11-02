@@ -166,6 +166,7 @@
     q.selected = key;
     if (PRACTICE) { q.feedback = localFeedback(q, opt.id) || null; }
     render();
+    stageToast();
     queue('a' + q.id, { qid: q.id, opt: opt.id, key: key });
     if (PRACTICE && isMob()) {
       var fbx = document.getElementById('sx-feedback');
@@ -173,6 +174,19 @@
     }
     if (!PRACTICE && autoNext && i === current && i < TOTAL - 1) {
       setTimeout(function () { if (current === i && Q[i].selected === key) go(i + 1); }, 400);
+    }
+  }
+  /* 02/11/2026: đề dài chia chặng 10 câu - báo xong chặng, bỏ dở thì lần sau "Tiếp tục chặng n". */
+  function stageInfo() {
+    var done = Q.filter(function (q) { return !!q.selected; }).length;
+    var right = Q.filter(function (q) { return q.feedback && q.feedback.is_correct; }).length;
+    return { done: done, right: right, stages: Math.ceil(TOTAL / 10), stage: Math.floor(done / 10) };
+  }
+  function stageToast() {
+    if (!PRACTICE || TOTAL <= 10) return;
+    var s = stageInfo();
+    if (s.done > 0 && s.done % 10 === 0 && s.done < TOTAL) {
+      toast('✓ Xong chặng ' + s.stage + '/' + s.stages + ' · đúng ' + s.right + '/' + s.done + ' câu. Nghỉ được - bài tự lưu, lần sau làm tiếp chặng ' + (s.stage + 1) + '.');
     }
   }
   function clearAnswer(i) {
@@ -672,6 +686,10 @@
   var firstOpen = Q.findIndex(function (q) { return !q.selected; });
   current = submitted ? 0 : (firstOpen > -1 ? firstOpen : 0);
   render();
+  if (PRACTICE && TOTAL > 10 && !submitted) {
+    var s0 = stageInfo();
+    if (s0.done > 0 && s0.done < TOTAL) setTimeout(function () { toast('Tiếp tục chặng ' + (s0.stage + 1) + '/' + s0.stages + ' · đã làm ' + s0.done + '/' + TOTAL + ' câu.'); }, 600);
+  }
   paintClock();
   // Hết giờ trong khoảng gia hạn khi vừa mở trang: tự nộp (máy chủ đã tự nộp nếu quá gia hạn).
   if (!submitted && tmode === 'countdown' && clockValue() <= 0) { autoSubmitting = true; setTimeout(function () { submit(true); }, 400); }

@@ -47,6 +47,7 @@ require_once __DIR__ . '/inc/admin/rounds.php';
 require_once __DIR__ . '/inc/admin/personal-exams.php';
 require_once __DIR__ . '/inc/admin/recruitment-imports.php';
 require_once __DIR__ . '/inc/admin/question-reports.php';
+require_once __DIR__ . '/inc/admin/general-questions.php'; // Câu tư duy & xã hội - văn hóa - lịch sử chờ duyệt (02/11/2026)
 require_once __DIR__ . '/inc/admin/exam-pdf.php';
 require_once __DIR__ . '/inc/admin/user-insights.php';
 require_once __DIR__ . '/inc/admin/docgen.php'; // Tài liệu tự sinh (31/10/2026)
@@ -90,6 +91,7 @@ require_once __DIR__ . '/inc/book3d.php'; // Sách 3D + link ngắn QR (01/11/20
 require_once __DIR__ . '/inc/doc-reader.php'; // Trình đọc bản gốc / bản chữ (01/11/2026)
 require_once __DIR__ . '/inc/doc-popular.php'; // Khối tài liệu được đọc nhiều (01/11/2026)
 require_once __DIR__ . '/inc/book-shelf.php'; // Kệ sách / Tủ sách / sách nổi bật (01/11/2026)
+require_once __DIR__ . '/inc/study.php'; // Thói quen ôn thi + khách làm thử 5 câu (02/11/2026)
 require_once __DIR__ . '/inc/admin-settings.php';
 require_once __DIR__ . '/inc/combo.php';
 require_once __DIR__ . '/inc/course-purchase.php';

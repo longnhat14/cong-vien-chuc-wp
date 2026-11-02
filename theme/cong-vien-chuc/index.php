@@ -217,6 +217,14 @@ $GLOBALS['cvc_home17_cfg'] = array(
  <?php endif; ?>
 </section>
 
+<?php // 02/11/2026: Ôn hôm nay (đã đăng nhập) / làm thử 5 câu không cần đăng nhập (khách). ?>
+<div class="container"><?php
+if ( function_exists( 'cvc_auth_token' ) && cvc_auth_token() ) {
+	cvc_study_card();
+} elseif ( function_exists( 'cvc_trial_widget' ) ) {
+	cvc_trial_widget( array( 'source' => 'home', 'title' => 'Thử sức với 5 câu Kiến thức chung vòng 1', 'sub' => 'Không cần đăng nhập. Chọn đáp án là thấy ngay đúng / sai, giải thích và điều luật căn cứ. Vòng 1 thi 60 câu, đúng từ 30 câu là qua.' ) );
+}
+?></div>
 <div class="source-marquee" aria-label="Các nguồn thông tin công vụ tham khảo">
  <div class="container">
   <div class="marquee-topline"><span class="live-dot"></span> Mạng lưới nguồn thông tin tham khảo <span style="color:#aabbd0;font-weight:normal;letter-spacing:0;text-transform:none">· Di chuyển để khám phá</span></div>

@@ -171,6 +171,8 @@ else :
 		<div class="stats"><div class="stat good"><span>Câu trả lời đúng</span><b><?php $e( (int) $c['correct'] ); ?></b></div><div class="stat bad"><span>Câu trả lời sai</span><b><?php $e( (int) $c['wrong'] ); ?></b></div><div class="stat skip"><span>Câu bỏ trống</span><b><?php $e( (int) $c['blank'] ); ?></b></div><div class="stat"><span><?php echo null !== $at['total_score'] ? 'Điểm đạt được' : 'Điểm quy đổi'; ?></span><b><?php $e( $score_lbl ); ?></b></div></div>
 	</div></section>
 
+	<?php if ( function_exists( 'cvc_study_card' ) ) { cvc_study_card( array( 'compact' => true, 'heading' => 'TIẾP THEO · ÔN HẰNG NGÀY' ) ); } // 02/11/2026 ?>
+
 	<section class="card plan"><div class="pad">
 		<div class="plan-head"><span class="plan-icon">✦</span><div><h2>Một lần thi — một kế hoạch tiến bộ</h2><p>Ba bước tiếp theo dựa trên phần kiến thức cần củng cố.</p></div></div>
 		<div class="steps">

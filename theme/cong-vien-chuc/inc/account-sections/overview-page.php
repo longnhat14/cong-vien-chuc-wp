@@ -132,6 +132,7 @@ get_header();
 
 		<div class="ad-content">
 			<?php cvc_render_notice(); ?>
+			<?php if ( function_exists( 'cvc_study_card' ) ) { cvc_study_card(); } // 02/11/2026: Ôn hôm nay ?>
 			<section class="ad-hero">
 				<div class="ad-hero-row">
 					<div>

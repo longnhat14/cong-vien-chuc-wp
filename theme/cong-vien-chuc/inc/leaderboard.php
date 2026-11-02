@@ -152,14 +152,27 @@ function cvc_lb_inline_style(): void {
 function cvc_render_leaderboard_mini( array $q, string $heading = 'Bảng xếp hạng thi thử', string $wrap_class = 'dz-card' ): void {
 	$r = cvc_leaderboard_get( $q + array( 'limit' => 5 ) );
 	$d = $r['data'] ?? array();
-	if ( empty( $r['ok'] ) || empty( $d['items'] ) ) {
+	if ( empty( $r['ok'] ) ) {
+		return;
+	}
+	if ( empty( $d['items'] ) ) {
+		// 02/11/2026: bảng theo tin chưa có ai - mời thi thử để lên bảng (ẩn danh).
+		if ( isset( $q['dot'] ) ) {
+			?>
+			<section class="<?php echo esc_attr( $wrap_class ); ?> cvc-lb-mini" aria-label="<?php echo esc_attr( $heading ); ?>">
+				<h3 class="cvc-lb-mini-h"><?php echo esc_html( $heading ); ?></h3>
+				<p class="cvc-lb-mini-sub">Chưa có ai thi thử đề của tin này. Làm 1 đề ở chế độ <b>Thi thử</b> để lên bảng - bảng ẩn danh, chỉ hiện biệt danh.</p>
+				<p><a class="cvc-lb-link" href="#de-rieng">Chọn đề thi thử của tin →</a></p>
+			</section>
+			<?php
+		}
 		return;
 	}
 	$multi = isset( $q['dot'] );
 	?>
 	<section class="<?php echo esc_attr( $wrap_class ); ?> cvc-lb-mini" aria-label="<?php echo esc_attr( $heading ); ?>">
 		<h3 class="cvc-lb-mini-h"><?php echo esc_html( $heading ); ?></h3>
-		<p class="cvc-lb-mini-sub"><?php echo (int) $d['participants']; ?> thí sinh<?php echo null !== ( $d['average'] ?? null ) ? ' · điểm TB ' . esc_html( cvc_lb_pct( $d['average'] ) ) : ''; ?></p>
+		<p class="cvc-lb-mini-sub"><?php echo (int) $d['participants']; ?> thí sinh<?php echo null !== ( $d['average'] ?? null ) ? ' · điểm TB ' . esc_html( cvc_lb_pct( $d['average'] ) ) : ''; ?><?php echo ! empty( $d['anonymous'] ) ? ' · ẩn danh (biệt danh)' : ''; ?></p>
 		<ol class="cvc-lb-mini-list">
 			<?php foreach ( (array) $d['items'] as $it ) : ?>
 				<li class="<?php echo ! empty( $it['is_me'] ) ? 'is-me' : ''; ?>">

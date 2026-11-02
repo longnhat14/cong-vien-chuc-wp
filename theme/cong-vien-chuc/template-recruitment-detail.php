@@ -672,6 +672,10 @@ get_header();
 	// 28/10/2026: đề riêng của tin đặt ngay sau bảng vị trí (trước kho tài liệu, hồ sơ ôn thi).
 	if ( $personal ) {
 		cvc_rd_render_personal_exams( $personal, is_array( $position ) ? (string) ( $position['name'] ?? '' ) : '', mb_strtolower( $type_lbl ), (array) ( $recruitment['personal_exams_pricing'] ?? array() ), (int) ( $recruitment['id'] ?? 0 ) );
+		// 02/11/2026: khách làm thử 5 câu đề riêng của tin, không cần đăng nhập.
+		if ( function_exists( 'cvc_trial_widget' ) ) {
+			cvc_trial_widget( array( 'source' => 'recruitment', 'ref' => (string) ( $recruitment['slug'] ?? '' ), 'recruitment_id' => (int) ( $recruitment['id'] ?? 0 ), 'title' => 'Làm thử 5 câu đề riêng của tin này', 'continue' => (string) cvc_recruitment_url( (string) ( $recruitment['slug'] ?? '' ) ) . '#de-rieng' ) );
+		}
 	} elseif ( 'building' === ( $recruitment['personal_exams_state'] ?? '' ) ) {
 		?>
 		<section class="rd-card rd-pe-building" id="de-rieng" aria-labelledby="rd-pe-h">

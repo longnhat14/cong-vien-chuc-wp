@@ -1,0 +1,82 @@
+/* Thói quen ôn thi + làm thử 5 câu (02/11/2026) - inc/study.php */
+.st-card,.tr-card{--st-ink:#17334f;--st-gold:#b08a3e;--st-line:#e6e0d2;--st-muted:#5b6470;--st-ok:#1f7a5c;--st-no:#b42318;--st-paper:#fffdf8;
+  margin:18px 0;padding:20px 22px;border:1px solid var(--st-line);border-radius:16px;background:linear-gradient(180deg,#fffdf8,#fff);color:#1b2833;font-family:inherit}
+.st-kicker{display:block;font-size:12px;font-weight:800;letter-spacing:.12em;color:var(--st-gold)}
+.st-card h2,.tr-card h2{margin:4px 0 4px;font-size:22px;line-height:1.3;color:var(--st-ink)}
+.st-sub{margin:0;font-size:15px;line-height:1.5;color:var(--st-muted)}
+.st-top{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;align-items:start}
+.st-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.st-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:10px 18px;border-radius:12px;border:1px solid #cfd6df;background:#fff;color:var(--st-ink)!important;font-weight:800;font-size:15px;line-height:1.25;text-decoration:none!important;cursor:pointer;font-family:inherit}
+.st-btn.is-primary{background:var(--st-ink);border-color:var(--st-ink);color:#fff!important}
+.st-btn.is-ghost{background:transparent;border-color:transparent;text-decoration:underline!important;text-underline-offset:3px}
+.st-btn:focus-visible{outline:2px solid #c9a052;outline-offset:2px}
+.st-btn[disabled]{opacity:.6;cursor:default}
+.st-weekbox{padding:12px 14px;border:1px solid var(--st-line);border-radius:14px;background:#fff}
+.st-days{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:0 0 8px;padding:0;list-style:none}
+.st-days li{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:12px;color:var(--st-muted)}
+.st-days i{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;border:2px solid #dde3ea;font-style:normal;font-weight:800;color:#fff;font-size:14px}
+.st-days .is-done i{background:var(--st-gold);border-color:var(--st-gold)}
+.st-days .is-miss i{background:#f2f4f7}
+.st-days .is-today i{box-shadow:0 0 0 3px #17334f33;border-color:var(--st-ink)}
+.st-days .is-today span{color:var(--st-ink);font-weight:800}
+.st-weektxt{margin:0;font-size:14.5px;color:var(--st-ink)}
+.st-streak{margin:4px 0 0;font-size:14px;font-weight:800;color:#9a5b0b}
+.st-hint{margin:6px 0 0;font-size:12.5px;line-height:1.45;color:var(--st-muted)}
+.st-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin-top:16px}
+.st-box{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border-radius:12px;background:#f6f8fb;border:1px solid #e8edf3}
+.st-lbl{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#7a5a17}
+.st-big{font-size:26px;line-height:1.1;color:var(--st-ink);font-variant-numeric:tabular-nums}
+.st-big small{font-size:14px;font-weight:700;color:var(--st-muted)}
+.st-note{font-size:13px;line-height:1.45;color:var(--st-muted)}
+.st-link{font-size:14px;font-weight:800;color:var(--st-ink)!important;text-decoration:underline!important;text-underline-offset:3px}
+.st-meter{position:relative;display:block;height:10px;border-radius:99px;background:#e3e8ef;overflow:visible;margin:4px 0 2px}
+.st-meter i{display:block;height:100%;border-radius:99px;background:#c9a052}
+.st-meter i.is-ok{background:var(--st-ok)}
+.st-meter em{position:absolute;top:-4px;width:2px;height:18px;background:var(--st-ink)}
+.st-remind{margin-top:14px;padding-top:12px;border-top:1px dashed var(--st-line)}
+.st-remind-form{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;font-size:14.5px;color:var(--st-ink)}
+.st-remind-form select{min-height:40px;padding:6px 10px;border:1px solid #cfd6df;border-radius:10px;background:#fff;font-size:15px}
+.st-chk{display:inline-flex;align-items:center;gap:6px;font-size:14.5px}
+.st-remind-on,.st-remind-msg{margin:6px 0 0;font-size:14px;color:var(--st-ink)}
+.st-card.is-compact{padding:16px 18px}
+.st-card.is-compact h2{font-size:19px}
+@media (max-width:860px){.st-top{grid-template-columns:1fr}}
+@media (max-width:560px){.st-card,.tr-card{padding:16px 14px;border-radius:14px}.st-card h2,.tr-card h2{font-size:19px}.st-btn{width:100%}.st-days i{width:28px;height:28px}}
+/* Làm thử 5 câu */
+.tr-bar{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:800;color:var(--st-ink)}
+.tr-prog{flex:1;height:8px;border-radius:99px;background:#e3e8ef;overflow:hidden}
+.tr-prog i{display:block;height:100%;background:var(--st-gold);transition:width .25s}
+.tr-q{margin:14px 0 12px;font-size:18px;line-height:1.55;font-weight:700;color:#14263b}
+.tr-opts{display:grid;gap:8px}
+.tr-opt{display:grid;grid-template-columns:34px minmax(0,1fr);gap:10px;align-items:start;width:100%;min-height:48px;padding:10px 12px;border:1px solid #d5dde6;border-radius:12px;background:#fff;text-align:left;font-size:16px;line-height:1.45;color:#1b2833;cursor:pointer;font-family:inherit}
+.tr-opt b{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#eef3f8;color:var(--st-ink)}
+.tr-opt:hover:not([disabled]){border-color:var(--st-ink)}
+.tr-opt:focus-visible{outline:2px solid #c9a052;outline-offset:2px}
+.tr-opt[disabled]{cursor:default}
+.tr-opt.is-right{border-color:var(--st-ok);background:#eaf6f0}
+.tr-opt.is-right b{background:var(--st-ok);color:#fff}
+.tr-opt.is-wrong{border-color:var(--st-no);background:#fdeeee}
+.tr-opt.is-wrong b{background:var(--st-no);color:#fff}
+.tr-fb{margin-top:12px;padding:12px 14px;border-radius:12px;background:#f6f8fb;border-left:4px solid var(--st-gold)}
+.tr-verdict{margin:0 0 4px;font-weight:800}
+.tr-verdict.is-ok{color:var(--st-ok)}.tr-verdict.is-no{color:var(--st-no)}
+.tr-exp,.tr-art{margin:4px 0 0;font-size:15px;line-height:1.55;color:#2b3542}
+.tr-art{font-size:13.5px;color:var(--st-muted)}
+.tr-nav{display:flex;justify-content:flex-end;margin-top:12px}
+.tr-dots{display:flex;gap:6px;margin:12px 0;padding:0;list-style:none}
+.tr-dots li{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;font-weight:800;color:#fff}
+.tr-dots .is-ok{background:var(--st-ok)}.tr-dots .is-no{background:var(--st-no)}
+.tr-cta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:14px;border-radius:12px;background:#fbf5e8;border:1px solid #ecdcb4}
+.tr-cta-h{flex-basis:100%;margin:0 0 4px;font-weight:800;color:var(--st-ink);font-size:15.5px}
+.tr-err{margin:10px 0 0;color:var(--st-no);font-weight:700}
+.xd-gate.is-hl{box-shadow:0 0 0 3px #c9a052}
+.tr-intro .st-btn{margin-top:12px}
+/* Trang dạng "văn bản" (body.cvc-doc, CLAUDE.md 16/10/2026): bo góc tối đa 4px, không gradient / đổ bóng, màu xanh hải quân. Trang chủ v17 giữ kiểu riêng. */
+body.cvc-doc .st-card,body.cvc-doc .tr-card{--st-ink:#123a63;--st-gold:#1767aa;--st-line:#8fb4da;--st-muted:#5c5c5c;border-radius:3px;background:#fff;color:#111}
+body.cvc-doc .st-btn,body.cvc-doc .st-weekbox,body.cvc-doc .st-box,body.cvc-doc .tr-opt,body.cvc-doc .tr-fb,body.cvc-doc .tr-cta,body.cvc-doc .st-remind-form select{border-radius:3px}
+body.cvc-doc .st-box{background:#eaf3fc;border-color:#8fb4da}
+body.cvc-doc .st-lbl,body.cvc-doc .st-streak{color:#123a63}
+body.cvc-doc .tr-cta{background:#eaf3fc;border-color:#8fb4da}
+body.cvc-doc .st-days .is-today i{box-shadow:none;border-width:3px}
+body.cvc-doc .xd-gate.is-hl{box-shadow:none;outline:3px solid #1767aa}
+@media (max-width:560px){body.cvc-doc .st-card,body.cvc-doc .tr-card{border-radius:3px}}

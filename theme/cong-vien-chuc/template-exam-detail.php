@@ -193,7 +193,13 @@ get_header();
 
 			<?php if ( $show_gate ) : ?>
 				<?php $back_rel = wp_make_link_relative( $mode_url( $mode_key ) ); ?>
-				<section class="xd-gate" aria-labelledby="xd-gate-h">
+				<?php
+				// 02/11/2026: khách làm thử 5 câu của đề này ngay, không cần đăng nhập (anh Nhật chốt) - hộp đăng nhập ở dưới.
+				if ( function_exists( 'cvc_trial_widget' ) && ! $locked ) {
+					cvc_trial_widget( array( 'source' => 'exam', 'ref' => $slug, 'exam' => $slug, 'title' => 'Làm thử 5 câu của đề này', 'sub' => 'Không cần đăng nhập. Chọn đáp án là thấy ngay đúng / sai và giải thích. Muốn làm cả đề và lưu kết quả thì đăng nhập ở dưới.', 'gate' => '#xd-gate', 'autostart' => true ) );
+				}
+				?>
+				<section class="xd-gate" id="xd-gate" aria-labelledby="xd-gate-h">
 					<span class="xd-chip is-<?php echo esc_attr( $mode_key ); ?>"><?php echo 'on-tap' === $mode_key ? '✎ Luyện thi' : '◷ Thi thử'; ?></span>
 					<h2 id="xd-gate-h"><?php echo 'on-tap' === $mode_key ? 'Đăng nhập để bắt đầu luyện đề này' : 'Đăng nhập để bắt đầu thi thử đề này'; ?></h2>
 					<p class="xd-gate-sub"><?php echo esc_html( 'on-tap' === $mode_key ? 'Không tính giờ; trả lời xong mỗi câu là thấy ngay đáp án, giải thích và căn cứ pháp luật.' : 'Tính giờ như phòng thi' . ( $duration > 0 ? ' (' . $duration . ' phút)' : '' ) . '; đáp án và giải thích hiện sau khi nộp bài.' ); ?></p>

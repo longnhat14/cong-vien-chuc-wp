@@ -286,6 +286,8 @@ get_header();
 				$cvc_syl_id ? cvc_admin_render_syllabus_detail( $cvc_syl_id ) : cvc_admin_render_syllabus_index();
 			} elseif ( 'van-ban' === $cvc_ing_view ) {
 				cvc_admin_render_legal_document( absint( $_GET['id'] ?? 0 ) ); // phpcs:ignore WordPress.Security.NonceVerification
+			} elseif ( 'cau-moi' === $cvc_ing_view ) {
+				cvc_admin_render_general_questions();
 			} elseif ( 'bao-cau-sai' === $cvc_ing_view ) {
 				cvc_admin_render_question_reports();
 			} elseif ( 'tai-pdf' === $cvc_ing_view ) {
