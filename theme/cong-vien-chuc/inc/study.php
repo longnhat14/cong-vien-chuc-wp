@@ -212,7 +212,8 @@ add_action(
 /* ------------------------------------------------------------------ Khách làm thử 5 câu */
 
 /**
- * @param array{source:string, ref?:string, exam?:string, recruitment_id?:int, title?:string, sub?:string, continue?:string, gate?:string, autostart?:bool} $o
+ * @param array{source:string, ref?:string, exam?:string, recruitment_id?:int, title?:string, sub?:string, continue?:string, gate?:string, autostart?:bool, htag?:string} $o
+ * htag: thẻ tiêu đề (mặc định h2; khối trong bài viết dùng h4 để không lọt vào mục lục).
  */
 function cvc_trial_widget( array $o ): void {
 	if ( function_exists( 'cvc_auth_token' ) && cvc_auth_token() ) {
@@ -223,13 +224,14 @@ function cvc_trial_widget( array $o ): void {
 	wp_enqueue_script( 'cvc-trial', get_theme_file_uri( '/assets/js/trial.js' ), array(), $v( '/assets/js/trial.js' ), true );
 	$continue = (string) ( $o['continue'] ?? cvc_study_url() );
 	$rel      = wp_make_link_relative( $continue );
+	$htag     = in_array( $o['htag'] ?? 'h2', array( 'h2', 'h3', 'h4' ), true ) ? (string) ( $o['htag'] ?? 'h2' ) : 'h2';
 	?>
 	<section class="tr-card" data-trial data-api="<?php echo esc_attr( rtrim( (string) cvc_api_base_url(), '/' ) ); ?>" data-source="<?php echo esc_attr( (string) $o['source'] ); ?>"
 		data-ref="<?php echo esc_attr( (string) ( $o['ref'] ?? '' ) ); ?>" data-exam="<?php echo esc_attr( (string) ( $o['exam'] ?? '' ) ); ?>" data-rec="<?php echo (int) ( $o['recruitment_id'] ?? 0 ); ?>"
 		data-gate="<?php echo esc_attr( (string) ( $o['gate'] ?? '' ) ); ?>" data-autostart="<?php echo ! empty( $o['autostart'] ) ? '1' : '0'; ?>" aria-label="Làm thử 5 câu">
 		<div class="tr-intro" data-tr-intro>
 			<span class="st-kicker">LÀM THỬ · KHÔNG CẦN ĐĂNG NHẬP</span>
-			<h2><?php echo esc_html( (string) ( $o['title'] ?? 'Thử 5 câu trắc nghiệm ngay' ) ); ?></h2>
+			<<?php echo $htag; ?>><?php echo esc_html( (string) ( $o['title'] ?? 'Thử 5 câu trắc nghiệm ngay' ) ); ?></<?php echo $htag; ?>>
 			<p class="st-sub"><?php echo esc_html( (string) ( $o['sub'] ?? 'Chọn đáp án là thấy ngay đúng / sai, giải thích và điều luật căn cứ. Khoảng 3 phút.' ) ); ?></p>
 			<button type="button" class="st-btn is-primary" data-tr-start>Bắt đầu 5 câu →</button>
 		</div>
@@ -242,7 +244,7 @@ function cvc_trial_widget( array $o ): void {
 		</div>
 		<div class="tr-end" data-tr-end hidden>
 			<span class="st-kicker">KẾT QUẢ LÀM THỬ</span>
-			<h2 data-tr-end-h></h2>
+			<<?php echo $htag; ?> data-tr-end-h></<?php echo $htag; ?>>
 			<p class="st-sub" data-tr-end-sub></p>
 			<ol class="tr-dots" data-tr-dots></ol>
 			<div class="tr-cta">

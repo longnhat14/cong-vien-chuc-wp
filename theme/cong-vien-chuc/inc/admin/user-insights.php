@@ -744,7 +744,7 @@ function cvc_ui_trial_section( int $days, callable $pct ): void {
 	$d   = (array) ( $res['data']['data'] ?? array() );
 	$t   = (array) ( $d['totals'] ?? array() );
 	$n   = (int) ( $t['started'] ?? 0 );
-	$src = array( 'home' => 'Trang chủ', 'exam' => 'Trang đề', 'recruitment' => 'Trang tin tuyển dụng', 'practice' => 'Trang Luyện thi', 'on-hom-nay' => 'Trang Ôn hôm nay' );
+	$src = array( 'home' => 'Trang chủ', 'exam' => 'Trang đề', 'recruitment' => 'Trang tin tuyển dụng', 'practice' => 'Trang Luyện thi', 'on-hom-nay' => 'Trang Ôn hôm nay', 'blog' => 'Bài viết (blog)' );
 	?>
 	<section class="ui-card">
 		<h2>Khách làm thử 5 câu (chưa đăng nhập)</h2>
