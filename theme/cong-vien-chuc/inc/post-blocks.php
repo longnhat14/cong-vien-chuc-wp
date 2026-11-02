@@ -54,7 +54,12 @@ function cvc_pb_context( int $post_id ): array {
 	foreach ( (array) get_the_category( $post_id ) as $c ) {
 		$parts[] = (string) $c->name;
 	}
-	$t = ' ' . cvc_pb_ascii( implode( ' | ', $parts ) ) . ' ';
+	return $memo[ $post_id ] = cvc_pb_context_text( implode( ' | ', $parts ) );
+}
+
+/** Ngữ cảnh từ một đoạn chữ bất kỳ (tiêu đề, từ khóa) - dùng cho bài viết và cho AI viết bài. */
+function cvc_pb_context_text( string $text ): array {
+	$t = ' ' . cvc_pb_ascii( $text ) . ' ';
 
 	$civil  = str_contains( $t, 'cong chuc' );
 	$public = str_contains( $t, 'vien chuc' );
@@ -98,7 +103,7 @@ function cvc_pb_context( int $post_id ): array {
 
 	$study = (bool) preg_match( '/on thi|de thi|thi thu|trac nghiem|cau hoi|tai lieu|meo thi|kien thuc chung|vong 1|vong 2/', $t );
 
-	return $memo[ $post_id ] = array( 'kind' => $kind, 'family' => $family, 'province_id' => $pid, 'province' => $pname, 'study' => $study );
+	return array( 'kind' => $kind, 'family' => $family, 'province_id' => $pid, 'province' => $pname, 'study' => $study );
 }
 
 /** Thuộc tính shortcode ghi đè ngữ cảnh tự nhận. */
@@ -405,4 +410,37 @@ add_action(
 		}
 	},
 	20
+);
+
+/* ------------------------------------------------------------------ Dữ liệu thật cho AI viết bài (PCTech AI SEO ≥ 0.12.0) */
+
+/**
+ * Filter pcseo_brief_resources: 2–3 tin đang nhận hồ sơ, 2–3 đề thi, 1–2 sách đúng chủ đề từ khóa → AI giới thiệu tự nhiên
+ * trong bài (kèm link) thay vì nói chung chung. Chỉ dữ liệu thật từ API.
+ */
+add_filter(
+	'pcseo_brief_resources',
+	static function ( $res, $keyword, $secondary ) {
+		$ctx = cvc_pb_context_text( (string) $keyword . ' ' . implode( ' ', array_slice( (array) $secondary, 0, 3 ) ) );
+		$out = (array) $res;
+		$r   = cvc_pb_recruitments( $ctx, 3 );
+		foreach ( $r['items'] as $it ) {
+			$meta  = array_filter( array( (string) ( $it['agency']['name'] ?? '' ), (int) ( $it['total_positions'] ?? 0 ) > 0 ? (int) $it['total_positions'] . ' chỉ tiêu' : '', cvc_pb_deadline( (array) $it ) ) );
+			$out[] = array( 'type' => 'Tin tuyển dụng', 'title' => (string) $it['title'], 'url' => cvc_recruitment_url( (string) $it['slug'] ), 'meta' => implode( ', ', $meta ) );
+		}
+		[ $exams ] = cvc_pb_exams( $ctx, 3 );
+		foreach ( $exams as $it ) {
+			$out[] = array( 'type' => 'Đề thi trắc nghiệm', 'title' => (string) $it['title'], 'url' => cvc_exam_url( (string) $it['slug'] ), 'meta' => trim( ( $it['type_label'] ?? '' ) . ', ' . (int) ( $it['total_questions'] ?? 0 ) . ' câu, chấm điểm ngay', ', ' ) );
+		}
+		if ( function_exists( 'cvc_books' ) ) {
+			$view  = 'civil' === $ctx['kind'] ? 'cong-chuc' : ( 'public' === $ctx['kind'] ? 'vien-chuc' : 'all' );
+			$books = cvc_books( $view, array( 'sort' => 'doc' ), 2 )['items'];
+			foreach ( $books as $it ) {
+				$out[] = array( 'type' => 'Sách / cẩm nang', 'title' => (string) $it['title'], 'url' => cvc_document_url( (string) $it['slug'] ), 'meta' => ! empty( $it['is_free'] ) ? 'đọc miễn phí' : 'có đọc thử' );
+			}
+		}
+		return $out;
+	},
+	10,
+	3
 );
