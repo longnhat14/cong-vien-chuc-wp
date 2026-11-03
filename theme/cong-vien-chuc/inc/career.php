@@ -99,7 +99,8 @@ function cvc_rec_geo_provinces( string $preset_key ): array {
 		$short         = cvc_rec_geo_short( (string) $r['slug'] );
 		$r['short']    = $short;
 		$r['label']    = cvc_rec_geo_label( (string) $r['name'] );
-		$r['indexable'] = (int) ( $r['open_count'] ?? 0 ) > 0 || (int) ( $r['recent_count'] ?? 0 ) >= cvc_rec_geo_min_recent();
+		// 03/11/2026: index khi có tin còn hạn, hoặc >= 3 tin / 12 tháng, hoặc có hồ sơ cơ quan đủ (nội dung riêng của tỉnh).
+		$r['indexable'] = (int) ( $r['open_count'] ?? 0 ) > 0 || (int) ( $r['recent_count'] ?? 0 ) >= cvc_rec_geo_min_recent() || ! empty( $r['profile_ok'] );
 		$out[ $short ] = $r;
 	}
 	uasort( $out, static fn ( $a, $b ) => strcmp( remove_accents( $a['label'] ), remove_accents( $b['label'] ) ) );
@@ -167,11 +168,222 @@ function cvc_rec_geo_lead( array $preset, array $g, int $open, int $positions ):
 	$hist = $recent > 0 ? sprintf( ' Trong 12 tháng qua, Công Viên Chức đã ghi nhận %d thông báo tuyển dụng %s tại %s.', $recent, $noun, $label ) : '';
 	$src  = array(
 		' Mọi tin lấy từ cổng thông tin chính thức của cơ quan tuyển dụng, kèm hạn nộp, chỉ tiêu, đề trắc nghiệm để ôn và văn bản cần nắm.',
-		' Danh sách tổng hợp từ nguồn chính thức (Sở Nội vụ, UBND, cơ quan, đơn vị tuyển dụng); mỗi tin có hạn nộp, chỉ tiêu và đề ôn thi theo tin.',
+		' Danh sách tổng hợp từ nguồn chính thức (sở, ngành, UBND, đơn vị tuyển dụng); mỗi tin có hạn nộp, chỉ tiêu và đề ôn thi theo tin.',
 		' Mỗi tin ghi rõ nguồn đăng chính thức, hạn nộp, chỉ tiêu, kèm đề trắc nghiệm và văn bản pháp luật cần ôn.',
 	)[ $v ];
 
 	return $open_txt . $hist . $src;
+}
+
+/* ------------------------------------------------------------------
+ * Hồ sơ cơ quan theo tỉnh (03/11/2026) - api/career/province-profile (nguồn chính thức đã xác minh, không AI, không dữ liệu mẫu).
+ * Công chức: sở, ngành cấp tỉnh + UBND cấp xã + khối Đảng, Mặt trận. Viên chức: sở quản lý + đơn vị sự nghiệp theo nhóm.
+ * ------------------------------------------------------------------ */
+function cvc_rec_geo_profile( string $preset_key, int $province_id ): array {
+	$kind = (string) ( cvc_rec_presets()[ $preset_key ]['api']['kind'] ?? '' );
+	if ( ! in_array( $kind, array( 'civil', 'public' ), true ) ) {
+		return array();
+	}
+	$res = cvc_ci_api( '/api/career/province-profile', array( 'province_id' => $province_id, 'kind' => $kind ), null, 10, 3600 );
+	return $res['ok'] ? (array) ( $res['data']['data'] ?? array() ) : array();
+}
+
+/** Tên cơ quan ngắn gọn trong trang tỉnh: bỏ đuôi tên tỉnh ("Sở Tài chính tỉnh Lạng Sơn" -> "Sở Tài chính"). */
+function cvc_rec_geo_short_org( string $name, string $province_name ): string {
+	if ( ! preg_match( '/^Sở\s/u', $name ) ) {
+		return $name; // Chỉ rút gọn tên sở; UBND, cổng thông tin, đơn vị giữ nguyên tên đầy đủ.
+	}
+	$short = cvc_rec_geo_label( $province_name );
+	$plain = preg_replace( '/^(Tỉnh|Thành phố)\s+/u', '', $province_name );
+	$out   = preg_replace( '/\s*(,\s*)?(tỉnh|thành phố|TP\.?)\s*' . preg_quote( (string) $plain, '/' ) . '\s*$/iu', '', $name );
+	$out   = preg_replace( '/\s*,\s*(' . preg_quote( (string) $plain, '/' ) . '|' . preg_quote( $short, '/' ) . '|TP\.? ?HCM|TPHCM)\s*$/iu', '', (string) $out );
+	return '' !== trim( (string) $out ) ? trim( (string) $out ) : $name;
+}
+
+function cvc_rec_geo_org_link( array $o, string $province_name ): string {
+	$name = esc_html( cvc_rec_geo_short_org( (string) ( $o['name'] ?? '' ), $province_name ) );
+	$url  = (string) ( $o['url'] ?? '' );
+	$tag  = ! empty( $o['hiring'] ) ? ' <span class="rh-org-tag">đã có tin</span>' : '';
+	if ( '' === $url || ! preg_match( '#^https?://#i', $url ) ) {
+		return $name . $tag;
+	}
+	return '<a href="' . esc_url( $url ) . '" rel="nofollow noopener" target="_blank">' . $name . '</a>' . $tag;
+}
+
+/** Danh sách cơ quan, hiện tối đa $max mục, phần còn lại trong <details>. */
+function cvc_rec_geo_org_list( array $list, string $province_name, int $max = 12 ): string {
+	if ( ! $list ) {
+		return '';
+	}
+	$li = static fn ( $o ) => '<li>' . cvc_rec_geo_org_link( (array) $o, $province_name ) . '</li>';
+	$h  = '<ul class="rh-orgs">' . implode( '', array_map( $li, array_slice( $list, 0, $max ) ) ) . '</ul>';
+	if ( count( $list ) > $max ) {
+		$h .= '<details class="rh-orgs-more"><summary>Xem thêm ' . ( count( $list ) - $max ) . ' đơn vị</summary><ul class="rh-orgs">' . implode( '', array_map( $li, array_slice( $list, $max ) ) ) . '</ul></details>';
+	}
+	return $h;
+}
+
+/** Câu hỏi thường gặp của trang tỉnh - chỉ trả lời bằng dữ liệu có thật. */
+function cvc_rec_geo_faq( array $preset, array $g, array $pf, int $open ): array {
+	$noun  = (string) $preset['noun'];
+	$label = (string) $g['label'];
+	$y     = cvc_rec_year();
+	$depts = (array) ( $pf['departments'] ?? array() );
+	$snv   = null;
+	foreach ( $depts as $d ) {
+		if ( 'snv' === ( $d['code'] ?? '' ) ) {
+			$snv = $d;
+		}
+	}
+	$portal = (array) ( $pf['portal'] ?? array() );
+	$faq    = array();
+	$faq[]  = array(
+		'q' => sprintf( '%s có đang tuyển dụng %s không?', $label, $noun ),
+		'a' => $open > 0
+			? sprintf( 'Có. Hiện có %d thông báo tuyển dụng %s tại %s còn hạn nộp hồ sơ%s. Danh sách ở đầu trang được cập nhật liên tục.', $open, $noun, $label, ! empty( $g['next_deadline'] ) ? ', hạn gần nhất ngày ' . wp_date( 'd/m/Y', strtotime( (string) $g['next_deadline'] ) ) : '' )
+			: sprintf( 'Hiện chưa có thông báo tuyển dụng %s tại %s còn hạn nộp. Khi cơ quan tuyển dụng đăng thông báo mới, tin sẽ tự hiện ở đầu trang này.', $noun, $label ),
+	);
+	$where = array();
+	if ( $snv ) {
+		$where[] = cvc_rec_geo_short_org( (string) $snv['name'], (string) $g['name'] ) . ( ! empty( $snv['url'] ) ? ' (' . preg_replace( '#^https?://#', '', rtrim( (string) $snv['url'], '/' ) ) . ')' : '' );
+	}
+	if ( $portal ) {
+		$where[] = 'cổng thông tin điện tử ' . $label . ( ! empty( $portal['url'] ) ? ' (' . preg_replace( '#^https?://#', '', rtrim( (string) $portal['url'], '/' ) ) . ')' : '' );
+	}
+	if ( $where ) {
+		$faq[] = array(
+			'q' => sprintf( 'Thông báo tuyển dụng %s %s được đăng ở đâu?', $noun, $label ),
+			'a' => sprintf( 'Thông báo chính thức được đăng trên trang của cơ quan, đơn vị tuyển dụng, trong đó có %s. Công Viên Chức tổng hợp các thông báo này, ghi rõ nguồn và hạn nộp của từng tin.', implode( ' và ', $where ) ),
+		);
+	}
+	$au = (array) ( $pf['admin_units'] ?? array() );
+	$nx = (int) ( $au['commune'] ?? 0 ) + (int) ( $au['ward'] ?? 0 ) + (int) ( $au['special_zone'] ?? 0 );
+	if ( $nx > 0 ) {
+		$parts = array_filter( array( (int) $au['commune'] ? (int) $au['commune'] . ' xã' : '', (int) $au['ward'] ? (int) $au['ward'] . ' phường' : '', (int) $au['special_zone'] ? (int) $au['special_zone'] . ' đặc khu' : '' ) );
+		$faq[] = array(
+			'q' => sprintf( '%s có bao nhiêu xã, phường?', $label ),
+			'a' => sprintf( 'Theo danh mục đơn vị hành chính hiện hành, %s có %d đơn vị hành chính cấp xã gồm %s.%s', $label, $nx, implode( ', ', $parts ), 'civil' === ( $pf['kind'] ?? '' ) ? ' Mỗi xã, phường, đặc khu đều có cơ quan sử dụng công chức.' : '' ),
+		);
+	}
+	$faq[] = array(
+		'q' => sprintf( 'Ôn thi %s %s năm %d thế nào?', $noun, $label, $y ),
+		'a' => 'civil' === ( $pf['kind'] ?? '' )
+			? 'Bạn có thể luyện đề trắc nghiệm kiến thức chung và văn bản pháp luật về cán bộ, công chức trên Công Viên Chức; với từng thông báo có đề riêng, trang tin ghi rõ môn thi và tài liệu cần ôn.'
+			: 'Ôn theo ngành của vị trí dự tuyển (giáo dục, y tế, văn hóa...) và văn bản pháp luật về viên chức; với từng thông báo có đề riêng, trang tin ghi rõ môn thi và tài liệu cần ôn.',
+	);
+	return $faq;
+}
+
+/** Khối hồ sơ cơ quan + lịch sử + hỏi đáp + nhận thông báo của trang tỉnh. */
+function cvc_rec_geo_render_profile( string $preset_key, array $preset, array $g, array $pf, int $open, bool $logged_in ): void {
+	if ( ! $pf ) {
+		return;
+	}
+	$kind  = (string) ( $pf['kind'] ?? '' );
+	$label = (string) $g['label'];
+	$pname = (string) $g['name'];
+	$noun  = (string) $preset['noun'];
+	$depts = (array) ( $pf['departments'] ?? array() );
+	$grp   = (array) ( $pf['groups'] ?? array() );
+	$au    = (array) ( $pf['admin_units'] ?? array() );
+	$hist  = (array) ( $pf['history'] ?? array() );
+	$is_city = 0 === mb_stripos( $pname, 'Thành phố', 0, 'UTF-8' );
+	$v     = (int) $g['id'] % 3;
+	?>
+	<section class="rh-prof" id="co-quan" aria-labelledby="rh-prof-h">
+		<div class="rh-sec-head"><h2 id="rh-prof-h"><?php echo esc_html( ( 'civil' === $kind ? 'Cơ quan tuyển dụng công chức tại ' : 'Đơn vị tuyển dụng viên chức tại ' ) . $label ); ?></h2><?php if ( ! empty( $pf['updated_at'] ) ) : ?><span>Cập nhật <?php echo esc_html( wp_date( 'd/m/Y', strtotime( (string) $pf['updated_at'] ) ) ); ?></span><?php endif; ?></div>
+		<?php if ( 'civil' === $kind ) : ?>
+			<?php
+			$nx = (int) ( $au['commune'] ?? 0 ) + (int) ( $au['ward'] ?? 0 ) + (int) ( $au['special_zone'] ?? 0 );
+			$parts = array_filter( array( (int) ( $au['commune'] ?? 0 ) ? (int) $au['commune'] . ' xã' : '', (int) ( $au['ward'] ?? 0 ) ? (int) $au['ward'] . ' phường' : '', (int) ( $au['special_zone'] ?? 0 ) ? (int) $au['special_zone'] . ' đặc khu' : '' ) );
+			$intro = array(
+				'Công chức tại %1$s làm việc trong cơ quan của Đảng, Mặt trận Tổ quốc, các sở, ngành thuộc UBND %2$s và chính quyền cấp xã.',
+				'Ở %1$s, công chức được tuyển vào các sở, ngành thuộc UBND %2$s, cơ quan Đảng, Mặt trận Tổ quốc và UBND cấp xã.',
+				'Nơi làm việc của công chức %1$s gồm các sở, ngành cấp tỉnh, cơ quan Đảng, Mặt trận Tổ quốc và chính quyền xã, phường.',
+			)[ $v ];
+			?>
+			<p class="rh-prof-lead"><?php echo esc_html( sprintf( $intro, $label, $is_city ? 'thành phố' : 'tỉnh' ) . ( $nx ? sprintf( ' %s hiện có %d đơn vị hành chính cấp xã (%s).', $label, $nx, implode( ', ', $parts ) ) : '' ) ); ?></p>
+			<div class="rh-prof-grid">
+				<?php if ( $depts || ! empty( $pf['portal'] ) ) : ?>
+					<div class="rh-prof-col"><h3>Sở, ngành cấp <?php echo $is_city ? 'thành phố' : 'tỉnh'; ?></h3><?php echo cvc_rec_geo_org_list( array_merge( ! empty( $pf['portal'] ) ? array( array( 'name' => 'Cổng thông tin điện tử ' . $label, 'url' => $pf['portal']['url'] ?? '' ) ) : array(), $depts, (array) ( $grp['state'] ?? array() ) ), $pname, 14 ); // phpcs:ignore WordPress.Security.EscapeOutput ?></div>
+				<?php endif; ?>
+				<?php if ( ! empty( $grp['commune'] ) || ! empty( $grp['party'] ) ) : ?>
+					<div class="rh-prof-col">
+						<?php if ( ! empty( $grp['party'] ) ) : ?><h3>Khối Đảng, Mặt trận, đoàn thể</h3><?php echo cvc_rec_geo_org_list( (array) $grp['party'], $pname, 8 ); // phpcs:ignore WordPress.Security.EscapeOutput ?><?php endif; ?>
+						<?php if ( ! empty( $grp['commune'] ) ) : ?><h3>Chính quyền cấp xã</h3><?php echo cvc_rec_geo_org_list( (array) $grp['commune'], $pname, 10 ); // phpcs:ignore WordPress.Security.EscapeOutput ?><?php endif; ?>
+					</div>
+				<?php endif; ?>
+			</div>
+		<?php else : ?>
+			<?php
+			$mgr   = array_values( array_filter( $depts, static fn ( $d ) => in_array( $d['code'] ?? '', array( 'sgddt', 'syt', 'svhttdl', 'snv' ), true ) ) );
+			$cnt   = array( 'education' => count( (array) ( $grp['education'] ?? array() ) ), 'health' => count( (array) ( $grp['health'] ?? array() ) ), 'culture' => count( (array) ( $grp['culture'] ?? array() ) ) );
+			$intro = array(
+				'Viên chức tại %1$s làm việc trong các đơn vị sự nghiệp công lập: trường học, bệnh viện, trung tâm y tế, đơn vị văn hóa, thể thao và các trung tâm dịch vụ công.',
+				'Ở %1$s, viên chức được tuyển vào trường học, cơ sở y tế, đơn vị văn hóa, thể thao và các đơn vị sự nghiệp công lập khác thuộc sở, ngành và chính quyền cấp xã.',
+				'Đơn vị tuyển viên chức tại %1$s gồm trường học các cấp, bệnh viện, trung tâm y tế, bảo tàng, thư viện, nhà hát và các trung tâm sự nghiệp công lập.',
+			)[ $v ];
+			$known = array_filter( array( $cnt['education'] ? $cnt['education'] . ' đơn vị giáo dục' : '', $cnt['health'] ? $cnt['health'] . ' đơn vị y tế' : '', $cnt['culture'] ? $cnt['culture'] . ' đơn vị văn hóa, thể thao' : '' ) );
+			?>
+			<p class="rh-prof-lead"><?php echo esc_html( sprintf( $intro, $label ) . ( $known ? ' Công Viên Chức đang theo dõi thông báo tuyển dụng của ' . implode( ', ', $known ) . ' tại ' . $label . ' (danh sách dưới đây).' : '' ) ); ?></p>
+			<?php if ( $mgr ) : ?><h3>Cơ quan quản lý</h3><?php echo cvc_rec_geo_org_list( $mgr, $pname, 6 ); // phpcs:ignore WordPress.Security.EscapeOutput ?><?php endif; ?>
+			<div class="rh-prof-grid">
+				<?php foreach ( array( 'education' => 'Giáo dục – đào tạo', 'health' => 'Y tế', 'culture' => 'Văn hóa – thể thao – du lịch', 'other' => 'Đơn vị sự nghiệp khác' ) as $gk => $gl ) : ?>
+					<?php if ( ! empty( $grp[ $gk ] ) ) : ?><div class="rh-prof-col"><h3><?php echo esc_html( $gl ); ?> <small><?php echo count( (array) $grp[ $gk ] ); ?></small></h3><?php echo cvc_rec_geo_org_list( (array) $grp[ $gk ], $pname, 10 ); // phpcs:ignore WordPress.Security.EscapeOutput ?></div><?php endif; ?>
+				<?php endforeach; ?>
+			</div>
+		<?php endif; ?>
+		<p class="rh-prof-note">Chỉ liệt kê cơ quan, đơn vị có trang thông tin chính thức đã được Công Viên Chức xác minh hoặc đã có thông báo tuyển dụng; danh sách được bổ sung dần. Nhãn “đã có tin” là đơn vị từng đăng thông báo tuyển dụng <?php echo esc_html( $noun ); ?> được ghi nhận.</p>
+	</section>
+
+	<?php
+	$months = array_map( 'intval', (array) ( $hist['months'] ?? array() ) );
+	$closed = (array) ( $hist['recent_closed'] ?? array() );
+	if ( (int) ( $hist['total_24m'] ?? 0 ) >= 5 || $closed ) :
+		arsort( $months );
+		$top = array_slice( array_keys( array_filter( $months ) ), 0, 3, true );
+		?>
+		<section class="rh-hist" aria-labelledby="rh-hist-h">
+			<div class="rh-sec-head"><h2 id="rh-hist-h"><?php echo esc_html( 'Tuyển dụng ' . $noun . ' ' . $label . ' những đợt gần đây' ); ?></h2></div>
+			<?php if ( (int) ( $hist['total_24m'] ?? 0 ) >= 5 && $top ) : ?>
+				<p><?php echo esc_html( sprintf( 'Trong 24 tháng qua có %d thông báo được ghi nhận; nhiều nhất vào %s.', (int) $hist['total_24m'], implode( ', ', array_map( static fn ( $m ) => 'tháng ' . (int) $m, $top ) ) ) ); ?></p>
+			<?php endif; ?>
+			<?php if ( $closed ) : ?>
+				<ul class="rh-orgs">
+					<?php foreach ( $closed as $c ) : ?><li><a href="<?php echo esc_url( cvc_recruitment_url( (string) $c['slug'] ) ); ?>"><?php echo esc_html( (string) $c['title'] ); ?></a><?php echo ! empty( $c['deadline'] ) ? ' <small>· hết hạn ' . esc_html( wp_date( 'd/m/Y', strtotime( (string) $c['deadline'] ) ) ) . '</small>' : ''; ?></li><?php endforeach; ?>
+				</ul>
+			<?php endif; ?>
+		</section>
+	<?php endif; ?>
+
+	<section class="rh-notify" aria-labelledby="rh-notify-h">
+		<h2 id="rh-notify-h"><?php echo esc_html( 'Nhận thông báo khi ' . $label . ' có tin tuyển dụng ' . $noun ); ?></h2>
+		<?php if ( $logged_in ) : ?>
+			<form id="ci-goal-form" class="rh-notify-form">
+				<input type="hidden" name="employment_type" value="<?php echo esc_attr( $kind ); ?>">
+				<input type="hidden" name="province_id" value="<?php echo (int) $g['id']; ?>">
+				<label class="ec-sr" for="ci-goal-family">Nhóm vị trí</label>
+				<select id="ci-goal-family" name="job_family" class="ci-field"><option value="">Mọi nhóm vị trí</option><?php foreach ( cvc_ci_families() as $fk => $fl ) : ?><option value="<?php echo esc_attr( $fk ); ?>"><?php echo esc_html( $fl ); ?></option><?php endforeach; ?></select>
+				<button type="submit" class="ci-btn is-primary">Đặt mục tiêu &amp; nhận thông báo</button>
+			</form>
+			<p class="ci-small">Lưu mục tiêu dự tuyển: <?php echo esc_html( $noun . ' · ' . $label ); ?>. Hệ thống báo cho bạn khi có tin mới khớp mục tiêu.</p>
+		<?php else : ?>
+			<p>Đặt mục tiêu dự tuyển <?php echo esc_html( $noun . ' tại ' . $label ); ?> để được báo khi có thông báo mới, kèm đề ôn thi phù hợp.</p>
+			<a class="ci-btn is-primary" href="<?php echo esc_url( cvc_ci_login_url() ); ?>" rel="nofollow">Đăng nhập để nhận thông báo</a>
+		<?php endif; ?>
+	</section>
+
+	<?php
+	$faq = cvc_rec_geo_faq( $preset, $g, $pf, $open );
+	if ( $faq ) :
+		?>
+		<section class="rh-faq" aria-labelledby="rh-faq-h">
+			<div class="rh-sec-head"><h2 id="rh-faq-h">Câu hỏi thường gặp</h2></div>
+			<?php foreach ( $faq as $qa ) : ?><details><summary><?php echo esc_html( $qa['q'] ); ?></summary><p><?php echo esc_html( $qa['a'] ); ?></p></details><?php endforeach; ?>
+			<script type="application/ld+json"><?php echo wp_json_encode( array( '@context' => 'https://schema.org', '@type' => 'FAQPage', 'mainEntity' => array_map( static fn ( $qa ) => array( '@type' => 'Question', 'name' => $qa['q'], 'acceptedAnswer' => array( '@type' => 'Answer', 'text' => $qa['a'] ) ), $faq ) ), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ); ?></script>
+		</section>
+		<?php
+	endif;
 }
 
 /** Khối liên kết đủ 34 tỉnh/thành của 1 loại (dùng ở trang loại và trang tỉnh). */

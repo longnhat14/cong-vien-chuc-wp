@@ -103,6 +103,12 @@ if ( $rh_geo ) {
 	$rh_title = $preset['h1'] . ' ' . $rh_geo['label'] . ' ' . $rh_y . ': ' . ( $rh_open > 0 ? $rh_open . ' thông báo còn hạn nộp' : 'thông báo mới nhất' );
 	$rh_desc  = sprintf( 'Thông báo %s tại %s năm %d từ nguồn chính thức%s: hạn nộp, chỉ tiêu, vị trí, đề trắc nghiệm ôn thi và văn bản cần nắm.', mb_strtolower( $preset['h1'], 'UTF-8' ), $rh_geo['label'], $rh_y, $rh_open > 0 ? ', ' . $rh_open . ' tin còn hạn' : '' );
 	$rh_lead  = cvc_rec_geo_lead( $preset, $rh_geo, $rh_open, (int) ( $hc['open_positions'] ?? 0 ) );
+	// 03/11/2026: hồ sơ cơ quan của tỉnh. Có tin còn hạn -> tin lên đầu, hồ sơ xuống dưới; chưa có tin -> hồ sơ lên trước danh sách.
+	$rh_prof = cvc_rec_geo_profile( $preset_key, (int) $rh_geo['id'] );
+	ob_start();
+	cvc_rec_geo_render_profile( $preset_key, $preset, $rh_geo, $rh_prof, $rh_open, $logged_in );
+	$rh_prof_html = (string) ob_get_clean();
+	$rh_prof_top  = 0 === $rh_open && 1 === $paged && ! $filtered;
 }
 
 // SEO: URL sạch là canonical; có lọc / tìm / trang ≥ 2 thì noindex (tránh trang mỏng trùng lặp).
@@ -202,6 +208,8 @@ get_header();
 			</section>
 		<?php endif; ?>
 
+		<?php if ( ! empty( $rh_prof_top ) && ! empty( $rh_prof_html ) ) { echo $rh_prof_html; } // phpcs:ignore WordPress.Security.EscapeOutput ?>
+
 		<div class="rh-grid">
 			<section class="rh-list" aria-labelledby="rh-list-h">
 				<div class="rh-sec-head">
@@ -276,6 +284,8 @@ get_header();
 				<?php endif; ?>
 			</aside>
 		</div>
+
+		<?php if ( empty( $rh_prof_top ) && ! empty( $rh_prof_html ) && 1 === $paged ) { echo $rh_prof_html; } // phpcs:ignore WordPress.Security.EscapeOutput ?>
 
 		<?php if ( ! empty( $preset['geo'] ) ) { cvc_rec_geo_render_links( $preset_key, $rh_geo ? $rh_geo['short'] : '' ); } ?>
 
