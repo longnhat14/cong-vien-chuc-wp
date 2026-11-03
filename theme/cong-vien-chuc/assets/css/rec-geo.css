@@ -213,3 +213,8 @@
 	.rg-side-title{margin:-13px -13px 9px;padding:10px 12px}
 	.rg-provinces .rh-geo-list{grid-template-columns:repeat(2,1fr)}
 }
+
+/* 03/11/2026: mục hợp đồng lao động tại đơn vị sự nghiệp (trang viên chức) */
+.rg-cu-note{display:flex;gap:8px;align-items:flex-start;padding:10px 12px;border-radius:10px;background:#fff6ee;border:1px solid #f5c9ad;color:#7a3d14}
+.rg-cu-note .rg-ic{flex:none;margin-top:2px}
+.rg-tag.is-contract{background:#eef2f6;color:#344054;border-color:#d5dae1}

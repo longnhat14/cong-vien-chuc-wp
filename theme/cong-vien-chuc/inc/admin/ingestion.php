@@ -270,6 +270,27 @@ function cvc_admin_render_ingestion_index(): void {
 			</div>
 		</dl>
 	</section>
+	<?php
+	// 03/11/2026: tin đã đăng / nháp chưa đủ căn cứ loại tuyển dụng (công chức / viên chức / hợp đồng) - quản trị chọn loại.
+	$tc_res  = cvc_admin_api_get( '/api/admin/ingestion/type-checks' );
+	$tc_rows = $tc_res['ok'] ? (array) ( $tc_res['data']['data'] ?? array() ) : array();
+	$tc_lbl  = array( 'civil_servant' => 'Công chức', 'public_employee' => 'Viên chức', 'other' => 'Hợp đồng / khác' );
+	?>
+	<?php if ( $tc_rows ) : ?>
+		<details class="dz-card border border-amber-200 bg-amber-50" id="can-kiem-tra-loai" open>
+			<summary class="cursor-pointer font-black text-amber-900 text-sm"><i class="fa-solid fa-scale-balanced" aria-hidden="true"></i> <?php echo esc_html( count( $tc_rows ) . ' tin cần kiểm tra loại tuyển dụng' ); ?></summary>
+			<p class="text-xs text-ink-2 mt-1">Thông báo không ghi rõ tuyển công chức, viên chức hay hợp đồng lao động. Mở tin, đối chiếu văn bản gốc rồi chọn đúng <b>Loại tuyển dụng</b> và lưu; tin sẽ rời danh sách này.</p>
+			<ul class="mt-2 space-y-1 text-sm">
+				<?php foreach ( $tc_rows as $t ) : ?>
+					<li class="flex flex-wrap items-baseline gap-x-2">
+						<a class="font-bold text-acc hover:underline" href="<?php echo esc_url( cvc_admin_url( 'recruitments', (int) $t['id'] ) ); ?>"><?php echo esc_html( '#' . (int) $t['id'] . ' · ' . mb_substr( (string) $t['title'], 0, 110 ) ); ?></a>
+						<span class="text-xs text-ink-muted"><?php echo esc_html( implode( ' · ', array_filter( array( (string) ( $t['agency'] ?? '' ), 'đang để: ' . ( $tc_lbl[ (string) $t['recruitment_type'] ] ?? (string) $t['recruitment_type'] ), 'published' === $t['status'] ? 'đang hiển thị' : 'nháp' ) ) ) ); ?></span>
+						<span class="text-xs text-amber-800"><?php echo esc_html( (string) $t['type_check'] ); ?></span>
+					</li>
+				<?php endforeach; ?>
+			</ul>
+		</details>
+	<?php endif; ?>
 
 	<?php $cvc_open = (array) ( $ov['open_unpublished'] ?? array() ); ?>
 	<?php if ( ! empty( $cvc_open ) ) : ?>
@@ -514,6 +535,10 @@ function cvc_admin_render_ingestion_detail( int $id ): void {
 						Cơ quan: <?php echo esc_html( (string) ( $ready['agency'] ?? '—' ) ); ?><?php echo ! empty( $ready['agency'] ) && empty( $ready['agency_exists'] ) ? esc_html( ' (sẽ tạo mới)' ) : ''; ?> ·
 						<?php echo esc_html( count( (array) ( $ready['positions'] ?? array() ) ) . ' vị trí' ); ?>
 					</p>
+					<?php if ( ! empty( $ready['type_evidence'] ) ) : ?>
+						<?php $tev = (array) $ready['type_evidence']; $tl = array( 'civil_servant' => 'Công chức', 'public_employee' => 'Viên chức', 'other' => 'Hợp đồng / khác' ); ?>
+						<p class="text-xs mt-1 <?php echo null === ( $tev['type'] ?? null ) ? 'text-amber-800 font-bold' : 'text-ink-muted'; ?>">Loại tuyển dụng: <?php echo esc_html( null === ( $tev['type'] ?? null ) ? 'Cần kiểm tra' : ( $tl[ (string) $tev['type'] ] ?? (string) $tev['type'] ) ); ?> — <?php echo esc_html( (string) ( $tev['note'] ?? '' ) ); ?></p>
+					<?php endif; ?>
 					<?php if ( ! empty( $ready['auto_gate_failures'] ) ) : ?>
 						<p class="text-xs text-ink-muted mt-1">Không tự đăng vì: <?php echo esc_html( implode( '; ', (array) $ready['auto_gate_failures'] ) ); ?>.</p>
 					<?php endif; ?>

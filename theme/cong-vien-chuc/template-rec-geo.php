@@ -56,6 +56,18 @@ if ( 'open' !== $rg_state ) {
 	}
 }
 
+// 03/11/2026: trang viên chức - mục riêng hợp đồng lao động tại đơn vị sự nghiệp công lập (KHÔNG phải tuyển viên chức).
+$rg_cu = array();
+if ( ! $rg_civil ) {
+	$cu = cvc_ci_api( '/api/career/recruitments', array( 'kind' => array( 'contract_unit' ), 'province_id' => (int) $rh_geo['id'], 'status' => 'open', 'sort' => 'deadline', 'page' => 1, 'per_page' => 8, 'with_exams' => 0 ), null, 10, 600 );
+	$rg_cu = $cu['ok'] ? array_values( array_filter( (array) ( $cu['data']['data']['items'] ?? array() ), 'is_array' ) ) : array();
+	// Chỉ giữ đơn vị sự nghiệp theo tên (trường, cơ sở y tế, viện, trung tâm...) - loại Chi cục, UBND, Sở...
+	$rg_cu = array_values( array_filter( $rg_cu, static function ( $r ) {
+		$a = strtolower( remove_accents( (string) ( $r['agency']['name'] ?? '' ) ) );
+		return (bool) preg_match( '/(^|\s)(truong|dai hoc|hoc vien|benh vien|tram y te|trung tam|vien [a-z]|bao tang|thu vien|nha hat|vuon quoc gia|mam non|tieu hoc|thcs|thpt)/', $a ) && ! preg_match( '/(chi cuc|uy ban|ubnd|so [a-z]|cong an)/', $a );
+	} ) );
+}
+
 // Thẻ cơ quan / đơn vị (số liệu thật) + danh sách tương ứng.
 if ( $rg_civil ) {
 	$rg_cards = array(
@@ -305,6 +317,30 @@ get_header();
 					</div>
 				<?php endif; ?>
 			</section>
+
+			<?php if ( $rg_cu ) : ?>
+				<section class="rg-panel" id="hop-dong-su-nghiep">
+					<div class="rg-head"><h2 class="rg-title"><?php echo $rg_ic( 'briefcase' ); // phpcs:ignore ?> <?php echo esc_html( 'Hợp đồng lao động tại đơn vị sự nghiệp công lập ' . $rg_label ); ?></h2><span class="rg-count"><?php echo (int) count( $rg_cu ); ?> tin</span></div>
+					<p class="rg-intro rg-cu-note"><?php echo $rg_ic( 'info' ); // phpcs:ignore ?> <?php echo esc_html( 'Đây là tuyển hợp đồng lao động / hợp đồng thực hiện công việc tại trường học, cơ sở y tế và đơn vị sự nghiệp công lập - không phải kỳ tuyển dụng viên chức. Người trúng tuyển ký hợp đồng lao động với đơn vị, không được tuyển vào viên chức.' ); ?></p>
+					<div class="rg-jobs">
+						<?php foreach ( $rg_cu as $r ) : ?>
+							<?php $dl = (string) ( $r['status']['deadline'] ?? '' ); $left = isset( $r['status']['days_left'] ) ? (int) $r['status']['days_left'] : null; ?>
+							<article class="rg-job">
+								<div class="rg-date<?php echo null !== $left && $left <= 7 ? ' is-soon' : ''; ?>"><?php if ( '' !== $dl ) : ?><strong><?php echo esc_html( $rg_date( $dl, 'd' ) ); ?></strong><span><?php echo esc_html( $rg_date( $dl, 'm/Y' ) ); ?></span><?php else : ?><span>Chưa rõ hạn</span><?php endif; ?></div>
+								<div class="rg-job-main">
+									<a class="rg-job-title" href="<?php echo esc_url( cvc_recruitment_url( (string) $r['slug'] ) ); ?>"><?php echo esc_html( (string) $r['title'] ); ?></a>
+									<div class="rg-meta">
+										<span class="rg-tag is-contract">Hợp đồng lao động</span>
+										<?php if ( ! empty( $r['agency']['name'] ) ) : ?><span><?php echo $rg_ic( 'building' ); // phpcs:ignore ?> <?php echo esc_html( cvc_rec_geo_short_org( (string) $r['agency']['name'], $rg_pname ) ); ?></span><?php endif; ?>
+										<?php if ( '' !== $dl ) : ?><span><?php echo $rg_ic( 'calendar' ); // phpcs:ignore ?> Hạn nộp: <?php echo esc_html( $rg_date( $dl ) ); ?></span><?php endif; ?>
+									</div>
+								</div>
+								<div class="rg-job-end"><a class="rg-arrow" href="<?php echo esc_url( cvc_recruitment_url( (string) $r['slug'] ) ); ?>" aria-label="<?php echo esc_attr( 'Xem: ' . (string) $r['title'] ); ?>"><?php echo $rg_ic( 'chevron-right' ); // phpcs:ignore ?></a></div>
+							</article>
+						<?php endforeach; ?>
+					</div>
+				</section>
+			<?php endif; ?>
 
 			<?php if ( $rg_nearby ) : ?>
 				<section class="rg-panel" id="dia-phuong-khac">
