@@ -122,7 +122,7 @@ $tracks = array( 'public_employee' => 'Viên chức', 'civil_servant' => 'Công 
 				<?php endforeach; ?>
 				<label class="flex items-center gap-2 text-xs text-ink-muted">Ngân sách/tin <input type="number" name="budget" min="0" step="1000" value="<?php echo (int) ( $s['budget'] ?? 20000 ); ?>" class="w-28 px-2 py-1 rounded-lg border border-slate-300"> ₫</label>
 			</fieldset>
-			<p class="text-sm font-bold text-ink pt-2">Thu phí</p>
+			<p class="text-sm font-bold text-ink pt-2">Thu phí <a class="text-xs font-normal text-acc" href="<?php echo esc_url( cvc_admin_url( 'thu-phi' ) ); ?>">(bảng Thu phí mọi tính năng →)</a></p>
 			<fieldset class="flex flex-wrap items-center gap-3 text-sm" <?php disabled( ! cvc_admin_can( 'settings.update' ) ); ?>>
 				<legend class="sr-only">Thu phí đề cá nhân hóa</legend>
 				<label class="flex items-center gap-2"><input type="checkbox" name="paywall" value="1" class="accent-acc-2" <?php checked( '0' !== (string) ( $s['paywall'] ?? '1' ) ); ?>> Thu phí (làm thử 10 câu)</label>

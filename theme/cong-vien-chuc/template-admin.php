@@ -39,6 +39,8 @@ $view         = 'dashboard';
 
 if ( 'thanh-toan' === $resource_key ) {
 	$view = 'payment';
+} elseif ( 'thu-phi' === $resource_key ) {
+	$view = cvc_admin_can( 'settings.view' ) ? 'paywall' : 'forbidden';
 } elseif ( 'thu-thap' === $resource_key ) {
 	$view = cvc_admin_can( 'recruitment.view' ) ? 'ingestion' : 'forbidden';
 } elseif ( 'don-vi' === $resource_key ) {
@@ -82,6 +84,8 @@ if ( 'list' === $view || 'form' === $view ) {
 	$page_title = $res['label'] . ( 'form' === $view ? ( $is_create ? ' — Thêm mới' : ' — ' . cvc_admin_item_title( $res, $item ) ) : '' );
 } elseif ( 'payment' === $view ) {
 	$page_title = 'Cấu hình thanh toán';
+} elseif ( 'paywall' === $view ) {
+	$page_title = 'Thu phí theo tính năng';
 } elseif ( 'ingestion' === $view ) {
 	$page_title = 'Thu thập tin tuyển dụng';
 } elseif ( 'employers' === $view ) {
@@ -153,6 +157,7 @@ get_header();
 					<div>
 						<p class="px-2.5 text-[10px] font-black uppercase tracking-wider text-ink-muted mb-1">Cấu hình</p>
 						<a href="<?php echo esc_url( cvc_admin_url( 'thanh-toan' ) ); ?>" class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg <?php echo 'payment' === $view ? 'bg-acc-soft text-acc font-bold' : 'text-ink-2 hover:bg-acc-soft'; ?>"><i class="fa-solid fa-credit-card w-4 text-ink-muted" aria-hidden="true"></i> Thanh toán</a>
+						<a href="<?php echo esc_url( cvc_admin_url( 'thu-phi' ) ); ?>" class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg <?php echo 'paywall' === $view ? 'bg-acc-soft text-acc font-bold' : 'text-ink-2 hover:bg-acc-soft'; ?>"><i class="fa-solid fa-lock w-4 text-ink-muted" aria-hidden="true"></i> Thu phí</a>
 						<a href="<?php echo esc_url( cvc_admin_ai_settings_url() ); ?>" class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-ink-2 hover:bg-acc-soft"><i class="fa-solid fa-robot w-4 text-ink-muted" aria-hidden="true"></i> AI giải thích</a>
 					</div>
 				<?php endif; ?>
@@ -252,6 +257,8 @@ get_header();
 				</div>
 			<?php endif; ?>
 
+		<?php elseif ( 'paywall' === $view ) : ?>
+			<div class="space-y-4"><?php cvc_admin_render_paywall(); ?></div>
 		<?php elseif ( 'docgen' === $view ) : ?>
 			<div class="space-y-4"><?php cvc_admin_render_docgen( $item_param ); ?></div>
 		<?php elseif ( 'docimport' === $view ) : ?>

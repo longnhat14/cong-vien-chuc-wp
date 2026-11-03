@@ -320,6 +320,32 @@ function cvc_pdf_exam_ajax(): void {
 	if ( '' === $slug || $n < 1 || $n > 20 ) {
 		wp_send_json( array( 'success' => false ) );
 	}
-	$d = cvc_pdf_api( '/api/pdf-sets/' . $slug . '/exams/' . $n, array(), 1800 );
+	// Đề mở công khai: lấy qua cache chung; đề cần gói (402, Quản trị → Thu phí) hỏi lại kèm token người dùng, không cache.
+	$path  = '/api/pdf-sets/' . $slug . '/exams/' . $n;
+	$res   = cvc_ci_api( $path, array(), null, 15, 1800 );
+	$token = cvc_auth_token();
+	if ( 402 === (int) ( $res['status'] ?? 0 ) && null !== $token ) {
+		$res = ( new CVC_Api_Client( null, 15 ) )->get( $path, array(), $token );
+	}
+	$d = is_array( $res['data']['data'] ?? null ) ? (array) $res['data']['data'] : array();
+	if ( 402 === (int) ( $res['status'] ?? 0 ) ) {
+		$lock = (array) ( $d['lock'] ?? array() );
+		$tpl  = (int) ( $lock['pack']['template_id'] ?? 0 );
+		$back = isset( $_POST['back'] ) ? wp_validate_redirect( esc_url_raw( wp_unslash( (string) $_POST['back'] ) ), home_url( '/' ) ) : home_url( '/' ); // phpcs:ignore WordPress.Security.NonceVerification
+		wp_send_json(
+			array(
+				'success' => false,
+				'locked'  => true,
+				'data'    => array(
+					'message' => (string) ( $res['data']['message'] ?? '' ),
+					'free'    => (int) ( $lock['free'] ?? 1 ),
+					'prices'  => (array) ( $lock['prices'] ?? array() ),
+					'pack'    => isset( $lock['pack'] ) && is_array( $lock['pack'] ) ? array( 'title' => (string) $lock['pack']['title'], 'exams' => (int) $lock['pack']['exams'] ) : null,
+					'logged'  => null !== $token,
+					'unlock'  => cvc_paywall_url( 'pdf_learn', $back, $tpl, (int) ( $lock['recruitment_id'] ?? 0 ) ),
+				),
+			)
+		);
+	}
 	wp_send_json( array( 'success' => ! empty( $d['questions'] ), 'data' => $d ) );
 }

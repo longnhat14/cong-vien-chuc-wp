@@ -93,6 +93,17 @@
 		p.setAttribute('data-loaded', '1');
 		bind(p); apply(n);
 	}
+	function money(v) { return Number(v || 0).toLocaleString('vi-VN') + ' ₫'; }
+	// 03/11/2026: đề cần gói (Quản trị → Thu phí 'pdf_learn') - hộp mở khóa thay cho câu hỏi.
+	function renderLock(p, d) {
+		var n = Number(p.getAttribute('data-n')), pr = d.prices || {}, from = d.pack && pr.pack ? pr.pack : pr.pass;
+		var h = '<div class="pql-lock"><b><i class="fa-solid fa-lock" aria-hidden="true"></i> Đề ' + n + ' cần gói ôn thi</b><p>Bạn đã học miễn phí ' + esc(d.free || 1) + ' đề đầu của bộ. '
+			+ (d.pack ? 'Mua ' + esc(d.pack.title) + ' (' + esc(d.pack.exams) + ' đề, dùng mãi) hoặc gói tháng để học trên trang, luyện và thi thử online toàn bộ đề.' : 'Mua gói tháng để học trên trang, luyện và thi thử online toàn bộ đề.')
+			+ '</p><div class="pql-cta-acts"><a class="pql-btn is-primary" rel="nofollow" href="' + esc(d.unlock || root.getAttribute('data-unlock')) + '">Mở khóa' + (from ? ' · từ ' + esc(money(from)) : '') + '</a>';
+		if (!d.logged) { h += '<a class="pql-btn" rel="nofollow" href="' + esc(root.getAttribute('data-login')) + '">Đã mua? Đăng nhập</a>'; }
+		p.innerHTML = h + '<button type="button" class="pql-btn is-ghost" data-pq="back1">Học lại đề 1</button></div></div>';
+		var b = $('[data-pq="back1"]', p); if (b) { b.onclick = function () { show(1); }; }
+	}
 	function show(n) {
 		cur = n;
 		$$('.pql-tab').forEach(function (t) { var on = Number(t.getAttribute('data-n')) === n; t.classList.toggle('is-on', on); t.setAttribute('aria-selected', on ? 'true' : 'false'); });
@@ -100,9 +111,9 @@
 		$('.pql-cta').hidden = true;
 		var p = panel(n);
 		if (p.getAttribute('data-loaded') !== '1') {
-			var fd = new FormData(); fd.append('action', 'cvc_pdf_exam'); fd.append('slug', slug); fd.append('n', String(n));
+			var fd = new FormData(); fd.append('action', 'cvc_pdf_exam'); fd.append('slug', slug); fd.append('n', String(n)); fd.append('back', location.href.split('#')[0] + '#hoc-bo-de');
 			fetch(root.getAttribute('data-ajax'), { method: 'POST', body: fd, credentials: 'same-origin' }).then(function (r) { return r.json(); }).then(function (r) {
-				if (r && r.success && r.data) { renderExam(p, r.data); } else { p.innerHTML = '<p class="pql-loading">Không tải được đề, vui lòng thử lại.</p>'; }
+				if (r && r.success && r.data) { renderExam(p, r.data); } else if (r && r.locked && r.data) { renderLock(p, r.data); } else { p.innerHTML = '<p class="pql-loading">Không tải được đề, vui lòng thử lại.</p>'; }
 				prog(); pager();
 			}).catch(function () { p.innerHTML = '<p class="pql-loading">Lỗi kết nối, vui lòng thử lại.</p>'; });
 		}

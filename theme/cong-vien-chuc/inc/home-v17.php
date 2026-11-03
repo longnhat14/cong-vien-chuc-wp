@@ -223,6 +223,16 @@ function cvc_home17_ajax_coach(): void {
 		cvc_auth_token()
 	);
 
+	// 03/11/2026: hết lượt hỏi miễn phí (Quản trị → Thu phí 'ai_coach') - trả lời kèm liên kết mở khóa.
+	if ( 402 === (int) $result['status'] ) {
+		$back  = wp_get_referer() ?: home_url( '/' );
+		$links = array( array( 'label' => 'Xem gói ôn thi để hỏi thêm', 'url' => cvc_paywall_url( 'ai_coach', $back ) ) );
+		if ( null === cvc_auth_token() ) {
+			$links[] = array( 'label' => 'Đã mua gói? Đăng nhập', 'url' => cvc_login_url( $back ) );
+		}
+		wp_send_json_success( array( 'answer' => (string) ( $result['data']['message'] ?? 'Bạn đã dùng hết lượt hỏi miễn phí hôm nay.' ), 'links' => $links, 'engine' => null, 'fallback_from' => null ) );
+	}
+
 	if ( ! $result['ok'] ) {
 		$status = (int) $result['status'];
 		$msg    = $result['data']['message'] ?? '';

@@ -313,6 +313,11 @@ add_action(
 			if ( function_exists( 'cvc_verify_redirect_if_required' ) ) {
 				cvc_verify_redirect_if_required( $res, '/on-hom-nay/' );
 			}
+			// 03/11/2026: hết lượt "Ôn thêm" miễn phí (Quản trị → Thu phí 'exam_review').
+			if ( 402 === (int) ( $res['status'] ?? 0 ) && function_exists( 'cvc_paywall_url' ) ) {
+				cvc_redirect_with_notice( cvc_paywall_url( 'exam_review', cvc_account_url() ), 'info', (string) ( $res['data']['message'] ?? 'Hôm nay bạn đã dùng hết lượt ôn thêm miễn phí.' ), null );
+				exit;
+			}
 			$id = (int) ( $res['data']['data']['id'] ?? 0 );
 			if ( $res['ok'] && $id > 0 ) {
 				wp_safe_redirect( ! empty( $res['data']['done'] ) ? cvc_exam_result_url( $id ) : cvc_exam_attempt_url( $id ) );

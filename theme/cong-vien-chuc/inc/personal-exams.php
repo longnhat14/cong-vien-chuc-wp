@@ -116,7 +116,10 @@ function cvc_handle_exam_buy(): void {
 		cvc_redirect_with_notice( $back, 'error', 'Gói không hợp lệ.', null );
 		return;
 	}
-	$result = ( new CVC_Order_Service() )->create( array( array( 'type' => $type, 'id' => $id ) ), $token );
+	// 03/11/2026: ghi nguồn (tính năng dẫn tới mua) cho thống kê Quản trị → Thu phí.
+	$source = sanitize_key( (string) ( $_POST['source'] ?? '' ) );
+	$source = defined( 'CVC_PAYWALL_FEATURES' ) && in_array( $source, CVC_PAYWALL_FEATURES, true ) ? $source : 'exam_practice';
+	$result = ( new CVC_Order_Service() )->create( array( array( 'type' => $type, 'id' => $id ) ), $token, $source );
 	if ( ! $result['ok'] ) {
 		$message = ! empty( $result['error'] ) ? (string) $result['error'] : cvc_api_error_message( $result );
 		cvc_redirect_with_notice( $back, 'error', $message, null );

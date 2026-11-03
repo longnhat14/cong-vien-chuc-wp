@@ -49,6 +49,7 @@ require_once __DIR__ . '/inc/admin/recruitment-imports.php';
 require_once __DIR__ . '/inc/admin/question-reports.php';
 require_once __DIR__ . '/inc/admin/general-questions.php'; // Câu tư duy & xã hội - văn hóa - lịch sử chờ duyệt (02/11/2026)
 require_once __DIR__ . '/inc/admin/exam-pdf.php';
+require_once __DIR__ . '/inc/admin/paywall.php'; // Quản trị → Thu phí theo tính năng (03/11/2026)
 require_once __DIR__ . '/inc/admin/user-insights.php';
 require_once __DIR__ . '/inc/admin/docgen.php'; // Tài liệu tự sinh (31/10/2026)
 require_once __DIR__ . '/inc/admin/docimport.php'; // Xưởng tài liệu - tải tệp sách (01/11/2026)
@@ -63,6 +64,7 @@ require_once __DIR__ . '/inc/employer.php';
 require_once __DIR__ . '/inc/avatars.php';
 require_once __DIR__ . '/inc/leaderboard.php';
 require_once __DIR__ . '/inc/admin/employers.php';
+require_once __DIR__ . '/inc/paywall.php'; // Trang Gói ôn thi /goi-on-thi/ (03/11/2026)
 require_once __DIR__ . '/inc/personal-exams.php';
 require_once __DIR__ . '/inc/exam-pdf.php'; // Tải đề trắc nghiệm PDF (26/10/2026)
 require_once __DIR__ . '/inc/email-verify.php'; // Xác minh email (27/10/2026)

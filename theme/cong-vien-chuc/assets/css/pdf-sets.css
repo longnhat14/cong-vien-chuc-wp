@@ -163,3 +163,9 @@
 .pql-btn.is-ghost{border-color:transparent;background:none;color:#1767aa}
 @media (max-width:640px){.pql-prog{top:82px}.pql-q{padding:12px}.pql-text{font-size:16px}.pql-opt{font-size:15.5px}.pql-btn{flex:1 1 100%;justify-content:center}}
 @media (prefers-reduced-motion:reduce){.pql-opt{animation:none!important;transition:none!important}}
+
+/* 03/11/2026: đề cần gói (Quản trị → Thu phí). */
+.pql-lk{font-size:12px;opacity:.75}
+.pql-lock{padding:18px;border:1.5px dashed #f0a477;border-radius:14px;background:#fff8f2}
+.pql-lock b{display:block;font-size:18px;color:#173653}
+.pql-lock p{margin:6px 0 12px;color:#475467}

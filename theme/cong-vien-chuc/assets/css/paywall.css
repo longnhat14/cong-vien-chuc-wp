@@ -1,0 +1,24 @@
+/* Trang Gói ôn thi /goi-on-thi/ (03/11/2026) */
+.pw{padding-top:24px;padding-bottom:48px}
+.pw-kicker{margin:0 0 6px;color:#c65316;font-weight:700;font-size:14px}
+.pw-h1{margin:0 0 8px;font-size:28px;line-height:1.25;color:#173653}
+.pw-lead{margin:0 0 18px;color:#475467}
+.pw-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px;margin:0 0 14px}
+.pw-card{position:relative;padding:18px;border:1.5px solid #e3e7ec;border-radius:16px;background:#fff;min-width:0}
+.pw-card.is-best{border-color:#e66a24;box-shadow:0 8px 24px rgba(230,106,36,.12)}
+.pw-card h2{margin:0 0 6px;font-size:20px;color:#173653}
+.pw-tag{position:absolute;top:-11px;right:14px;margin:0;padding:2px 10px;border-radius:20px;background:#e66a24;color:#fff;font-size:12px;font-weight:700}
+.pw-price{margin:0 0 8px;font-size:26px;font-weight:800;color:#e66a24}
+.pw-price small{font-size:14px;font-weight:400;color:#667085}
+.pw-desc{margin:0 0 8px;color:#475467;font-size:14px}
+.pw-list{margin:0 0 14px;padding-left:18px;color:#344054;font-size:15px;line-height:1.6}
+.pw-btn{display:flex;justify-content:center;align-items:center;width:100%;padding:12px 14px;border-radius:12px;border:1.5px solid #e66a24;background:#fff;color:#c65316;font-weight:800;font-size:16px;text-decoration:none;cursor:pointer}
+.pw-btn.is-primary{background:#e66a24;color:#fff}
+@media (hover:hover){.pw-btn:hover{filter:brightness(.96)}}
+.pw-ok{padding:16px;border:1px solid #b7e2c7;border-radius:14px;background:#ecf8f0;margin:0 0 14px}
+.pw-ok b{color:#23845a;font-size:17px}
+.pw-ok p{margin:6px 0 12px}
+.pw-ok .pw-btn{width:auto;display:inline-flex}
+.pw-note{color:#667085;font-size:14px}
+.pw-note.is-warn{color:#b54708}
+.pw-back{color:#1767aa}

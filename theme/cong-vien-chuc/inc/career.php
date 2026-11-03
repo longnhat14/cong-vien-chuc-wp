@@ -546,7 +546,7 @@ function cvc_ci_api( string $path, array $query = array(), ?string $token = null
 		}
 	}
 	$res = ( new CVC_Api_Client( null, $timeout ) )->get( $path, $query, $token );
-	if ( ! $res['ok'] && ! in_array( (int) ( $res['status'] ?? 0 ), array( 401, 403, 404, 422 ), true ) ) {
+	if ( ! $res['ok'] && ! in_array( (int) ( $res['status'] ?? 0 ), array( 401, 402, 403, 404, 422 ), true ) ) {
 		$res = ( new CVC_Api_Client( null, $timeout + 10 ) )->get( $path, $query, $token );
 	}
 	if ( '' !== $key && $res['ok'] ) {

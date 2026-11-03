@@ -16,7 +16,7 @@ final class CVC_Order_Service extends CVC_Api_Service {
 	/**
 	 * @param array<int, array{type: string, id: int}> $items
 	 */
-	public function create( array $items, string $token ): array {
-		return $this->client->post( $this->endpoint(), array( 'items' => $items ), $token );
+	public function create( array $items, string $token, string $source = '' ): array {
+		return $this->client->post( $this->endpoint(), array_filter( array( 'items' => $items, 'source' => $source ) ), $token );
 	}
 }

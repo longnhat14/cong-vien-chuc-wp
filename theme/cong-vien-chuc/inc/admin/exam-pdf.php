@@ -54,6 +54,7 @@ function cvc_admin_render_exam_pdf(): void {
 			<label class="flex items-center gap-2">Giới hạn mỗi người <input type="number" name="daily_limit" min="1" max="500" value="<?php echo esc_attr( (string) (int) ( $s['daily_limit'] ?? 20 ) ); ?>" class="w-20 border border-slate-300 rounded px-2 py-1"> file/ngày</label>
 		</fieldset>
 		<p class="text-xs <?php echo ! empty( $s['paywall'] ) ? 'text-amber-800' : 'text-emerald-800'; ?>"><?php echo esc_html( ! empty( $s['paywall'] ) ? 'Đang thu phí: người chưa có gói chỉ xem trước được. Giá gói lấy theo cấu hình đề cá nhân hóa (gói theo bộ đề / gói 30 ngày).' : 'Đang miễn phí: mọi tài khoản đã đăng nhập đều tải được (trong giới hạn mỗi ngày).' ); ?></p>
+		<p class="text-xs text-ink-muted">Bật/tắt thu phí mọi tính năng ở một chỗ: <a class="text-acc font-bold" href="<?php echo esc_url( cvc_admin_url( 'thu-phi' ) ); ?>">Cấu hình → Thu phí</a>.</p>
 		<?php if ( $can ) : ?><button type="submit" class="px-4 py-2 rounded-lg bg-acc text-white font-bold text-sm">Lưu cài đặt</button><?php endif; ?>
 	</form>
 

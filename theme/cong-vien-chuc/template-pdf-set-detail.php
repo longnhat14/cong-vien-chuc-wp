@@ -125,6 +125,9 @@ get_header();
 				 * trong HTML (SEO); đề 2, 3... tải qua AJAX cvc_pdf_exam khi bấm tab (tránh trùng nội dung giữa các bộ đề).
 				 */
 				$pql_logged = null !== cvc_auth_token();
+				// 03/11/2026: Quản trị → Thu phí 'pdf_learn' - đề > free có ổ khóa (đề 1 luôn miễn phí).
+				$pql_lock   = ! empty( $d['access']['pdf_learn']['active'] );
+				$pql_free   = $pql_lock ? max( 1, (int) ( $d['access']['pdf_learn']['free'] ?? 1 ) ) : count( $exams );
 				$pql_q      = static function ( array $qq, int $n, int $i ): void {
 					$ans = (string) $qq['answer'];
 					?>
@@ -139,13 +142,13 @@ get_header();
 				};
 				?>
 				<?php if ( $preview ) : ?>
-					<section class="pds-box pql" id="hoc-bo-de" aria-labelledby="pds-pv-h" data-slug="<?php echo esc_attr( $slug ); ?>" data-logged="<?php echo $pql_logged ? '1' : '0'; ?>" data-login="<?php echo esc_url( cvc_login_url( $url . '#hoc-bo-de' ) ); ?>" data-ajax="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>">
+					<section class="pds-box pql" id="hoc-bo-de" aria-labelledby="pds-pv-h" data-slug="<?php echo esc_attr( $slug ); ?>" data-logged="<?php echo $pql_logged ? '1' : '0'; ?>" data-login="<?php echo esc_url( cvc_login_url( $url . '#hoc-bo-de' ) ); ?>" data-ajax="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>" data-free="<?php echo (int) $pql_free; ?>" data-unlock="<?php echo esc_url( cvc_paywall_url( 'pdf_learn', $url . '#hoc-bo-de' ) ); ?>">
 						<h2 id="pds-pv-h">Học trọn bộ đề miễn phí · <?php echo (int) $n_e; ?> đề · <?php echo (int) $n_q; ?> câu</h2>
 						<p class="pql-lead">Bấm chọn đáp án để biết đúng / sai ngay, kèm giải thích và căn cứ Điều – khoản. Không cần đăng nhập - tiến độ được lưu trên trình duyệt này.</p>
 						<?php if ( count( $exams ) > 1 ) : ?>
 							<div class="pql-tabs" role="tablist" aria-label="Chọn đề">
 								<?php foreach ( $exams as $k => $ex ) : ?>
-									<button type="button" role="tab" class="pql-tab<?php echo 0 === $k ? ' is-on' : ''; ?>" aria-selected="<?php echo 0 === $k ? 'true' : 'false'; ?>" data-n="<?php echo (int) ( $k + 1 ); ?>" data-exam="<?php echo esc_url( cvc_exam_url( (string) $ex['slug'] ) ); ?>">Đề <?php echo (int) ( $k + 1 ); ?> <small><?php echo (int) $ex['total_questions']; ?> câu</small></button>
+									<button type="button" role="tab" class="pql-tab<?php echo 0 === $k ? ' is-on' : ''; ?>" aria-selected="<?php echo 0 === $k ? 'true' : 'false'; ?>" data-n="<?php echo (int) ( $k + 1 ); ?>" data-exam="<?php echo esc_url( cvc_exam_url( (string) $ex['slug'] ) ); ?>"><?php if ( $k + 1 > $pql_free ) : ?><i class="fa-solid fa-lock pql-lk" aria-label="Cần gói"></i> <?php endif; ?>Đề <?php echo (int) ( $k + 1 ); ?> <small><?php echo (int) $ex['total_questions']; ?> câu</small></button>
 								<?php endforeach; ?>
 							</div>
 						<?php endif; ?>
