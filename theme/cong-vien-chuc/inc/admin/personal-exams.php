@@ -28,7 +28,7 @@ function cvc_admin_handle_personal_exams(): void {
 			cvc_admin_redirect( $back, 'error', 'Bạn không có quyền đổi cấu hình chung.' );
 			return;
 		}
-		$scope  = array_values( array_intersect( array( 'public_employee', 'civil_servant', 'other' ), array_map( 'sanitize_key', (array) wp_unslash( $_POST['scope'] ?? array() ) ) ) );
+		$scope  = array_values( array_intersect( array( 'public_employee', 'civil_servant', 'contract', 'armed_forces', 'other' ), array_map( 'sanitize_key', (array) wp_unslash( $_POST['scope'] ?? array() ) ) ) );
 		$budget = isset( $_POST['budget'] ) && '' !== $_POST['budget'] ? absint( $_POST['budget'] ) : null;
 		$body   = array( 'scope' => $scope, 'budget' => $budget );
 		foreach ( array( 'price_pack', 'price_pass' ) as $k ) {

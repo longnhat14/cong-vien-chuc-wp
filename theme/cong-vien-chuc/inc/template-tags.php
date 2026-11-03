@@ -435,7 +435,9 @@ function cvc_recruitment_type_label( ?string $type ): string {
 	$labels = array(
 		'civil_servant'   => 'Công chức',
 		'public_employee' => 'Viên chức',
-		'other'           => 'Khác',
+		'contract'        => 'Hợp đồng lao động',
+		'armed_forces'    => 'Lực lượng vũ trang',
+		'other'           => 'Doanh nghiệp / khác',
 	);
 
 	return $labels[ $type ] ?? (string) $type;

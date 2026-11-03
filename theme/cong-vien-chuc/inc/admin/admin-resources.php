@@ -78,13 +78,13 @@ function cvc_admin_resources(): array {
 			),
 			'filters'  => array(
 				'status'           => array( 'label' => 'Trạng thái', 'options' => array( 'draft' => 'Nháp', 'review' => 'Chờ duyệt', 'published' => 'Đã xuất bản', 'expired' => 'Hết hạn' ) ),
-				'recruitment_type' => array( 'label' => 'Loại', 'options' => array( 'civil_servant' => 'Công chức', 'public_employee' => 'Viên chức', 'other' => 'Khác' ) ),
+				'recruitment_type' => array( 'label' => 'Loại', 'options' => array( 'civil_servant' => 'Công chức', 'public_employee' => 'Viên chức', 'contract' => 'Hợp đồng lao động', 'armed_forces' => 'Lực lượng vũ trang', 'other' => 'Doanh nghiệp / khác' ) ),
 			),
 			'fields'   => array(
 				array( 'name' => 'title', 'label' => 'Tiêu đề', 'type' => 'text', 'required' => true, 'wide' => true ),
 				array( 'name' => 'slug', 'label' => 'Đường dẫn (slug)', 'type' => 'slug', 'from' => 'title', 'required' => true ),
 				array( 'name' => 'code', 'label' => 'Mã đợt tuyển', 'type' => 'text', 'required' => true ),
-				array( 'name' => 'recruitment_type', 'label' => 'Loại tuyển dụng', 'type' => 'select', 'required' => true, 'options' => array( 'civil_servant' => 'Công chức', 'public_employee' => 'Viên chức', 'other' => 'Khác' ) ),
+				array( 'name' => 'recruitment_type', 'label' => 'Loại tuyển dụng', 'type' => 'select', 'required' => true, 'options' => array( 'civil_servant' => 'Công chức', 'public_employee' => 'Viên chức', 'contract' => 'Hợp đồng lao động', 'armed_forces' => 'Lực lượng vũ trang', 'other' => 'Doanh nghiệp / khác' ) ),
 				array( 'name' => 'agency_id', 'label' => 'Cơ quan tuyển dụng', 'type' => 'relation', 'resource' => 'agencies', 'required' => true, 'help' => 'Tỉnh/thành bên dưới phải trùng với tỉnh của cơ quan (ghi trong ngoặc).' ),
 				array( 'name' => 'province_id', 'label' => 'Tỉnh/thành', 'type' => 'province', 'required' => true ),
 				array( 'name' => 'admin_unit_id', 'label' => 'Đơn vị hành chính', 'type' => 'admin_unit' ),

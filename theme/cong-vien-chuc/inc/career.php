@@ -45,7 +45,9 @@ function cvc_rec_presets(): array {
 	return array(
 		'cong-chuc' => array( 'path' => 'tuyen-dung-cong-chuc', 'legacy' => array( 'tuyen-cong-chuc' ), 'geo' => true, 'label' => 'Tin tuyển dụng công chức', 'chip' => 'Công chức', 'noun' => 'công chức', 'filter' => array( 'loai' => 'civil' ), 'api' => array( 'kind' => 'civil' ), 'rp' => array( 'type' => 'civil_servant' ), 'track' => 'cong-chuc', 'h1' => 'Tuyển dụng công chức', 'title' => 'Tuyển dụng công chức ' . $y . ': thông báo thi tuyển còn hạn', 'desc' => 'Thông báo tuyển dụng công chức còn hạn nộp hồ sơ từ nguồn chính thức các bộ, ngành, tỉnh, thành; kèm đề trắc nghiệm, văn bản cần ôn và hạn nộp.', 'lead' => 'Thông báo thi tuyển, xét tuyển công chức tại các bộ, ngành, tỉnh, thành phố còn hạn nộp hồ sơ, lấy từ nguồn chính thức. Mỗi tin kèm hạn nộp, đề trắc nghiệm để ôn và văn bản cần nắm.' ),
 		'vien-chuc' => array( 'path' => 'tuyen-dung-vien-chuc', 'legacy' => array( 'tuyen-vien-chuc' ), 'geo' => true, 'label' => 'Tin tuyển dụng viên chức', 'chip' => 'Viên chức', 'noun' => 'viên chức', 'filter' => array( 'loai' => 'public' ), 'api' => array( 'kind' => 'public' ), 'rp' => array( 'type' => 'public_employee' ), 'track' => 'vien-chuc', 'h1' => 'Tuyển dụng viên chức', 'title' => 'Tuyển dụng viên chức ' . $y . ': giáo viên, y tế, sự nghiệp công lập', 'desc' => 'Thông báo tuyển dụng viên chức còn hạn: giáo viên, bác sĩ, điều dưỡng, đơn vị sự nghiệp công lập; kèm đề trắc nghiệm riêng theo tin và văn bản cần ôn.', 'lead' => 'Thông báo tuyển dụng viên chức tại trường học, bệnh viện và đơn vị sự nghiệp công lập còn hạn nộp hồ sơ, lấy từ nguồn chính thức. Mỗi tin kèm hạn nộp, đề trắc nghiệm để ôn và văn bản cần nắm.' ),
-		'hop-dong'  => array( 'path' => 'tuyen-dung/hop-dong', 'label' => 'Tin tuyển hợp đồng', 'chip' => 'Hợp đồng', 'noun' => 'lao động hợp đồng', 'filter' => array( 'loai' => 'contract' ), 'api' => array( 'kind' => 'contract' ), 'rp' => array( 'type' => 'other' ), 'track' => '', 'h1' => 'Tuyển dụng lao động hợp đồng', 'title' => 'Tuyển dụng lao động hợp đồng trong cơ quan nhà nước ' . $y, 'desc' => 'Thông báo tuyển lao động hợp đồng tại cơ quan hành chính, đơn vị sự nghiệp công lập còn hạn nộp hồ sơ, cập nhật từ nguồn chính thức.', 'lead' => 'Thông báo tuyển lao động hợp đồng tại cơ quan hành chính và đơn vị sự nghiệp công lập còn hạn nộp hồ sơ, lấy từ nguồn chính thức.' ),
+		'hop-dong'  => array( 'path' => 'tuyen-dung/hop-dong', 'label' => 'Tin tuyển hợp đồng lao động', 'chip' => 'Hợp đồng lao động', 'noun' => 'hợp đồng lao động', 'filter' => array( 'loai' => 'contract' ), 'api' => array( 'kind' => 'contract' ), 'rp' => array( 'type' => 'contract' ), 'track' => '', 'h1' => 'Tuyển dụng hợp đồng lao động', 'title' => 'Tuyển dụng hợp đồng lao động, nhân viên hợp đồng ' . $y, 'desc' => 'Thông báo tuyển lao động hợp đồng tại cơ quan hành chính, đơn vị sự nghiệp công lập còn hạn nộp hồ sơ, cập nhật từ nguồn chính thức.', 'lead' => 'Thông báo tuyển lao động hợp đồng tại cơ quan hành chính và đơn vị sự nghiệp công lập còn hạn nộp hồ sơ, lấy từ nguồn chính thức.' ),
+		// 03/11/2026 (5 loại): công an, quân đội - chế độ tuyển dụng riêng (công nhân công an, quân nhân chuyên nghiệp, công nhân và viên chức quốc phòng).
+		'cong-an-quan-doi' => array( 'path' => 'tuyen-dung-cong-an-quan-doi', 'label' => 'Tin tuyển dụng công an, quân đội', 'chip' => 'Công an, quân đội', 'noun' => 'công an, quân đội', 'filter' => array( 'loai' => 'armed' ), 'api' => array( 'kind' => 'armed' ), 'rp' => array( 'type' => 'armed_forces' ), 'track' => '', 'h1' => 'Tuyển dụng công an, quân đội', 'title' => 'Tuyển dụng công an, quân đội ' . $y . ': công nhân công an, quân nhân chuyên nghiệp, hợp đồng', 'desc' => 'Thông báo tuyển dụng của công an, quân đội, biên phòng còn hạn: công nhân công an, quân nhân chuyên nghiệp, công nhân và viên chức quốc phòng, lao động hợp đồng; cập nhật từ nguồn chính thức.', 'lead' => 'Thông báo tuyển dụng của công an, quân đội và bộ đội biên phòng còn hạn nộp hồ sơ, lấy từ nguồn chính thức. Đây là chế độ tuyển dụng riêng, không phải thi tuyển công chức, viên chức.' ),
 		'giao-vien' => array( 'path' => 'tuyen-giao-vien', 'label' => 'Tin tuyển giáo viên', 'chip' => 'Giáo viên', 'noun' => 'giáo viên', 'filter' => array( 'nhom' => 'education' ), 'api' => array( 'job_family' => 'education' ), 'rp' => array( 'family' => 'education' ), 'track' => 'giao-vien', 'h1' => 'Tuyển dụng giáo viên', 'title' => 'Tuyển dụng giáo viên ' . $y . ': mầm non, tiểu học, THCS, THPT', 'desc' => 'Thông báo tuyển dụng giáo viên mầm non, tiểu học, THCS, THPT, giảng viên còn hạn; kèm đề trắc nghiệm theo vị trí và văn bản ngành giáo dục cần ôn.', 'lead' => 'Thông báo tuyển dụng giáo viên mầm non, tiểu học, THCS, THPT và giảng viên còn hạn nộp hồ sơ, lấy từ nguồn chính thức. Mỗi tin kèm hạn nộp, đề trắc nghiệm theo cấp học và văn bản ngành giáo dục.' ),
 		'y-te'      => array( 'path' => 'tuyen-dung-y-te', 'label' => 'Tin tuyển ngành y tế', 'chip' => 'Y tế', 'noun' => 'ngành y tế', 'filter' => array( 'nhom' => 'health' ), 'api' => array( 'job_family' => 'health' ), 'rp' => array( 'family' => 'health' ), 'track' => 'y-te', 'h1' => 'Tuyển dụng ngành y tế', 'title' => 'Tuyển dụng ngành y tế ' . $y . ': bác sĩ, điều dưỡng, hộ sinh, dược', 'desc' => 'Thông báo tuyển dụng bác sĩ, điều dưỡng, hộ sinh, kỹ thuật y, dược tại bệnh viện, trung tâm y tế công lập còn hạn; kèm đề ôn theo luật ngành y.', 'lead' => 'Thông báo tuyển dụng bác sĩ, điều dưỡng, hộ sinh, kỹ thuật y, dược tại bệnh viện và trung tâm y tế công lập còn hạn nộp hồ sơ, lấy từ nguồn chính thức.' ),
 	);
@@ -457,7 +459,9 @@ function cvc_ci_kinds(): array {
 	return array(
 		'civil'    => 'Tuyển dụng công chức',
 		'public'   => 'Tuyển dụng viên chức',
-		'contract' => 'Hợp đồng / khác',
+		'contract' => 'Hợp đồng lao động',
+		'armed'    => 'Công an, quân đội',
+		'other'    => 'Doanh nghiệp / khác',
 	);
 }
 
@@ -483,7 +487,7 @@ function cvc_ci_url( array $args = array(), int $page = 1 ): string {
  * @return array<string, mixed>
  */
 function cvc_ci_filters_from_request( array $src ): array {
-	$kinds_legacy = array( 'civil_servant' => 'civil', 'public_employee' => 'public', 'contract_admin' => 'contract', 'contract_public_unit' => 'contract' );
+	$kinds_legacy = array( 'civil_servant' => 'civil', 'public_employee' => 'public', 'contract_admin' => 'contract', 'contract_public_unit' => 'contract', 'armed_forces' => 'armed' );
 	$kind_raw     = isset( $src['loai'] ) ? (string) wp_unslash( $src['loai'] ) : '';
 	$kinds        = array();
 	foreach ( array_filter( array_map( 'sanitize_key', explode( ',', $kind_raw ) ) ) as $k ) {
@@ -987,7 +991,7 @@ function cvc_ci_render_goal_form( ?array $me, bool $logged_in, array $provinces 
 					<label class="ci-label" for="ci-goal-type">Loại tuyển dụng</label>
 					<select id="ci-goal-type" name="employment_type" class="ci-field">
 						<option value="">Chưa chọn</option>
-						<?php foreach ( array( 'civil' => 'Công chức', 'public' => 'Viên chức', 'contract' => 'Hợp đồng / khác' ) as $k => $lbl ) : ?><option value="<?php echo esc_attr( $k ); ?>"<?php selected( (string) ( $g['employment_type'] ?? '' ), $k ); ?>><?php echo esc_html( $lbl ); ?></option><?php endforeach; ?>
+						<?php foreach ( array( 'civil' => 'Công chức', 'public' => 'Viên chức', 'contract' => 'Hợp đồng lao động', 'armed' => 'Công an, quân đội', 'other' => 'Doanh nghiệp / khác' ) as $k => $lbl ) : ?><option value="<?php echo esc_attr( $k ); ?>"<?php selected( (string) ( $g['employment_type'] ?? '' ), $k ); ?>><?php echo esc_html( $lbl ); ?></option><?php endforeach; ?>
 					</select>
 					<label class="ci-label" for="ci-goal-province">Địa phương</label>
 					<select id="ci-goal-province" name="province_id" class="ci-field">

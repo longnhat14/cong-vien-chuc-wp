@@ -274,7 +274,7 @@ function cvc_admin_render_ingestion_index(): void {
 	// 03/11/2026: tin đã đăng / nháp chưa đủ căn cứ loại tuyển dụng (công chức / viên chức / hợp đồng) - quản trị chọn loại.
 	$tc_res  = cvc_admin_api_get( '/api/admin/ingestion/type-checks' );
 	$tc_rows = $tc_res['ok'] ? (array) ( $tc_res['data']['data'] ?? array() ) : array();
-	$tc_lbl  = array( 'civil_servant' => 'Công chức', 'public_employee' => 'Viên chức', 'other' => 'Hợp đồng / khác' );
+	$tc_lbl  = array( 'civil_servant' => 'Công chức', 'public_employee' => 'Viên chức', 'contract' => 'Hợp đồng lao động', 'armed_forces' => 'Lực lượng vũ trang', 'other' => 'Doanh nghiệp / khác' );
 	?>
 	<?php if ( $tc_rows ) : ?>
 		<details class="dz-card border border-amber-200 bg-amber-50" id="can-kiem-tra-loai" open>
@@ -536,7 +536,7 @@ function cvc_admin_render_ingestion_detail( int $id ): void {
 						<?php echo esc_html( count( (array) ( $ready['positions'] ?? array() ) ) . ' vị trí' ); ?>
 					</p>
 					<?php if ( ! empty( $ready['type_evidence'] ) ) : ?>
-						<?php $tev = (array) $ready['type_evidence']; $tl = array( 'civil_servant' => 'Công chức', 'public_employee' => 'Viên chức', 'other' => 'Hợp đồng / khác' ); ?>
+						<?php $tev = (array) $ready['type_evidence']; $tl = array( 'civil_servant' => 'Công chức', 'public_employee' => 'Viên chức', 'contract' => 'Hợp đồng lao động', 'armed_forces' => 'Lực lượng vũ trang', 'other' => 'Doanh nghiệp / khác' ); ?>
 						<p class="text-xs mt-1 <?php echo null === ( $tev['type'] ?? null ) ? 'text-amber-800 font-bold' : 'text-ink-muted'; ?>">Loại tuyển dụng: <?php echo esc_html( null === ( $tev['type'] ?? null ) ? 'Cần kiểm tra' : ( $tl[ (string) $tev['type'] ] ?? (string) $tev['type'] ) ); ?> — <?php echo esc_html( (string) ( $tev['note'] ?? '' ) ); ?></p>
 					<?php endif; ?>
 					<?php if ( ! empty( $ready['auto_gate_failures'] ) ) : ?>
@@ -598,7 +598,7 @@ function cvc_admin_render_ingestion_detail( int $id ): void {
 				</label>
 				<label class="text-sm"><span class="font-bold text-ink-2">Loại</span>
 					<select name="recruitment_type" class="text-ink border-slate-400 bg-white <?php echo esc_attr( $input ); ?> text-ink border-slate-400 bg-white"<?php echo $dis; // phpcs:ignore ?>>
-						<?php foreach ( array( '' => '— Chưa rõ —', 'civil_servant' => 'Công chức', 'public_employee' => 'Viên chức', 'other' => 'Khác' ) as $k => $v ) : ?>
+						<?php foreach ( array( '' => '— Chưa rõ —', 'civil_servant' => 'Công chức', 'public_employee' => 'Viên chức', 'contract' => 'Hợp đồng lao động', 'armed_forces' => 'Lực lượng vũ trang', 'other' => 'Doanh nghiệp / khác' ) as $k => $v ) : ?>
 							<option value="<?php echo esc_attr( $k ); ?>" <?php selected( (string) ( $r['recruitment_type'] ?? '' ), $k ); ?>><?php echo esc_html( $v ); ?></option>
 						<?php endforeach; ?>
 					</select>

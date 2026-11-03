@@ -26,7 +26,7 @@ $st    = array(
 	'off'        => array( 'Tắt', 'bg-slate-100 text-slate-600 border-slate-300' ),
 	'planned'    => array( 'Chờ chạy', 'bg-slate-100 text-slate-700 border-slate-300' ),
 );
-$tracks = array( 'public_employee' => 'Viên chức', 'civil_servant' => 'Công chức', 'other' => 'Hợp đồng / khác' );
+$tracks = array( 'public_employee' => 'Viên chức', 'civil_servant' => 'Công chức', 'contract' => 'Hợp đồng lao động', 'armed_forces' => 'Lực lượng vũ trang', 'other' => 'Doanh nghiệp / khác' );
 ?>
 <section class="dz-card space-y-4" id="de-ca-nhan-hoa" aria-labelledby="cvc-pe-h">
 	<div class="flex flex-wrap items-start justify-between gap-3">

@@ -180,7 +180,7 @@ function cvc_admin_render_import_detail( int $id ): void {
 				$rows = array(
 					'Cơ quan'      => $draft['agency_name'] ?? null,
 					'Tỉnh/thành'   => $draft['province_name'] ?? null,
-					'Loại tin'     => array( 'public_employee' => 'Viên chức', 'civil_servant' => 'Công chức', 'other' => 'Khác' )[ (string) ( $draft['recruitment_type'] ?? '' ) ] ?? ( $draft['recruitment_type'] ?? null ),
+					'Loại tin'     => array( 'civil_servant' => 'Công chức', 'public_employee' => 'Viên chức', 'contract' => 'Hợp đồng lao động', 'armed_forces' => 'Lực lượng vũ trang', 'other' => 'Doanh nghiệp / khác' )[ (string) ( $draft['recruitment_type'] ?? '' ) ] ?? ( $draft['recruitment_type'] ?? null ),
 					'Nhận hồ sơ'   => trim( ( $draft['application_start_date'] ?? '' ) . ' → ' . ( $draft['application_deadline'] ?? '' ), ' →' ),
 					'Tổng chỉ tiêu' => isset( $draft['total_positions'] ) ? (string) $draft['total_positions'] : null,
 					'Độ tin cậy AI' => isset( $draft['confidence'] ) ? round( (float) $draft['confidence'] * 100 ) . '%' : null,
