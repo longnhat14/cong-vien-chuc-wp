@@ -17,6 +17,7 @@
   var Q = D.questions || [];
   var TOTAL = Q.length;
   var PRACTICE = D.mode === 'practice';
+  var V2 = !!D.v2; // 03/11/2026: giao diện làm bài v2 (exam-smart-v2.css)
   var $ = function (s) { return root.querySelector(s) || document.querySelector(s); };
   var $$ = function (s) { return Array.prototype.slice.call(root.querySelectorAll(s)); };
   var noteKey = 'cvc-sx-notes-' + D.attempt_id;
@@ -166,6 +167,7 @@
     q.selected = key;
     if (PRACTICE) { q.feedback = localFeedback(q, opt.id) || null; }
     render();
+    if (V2) v2Pop(q);
     stageToast();
     queue('a' + q.id, { qid: q.id, opt: opt.id, key: key });
     if (PRACTICE && isMob()) {
@@ -182,7 +184,63 @@
     var right = Q.filter(function (q) { return q.feedback && q.feedback.is_correct; }).length;
     return { done: done, right: right, stages: Math.ceil(TOTAL / 10), stage: Math.floor(done / 10) };
   }
+  /* 03/11/2026 (v2): hiệu ứng khi chọn + rung nhẹ trên điện thoại; màn "Hoàn thành chặng". */
+  function v2Pop(q) {
+    var b = root.querySelector('#sx-answers .sx-answer.sel') || root.querySelector('#sx-answers .sx-answer.wrong');
+    var fb = PRACTICE && q.feedback ? q.feedback.is_correct : null;
+    if (b) { b.classList.add(fb === false ? 'is-shake' : 'is-pop'); }
+    var r = root.querySelector('#sx-answers .sx-answer.right'); if (r && fb !== null) r.classList.add('is-glow');
+    try { if (navigator.vibrate && isMob()) navigator.vibrate(fb === false ? [40, 40, 40] : 18); } catch (e) {}
+  }
+  function v2Segs() {
+    var el = document.getElementById('sx-segs'); if (!el) return;
+    if (el.children.length !== TOTAL) { el.innerHTML = ''; for (var k = 0; k < TOTAL; k++) el.appendChild(document.createElement('li')); }
+    Q.forEach(function (q, i) {
+      var v = verdictOf(q), c = '';
+      if (v === true) c = 'right'; else if (v === false) c = 'wrong'; else if (q.selected) c = 'done';
+      if (i === current) c += ' now';
+      el.children[i].className = c;
+    });
+  }
+  function v2Confetti() {
+    var c = document.getElementById('sx-confetti'); if (!c) return;
+    c.innerHTML = ''; var cols = ['#e66a24', '#23845a', '#245b86', '#f2a34d', '#d94350'];
+    for (var k = 0; k < 36; k++) { var i = document.createElement('i'); i.style.left = (Math.random() * 100) + '%'; i.style.background = cols[k % cols.length]; i.style.animationDelay = (Math.random() * .5) + 's'; i.style.transform = 'rotate(' + (Math.random() * 360) + 'deg)'; c.appendChild(i); }
+    c.classList.add('show'); setTimeout(function () { c.classList.remove('show'); c.innerHTML = ''; }, 2600);
+  }
+  function v2Done(s, finished) {
+    var dlg = document.getElementById('sx-doneDialog'); if (!dlg) return false;
+    var span = finished ? TOTAL : 10, from = finished ? 0 : s.done - 10;
+    var part = Q.slice(finished && TOTAL > 10 ? TOTAL - (TOTAL % 10 || 10) : from, finished ? TOTAL : s.done);
+    var ok = part.filter(function (q) { return q.feedback && q.feedback.is_correct; }).length, n = part.length || span;
+    var all = Q.filter(function (q) { return q.feedback && q.feedback.is_correct; }).length;
+    document.getElementById('sx-doneScore').textContent = (finished ? all + '/' + TOTAL : ok + '/' + n);
+    document.getElementById('sx-doneRing').style.setProperty('--p', Math.round((finished ? all / TOTAL : ok / n) * 100));
+    document.getElementById('sx-doneTitle').textContent = finished ? 'Hoàn thành bài luyện!' : 'Xong chặng ' + s.stage + '/' + s.stages + '!';
+    var good = (finished ? all / TOTAL : ok / n) >= 0.7;
+    document.getElementById('sx-doneText').textContent = finished
+      ? (good ? 'Rất tốt! ' : 'Câu sai đã vào Sổ câu sai và sẽ quay lại đúng hạn. ') + 'Nộp bài để lưu kết quả, tính ngày ôn và xem phân tích.'
+      : (good ? 'Đang rất tốt! ' : 'Cố lên - ') + 'bài đã tự lưu. Nghỉ được, lần sau làm tiếp chặng ' + (s.stage + 1) + '.';
+    var act = document.getElementById('sx-doneActions'); act.innerHTML = '';
+    var mk = function (t, cls, fn) { var b = document.createElement('button'); b.type = 'button'; b.className = 'sx-btn ' + cls; b.textContent = t; b.onclick = fn; act.appendChild(b); return b; };
+    var close = function () { dlg.classList.remove('show'); };
+    if (finished) {
+      mk('Xem lại từng câu', '', close);
+      mk('Nộp bài & xem kết quả', 'sx-primary', function () { close(); submit(false); }).focus();
+    } else {
+      mk('Nghỉ - lưu bài', '', function () { flush(); location.href = D.exam_url || D.home_url; });
+      mk('Làm tiếp chặng ' + (s.stage + 1) + ' →', 'sx-primary', function () { close(); if (current < TOTAL - 1) go(current + 1); }).focus();
+    }
+    dlg.classList.add('show');
+    if (good) v2Confetti();
+    return true;
+  }
   function stageToast() {
+    if (V2 && PRACTICE && !submitted) {
+      var s2 = stageInfo();
+      if (s2.done === TOTAL && TOTAL > 0) { setTimeout(function () { v2Done(s2, true); }, 900); return; }
+      if (TOTAL > 10 && s2.done > 0 && s2.done % 10 === 0) { setTimeout(function () { v2Done(s2, false); }, 900); return; }
+    }
     if (!PRACTICE || TOTAL <= 10) return;
     var s = stageInfo();
     if (s.done > 0 && s.done % 10 === 0 && s.done < TOTAL) {
@@ -336,6 +394,7 @@
     if (PRACTICE) $('#sx-clear').title = 'Chế độ ôn tập: câu đã chọn không đổi được';
     $('#sx-flagBtn').textContent = q.flagged ? '⚑ Bỏ đánh dấu' : '⚑ Đánh dấu';
     grid($('#sx-grid')); grid($('#sx-largeGrid'), true);
+    if (V2) v2Segs();
     if (mode === 'list') list();
     var n = count(), pct = TOTAL ? Math.round(n / TOTAL * 100) : 0;
     $('#sx-answered').textContent = n; $('#sx-sideAnswered').textContent = n;

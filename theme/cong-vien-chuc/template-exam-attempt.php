@@ -245,6 +245,11 @@ $smart_payload = array(
 	'submitted_by'  => $submitted_by,
 	'result_url' => $real_attempt_id > 0 ? cvc_exam_result_url( (int) $real_attempt_id ) : '',
 	'timer'      => array( 'mode' => $timer_mode, 'seconds' => (int) $timer_seconds, 'duration' => $exam_duration * 60 ),
+	// 03/11/2026: giao diện v2 + liên kết "Luyện nhanh 10 câu tiếp" (màn Hoàn thành chặng).
+	'v2'         => function_exists( 'cvc_exam_ui_v2_active' ) && cvc_exam_ui_v2_active(),
+	'quick'      => ! empty( $attempt_data['is_quick'] ),
+	'next_quick_url' => ! empty( $exam_info['slug'] ) ? add_query_arg( 'che-do', 'on-tap-nhanh', cvc_exam_url( (string) $exam_info['slug'] ) ) : '',
+	'exam_url'   => ! empty( $exam_info['slug'] ) ? cvc_exam_url( (string) $exam_info['slug'] ) : cvc_exams_url(),
 	'exam'       => array(
 		'title'         => $exam_title,
 		'code'          => $exam_code,
@@ -262,7 +267,8 @@ $smart_payload = array(
 	'questions'  => $smart_questions,
 );
 
-add_filter( 'body_class', static fn ( $c ) => array_merge( $c, array( 'cvc-exam-legal' ) ) );
+$sx_v2 = ! empty( $smart_payload['v2'] );
+add_filter( 'body_class', static fn ( $c ) => array_merge( $c, array( 'cvc-exam-legal' ), $sx_v2 ? array( 'sx-v2' ) : array() ) );
 cvc_seo_set_title( 'Làm bài: ' . $exam_title );
 cvc_seo_set_noindex();
 
@@ -271,6 +277,7 @@ $total_q = count( $smart_questions );
 $doc_icon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v5h4M9 12h7M9 16h7"/></svg>';
 ?>
 <link rel="stylesheet" href="<?php echo esc_url( get_template_directory_uri() . '/assets/css/exam-smart.css?ver=' . (string) filemtime( get_theme_file_path( '/assets/css/exam-smart.css' ) ) ); ?>">
+<?php if ( $sx_v2 ) : ?><link rel="stylesheet" href="<?php echo esc_url( get_template_directory_uri() . '/assets/css/exam-smart-v2.css?ver=' . (string) filemtime( get_theme_file_path( '/assets/css/exam-smart-v2.css' ) ) ); ?>"><?php endif; ?>
 
 <div class="cvc-smart-exam" id="cvc-smart-exam" data-total="<?php echo (int) $total_q; ?>">
 
@@ -343,6 +350,7 @@ $doc_icon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H
 						<label class="sx-check"><input id="sx-flag" type="checkbox"> Đánh dấu xem lại</label>
 					</div>
 				</div>
+				<?php if ( $sx_v2 && $total_q <= 20 ) : ?><ol class="sx-segs" id="sx-segs" aria-hidden="true"></ol><?php endif; ?>
 				<h2 class="sx-qtext" id="sx-qtext"></h2>
 				<p class="sx-hintline" id="sx-hintline"><?php echo $is_practice ? 'Chọn một đáp án - đáp án đúng, giải thích và căn cứ pháp luật hiện ngay (câu đã chọn không đổi được).' : 'Chọn một đáp án đúng nhất.'; ?></p>
 				<div class="sx-answers" id="sx-answers"></div>
@@ -520,6 +528,15 @@ $doc_icon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H
 	<div class="sx-overlay" id="sx-submitDialog"><div class="sx-dialog sx-review" role="dialog" aria-modal="true" aria-labelledby="sx-submitTitle"><h2 id="sx-submitTitle">Rà soát trước khi nộp</h2><div id="sx-reviewBody"></div><p id="sx-submitMessage"></p><div class="sx-dialogactions"><button type="button" class="sx-btn" id="sx-cancel">Quay lại làm tiếp</button><button type="button" class="sx-btn sx-danger" id="sx-confirm">Nộp bài</button></div></div></div>
 	<div class="sx-overlay" id="sx-resultDialog"><div class="sx-dialog" role="dialog" aria-labelledby="sx-resultTitle"><h2 id="sx-resultTitle">Kết quả bài thi</h2><div id="sx-resultBody"></div><div class="sx-dialogactions"><button type="button" class="sx-btn" id="sx-closeResult">Xem lại bài làm</button><button type="button" class="sx-btn sx-primary" id="sx-showAnalysis">Xem phân tích</button></div></div></div>
 	<div class="sx-toast" id="sx-toast" role="status" aria-live="polite"></div>
+	<?php if ( $sx_v2 ) : ?>
+	<div class="sx-overlay sx-done" id="sx-doneDialog"><div class="sx-dialog" role="dialog" aria-modal="true" aria-labelledby="sx-doneTitle">
+		<div class="sx-done-ring" id="sx-doneRing"><b id="sx-doneScore">0/10</b><small>câu đúng</small></div>
+		<h2 id="sx-doneTitle">Hoàn thành chặng!</h2>
+		<p id="sx-doneText"></p>
+		<div class="sx-dialogactions" id="sx-doneActions"></div>
+	</div></div>
+	<div class="sx-confetti" id="sx-confetti" aria-hidden="true"></div>
+	<?php endif; ?>
 
 	<nav class="sx-mnav" id="sx-mnav" aria-label="Chuyển câu">
 		<button type="button" class="sx-btn" id="sx-mPrev">‹ Trước</button>

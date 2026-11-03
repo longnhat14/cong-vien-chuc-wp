@@ -1,0 +1,125 @@
+/*
+ * Trang làm bài - giao diện v2 (03/11/2026). Chỉ áp khi body có lớp .sx-v2 (xem cvc_exam_ui_v2_active()).
+ * Ôn tập: thân thiện, phản hồi ngay; Thi thật: gọn như phòng thi trên máy (không tô đúng/sai đến khi nộp - logic cũ).
+ * Câu hỏi giữ chữ có chân (văn bản), nút / đáp án / nhãn dùng chữ không chân. Màu cam #e66a24 + navy #173653.
+ */
+body.sx-v2{background:#f6f7f9!important}
+body.sx-v2 .cvc-smart-exam{--v-orange:#e66a24;--v-orange-dk:#c65316;--v-orange-soft:#fff4eb;--v-navy:#173653;--v-blue:#245b86;--v-green:#23845a;--v-green-soft:#ecf8f0;--v-red:#d0393f;--v-red-soft:#fdeeee;--v-line:#e3e7ec;--v-muted:#5b6878;--v-shadow:0 2px 10px rgba(23,54,83,.06);background:#f6f7f9}
+/* Dùng #id để thắng quy tắc chữ Times toàn site (cvc-doc.css, nhiều :not() nên độ ưu tiên cao). */
+body.sx-v2 #cvc-smart-exam,body.sx-v2 #cvc-smart-exam *:not(svg):not(svg *):not(.sx-qtext):not(.sx-explain):not(.sx-explain *):not(.sx-citation):not(.sx-citation *):not(.sx-mini h3),
+body.sx-v2 #cvc-smart-exam button,body.sx-v2 #cvc-smart-exam input,body.sx-v2 #cvc-smart-exam textarea,body.sx-v2 #cvc-smart-exam select{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif!important}
+
+/* Khung chung */
+body.sx-v2 .sx-toolbar{background:#fff;border-bottom:1px solid var(--v-line)}
+body.sx-v2 .sx-panel{border:1px solid var(--v-line);border-radius:14px;box-shadow:var(--v-shadow)}
+body.sx-v2 .sx-btn,body.sx-v2 .sx-mode{border:1px solid #d5dae1;border-radius:10px;padding:9px 14px;font-weight:600;transition:background .15s,border-color .15s,transform .1s}
+@media (hover:hover){body.sx-v2 .sx-btn:hover,body.sx-v2 .sx-mode:hover{border-color:var(--v-orange);background:#fffaf6}}
+body.sx-v2 .sx-btn:active{transform:scale(.97)}
+body.sx-v2 .sx-primary{background:var(--v-navy);border-color:var(--v-navy);color:#fff!important}
+body.sx-v2 .sx-primary:hover{background:#0f2840;border-color:#0f2840}
+body.sx-v2 .sx-mode.active{background:var(--v-orange-soft);border-color:#f5c9ad;color:var(--v-orange-dk)}
+body.sx-v2 .sx-modebadge{border-radius:20px;padding:2px 11px;font-size:12.5px}
+body.sx-v2 .sx-qbadge{border:0;border-radius:20px;background:var(--v-orange-soft);color:var(--v-orange-dk);padding:5px 13px;font-size:15px}
+
+/* Máy tính: ẩn cột trái, câu hỏi rộng ở giữa */
+@media (min-width:761px){
+	body.sx-v2 .sx-page{grid-template-columns:minmax(0,1fr) minmax(300px,360px);max-width:1240px}
+	body.sx-v2 .sx-left{display:none}
+	body.sx-v2 .sx-mainpanel{padding:4px}
+}
+
+/* Thanh 10 vạch */
+body.sx-v2 .sx-segs{list-style:none;display:flex;gap:5px;margin:16px 4px 4px;padding:0}
+body.sx-v2 .sx-segs li{flex:1;height:7px;border-radius:6px;background:#e5e8ec;transition:background .25s}
+body.sx-v2 .sx-segs li.done{background:#9fb4c9}
+body.sx-v2 .sx-segs li.right{background:var(--v-green)}
+body.sx-v2 .sx-segs li.wrong{background:var(--v-red)}
+body.sx-v2 .sx-segs li.now{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--v-orange)}
+
+/* Câu hỏi */
+body.sx-v2 .sx-qtext{font-size:clamp(20px,1.6vw,24px);line-height:1.45;color:#18202c}
+body.sx-v2 .sx-hintline{color:var(--v-muted);font-size:14px}
+
+/* Thẻ đáp án */
+body.sx-v2 .sx-answers{gap:10px}
+body.sx-v2 .sx-answer{min-height:58px;padding:12px 14px;gap:14px;border:1.5px solid var(--v-line);border-radius:14px;background:#fff;box-shadow:0 1px 3px rgba(23,54,83,.05);font-size:17px;transition:border-color .15s,background .15s,box-shadow .15s,transform .12s}
+@media (hover:hover){body.sx-v2 .sx-answer:hover{border-color:#f0a477;background:#fffaf6;box-shadow:0 3px 10px rgba(230,106,36,.10)}}
+body.sx-v2 .sx-answer:active{transform:scale(.985)}
+body.sx-v2 .sx-letter{width:38px;height:38px;min-width:38px;border:1.5px solid #cfd6de;border-radius:50%;background:#f3f5f8;color:#3b4856;font-size:16px;transition:background .15s,color .15s,border-color .15s;position:relative}
+@media (hover:hover){body.sx-v2 .sx-answer:hover .sx-letter{border-color:#f0a477;color:var(--v-orange-dk)}}
+body.sx-v2 .sx-radio{display:none}
+body.sx-v2 .sx-answer.sel{border:2px solid var(--v-orange);background:var(--v-orange-soft);padding:11.5px 13.5px}
+body.sx-v2 .sx-answer.sel .sx-letter{background:var(--v-orange);border-color:var(--v-orange);color:#fff}
+body.sx-v2 .sx-answer.right{border:2px solid var(--v-green);background:var(--v-green-soft)}
+body.sx-v2 .sx-answer.wrong{border:2px solid var(--v-red);background:var(--v-red-soft)}
+body.sx-v2 .sx-answer.right .sx-letter,body.sx-v2 .sx-answer.wrong .sx-letter{color:transparent}
+body.sx-v2 .sx-answer.right .sx-letter{background:var(--v-green);border-color:var(--v-green)}
+body.sx-v2 .sx-answer.wrong .sx-letter{background:var(--v-red);border-color:var(--v-red)}
+body.sx-v2 .sx-answer.right .sx-letter::after,body.sx-v2 .sx-answer.wrong .sx-letter::after{position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-size:19px;font-weight:700}
+body.sx-v2 .sx-answer.right .sx-letter::after{content:"✓"}
+body.sx-v2 .sx-answer.wrong .sx-letter::after{content:"✕"}
+body.sx-v2 .sx-answer .sx-tag{margin-left:auto;border-radius:20px;padding:3px 10px;font-size:12.5px;font-weight:700}
+body.sx-v2 .sx-answer.right .sx-tag{background:#fff;color:#1d6f48;border:1px solid #a9dcbc}
+body.sx-v2 .sx-answer.wrong .sx-tag{background:#fff;color:#b02a30;border:1px solid #f1b0b3}
+body.sx-v2 .sx-answer.is-pop{animation:sxPop .28s ease-out}
+body.sx-v2 .sx-answer.is-shake{animation:sxShake .35s ease-in-out}
+body.sx-v2 .sx-answer.is-glow{animation:sxGlow 1s ease-out}
+@keyframes sxPop{0%{transform:scale(.97)}60%{transform:scale(1.015)}100%{transform:scale(1)}}
+@keyframes sxShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+@keyframes sxGlow{0%{box-shadow:0 0 0 0 rgba(35,132,90,.45)}100%{box-shadow:0 0 0 12px rgba(35,132,90,0)}}
+
+/* Phản hồi sau mỗi câu (Ôn tập) */
+body.sx-v2 .sx-feedback{border:1px solid var(--v-line);border-left-width:5px;border-radius:14px;background:#fff;box-shadow:var(--v-shadow);padding:14px 16px;animation:sxUp .25s ease-out}
+body.sx-v2 .sx-feedback.ok{border-left-color:var(--v-green);background:linear-gradient(105deg,#f3fbf6,#fff 60%)}
+body.sx-v2 .sx-feedback.no{border-left-color:var(--v-red);background:linear-gradient(105deg,#fff5f5,#fff 60%)}
+body.sx-v2 .sx-feedback h3{font-size:19px}
+body.sx-v2 .sx-feedback.ok h3{color:#1d6f48}
+body.sx-v2 .sx-feedback.no h3{color:#b02a30}
+body.sx-v2 .sx-fbnext{background:var(--v-orange)!important;border-color:var(--v-orange)!important}
+body.sx-v2 .sx-fbnext:hover{background:var(--v-orange-dk)!important}
+body.sx-v2 .sx-citation{border-radius:10px}
+@keyframes sxUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* Bản đồ câu: ô bo tròn, màu nhạt */
+body.sx-v2 .sx-grid{gap:6px}
+body.sx-v2 .sx-num{border:1px solid #d5dae1;border-radius:9px;background:#fff;color:#3b4856;font-weight:600}
+body.sx-v2 .sx-num.done{background:#e3ecf5;border-color:#b9cde0;color:var(--v-navy)}
+body.sx-v2 .sx-num.right{background:#dff3e7;border-color:#9fd5b5;color:#1d6f48}
+body.sx-v2 .sx-num.wrong{background:#fde4e4;border-color:#f1a9ad;color:#b02a30}
+body.sx-v2 .sx-num.now{background:var(--v-orange-soft);border:2px solid var(--v-orange);color:var(--v-orange-dk)}
+
+/* Hộp thoại */
+body.sx-v2 .sx-overlay{background:rgba(15,30,45,.45);backdrop-filter:blur(2px)}
+body.sx-v2 .sx-dialog{border:0;border-radius:18px;box-shadow:0 20px 50px rgba(15,30,45,.25)}
+body.sx-v2 .sx-dialog h2{text-transform:none}
+body.sx-v2 .sx-danger{border-radius:10px}
+
+/* Hoàn thành chặng */
+body.sx-v2 .sx-done .sx-dialog{text-align:center;width:min(420px,100%);padding:26px 22px;animation:sxUp .25s ease-out}
+body.sx-v2 .sx-done-ring{--p:0;width:118px;height:118px;margin:0 auto 10px;border-radius:50%;display:grid;place-content:center;background:radial-gradient(closest-side,#fff 78%,transparent 79% 100%),conic-gradient(var(--v-green) calc(var(--p) * 1%),#e5e8ec 0)}
+body.sx-v2 .sx-done-ring b{font-size:28px;color:#18202c;line-height:1}
+body.sx-v2 .sx-done-ring small{font-size:12.5px;color:var(--v-muted)}
+body.sx-v2 .sx-done h2{font-size:22px;color:var(--v-navy)}
+body.sx-v2 .sx-done p{color:#475467}
+body.sx-v2 .sx-done .sx-dialogactions{justify-content:center}
+body.sx-v2 .sx-done .sx-primary{background:var(--v-orange);border-color:var(--v-orange)}
+body.sx-v2 .sx-done .sx-primary:hover{background:var(--v-orange-dk)}
+body.sx-v2 .sx-confetti{position:fixed;inset:0;pointer-events:none;z-index:90;overflow:hidden;display:none}
+body.sx-v2 .sx-confetti.show{display:block}
+body.sx-v2 .sx-confetti i{position:absolute;top:-12px;width:9px;height:14px;border-radius:2px;animation:sxFall 2.2s ease-in forwards}
+@keyframes sxFall{to{top:105%;transform:translateX(30px) rotate(540deg)}}
+
+/* Điện thoại */
+body.sx-v2.sx-mob .sx-mbar{background:#fff;border-bottom:1px solid var(--v-line)}
+body.sx-v2.sx-mob .sx-mnav{background:#fff;border-top:1px solid var(--v-line);box-shadow:0 -4px 14px rgba(23,54,83,.06)}
+body.sx-v2.sx-mob .sx-mnav .sx-btn{border-radius:12px;min-height:48px}
+body.sx-v2.sx-mob .sx-mnav .sx-primary{background:var(--v-orange);border-color:var(--v-orange)}
+body.sx-v2.sx-mob .sx-answer{font-size:16.5px}
+/* Điện thoại: biểu tượng ✓/✕ trong vòng tròn đã đủ rõ - ẩn nhãn chữ để đáp án không bị ép hẹp (vẫn đọc được bằng trình đọc màn hình). */
+body.sx-v2.sx-mob .sx-answer .sx-tag{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;padding:0;border:0}
+body.sx-v2.sx-mob .sx-segs{margin-top:10px}
+
+@media (prefers-reduced-motion:reduce){
+	body.sx-v2 .sx-answer,body.sx-v2 .sx-feedback,body.sx-v2 .sx-done .sx-dialog{animation:none!important;transition:none!important}
+	body.sx-v2 .sx-confetti{display:none!important}
+}

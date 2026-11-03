@@ -388,3 +388,29 @@ function cvc_study_ajax(): void {
 	}
 	wp_send_json_success( array( 'message' => (string) ( $res['data']['message'] ?? 'Đã lưu.' ), 'data' => $res['data']['data'] ?? null ) );
 }
+
+/**
+ * Giao diện làm bài v2 (03/11/2026, anh Nhật duyệt đề xuất "bo góc, hiệu ứng khi chọn đáp án"): thẻ đáp án bo tròn,
+ * chữ cái tròn có ✓/✕, hiệu ứng chọn, thanh 10 vạch, màn "Hoàn thành chặng". Xem trước: ?giao-dien=moi (ghi nhớ bằng
+ * cookie cvc_exam_ui 7 ngày vì lượt làm bài mở qua chuyển hướng); ?giao-dien=cu để quay lại. Bật cho mọi người:
+ * tùy chọn cvc_exam_ui_v2 = 1.
+ */
+function cvc_exam_ui_v2_active(): bool {
+	$q = isset( $_GET['giao-dien'] ) ? sanitize_key( wp_unslash( $_GET['giao-dien'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification
+	$c = isset( $_COOKIE['cvc_exam_ui'] ) ? sanitize_key( wp_unslash( $_COOKIE['cvc_exam_ui'] ) ) : '';
+	$v = '' !== $q ? $q : $c;
+	if ( 'cu' === $v ) {
+		return false;
+	}
+	return 'moi' === $v || '1' === (string) get_option( 'cvc_exam_ui_v2', '0' );
+}
+add_action(
+	'init',
+	static function (): void {
+		$q = isset( $_GET['giao-dien'] ) ? sanitize_key( wp_unslash( $_GET['giao-dien'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification
+		if ( in_array( $q, array( 'moi', 'cu' ), true ) && ! headers_sent() ) {
+			setcookie( 'cvc_exam_ui', $q, array( 'expires' => time() + 7 * DAY_IN_SECONDS, 'path' => '/', 'secure' => is_ssl(), 'httponly' => true, 'samesite' => 'Lax' ) );
+			$_COOKIE['cvc_exam_ui'] = $q;
+		}
+	}
+);
