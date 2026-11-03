@@ -253,6 +253,7 @@ get_header();
 								<div class="rg-job-main">
 									<a class="rg-job-title" href="<?php echo esc_url( cvc_recruitment_url( (string) $r['slug'] ) ); ?>"><?php echo esc_html( (string) $r['title'] ); ?></a>
 									<div class="rg-meta">
+										<?php if ( preg_match( '/(hop dong|lao dong hop dong)/', strtolower( remove_accents( (string) $r['title'] ) ) ) ) : ?><span class="rg-tag is-contract">Hợp đồng lao động</span><?php endif; ?>
 										<?php if ( ! empty( $r['agency']['name'] ) ) : ?><span><?php echo $rg_ic( 'building' ); // phpcs:ignore ?> <?php echo esc_html( cvc_rec_geo_short_org( (string) $r['agency']['name'], $rg_pname ) ); ?></span><?php endif; ?>
 										<?php if ( ! empty( $r['total_positions'] ) ) : ?><span><?php echo $rg_ic( 'users' ); // phpcs:ignore ?> Chỉ tiêu: <?php echo (int) $r['total_positions']; ?></span><?php endif; ?>
 										<?php if ( '' !== $dl ) : ?><span><?php echo $rg_ic( 'calendar' ); // phpcs:ignore ?> Hạn nộp: <?php echo esc_html( $rg_date( $dl ) ); ?><?php echo null !== $left && $left >= 0 ? esc_html( ' · ' . ( 0 === $left ? 'hôm nay' : 'còn ' . $left . ' ngày' ) ) : ''; ?></span><?php endif; ?>
