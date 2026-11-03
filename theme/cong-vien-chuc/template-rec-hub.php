@@ -120,6 +120,16 @@ if ( $filtered || $paged > 1 || ( $rh_geo && empty( $rh_geo['indexable'] ) ) ) {
 	cvc_seo_set_noindex();
 }
 
+// 03/11/2026: trang tỉnh giao diện v2 (template-rec-geo.php, theo mẫu anh Nhật). Bật cho mọi người bằng tùy chọn
+// cvc_rec_geo_v2 = 1; trước đó xem trước bằng ?giao-dien=moi (noindex). ?giao-dien=cu luôn về giao diện cũ.
+if ( $rh_geo && cvc_rec_geo_v2_active() ) {
+	if ( isset( $_GET['giao-dien'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+		cvc_seo_set_noindex();
+	}
+	require get_theme_file_path( 'template-rec-geo.php' );
+	return;
+}
+
 $today_vn = strtotime( wp_date( 'Y-m-d' ) );
 $days_left = static function ( ?string $d ) use ( $today_vn ): ?int {
 	$t = $d ? strtotime( substr( $d, 0, 10 ) ) : false;

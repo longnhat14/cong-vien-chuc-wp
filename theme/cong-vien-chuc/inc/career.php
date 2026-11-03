@@ -386,6 +386,41 @@ function cvc_rec_geo_render_profile( string $preset_key, array $preset, array $g
 	endif;
 }
 
+/** Giao diện trang tỉnh v2 (03/11/2026): ?giao-dien=moi|cu để xem trước / quay lại; tùy chọn cvc_rec_geo_v2 = 1 bật cho mọi người. */
+function cvc_rec_geo_v2_active(): bool {
+	$q = isset( $_GET['giao-dien'] ) ? sanitize_key( wp_unslash( $_GET['giao-dien'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification
+	if ( 'cu' === $q ) {
+		return false;
+	}
+	return 'moi' === $q || '1' === (string) get_option( 'cvc_rec_geo_v2', '0' );
+}
+
+/** Đăng ký nhận email tin tuyển dụng theo tỉnh (03/11/2026) -> Laravel api/career/geo-alerts (gửi email xác nhận). */
+add_action( 'wp_ajax_cvc_geo_alert', 'cvc_geo_alert_ajax' );
+add_action( 'wp_ajax_nopriv_cvc_geo_alert', 'cvc_geo_alert_ajax' );
+function cvc_geo_alert_ajax(): void {
+	// phpcs:disable WordPress.Security.NonceVerification -- form công khai (trang có thể được cache), chống bot bằng bẫy + giới hạn ở backend.
+	$email = sanitize_email( wp_unslash( (string) ( $_POST['email'] ?? '' ) ) );
+	$kind  = sanitize_key( wp_unslash( (string) ( $_POST['kind'] ?? '' ) ) );
+	$prov  = absint( $_POST['province_id'] ?? 0 );
+	$trap  = (string) wp_unslash( $_POST['website'] ?? '' );
+	// phpcs:enable
+	if ( '' !== $trap ) {
+		wp_send_json( array( 'success' => true, 'data' => array( 'message' => 'Đã ghi nhận.' ) ) );
+	}
+	if ( ! is_email( $email ) || ! $prov || ! in_array( $kind, array( 'civil', 'public' ), true ) ) {
+		wp_send_json( array( 'success' => false, 'data' => array( 'message' => 'Vui lòng nhập email hợp lệ.' ) ) );
+	}
+	$res = ( new CVC_Api_Client( null, 20 ) )->post( '/api/career/geo-alerts', array( 'email' => $email, 'province_id' => $prov, 'kind' => $kind, 'source' => 'trang-tinh' ) );
+	$msg = (string) ( $res['data']['message'] ?? '' );
+	if ( 429 === (int) ( $res['status'] ?? 0 ) ) {
+		$msg = 'Bạn thao tác quá nhanh, vui lòng thử lại sau ít phút.';
+	} elseif ( '' === $msg || ( ! $res['ok'] && 422 !== (int) ( $res['status'] ?? 0 ) ) ) {
+		$msg = $res['ok'] ? 'Đã ghi nhận.' : 'Hệ thống đang bận, vui lòng thử lại sau.';
+	}
+	wp_send_json( array( 'success' => ! empty( $res['ok'] ), 'data' => array( 'message' => $msg ) ) );
+}
+
 /** Khối liên kết đủ 34 tỉnh/thành của 1 loại (dùng ở trang loại và trang tỉnh). */
 function cvc_rec_geo_render_links( string $preset_key, string $current_short = '' ): void {
 	$pr   = cvc_rec_presets()[ $preset_key ] ?? null;
@@ -1104,6 +1139,9 @@ function cvc_ci_assets(): void {
 	wp_enqueue_style( 'cvc-career', get_theme_file_uri( '/assets/css/career.css' ), array(), (string) filemtime( get_theme_file_path( '/assets/css/career.css' ) ) );
 	if ( 'recruitments' === $page && '' !== (string) get_query_var( 'cvc_rec_preset' ) ) {
 		wp_enqueue_style( 'cvc-rec-hub', get_theme_file_uri( '/assets/css/rec-hub.css' ), array( 'cvc-career' ), (string) filemtime( get_theme_file_path( '/assets/css/rec-hub.css' ) ) );
+		if ( '' !== (string) get_query_var( 'cvc_rec_tinh' ) && cvc_rec_geo_v2_active() ) { // 03/11/2026: trang tỉnh v2
+			wp_enqueue_style( 'cvc-rec-geo', get_theme_file_uri( '/assets/css/rec-geo.css' ), array( 'cvc-rec-hub' ), (string) filemtime( get_theme_file_path( '/assets/css/rec-geo.css' ) ) );
+		}
 	}
 	if ( 'exam-detail' === $page ) {
 		return;
