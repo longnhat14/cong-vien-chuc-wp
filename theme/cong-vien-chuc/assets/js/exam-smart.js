@@ -337,9 +337,8 @@
     var f = q.feedback, ok = f.is_correct === true;
     fb.classList.add('show', ok ? 'ok' : 'no');
     var ck = correctKey(q) || f.correct_option_key;
-    // 03/11/2026: nút "Câu tiếp" ngay cạnh kết luận đúng/sai (máy tính) - không phải cuộn qua giải thích.
     var html = '<div class="sx-fbhead"><h3>' + (ok ? '✓ Chính xác' : '✗ Chưa đúng') + (ck && !ok ? ' <span class="sx-fbkey">- đáp án đúng: <strong>' + esc(ck) + '</strong></span>' : '') + '</h3>' +
-      (current < TOTAL - 1 ? '<button type="button" class="sx-btn sx-primary sx-fbnext sx-fbquick" data-act="next2" title="Phím Enter hoặc →">Câu tiếp →</button>' : '') + '</div>' +
+      '</div>' + // 03/11/2026: bỏ nút "Câu tiếp" trong khung (trùng thanh dính đáy theo góp ý anh Nhật)
       '<p class="sx-fbline">' + (ck ? 'Đáp án đúng: <strong>' + esc(ck) + '</strong>. ' : '') + (ok ? '' : 'Bạn chọn ' + esc(q.selected || '') + '.') + '</p>';
     var more = '';
     if (f.explanation) more += '<div class="sx-explain">' + esc(f.explanation).replace(/\n/g, '<br>') + '</div>';
