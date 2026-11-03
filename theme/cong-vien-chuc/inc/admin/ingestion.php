@@ -191,7 +191,7 @@ function cvc_admin_render_ingestion_index(): void {
 	$can_upd  = cvc_admin_can( 'recruitment.update' );
 	$auto     = ! empty( $ov['auto_publish'] );
 	$ai_ok    = ! empty( $ov['ai']['configured'] );
-	$btn      = 'px-3 py-1.5 rounded-lg text-xs font-bold';
+	$btn      = 'px-3 py-1.5 rounded-lg text-xs font-bold ';
 	?>
 	<header class="flex flex-wrap items-end justify-between gap-3">
 		<div>
@@ -441,7 +441,7 @@ function cvc_admin_render_ingestion_detail( int $id ): void {
 	$ready    = (array) ( $it['readiness'] ?? array() );
 	$can_pub  = cvc_admin_can( 'recruitment.publish' );
 	$can_upd  = cvc_admin_can( 'recruitment.update' );
-	$btn      = 'px-3 py-1.5 rounded-lg text-xs font-bold';
+	$btn      = 'px-3 py-1.5 rounded-lg text-xs font-bold ';
 	$editable = 'published' !== ( $it['state'] ?? '' );
 	$input    = cvc_admin_input_class();
 	$pos_text = '';
@@ -475,11 +475,36 @@ function cvc_admin_render_ingestion_detail( int $id ): void {
 		</p>
 	</header>
 
+	<?php
+	// 03/11/2026: bản trùng tin đã đăng - nói rõ đã đăng ở đâu, đóng 1 bấm; tránh tưởng tin "treo" rồi đăng 2 lần.
+	$dup     = (array) ( $it['duplicate_of'] ?? array() );
+	$is_dup  = 'duplicate' === ( $it['state'] ?? '' ) && ! empty( $dup['id'] );
+	$dup_lbl = array( 'published' => 'đang hiển thị', 'expired' => 'đã hết hạn', 'draft' => 'bản nháp' );
+	?>
+	<?php if ( $is_dup ) : ?>
+		<section class="rounded-2xl p-4 border border-emerald-200 bg-emerald-50 space-y-2">
+			<p class="font-bold text-emerald-900"><i class="fa-solid fa-circle-check" aria-hidden="true"></i> Thông báo này đã có trên hệ thống — không cần đăng lại.</p>
+			<p class="text-sm text-ink-2">Trùng với tin <a class="font-bold text-acc underline" href="<?php echo esc_url( cvc_admin_url( 'recruitments', (int) $dup['id'] ) ); ?>">#<?php echo (int) $dup['id']; ?> · <?php echo esc_html( (string) $dup['title'] ); ?></a> (<?php echo esc_html( $dup_lbl[ (string) ( $dup['status'] ?? '' ) ] ?? (string) ( $dup['status'] ?? '' ) ); ?>)<?php if ( 'published' === ( $dup['status'] ?? '' ) && ! empty( $dup['slug'] ) ) : ?> · <a class="text-emerald-800 font-bold" href="<?php echo esc_url( cvc_recruitment_url( (string) $dup['slug'] ) ); ?>" target="_blank" rel="noopener">Xem tin đã đăng ↗</a><?php endif; ?>.
+			Bản này lấy từ một đường dẫn khác của cùng nguồn<?php echo ! empty( $dup['source_url'] ) ? esc_html( ' (tin đã đăng lấy từ ' . wp_parse_url( (string) $dup['source_url'], PHP_URL_PATH ) . ')' ) : ''; ?>.</p>
+			<?php if ( $can_pub ) : ?>
+				<div class="flex flex-wrap items-center gap-2">
+					<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="inline">
+						<?php wp_nonce_field( 'cvc_admin_ingestion' ); ?>
+						<input type="hidden" name="action" value="cvc_admin_ingestion"><input type="hidden" name="op" value="reject"><input type="hidden" name="id" value="<?php echo (int) $id; ?>"><input type="hidden" name="reason" value="duplicate">
+						<button type="submit" class="<?php echo esc_attr( $btn ); ?> bg-emerald-700 text-white hover:bg-emerald-800">Xác nhận trùng &amp; đóng</button>
+					</form>
+					<span class="text-xs text-ink-muted">Nếu đây là thông báo khác (đợt khác, vị trí khác) thì dùng nút "Vẫn đăng riêng" bên dưới.</span>
+				</div>
+			<?php endif; ?>
+		</section>
+	<?php endif; ?>
 	<?php if ( $editable && ! empty( $ready ) ) : ?>
 		<section class="rounded-2xl p-4 border <?php echo ! empty( $ready['ready'] ) ? 'border-acc-line bg-acc-soft' : 'border-acc-line bg-acc-soft'; ?>">
 			<div class="flex flex-wrap items-center justify-between gap-3">
 				<div class="text-sm">
-					<?php if ( ! empty( $ready['ready'] ) ) : ?>
+					<?php if ( $is_dup ) : ?>
+						<p class="font-bold text-ink-2">Bản trùng — thông tin vẫn đầy đủ nếu cần đăng riêng.</p>
+					<?php elseif ( ! empty( $ready['ready'] ) ) : ?>
 						<p class="font-bold text-emerald-800">Đủ điều kiện đăng.</p>
 					<?php else : ?>
 						<p class="font-bold text-acc">Chưa đăng được: <?php echo esc_html( implode( '; ', (array) $ready['errors'] ) ); ?>.</p>
@@ -495,7 +520,7 @@ function cvc_admin_render_ingestion_detail( int $id ): void {
 				</div>
 				<div class="flex gap-2">
 					<?php if ( $can_pub ) : ?>
-						<?php echo cvc_ingestion_op_form( 'approve', $id, 'Duyệt & đăng', $btn . 'bg-acc text-slate-950 hover:bg-acc-deep text-white' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+						<?php echo $is_dup ? cvc_ingestion_op_form( 'approve', $id, 'Vẫn đăng riêng', $btn . 'bg-white text-ink-2 hover:bg-acc-soft border border-slate-300', 'Tin #' . (int) $dup['id'] . ' đã đăng cùng thông báo này. Vẫn đăng thành tin riêng?' ) : cvc_ingestion_op_form( 'approve', $id, 'Duyệt & đăng', $btn . 'bg-acc text-slate-950 hover:bg-acc-deep text-white' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 						<?php echo cvc_ingestion_reject_form( $id, $btn . 'bg-white text-ink-2 hover:bg-acc-soft' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 					<?php endif; ?>
 					<?php if ( $can_upd ) : ?>
