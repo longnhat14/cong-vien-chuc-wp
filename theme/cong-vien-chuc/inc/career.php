@@ -39,13 +39,159 @@ function cvc_ci_families(): array {
 function cvc_rec_presets(): array {
 	// 28/10/2026 (v2): mỗi loại là 1 trang chủ đề riêng với URL ngắn (path), số liệu thật từ api/career/hub (api),
 	// đề riêng theo tin (rp -> api/catalog/recruitment-exams) và trang ôn thi tương ứng (track -> cvc_cat_tracks).
+	// 03/11/2026: từ khóa chính "Tuyển dụng công chức" / "Tuyển dụng viên chức" -> URL /tuyen-dung-cong-chuc/, /tuyen-dung-vien-chuc/
+	// (URL cũ trong 'legacy' chuyển 301); 'geo' = có trang theo tỉnh /{path}/{tinh}/. Năm trong tiêu đề tự đổi theo năm hiện tại.
+	$y = cvc_rec_year();
 	return array(
-		'cong-chuc' => array( 'path' => 'tuyen-cong-chuc', 'label' => 'Tin tuyển dụng công chức', 'chip' => 'Công chức', 'noun' => 'công chức', 'filter' => array( 'loai' => 'civil' ), 'api' => array( 'kind' => 'civil' ), 'rp' => array( 'type' => 'civil_servant' ), 'track' => 'cong-chuc', 'h1' => 'Tuyển dụng công chức', 'title' => 'Tuyển dụng công chức 2026: thông báo thi tuyển còn hạn', 'desc' => 'Thông báo tuyển dụng công chức còn hạn nộp hồ sơ từ nguồn chính thức các bộ, ngành, tỉnh, thành; kèm đề trắc nghiệm, văn bản cần ôn và hạn nộp.', 'lead' => 'Thông báo thi tuyển, xét tuyển công chức tại các bộ, ngành, tỉnh, thành phố còn hạn nộp hồ sơ, lấy từ nguồn chính thức. Mỗi tin kèm hạn nộp, đề trắc nghiệm để ôn và văn bản cần nắm.' ),
-		'vien-chuc' => array( 'path' => 'tuyen-vien-chuc', 'label' => 'Tin tuyển dụng viên chức', 'chip' => 'Viên chức', 'noun' => 'viên chức', 'filter' => array( 'loai' => 'public' ), 'api' => array( 'kind' => 'public' ), 'rp' => array( 'type' => 'public_employee' ), 'track' => 'vien-chuc', 'h1' => 'Tuyển dụng viên chức', 'title' => 'Tuyển dụng viên chức 2026: giáo viên, y tế, sự nghiệp công lập', 'desc' => 'Thông báo tuyển dụng viên chức còn hạn: giáo viên, bác sĩ, điều dưỡng, đơn vị sự nghiệp công lập; kèm đề trắc nghiệm riêng theo tin và văn bản cần ôn.', 'lead' => 'Thông báo tuyển dụng viên chức tại trường học, bệnh viện và đơn vị sự nghiệp công lập còn hạn nộp hồ sơ, lấy từ nguồn chính thức. Mỗi tin kèm hạn nộp, đề trắc nghiệm để ôn và văn bản cần nắm.' ),
-		'hop-dong'  => array( 'path' => 'tuyen-dung/hop-dong', 'label' => 'Tin tuyển hợp đồng', 'chip' => 'Hợp đồng', 'noun' => 'lao động hợp đồng', 'filter' => array( 'loai' => 'contract' ), 'api' => array( 'kind' => 'contract' ), 'rp' => array( 'type' => 'other' ), 'track' => '', 'h1' => 'Tuyển dụng lao động hợp đồng', 'title' => 'Tuyển dụng lao động hợp đồng trong cơ quan nhà nước 2026', 'desc' => 'Thông báo tuyển lao động hợp đồng tại cơ quan hành chính, đơn vị sự nghiệp công lập còn hạn nộp hồ sơ, cập nhật từ nguồn chính thức.', 'lead' => 'Thông báo tuyển lao động hợp đồng tại cơ quan hành chính và đơn vị sự nghiệp công lập còn hạn nộp hồ sơ, lấy từ nguồn chính thức.' ),
-		'giao-vien' => array( 'path' => 'tuyen-giao-vien', 'label' => 'Tin tuyển giáo viên', 'chip' => 'Giáo viên', 'noun' => 'giáo viên', 'filter' => array( 'nhom' => 'education' ), 'api' => array( 'job_family' => 'education' ), 'rp' => array( 'family' => 'education' ), 'track' => 'giao-vien', 'h1' => 'Tuyển dụng giáo viên', 'title' => 'Tuyển dụng giáo viên 2026: mầm non, tiểu học, THCS, THPT', 'desc' => 'Thông báo tuyển dụng giáo viên mầm non, tiểu học, THCS, THPT, giảng viên còn hạn; kèm đề trắc nghiệm theo vị trí và văn bản ngành giáo dục cần ôn.', 'lead' => 'Thông báo tuyển dụng giáo viên mầm non, tiểu học, THCS, THPT và giảng viên còn hạn nộp hồ sơ, lấy từ nguồn chính thức. Mỗi tin kèm hạn nộp, đề trắc nghiệm theo cấp học và văn bản ngành giáo dục.' ),
-		'y-te'      => array( 'path' => 'tuyen-dung-y-te', 'label' => 'Tin tuyển ngành y tế', 'chip' => 'Y tế', 'noun' => 'ngành y tế', 'filter' => array( 'nhom' => 'health' ), 'api' => array( 'job_family' => 'health' ), 'rp' => array( 'family' => 'health' ), 'track' => 'y-te', 'h1' => 'Tuyển dụng ngành y tế', 'title' => 'Tuyển dụng ngành y tế 2026: bác sĩ, điều dưỡng, hộ sinh, dược', 'desc' => 'Thông báo tuyển dụng bác sĩ, điều dưỡng, hộ sinh, kỹ thuật y, dược tại bệnh viện, trung tâm y tế công lập còn hạn; kèm đề ôn theo luật ngành y.', 'lead' => 'Thông báo tuyển dụng bác sĩ, điều dưỡng, hộ sinh, kỹ thuật y, dược tại bệnh viện và trung tâm y tế công lập còn hạn nộp hồ sơ, lấy từ nguồn chính thức.' ),
+		'cong-chuc' => array( 'path' => 'tuyen-dung-cong-chuc', 'legacy' => array( 'tuyen-cong-chuc' ), 'geo' => true, 'label' => 'Tin tuyển dụng công chức', 'chip' => 'Công chức', 'noun' => 'công chức', 'filter' => array( 'loai' => 'civil' ), 'api' => array( 'kind' => 'civil' ), 'rp' => array( 'type' => 'civil_servant' ), 'track' => 'cong-chuc', 'h1' => 'Tuyển dụng công chức', 'title' => 'Tuyển dụng công chức ' . $y . ': thông báo thi tuyển còn hạn', 'desc' => 'Thông báo tuyển dụng công chức còn hạn nộp hồ sơ từ nguồn chính thức các bộ, ngành, tỉnh, thành; kèm đề trắc nghiệm, văn bản cần ôn và hạn nộp.', 'lead' => 'Thông báo thi tuyển, xét tuyển công chức tại các bộ, ngành, tỉnh, thành phố còn hạn nộp hồ sơ, lấy từ nguồn chính thức. Mỗi tin kèm hạn nộp, đề trắc nghiệm để ôn và văn bản cần nắm.' ),
+		'vien-chuc' => array( 'path' => 'tuyen-dung-vien-chuc', 'legacy' => array( 'tuyen-vien-chuc' ), 'geo' => true, 'label' => 'Tin tuyển dụng viên chức', 'chip' => 'Viên chức', 'noun' => 'viên chức', 'filter' => array( 'loai' => 'public' ), 'api' => array( 'kind' => 'public' ), 'rp' => array( 'type' => 'public_employee' ), 'track' => 'vien-chuc', 'h1' => 'Tuyển dụng viên chức', 'title' => 'Tuyển dụng viên chức ' . $y . ': giáo viên, y tế, sự nghiệp công lập', 'desc' => 'Thông báo tuyển dụng viên chức còn hạn: giáo viên, bác sĩ, điều dưỡng, đơn vị sự nghiệp công lập; kèm đề trắc nghiệm riêng theo tin và văn bản cần ôn.', 'lead' => 'Thông báo tuyển dụng viên chức tại trường học, bệnh viện và đơn vị sự nghiệp công lập còn hạn nộp hồ sơ, lấy từ nguồn chính thức. Mỗi tin kèm hạn nộp, đề trắc nghiệm để ôn và văn bản cần nắm.' ),
+		'hop-dong'  => array( 'path' => 'tuyen-dung/hop-dong', 'label' => 'Tin tuyển hợp đồng', 'chip' => 'Hợp đồng', 'noun' => 'lao động hợp đồng', 'filter' => array( 'loai' => 'contract' ), 'api' => array( 'kind' => 'contract' ), 'rp' => array( 'type' => 'other' ), 'track' => '', 'h1' => 'Tuyển dụng lao động hợp đồng', 'title' => 'Tuyển dụng lao động hợp đồng trong cơ quan nhà nước ' . $y, 'desc' => 'Thông báo tuyển lao động hợp đồng tại cơ quan hành chính, đơn vị sự nghiệp công lập còn hạn nộp hồ sơ, cập nhật từ nguồn chính thức.', 'lead' => 'Thông báo tuyển lao động hợp đồng tại cơ quan hành chính và đơn vị sự nghiệp công lập còn hạn nộp hồ sơ, lấy từ nguồn chính thức.' ),
+		'giao-vien' => array( 'path' => 'tuyen-giao-vien', 'label' => 'Tin tuyển giáo viên', 'chip' => 'Giáo viên', 'noun' => 'giáo viên', 'filter' => array( 'nhom' => 'education' ), 'api' => array( 'job_family' => 'education' ), 'rp' => array( 'family' => 'education' ), 'track' => 'giao-vien', 'h1' => 'Tuyển dụng giáo viên', 'title' => 'Tuyển dụng giáo viên ' . $y . ': mầm non, tiểu học, THCS, THPT', 'desc' => 'Thông báo tuyển dụng giáo viên mầm non, tiểu học, THCS, THPT, giảng viên còn hạn; kèm đề trắc nghiệm theo vị trí và văn bản ngành giáo dục cần ôn.', 'lead' => 'Thông báo tuyển dụng giáo viên mầm non, tiểu học, THCS, THPT và giảng viên còn hạn nộp hồ sơ, lấy từ nguồn chính thức. Mỗi tin kèm hạn nộp, đề trắc nghiệm theo cấp học và văn bản ngành giáo dục.' ),
+		'y-te'      => array( 'path' => 'tuyen-dung-y-te', 'label' => 'Tin tuyển ngành y tế', 'chip' => 'Y tế', 'noun' => 'ngành y tế', 'filter' => array( 'nhom' => 'health' ), 'api' => array( 'job_family' => 'health' ), 'rp' => array( 'family' => 'health' ), 'track' => 'y-te', 'h1' => 'Tuyển dụng ngành y tế', 'title' => 'Tuyển dụng ngành y tế ' . $y . ': bác sĩ, điều dưỡng, hộ sinh, dược', 'desc' => 'Thông báo tuyển dụng bác sĩ, điều dưỡng, hộ sinh, kỹ thuật y, dược tại bệnh viện, trung tâm y tế công lập còn hạn; kèm đề ôn theo luật ngành y.', 'lead' => 'Thông báo tuyển dụng bác sĩ, điều dưỡng, hộ sinh, kỹ thuật y, dược tại bệnh viện và trung tâm y tế công lập còn hạn nộp hồ sơ, lấy từ nguồn chính thức.' ),
 	);
+}
+
+/** Năm hiển thị trong tiêu đề trang tuyển dụng (03/11/2026): năm hiện tại theo giờ Việt Nam - URL không chứa năm. */
+function cvc_rec_year(): int {
+	return (int) wp_date( 'Y' );
+}
+
+/* ------------------------------------------------------------------
+ * Trang tuyển dụng công chức / viên chức theo tỉnh (03/11/2026): /tuyen-dung-cong-chuc/{tinh}/
+ * Dữ liệu: api/career/geo?kind= (đủ 34 tỉnh, số tin còn hạn + số tin 12 tháng). Nội dung dựng từ mẫu + số liệu thật (0 token AI).
+ * Index khi có tin còn hạn hoặc >= 3 tin trong 12 tháng; còn lại noindex,follow và không đưa vào sitemap.
+ * ------------------------------------------------------------------ */
+function cvc_rec_geo_min_recent(): int {
+	return 3;
+}
+
+/** Slug ngắn của tỉnh trong URL: "thanh-pho-ho-chi-minh" -> "ho-chi-minh", "tinh-lang-son" -> "lang-son". */
+function cvc_rec_geo_short( string $slug ): string {
+	return (string) preg_replace( '/^(tinh|thanh-pho)-/', '', $slug );
+}
+
+/** Tên ngắn trong tiêu đề: "Tỉnh Lạng Sơn" -> "Lạng Sơn", "Thành phố Hồ Chí Minh" -> "TP. Hồ Chí Minh". */
+function cvc_rec_geo_label( string $name ): string {
+	$name = trim( $name );
+	if ( 0 === mb_stripos( $name, 'Thành phố ', 0, 'UTF-8' ) ) {
+		return 'TP. ' . mb_substr( $name, 10, null, 'UTF-8' );
+	}
+	return 0 === mb_stripos( $name, 'Tỉnh ', 0, 'UTF-8' ) ? mb_substr( $name, 5, null, 'UTF-8' ) : $name;
+}
+
+/** Danh sách 34 tỉnh của 1 loại preset, khóa = slug ngắn. */
+function cvc_rec_geo_provinces( string $preset_key ): array {
+	$pr = cvc_rec_presets()[ $preset_key ] ?? null;
+	if ( ! $pr || empty( $pr['geo'] ) || empty( $pr['api']['kind'] ) ) {
+		return array();
+	}
+	static $memo = array();
+	if ( isset( $memo[ $preset_key ] ) ) {
+		return $memo[ $preset_key ];
+	}
+	$res  = cvc_ci_api( '/api/career/geo', array( 'kind' => $pr['api']['kind'] ), null, 10, 900 );
+	$rows = $res['ok'] ? (array) ( $res['data']['data']['provinces'] ?? array() ) : array();
+	$out  = array();
+	foreach ( $rows as $r ) {
+		if ( ! is_array( $r ) || empty( $r['slug'] ) ) {
+			continue;
+		}
+		$short         = cvc_rec_geo_short( (string) $r['slug'] );
+		$r['short']    = $short;
+		$r['label']    = cvc_rec_geo_label( (string) $r['name'] );
+		$r['indexable'] = (int) ( $r['open_count'] ?? 0 ) > 0 || (int) ( $r['recent_count'] ?? 0 ) >= cvc_rec_geo_min_recent();
+		$out[ $short ] = $r;
+	}
+	uasort( $out, static fn ( $a, $b ) => strcmp( remove_accents( $a['label'] ), remove_accents( $b['label'] ) ) );
+	return $memo[ $preset_key ] = $out;
+}
+
+function cvc_rec_geo_by_id( string $preset_key, int $id ): ?array {
+	foreach ( cvc_rec_geo_provinces( $preset_key ) as $g ) {
+		if ( (int) $g['id'] === $id ) {
+			return $g;
+		}
+	}
+	return null;
+}
+
+function cvc_rec_geo_url( string $preset_key, string $short, int $page = 1, array $args = array() ): string {
+	$p = cvc_rec_presets()[ $preset_key ] ?? null;
+	if ( ! $p || empty( $p['geo'] ) ) {
+		return cvc_rec_preset_url( $preset_key, $page, $args );
+	}
+	$url  = home_url( '/' . $p['path'] . '/' . $short . '/' . ( $page > 1 ? 'page/' . $page . '/' : '' ) );
+	$args = array_filter( $args, static fn ( $v ) => null !== $v && '' !== $v && 0 !== $v );
+
+	return $args ? add_query_arg( $args, $url ) : $url;
+}
+
+/** Tỉnh đang xem (query var cvc_rec_tinh) của trang theo tỉnh, null nếu không phải trang tỉnh. */
+function cvc_rec_geo_current(): ?array {
+	$short = (string) get_query_var( 'cvc_rec_tinh' );
+	$key   = (string) get_query_var( 'cvc_rec_preset' );
+	if ( '' === $short || '' === $key ) {
+		return null;
+	}
+	return cvc_rec_geo_provinces( $key )[ $short ] ?? null;
+}
+
+/**
+ * Đoạn giới thiệu trang tỉnh dựng từ số liệu thật (không gọi AI). Câu mở đầu luân phiên theo id tỉnh để các trang không trùng khuôn.
+ */
+function cvc_rec_geo_lead( array $preset, array $g, int $open, int $positions ): string {
+	$y     = cvc_rec_year();
+	$noun  = (string) $preset['noun'];
+	$label = (string) $g['label'];
+	$recent = (int) ( $g['recent_count'] ?? 0 );
+	$v     = (int) $g['id'] % 3;
+	if ( $open > 0 ) {
+		$open_txt = array(
+			sprintf( 'Hiện có %d thông báo tuyển dụng %s tại %s còn hạn nộp hồ sơ', $open, $noun, $label ),
+			sprintf( '%s đang có %d đợt tuyển dụng %s còn nhận hồ sơ', $label, $open, $noun ),
+			sprintf( 'Năm %d, %s đang có %d thông báo tuyển dụng %s chưa hết hạn nộp', $y, $label, $open, $noun ),
+		)[ $v ];
+		$open_txt .= $positions > 0 ? sprintf( ', với %d vị trí việc làm', $positions ) : '';
+		if ( ! empty( $g['next_deadline'] ) ) {
+			$open_txt .= sprintf( '; hạn nộp gần nhất là ngày %s', wp_date( 'd/m/Y', strtotime( (string) $g['next_deadline'] ) ) );
+		}
+		$open_txt .= '.';
+	} else {
+		$open_txt = array(
+			sprintf( 'Hiện chưa có thông báo tuyển dụng %s nào tại %s còn hạn nộp hồ sơ.', $noun, $label ),
+			sprintf( '%s chưa có đợt tuyển dụng %s nào đang nhận hồ sơ.', $label, $noun ),
+			sprintf( 'Tại thời điểm này, chưa có thông báo tuyển dụng %s tại %s còn hạn.', $noun, $label ),
+		)[ $v ];
+		$open_txt .= ' Trang tự cập nhật ngay khi cơ quan tuyển dụng đăng thông báo mới; trong lúc chờ, bạn có thể ôn thi trước hoặc xem tin ở các tỉnh, thành khác.';
+	}
+	$hist = $recent > 0 ? sprintf( ' Trong 12 tháng qua, Công Viên Chức đã ghi nhận %d thông báo tuyển dụng %s tại %s.', $recent, $noun, $label ) : '';
+	$src  = array(
+		' Mọi tin lấy từ cổng thông tin chính thức của cơ quan tuyển dụng, kèm hạn nộp, chỉ tiêu, đề trắc nghiệm để ôn và văn bản cần nắm.',
+		' Danh sách tổng hợp từ nguồn chính thức (Sở Nội vụ, UBND, cơ quan, đơn vị tuyển dụng); mỗi tin có hạn nộp, chỉ tiêu và đề ôn thi theo tin.',
+		' Mỗi tin ghi rõ nguồn đăng chính thức, hạn nộp, chỉ tiêu, kèm đề trắc nghiệm và văn bản pháp luật cần ôn.',
+	)[ $v ];
+
+	return $open_txt . $hist . $src;
+}
+
+/** Khối liên kết đủ 34 tỉnh/thành của 1 loại (dùng ở trang loại và trang tỉnh). */
+function cvc_rec_geo_render_links( string $preset_key, string $current_short = '' ): void {
+	$pr   = cvc_rec_presets()[ $preset_key ] ?? null;
+	$list = cvc_rec_geo_provinces( $preset_key );
+	if ( ! $pr || ! $list ) {
+		return;
+	}
+	?>
+	<section class="rh-geo" aria-labelledby="rh-geo-h-<?php echo esc_attr( $preset_key ); ?>">
+		<div class="rh-sec-head"><h2 id="rh-geo-h-<?php echo esc_attr( $preset_key ); ?>"><?php echo esc_html( $pr['h1'] . ' theo tỉnh, thành phố' ); ?></h2><span>34 tỉnh, thành · số tin còn hạn</span></div>
+		<ul class="rh-geo-list">
+			<?php foreach ( $list as $g ) : ?>
+				<?php $cur = $g['short'] === $current_short; ?>
+				<li class="<?php echo (int) $g['open_count'] > 0 ? 'has-open' : ''; ?>"><a href="<?php echo esc_url( cvc_rec_geo_url( $preset_key, $g['short'] ) ); ?>"<?php echo $cur ? ' aria-current="page"' : ''; ?>><?php echo esc_html( $g['label'] ); ?></a><?php if ( (int) $g['open_count'] > 0 ) : ?> <small><?php echo (int) $g['open_count']; ?></small><?php endif; ?></li>
+			<?php endforeach; ?>
+		</ul>
+	</section>
+	<?php
 }
 
 /** URL trang chủ đề tuyển dụng theo loại (28/10/2026: URL ngắn /tuyen-vien-chuc/...; URL cũ /tuyen-dung/{key}/ chuyển 301). */

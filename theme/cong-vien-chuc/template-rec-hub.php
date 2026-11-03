@@ -14,17 +14,43 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+// 03/11/2026: trang theo tỉnh /tuyen-dung-cong-chuc/{tinh}/ - tỉnh lấy từ URL (không dùng ?tinh=).
+$rh_short = (string) get_query_var( 'cvc_rec_tinh' );
+$rh_geo   = '' !== $rh_short ? cvc_rec_geo_current() : null;
+if ( '' !== $rh_short && ! $rh_geo ) {
+	status_header( 404 );
+	nocache_headers();
+	cvc_seo_set_noindex();
+	cvc_seo_set_title( 'Không tìm thấy tỉnh, thành phố' );
+	get_header();
+	echo '<main id="main" class="dz-main ci rh"><div class="ci-wrap rh-body"><div class="ci-empty"><b>Không tìm thấy tỉnh, thành phố này</b><a class="ci-btn" href="' . esc_url( cvc_rec_preset_url( $preset_key ) ) . '">' . esc_html( $preset['h1'] ) . ' toàn quốc</a></div>';
+	cvc_rec_geo_render_links( $preset_key );
+	echo '</div></main>';
+	get_footer();
+	return;
+}
+if ( $rh_geo ) {
+	$f['tinh'] = (int) $rh_geo['id'];
+}
+
 $rh_fam_fixed = isset( $preset['filter']['nhom'] );
 $rh_args      = array_filter(
 	array(
 		'q'    => $f['q'],
-		'tinh' => $f['tinh'] ?: null,
+		'tinh' => ! $rh_geo && $f['tinh'] ? $f['tinh'] : null,
 		'nhom' => ! $rh_fam_fixed && '' !== $f['nhom'] ? $f['nhom'] : null,
 	)
 );
-$rh_url = static fn ( int $p = 1, array $a = array() ) => cvc_rec_preset_url( $preset_key, $p, $a );
+$rh_url = $rh_geo
+	? static fn ( int $p = 1, array $a = array() ) => cvc_rec_geo_url( $preset_key, $rh_geo['short'], $p, $a )
+	: static fn ( int $p = 1, array $a = array() ) => cvc_rec_preset_url( $preset_key, $p, $a );
+$rh_hub_url = cvc_rec_preset_url( $preset_key );
+$rh_tinh_url = static function ( int $id ) use ( $preset_key, $rh_hub_url ): string {
+	$g = ! empty( cvc_rec_presets()[ $preset_key ]['geo'] ) ? cvc_rec_geo_by_id( $preset_key, $id ) : null;
+	return $g ? cvc_rec_geo_url( $preset_key, $g['short'] ) : add_query_arg( 'tinh', $id, $rh_hub_url );
+};
 
-$hub_res = cvc_ci_api( '/api/career/hub', $preset['api'] + array( 'limit' => 8 ), null, 10, 600 );
+$hub_res = cvc_ci_api( '/api/career/hub', $preset['api'] + array( 'limit' => 8 ) + ( $rh_geo ? array( 'province_id' => (int) $rh_geo['id'] ) : array() ), null, 10, 600 );
 $hub     = $hub_res['ok'] ? (array) ( $hub_res['data']['data'] ?? array() ) : array();
 $hc      = (array) ( $hub['counts'] ?? array() );
 $h_provs = array_values( array_filter( (array) ( $hub['provinces'] ?? array() ), 'is_array' ) );
@@ -38,7 +64,7 @@ $items    = (array) ( $jobs['items'] ?? array() );
 $pg       = (array) ( $jobs['pagination'] ?? array() );
 $total    = (int) ( $pg['total'] ?? 0 );
 
-$filtered = '' !== $f['q'] || $f['tinh'] || ( ! $rh_fam_fixed && '' !== $f['nhom'] );
+$filtered = '' !== $f['q'] || ( ! $rh_geo && $f['tinh'] ) || ( ! $rh_fam_fixed && '' !== $f['nhom'] );
 $soon     = array();
 if ( 1 === $paged && '' === $f['q'] ) {
 	$soon_res = cvc_ci_api( '/api/career/recruitments', array_merge( $jobs_q, array( 'status' => 'closing_soon', 'sort' => 'deadline', 'page' => 1, 'per_page' => 6, 'with_exams' => 0 ) ), null, 10, 300 );
@@ -66,12 +92,25 @@ foreach ( $h_provs as $p ) {
 }
 $fam_label = ! $rh_fam_fixed && '' !== $f['nhom'] ? (string) ( cvc_ci_families()[ $f['nhom'] ] ?? '' ) : '';
 $h1        = $preset['h1'] . ( '' !== $fam_label ? ' · ' . mb_strtolower( $fam_label, 'UTF-8' ) : '' ) . ( '' !== $province_name ? ' tại ' . $province_name : '' );
+$rh_lead   = (string) $preset['lead'];
+$rh_title  = (string) $preset['title'];
+$rh_desc   = (string) $preset['desc'];
+if ( $rh_geo ) {
+	// Trang tỉnh: tiêu đề / mô tả / đoạn mở đầu dựng từ mẫu + số liệu thật, năm tự đổi.
+	$rh_y     = cvc_rec_year();
+	$rh_open  = (int) ( $hc['open_recruitments'] ?? $rh_geo['open_count'] ?? 0 );
+	$h1       = $preset['h1'] . ' ' . $rh_geo['label'] . ' ' . $rh_y . ( '' !== $fam_label ? ' · ' . mb_strtolower( $fam_label, 'UTF-8' ) : '' );
+	$rh_title = $preset['h1'] . ' ' . $rh_geo['label'] . ' ' . $rh_y . ': ' . ( $rh_open > 0 ? $rh_open . ' thông báo còn hạn nộp' : 'thông báo mới nhất' );
+	$rh_desc  = sprintf( 'Thông báo %s tại %s năm %d từ nguồn chính thức%s: hạn nộp, chỉ tiêu, vị trí, đề trắc nghiệm ôn thi và văn bản cần nắm.', mb_strtolower( $preset['h1'], 'UTF-8' ), $rh_geo['label'], $rh_y, $rh_open > 0 ? ', ' . $rh_open . ' tin còn hạn' : '' );
+	$rh_lead  = cvc_rec_geo_lead( $preset, $rh_geo, $rh_open, (int) ( $hc['open_positions'] ?? 0 ) );
+}
 
 // SEO: URL sạch là canonical; có lọc / tìm / trang ≥ 2 thì noindex (tránh trang mỏng trùng lặp).
-cvc_seo_set_title( $filtered ? $h1 : $preset['title'] );
-cvc_seo_set_description( $preset['desc'] );
+// Trang tỉnh chưa đủ dữ liệu (không có tin còn hạn và < 3 tin / 12 tháng) cũng noindex, follow.
+cvc_seo_set_title( $filtered ? $h1 : $rh_title );
+cvc_seo_set_description( $rh_desc );
 cvc_seo_set_canonical( $rh_url() );
-if ( $filtered || $paged > 1 ) {
+if ( $filtered || $paged > 1 || ( $rh_geo && empty( $rh_geo['indexable'] ) ) ) {
 	cvc_seo_set_noindex();
 }
 
@@ -86,16 +125,16 @@ get_header();
 <main id="main" class="dz-main ci rh" data-preset="<?php echo esc_attr( $preset_key ); ?>">
 	<section class="rh-hero">
 		<div class="ci-wrap">
-			<?php cvc_render_breadcrumbs( array( array( 'label' => 'Trang chủ', 'url' => home_url( '/' ) ), array( 'label' => 'Tuyển dụng', 'url' => cvc_ci_url() ), array( 'label' => $preset['h1'] ) ) ); ?>
+			<?php cvc_render_breadcrumbs( array_merge( array( array( 'label' => 'Trang chủ', 'url' => home_url( '/' ) ), array( 'label' => 'Tuyển dụng', 'url' => cvc_ci_url() ), array( 'label' => $preset['h1'], 'url' => $rh_hub_url ) ), $rh_geo ? array( array( 'label' => $rh_geo['label'] ) ) : array() ) ); ?>
 			<div class="rh-hero-grid">
 				<div>
 					<p class="rh-eyebrow"><i class="ci-pulse" aria-hidden="true"></i> Còn hạn nộp hồ sơ · nguồn chính thức</p>
 					<h1><?php echo esc_html( $h1 ); ?></h1>
-					<p class="rh-lead"><?php echo esc_html( $preset['lead'] ); ?></p>
+					<p class="rh-lead"><?php echo esc_html( $rh_lead ); ?></p>
 					<form class="rh-search" method="get" action="<?php echo esc_url( $rh_url() ); ?>" role="search">
 						<label class="ec-sr" for="rh-q">Tìm trong <?php echo esc_html( mb_strtolower( $preset['label'], 'UTF-8' ) ); ?></label>
 						<input id="rh-q" name="q" value="<?php echo esc_attr( $f['q'] ); ?>" maxlength="100" placeholder="<?php echo esc_attr( 'Tìm đơn vị, vị trí, số thông báo…' ); ?>">
-						<?php if ( $h_provs ) : ?>
+						<?php if ( $h_provs && ! $rh_geo ) : ?>
 							<label class="ec-sr" for="rh-tinh">Tỉnh, thành phố</label>
 							<select id="rh-tinh" name="tinh">
 								<option value="">Tất cả tỉnh, thành</option>
@@ -106,7 +145,7 @@ get_header();
 						<button class="ci-btn is-primary" type="submit">Tìm tin</button>
 					</form>
 				</div>
-				<dl class="rh-stats" aria-label="Số liệu <?php echo esc_attr( $preset['noun'] ); ?>">
+				<dl class="rh-stats" aria-label="Số liệu <?php echo esc_attr( $preset['noun'] . ( $rh_geo ? ' tại ' . $rh_geo['label'] : '' ) ); ?>">
 					<div><dt>Tin đang nhận hồ sơ</dt><dd><?php echo isset( $hc['open_recruitments'] ) ? esc_html( number_format_i18n( (int) $hc['open_recruitments'] ) ) : '—'; ?></dd></div>
 					<div><dt>Vị trí đang tuyển</dt><dd><?php echo isset( $hc['open_positions'] ) ? esc_html( number_format_i18n( (int) $hc['open_positions'] ) ) : '—'; ?></dd></div>
 					<div class="is-warn"><dt>Hết hạn trong 7 ngày</dt><dd><?php echo isset( $hc['closing_soon'] ) ? ( (int) $hc['closing_soon'] > 0 && $soon ? '<a href="#sap-het-han">' . (int) $hc['closing_soon'] . '</a>' : (int) $hc['closing_soon'] ) : '—'; // phpcs:ignore WordPress.Security.EscapeOutput ?></dd></div>
@@ -122,11 +161,18 @@ get_header();
 						<a class="rh-chip<?php echo $on ? ' is-on' : ''; ?>" href="<?php echo esc_url( $rh_url( 1, array( 'nhom' => $on ? null : (string) $fm['code'] ) + $rh_args ) ); ?>"<?php echo $on ? ' aria-current="page"' : ''; ?>><?php echo esc_html( (string) $fm['label'] ); ?> <small><?php echo (int) $fm['open_count']; ?></small></a>
 					<?php endforeach; ?></div>
 				<?php endif; ?>
-				<?php if ( $h_provs ) : ?>
+				<?php if ( $h_provs && ! $rh_geo ) : ?>
 					<div class="rh-chip-row"><span class="rh-chips-h">Nhiều tin</span>
 					<?php foreach ( array_slice( $h_provs, 0, 6 ) as $p ) : ?>
 						<?php $on = (int) $f['tinh'] === (int) $p['id']; ?>
-						<a class="rh-chip<?php echo $on ? ' is-on' : ''; ?>" href="<?php echo esc_url( $rh_url( 1, array( 'tinh' => $on ? null : (int) $p['id'] ) + $rh_args ) ); ?>"<?php echo $on ? ' aria-current="page"' : ''; ?>><?php echo esc_html( (string) $p['name'] ); ?> <small><?php echo (int) $p['open_count']; ?></small></a>
+						<a class="rh-chip<?php echo $on ? ' is-on' : ''; ?>" href="<?php echo esc_url( $on ? $rh_url( 1, array( 'tinh' => null ) + $rh_args ) : $rh_tinh_url( (int) $p['id'] ) ); ?>"<?php echo $on ? ' aria-current="page"' : ''; ?>><?php echo esc_html( (string) $p['name'] ); ?> <small><?php echo (int) $p['open_count']; ?></small></a>
+					<?php endforeach; ?>
+					<?php if ( $filtered ) : ?><a class="rh-chip is-clear" href="<?php echo esc_url( $rh_url() ); ?>">↺ Bỏ lọc</a><?php endif; ?></div>
+				<?php elseif ( $rh_geo ) : ?>
+					<div class="rh-chip-row"><span class="rh-chips-h">Khu vực</span>
+					<a class="rh-chip" href="<?php echo esc_url( $rh_hub_url ); ?>">← Toàn quốc</a>
+					<?php foreach ( cvc_rec_presets() as $pk => $pv ) : ?>
+						<?php if ( $pk !== $preset_key && ! empty( $pv['geo'] ) ) : ?><a class="rh-chip" href="<?php echo esc_url( cvc_rec_geo_url( $pk, $rh_geo['short'] ) ); ?>"><?php echo esc_html( $pv['h1'] . ' ' . $rh_geo['label'] ); ?></a><?php endif; ?>
 					<?php endforeach; ?>
 					<?php if ( $filtered ) : ?><a class="rh-chip is-clear" href="<?php echo esc_url( $rh_url() ); ?>">↺ Bỏ lọc</a><?php endif; ?></div>
 				<?php elseif ( $filtered ) : ?>
@@ -165,7 +211,7 @@ get_header();
 				<?php if ( ! $jobs_res['ok'] ) : ?>
 					<div class="ci-empty is-error"><b>Không tải được danh sách tin</b>Hệ thống đang bận, vui lòng tải lại trang sau ít phút.</div>
 				<?php elseif ( ! $items ) : ?>
-					<div class="ci-empty"><b>Chưa có tin còn hạn khớp bộ lọc</b><a class="ci-btn" href="<?php echo esc_url( $rh_url() ); ?>">↺ Bỏ lọc</a> <a class="ci-btn" href="<?php echo esc_url( cvc_ci_url( array( 'trang-thai' => 'all' ) + $preset['filter'] ) ); ?>">Xem cả tin đã hết hạn</a></div>
+					<div class="ci-empty"><b><?php echo $rh_geo && ! $filtered ? esc_html( 'Chưa có thông báo ' . mb_strtolower( $preset['h1'], 'UTF-8' ) . ' tại ' . $rh_geo['label'] . ' còn hạn' ) : 'Chưa có tin còn hạn khớp bộ lọc'; ?></b><a class="ci-btn" href="<?php echo esc_url( $rh_url() ); ?>">↺ Bỏ lọc</a> <a class="ci-btn" href="<?php echo esc_url( cvc_ci_url( array( 'trang-thai' => 'all' ) + $preset['filter'] ) ); ?>">Xem cả tin đã hết hạn</a></div>
 				<?php else : ?>
 					<div class="ci-job-list">
 						<?php foreach ( $items as $r ) { cvc_ci_render_job_card( (array) $r, $logged_in, true ); } ?>
@@ -230,6 +276,8 @@ get_header();
 				<?php endif; ?>
 			</aside>
 		</div>
+
+		<?php if ( ! empty( $preset['geo'] ) ) { cvc_rec_geo_render_links( $preset_key, $rh_geo ? $rh_geo['short'] : '' ); } ?>
 
 		<nav class="rh-more" aria-label="Loại tin khác">
 			<span>Xem thêm:</span>

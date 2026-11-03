@@ -74,3 +74,13 @@
 @media (max-width:1100px){.rh-grid{grid-template-columns:1fr}.rh-side{position:static;grid-template-columns:1fr 1fr}}
 @media (max-width:900px){.rh-hero-grid{grid-template-columns:1fr;gap:16px}.rh-stats{grid-template-columns:repeat(4,1fr)}.rh-stats dd{font-size:22px}}
 @media (max-width:640px){.rh-chip-row{flex-wrap:nowrap;overflow-x:auto;margin-inline:-12px;padding:0 12px 4px;scrollbar-width:none}.rh-chip-row::-webkit-scrollbar{display:none}.rh-chips-h{min-width:0}.rh-side{grid-template-columns:1fr}.rh-stats{grid-template-columns:1fr 1fr}.rh-search select,.rh-search .ci-btn{flex:1 1 100%}.rh-soon-row{grid-auto-columns:78%}.rh-more a.is-emp{margin-left:0}.rh-sec-head h2{font-size:19px}}
+/* 03/11/2026: trang tuyển dụng theo tỉnh - khối 34 tỉnh, thành */
+.rh-geo{margin:28px 0 0}
+.rh-geo-list{list-style:none;margin:10px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:6px 18px}
+.rh-geo-list li{font-size:15px;line-height:1.5}
+.rh-geo-list a{color:#1d3550;text-decoration:none!important;border-bottom:1px solid transparent}
+.rh-geo-list a:hover{border-bottom-color:#d1b47a}
+.rh-geo-list a[aria-current]{font-weight:bold;color:#7a4511}
+.rh-geo-list li:not(.has-open) a{color:#5c5c5c}
+.rh-geo-list small{font-size:12px;color:#7a6440;font-weight:bold;font-variant-numeric:tabular-nums}
+@media (max-width:640px){.rh-geo-list{grid-template-columns:1fr 1fr}}

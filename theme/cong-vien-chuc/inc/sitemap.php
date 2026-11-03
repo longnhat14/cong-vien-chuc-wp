@@ -86,8 +86,14 @@ function cvc_sitemap_render(): void {
 			}
 		}
 	}
-	foreach ( function_exists( 'cvc_rec_presets' ) ? cvc_rec_presets() : array() as $pr ) {
+	foreach ( function_exists( 'cvc_rec_presets' ) ? cvc_rec_presets() : array() as $prk => $pr ) {
 		$rows[] = array( 'path' => '/' . $pr['path'] . '/', 'lastmod' => cvc_sitemap_lastmod( $data['notices'] ) );
+		// 03/11/2026: trang theo tỉnh - chỉ trang đủ điều kiện index (có tin còn hạn hoặc >= 3 tin / 12 tháng).
+		foreach ( ! empty( $pr['geo'] ) && function_exists( 'cvc_rec_geo_provinces' ) ? cvc_rec_geo_provinces( $prk ) : array() as $g ) {
+			if ( ! empty( $g['indexable'] ) ) {
+				$rows[] = array( 'path' => '/' . $pr['path'] . '/' . $g['short'] . '/', 'lastmod' => (string) ( $g['updated_at'] ?? '' ) );
+			}
+		}
 	}
 	$rows = array_merge( $rows, $data['notices'], $data['positions'] );
 

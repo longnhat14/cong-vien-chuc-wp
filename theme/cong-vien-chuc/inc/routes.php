@@ -59,9 +59,14 @@ function cvc_register_rewrite_rules(): void {
 	// 28/10/2026 (v2): trang chủ đề tuyển dụng URL ngắn (/tuyen-cong-chuc/, /tuyen-vien-chuc/, /tuyen-giao-vien/,
 	// /tuyen-dung-y-te/, /tuyen-dung/hop-dong/). URL cũ /tuyen-dung/{key}/ vẫn khớp để cvc_rec_legacy_redirect() chuyển 301.
 	foreach ( cvc_rec_presets() as $cvc_k => $cvc_pr ) {
-		foreach ( array_unique( array( $cvc_pr['path'], 'tuyen-dung/' . $cvc_k ) ) as $cvc_path ) {
+		foreach ( array_unique( array_merge( array( $cvc_pr['path'], 'tuyen-dung/' . $cvc_k ), (array) ( $cvc_pr['legacy'] ?? array() ) ) ) as $cvc_path ) {
 			add_rewrite_rule( '^' . $cvc_path . '/page/([0-9]+)/?$', 'index.php?cvc_page=recruitments&cvc_rec_preset=' . $cvc_k . '&cvc_paged=$matches[1]', 'top' );
 			add_rewrite_rule( '^' . $cvc_path . '/?$', 'index.php?cvc_page=recruitments&cvc_rec_preset=' . $cvc_k, 'top' );
+			// 03/11/2026: trang theo tỉnh /tuyen-dung-cong-chuc/{tinh}/ (URL cũ /tuyen-cong-chuc/{tinh}/ cũng khớp để chuyển 301).
+			if ( ! empty( $cvc_pr['geo'] ) && 0 !== strpos( $cvc_path, 'tuyen-dung/' ) ) {
+				add_rewrite_rule( '^' . $cvc_path . '/([a-z0-9-]+)/page/([0-9]+)/?$', 'index.php?cvc_page=recruitments&cvc_rec_preset=' . $cvc_k . '&cvc_rec_tinh=$matches[1]&cvc_paged=$matches[2]', 'top' );
+				add_rewrite_rule( '^' . $cvc_path . '/([a-z0-9-]+)/?$', 'index.php?cvc_page=recruitments&cvc_rec_preset=' . $cvc_k . '&cvc_rec_tinh=$matches[1]', 'top' );
+			}
 		}
 	}
 	// 19/10/2026: sitemap tin tuyển dụng + vị trí (inc/sitemap.php), gắn vào sitemap_index của Rank Math.
@@ -421,6 +426,7 @@ function cvc_register_query_vars( array $vars ): array {
 	$vars[] = 'cvc_exam_mode';
 	$vars[] = 'cvc_exam_track';
 	$vars[] = 'cvc_rec_preset';
+	$vars[] = 'cvc_rec_tinh';
 	$vars[] = 'cvc_account_section';
 	$vars[] = 'cvc_attempt_id';
 	$vars[] = 'cvc_document_slug';
@@ -857,13 +863,34 @@ function cvc_rec_legacy_redirect(): void {
 	if ( '' === $key || 'recruitments' !== get_query_var( 'cvc_page' ) || ! isset( cvc_rec_presets()[ $key ] ) ) {
 		return;
 	}
-	$want = '/' . cvc_rec_presets()[ $key ]['path'] . '/';
-	$path = (string) wp_parse_url( (string) ( $_SERVER['REQUEST_URI'] ?? '' ), PHP_URL_PATH );
+	$pr    = cvc_rec_presets()[ $key ];
+	$paged = max( 1, absint( get_query_var( 'cvc_paged' ) ) );
+	$path  = (string) wp_parse_url( (string) ( $_SERVER['REQUEST_URI'] ?? '' ), PHP_URL_PATH );
+	$query = array();
+	wp_parse_str( (string) wp_parse_url( (string) ( $_SERVER['REQUEST_URI'] ?? '' ), PHP_URL_QUERY ), $query );
+
+	// 03/11/2026: trang theo tỉnh. Slug tỉnh không có -> 404; ?tinh=<id> trên trang loại -> URL tỉnh sạch (301).
+	$short = (string) get_query_var( 'cvc_rec_tinh' );
+	if ( ! empty( $pr['geo'] ) ) {
+		$geo = cvc_rec_geo_provinces( $key );
+		if ( '' !== $short ) {
+			if ( $geo && ! isset( $geo[ $short ] ) ) {
+				return; // template-rec-hub.php trả 404.
+			}
+		} elseif ( ! empty( $query['tinh'] ) && empty( $query['q'] ) ) {
+			$g = cvc_rec_geo_by_id( $key, absint( $query['tinh'] ) );
+			if ( $g ) {
+				unset( $query['tinh'] );
+				wp_safe_redirect( cvc_rec_geo_url( $key, $g['short'], $paged, $query ), 301, 'Cong Vien Chuc' );
+				exit;
+			}
+		}
+	}
+	$want = '/' . $pr['path'] . '/' . ( '' !== $short ? $short . '/' : '' );
 	if ( 0 === strpos( $path, $want ) ) {
 		return;
 	}
-	$query = (string) wp_parse_url( (string) ( $_SERVER['REQUEST_URI'] ?? '' ), PHP_URL_QUERY );
-	$to    = cvc_rec_preset_url( $key, max( 1, absint( get_query_var( 'cvc_paged' ) ) ) ) . ( '' !== $query ? '?' . $query : '' );
+	$to = '' !== $short ? cvc_rec_geo_url( $key, $short, $paged, $query ) : cvc_rec_preset_url( $key, $paged, $query );
 	wp_safe_redirect( $to, 301, 'Cong Vien Chuc' );
 	exit;
 }
