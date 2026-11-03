@@ -49,7 +49,10 @@ $token       = cvc_auth_token();
  * tự mở lượt mới khi chỉ xem đề. Có lượt đang làm dở -> mở lại ngay; có ?che-do=thi-that|on-tap -> bắt đầu
  * đúng chế độ đó; còn lại hiện trang đề với 2 nút chọn chế độ.
  */
-$start_mode = array( 'thi-that' => 'exam', 'on-tap' => 'practice' )[ sanitize_key( (string) ( $_GET['che-do'] ?? '' ) ) ] ?? '';
+// 03/11/2026: ?che-do=on-tap-nhanh = Luyện nhanh 10 câu (ôn tập, ưu tiên câu chưa làm / từng sai).
+$start_raw   = sanitize_key( (string) ( $_GET['che-do'] ?? '' ) );
+$start_quick = 'on-tap-nhanh' === $start_raw;
+$start_mode  = array( 'thi-that' => 'exam', 'on-tap' => 'practice', 'on-tap-nhanh' => 'practice' )[ $start_raw ] ?? '';
 if ( $is_found && null !== $token && '' === $start_mode ) {
 	nocache_headers();
 	$open = ( new CVC_Api_Client( null, 8 ) )->get( '/api/my-exam-attempts', array( 'status' => 'in_progress', 'exam_id' => (int) ( $exam['id'] ?? 0 ), 'per_page' => 1 ), $token );
@@ -64,7 +67,7 @@ if ( $is_found && null !== $token && '' === $start_mode ) {
 }
 if ( $is_found && null !== $token && '' !== $start_mode && (int) ( $exam['questions_count'] ?? count( (array) ( $exam['questions'] ?? array() ) ) ) > 0 ) {
 	nocache_headers();
-	$started = ( new CVC_Exam_Attempt_Service() )->start( (int) ( $exam['id'] ?? 0 ), $start_mode, $token );
+	$started = ( new CVC_Exam_Attempt_Service() )->start( (int) ( $exam['id'] ?? 0 ), $start_mode, $token, $start_quick );
 	$att_id  = (int) ( $started['data']['data']['id'] ?? 0 );
 	if ( $started['ok'] && $att_id > 0 ) {
 		wp_safe_redirect( cvc_exam_attempt_url( $att_id ) );
@@ -221,8 +224,14 @@ get_header();
 				<?php if ( 0 === $total_q ) : ?>
 					<?php cvc_render_empty_state( 'Đề thi này chưa có câu hỏi được công bố.' ); ?>
 				<?php else : ?>
-					<section class="xd-actions" aria-label="Làm đề">
+					<?php $xd_quick = $total_q > 10 && ! $locked; ?>
+					<section class="xd-actions<?php echo $xd_quick ? ' has-quick' : ''; ?>" aria-label="Làm đề">
+						<?php if ( $xd_quick ) : // 03/11/2026: Luyện nhanh 10 câu là lựa chọn đầu tiên (đề dài hay bị bỏ dở). ?>
+						<a class="xd-act is-primary is-quick" href="<?php echo esc_url( $mode_url( 'on-tap-nhanh' ) ); ?>" rel="nofollow"><b>⚡ Luyện nhanh 10 câu</b><small>Khoảng 8 phút · ưu tiên câu bạn chưa làm, rồi câu từng sai</small></a>
+						<a class="xd-act" href="<?php echo esc_url( $mode_url( 'on-tap' ) ); ?>" rel="nofollow"><b>✎ Luyện cả đề · <?php echo (int) $total_q; ?> câu</b><small>Không tính giờ, xem đáp án và căn cứ sau mỗi câu</small></a>
+						<?php else : ?>
 						<a class="xd-act is-primary" href="<?php echo esc_url( $mode_url( 'on-tap' ) ); ?>" rel="nofollow"><b>✎ Luyện thi đề này</b><small>Không tính giờ, xem đáp án và căn cứ sau mỗi câu</small></a>
+						<?php endif; ?>
 						<a class="xd-act is-navy" href="<?php echo esc_url( $mode_url( 'thi-that' ) ); ?>" rel="nofollow"><b>◷ Thi thử đề này</b><small>Tính giờ<?php echo $duration > 0 ? ' ' . (int) $duration . ' phút' : ''; ?>, nộp bài xem điểm</small></a>
 						<div class="xd-act-side">
 							<?php if ( $can_pdf ) { echo cvc_pdf_button( 'exam', $exam_id, array( 'label' => 'Tải PDF có đáp án', 'variant' => 'dap-an', 'class' => 'xd-pdf' ) ); } // phpcs:ignore WordPress.Security.EscapeOutput ?>

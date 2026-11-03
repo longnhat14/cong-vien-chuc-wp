@@ -311,3 +311,13 @@ a.side-btn{text-decoration:none}
 .qreport-send{background:#156361;color:#fff;border:0;border-radius:8px;padding:6px 12px;font-weight:700}
 .qreport-cancel{background:#fff;border:1px solid #d6cbb6;border-radius:8px;padding:6px 12px}
 @media print{.qreport{display:none}}
+/* 03/11/2026: bước tiếp theo ngay dưới điểm (Luyện nhanh 10 câu) */
+.xr-next{border-color:#f5c9ad;background:linear-gradient(105deg,#fff6ee,#fff)}
+.xr-next h2{margin:0 0 6px;font-size:20px;color:#173653}
+.xr-next p{margin:0 0 12px;color:#475467;line-height:1.55}
+.xr-next-actions{display:flex;flex-wrap:wrap;gap:8px}
+.xr-next-btn{display:inline-flex;align-items:center;gap:6px;padding:10px 15px;border-radius:9px;border:1px solid #d7dbe1;background:#fff;color:#173653;font-weight:700;text-decoration:none}
+.xr-next-btn:hover{border-color:#e66a24;color:#c65316}
+.xr-next-btn.is-primary{background:#e66a24;border-color:#e66a24;color:#fff}
+.xr-next-btn.is-primary:hover{background:#c65316;color:#fff}
+@media (max-width:640px){.xr-next-btn{flex:1 1 100%;justify-content:center}}

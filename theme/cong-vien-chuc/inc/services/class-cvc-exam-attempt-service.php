@@ -32,8 +32,9 @@ final class CVC_Exam_Attempt_Service extends CVC_Api_Service {
 		return '/api/exam-attempts';
 	}
 
-	public function start( int $examId, string $mode, string $token ): array {
-		return $this->client->post( '/api/exams/' . $examId . '/attempts', array( 'mode' => $mode ), $token );
+	/** $quick = Luyện nhanh 10 câu (03/11/2026, chỉ chế độ practice). */
+	public function start( int $examId, string $mode, string $token, bool $quick = false ): array {
+		return $this->client->post( '/api/exams/' . $examId . '/attempts', array( 'mode' => $mode ) + ( $quick ? array( 'quick' => 1 ) : array() ), $token );
 	}
 
 	public function show( int $attemptId, string $token ): array {

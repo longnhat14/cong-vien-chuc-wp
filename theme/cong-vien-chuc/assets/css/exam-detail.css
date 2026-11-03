@@ -71,3 +71,8 @@ a.xd-doc:hover{border-color:var(--dz-accline,#8fb4da);background:var(--dz-accsof
 @media(max-width:380px){.xd-actions{grid-template-columns:1fr}}
 @media print{.xd-sticky,.xd-actions{display:none}}
 @media(prefers-reduced-motion:reduce){.xd-act{transition:none}}
+/* 03/11/2026: Luyện nhanh 10 câu - 4 nút: nhanh | cả đề | thi thử | PDF/lưu */
+.xd-actions.has-quick{grid-template-columns:repeat(3,minmax(0,1fr)) auto;max-width:1180px}
+.xd-act.is-quick{background:#e66a24;border-color:#e66a24}
+.xd-act.is-quick:hover{background:#c65316}
+@media (max-width:900px){.xd-actions.has-quick{grid-template-columns:1fr 1fr}.xd-actions.has-quick .xd-act.is-quick{grid-column:1/-1}}

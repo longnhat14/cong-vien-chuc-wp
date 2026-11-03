@@ -429,3 +429,10 @@
  :root .ch-nav-links .ch-mg a.ch-mg-book:nth-of-type(n+3){display:none}
  :root .ch-nav-links .ch-mg a.ch-mg-booksall{margin:4px 0 0 4px;border-bottom:0}
 }
+/* 03/11/2026: nút Ôn hôm nay (số ngày ôn tuần này / mục tiêu) */
+:root .ch-study{display:inline-flex;align-items:center;gap:7px;height:44px;padding:0 12px;border-radius:13px;border:1px solid #f5c9ad;background:#fff6ee;color:#b8460c;font-weight:700;font-size:14px;text-decoration:none;white-space:nowrap}
+:root .ch-study b{display:inline-block;padding:2px 8px;border-radius:20px;background:#e66a24;color:#fff;font-size:12.5px}
+:root .ch-study:hover{background:#ffeadb}
+:root .ch-study.is-done{border-color:#bfe3cb;background:#effaf2;color:#1f6b3a}
+:root .ch-study.is-done b{background:#23845a}
+@media (max-width:640px){:root .ch-study{padding:0 9px}:root .ch-study .ch-study-l{display:none}}

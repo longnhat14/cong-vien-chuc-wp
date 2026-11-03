@@ -171,6 +171,25 @@ else :
 		<div class="stats"><div class="stat good"><span>Câu trả lời đúng</span><b><?php $e( (int) $c['correct'] ); ?></b></div><div class="stat bad"><span>Câu trả lời sai</span><b><?php $e( (int) $c['wrong'] ); ?></b></div><div class="stat skip"><span>Câu bỏ trống</span><b><?php $e( (int) $c['blank'] ); ?></b></div><div class="stat"><span><?php echo null !== $at['total_score'] ? 'Điểm đạt được' : 'Điểm quy đổi'; ?></span><b><?php $e( $score_lbl ); ?></b></div></div>
 	</div></section>
 
+	<?php
+	// 03/11/2026: bước tiếp theo ngay dưới điểm - Luyện nhanh 10 câu tiếp / làm cả đề; điểm thấp có lời động viên.
+	$xr_slug  = (string) ( $ex['slug'] ?? '' );
+	$xr_quick = ! empty( $at['quick'] );
+	$xr_total = (int) ( $ex['questions_count'] ?? 0 );
+	if ( '' !== $xr_slug && empty( $ex['personal'] ) && $xr_total > 10 ) :
+		$xr_url = cvc_exam_url( $xr_slug );
+		$xr_low = (float) $pct < 50;
+		?>
+		<section class="card xr-next"><div class="pad">
+			<h2><?php echo $xr_quick ? 'Làm tiếp 10 câu khác của đề này?' : ( $xr_low ? 'Đừng nản - ôn từng chặng 10 câu sẽ nhanh tiến bộ' : 'Ôn tiếp để nhớ lâu' ); ?></h2>
+			<p><?php echo esc_html( $xr_low ? 'Lần đầu đúng dưới một nửa là bình thường. Câu sai đã vào Sổ câu sai và sẽ quay lại đúng hạn; luyện từng chặng 10 câu (khoảng 8 phút) giúp nhớ chắc hơn làm cả đề một lúc.' : 'Mỗi chặng 10 câu ưu tiên câu bạn chưa làm, rồi câu từng sai của đề này.' ); ?></p>
+			<div class="xr-next-actions">
+				<a class="xr-next-btn is-primary" href="<?php echo esc_url( add_query_arg( 'che-do', 'on-tap-nhanh', $xr_url ) ); ?>" rel="nofollow">⚡ Luyện nhanh 10 câu<?php echo $xr_quick ? ' tiếp theo' : ''; ?></a>
+				<a class="xr-next-btn" href="<?php echo esc_url( add_query_arg( 'che-do', 'on-tap', $xr_url ) ); ?>" rel="nofollow">Luyện cả đề · <?php echo (int) $xr_total; ?> câu</a>
+				<?php if ( ! $xr_quick ) : ?><a class="xr-next-btn" href="<?php echo esc_url( add_query_arg( 'che-do', 'thi-that', $xr_url ) ); ?>" rel="nofollow">Thi thử lại (tính giờ)</a><?php endif; ?>
+			</div>
+		</div></section>
+	<?php endif; ?>
 	<?php if ( function_exists( 'cvc_study_card' ) ) { cvc_study_card( array( 'compact' => true, 'heading' => 'TIẾP THEO · ÔN HẰNG NGÀY' ) ); } // 02/11/2026 ?>
 
 	<section class="card plan"><div class="pad">

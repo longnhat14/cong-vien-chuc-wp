@@ -57,6 +57,31 @@ function cvc_chrome_unread(): int {
 	return $n;
 }
 
+/**
+ * Nút "Ôn hôm nay" ở đầu trang (03/11/2026, claude/phan-tich-giu-chan-luyen-de.md): số ngày ôn tuần này / mục tiêu,
+ * dấu ✓ khi đã xong bài ôn hôm nay. Cache 2 phút / người.
+ */
+function cvc_chrome_study(): ?array {
+	$token = cvc_auth_token();
+	if ( null === $token || ! function_exists( 'cvc_study_summary' ) ) {
+		return null;
+	}
+	$key    = 'cvc_stchip_' . md5( $token );
+	$cached = get_transient( $key );
+	if ( is_array( $cached ) ) {
+		return $cached ?: null;
+	}
+	$s   = cvc_study_summary();
+	$out = $s ? array(
+		'done' => ! empty( $s['today']['daily_done'] ),
+		'week' => (int) ( $s['week']['done'] ?? 0 ),
+		'goal' => (int) ( $s['week']['goal'] ?? 5 ),
+	) : array();
+	set_transient( $key, $out, 120 );
+
+	return $out ?: null;
+}
+
 function cvc_chrome_icons(): array {
 	return array(
 		'arrow'  => '<svg class="ch-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
@@ -158,6 +183,8 @@ function cvc_chrome_header(): void {
 			<div class="ch-nav-actions">
 				<a class="ch-iconbtn" href="<?php echo esc_url( cvc_search_url() ); ?>" data-ch-search aria-label="Tìm kiếm"><?php echo $ico['search']; // phpcs:ignore WordPress.Security.EscapeOutput ?></a>
 				<?php if ( $logged_in ) : ?>
+				<?php $ch_st = ! $is_emp && function_exists( 'cvc_study_url' ) ? cvc_chrome_study() : null; ?>
+				<?php if ( $ch_st ) : ?><a class="ch-study<?php echo $ch_st['done'] ? ' is-done' : ''; ?>" href="<?php echo esc_url( cvc_study_url( $ch_st['done'] ) ); ?>" rel="nofollow" title="<?php echo esc_attr( ( $ch_st['done'] ? 'Đã xong bài ôn hôm nay' : 'Bài ôn hôm nay: 10 câu, khoảng 7 phút' ) . ' · tuần này ' . $ch_st['week'] . '/' . $ch_st['goal'] . ' ngày' ); ?>"><span class="ch-study-l"><?php echo $ch_st['done'] ? 'Đã ôn hôm nay' : 'Ôn hôm nay'; ?></span><b><?php echo $ch_st['done'] ? '✓ ' : ''; ?><?php echo (int) $ch_st['week']; ?>/<?php echo (int) $ch_st['goal']; ?></b></a><?php endif; ?>
 				<a class="ch-iconbtn" href="<?php echo esc_url( cvc_account_url( 'notifications' ) ); ?>" aria-label="<?php echo esc_attr( $unread > 0 ? sprintf( 'Thông báo: %d chưa đọc', $unread ) : 'Thông báo' ); ?>"><?php echo $ico['bell']; // phpcs:ignore WordPress.Security.EscapeOutput ?><?php if ( $unread > 0 ) : ?><span class="ch-count"><?php echo esc_html( $unread > 9 ? '9+' : (string) $unread ); ?></span><?php endif; ?></a>
 				<a class="ch-btn ch-btn-primary ch-btn-small ch-acc-btn" href="<?php echo esc_url( $is_emp ? home_url( '/don-vi/' ) : cvc_account_url() ); ?>"><?php echo function_exists( 'cvc_current_avatar_html' ) ? cvc_current_avatar_html( 22, 'ch-acc-avatar' ) : ''; // phpcs:ignore WordPress.Security.EscapeOutput ?><?php echo $is_emp ? 'Đơn vị' : 'Tài khoản'; ?> <?php echo $ico['arrow']; // phpcs:ignore WordPress.Security.EscapeOutput ?></a>
 				<?php else : ?>
