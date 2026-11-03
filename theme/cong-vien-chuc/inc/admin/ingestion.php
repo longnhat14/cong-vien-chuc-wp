@@ -276,6 +276,23 @@ function cvc_admin_render_ingestion_index(): void {
 	$tc_rows = $tc_res['ok'] ? (array) ( $tc_res['data']['data'] ?? array() ) : array();
 	$tc_lbl  = array( 'civil_servant' => 'Công chức', 'public_employee' => 'Viên chức', 'contract' => 'Hợp đồng lao động', 'armed_forces' => 'Lực lượng vũ trang', 'other' => 'Doanh nghiệp / khác' );
 	?>
+	<?php
+	// 03/11/2026: bộ lọc trùng tự học - luật theo tên miền (tham số không đổi nội dung / 1 bài nhiều đường dẫn).
+	$dr_res = cvc_admin_api_get( '/api/admin/ingestion/dedup-rules' );
+	$dr     = $dr_res['ok'] ? (array) ( $dr_res['data']['data'] ?? array() ) : array();
+	$dr_rules = (array) ( $dr['rules'] ?? array() );
+	?>
+	<?php if ( $dr_rules ) : ?>
+		<details class="dz-card border border-slate-300 bg-white" id="bo-loc-trung">
+			<summary class="cursor-pointer font-black text-ink text-sm"><i class="fa-solid fa-filter" aria-hidden="true"></i> <?php echo esc_html( 'Bộ lọc trùng tự học: ' . count( array_filter( $dr_rules, static fn ( $r ) => ! empty( $r['active'] ) ) ) . ' luật đang bật · chặn ' . (int) ( $dr['blocked30'] ?? 0 ) . ' bản trùng trong 30 ngày' ); ?></summary>
+			<p class="text-xs text-ink-muted mt-1">Hệ thống tự học từ mỗi cặp tin trùng đã xác nhận: tham số đường dẫn không đổi nội dung (vd <code>categoryId</code>, <code>zoneid</code>) và trang có 1 bài nhiều đường dẫn. Bấm "Vẫn đăng riêng" cho tin bị báo trùng sai thì luật bị ghi sai; sai từ 2 lần và nhiều hơn đúng sẽ tự tắt.</p>
+			<div class="overflow-x-auto mt-2"><table class="w-full text-xs min-w-[560px]"><thead class="text-left text-ink-muted"><tr><th class="py-1">Tên miền</th><th>Luật</th><th class="text-right">Đúng</th><th class="text-right">Sai</th><th>Trạng thái</th></tr></thead><tbody>
+				<?php foreach ( array_slice( $dr_rules, 0, 60 ) as $r ) : ?>
+					<tr class="border-t border-slate-200"><td class="py-1"><?php echo esc_html( (string) $r['host'] ); ?></td><td><?php echo esc_html( 'slug_alias' === $r['kind'] ? 'Cùng bài, khác đường dẫn' : 'Bỏ tham số ' . $r['value'] ); ?></td><td class="text-right tabular-nums"><?php echo (int) $r['hits']; ?></td><td class="text-right tabular-nums"><?php echo (int) $r['misses']; ?></td><td><?php echo ! empty( $r['active'] ) ? 'Đang bật' : 'Đã tắt'; ?></td></tr>
+				<?php endforeach; ?>
+			</tbody></table></div>
+		</details>
+	<?php endif; ?>
 	<?php if ( $tc_rows ) : ?>
 		<details class="dz-card border border-amber-200 bg-amber-50" id="can-kiem-tra-loai" open>
 			<summary class="cursor-pointer font-black text-amber-900 text-sm"><i class="fa-solid fa-scale-balanced" aria-hidden="true"></i> <?php echo esc_html( count( $tc_rows ) . ' tin cần kiểm tra loại tuyển dụng' ); ?></summary>
