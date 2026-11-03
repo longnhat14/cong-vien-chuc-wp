@@ -91,7 +91,7 @@ get_header();
 					<?php echo cvc_pdf_button( 'recruitment', $rid, array( 'group' => $group, 'label' => 'Bản đề thi + phiếu tô', 'variant' => 'de', 'class' => 'is-ghost' ) ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
 					<a class="pds-link" href="<?php echo esc_url( $rec_url ); ?>">Làm đề online ›</a>
 				</div>
-				<p class="pds-note">Xem trước miễn phí · đăng nhập (miễn phí) để tải · file có mã QR làm bài và chấm điểm trực tuyến.</p>
+				<p class="pds-note"><a href="#hoc-bo-de">Học miễn phí cả <?php echo (int) $n_e; ?> đề ngay trên trang</a> · đăng nhập (miễn phí) để tải PDF · file có mã QR làm bài và chấm điểm trực tuyến.</p>
 			</div>
 			<figure class="pds-cover">
 				<img src="<?php echo esc_url( $cover ); ?>" alt="<?php echo esc_attr( 'Ảnh bìa ' . $set['title'] ); ?>" width="360" height="360" loading="eager" decoding="async">
@@ -118,17 +118,48 @@ get_header();
 					</ol>
 				</section>
 
+				<?php
+				/*
+				 * 03/11/2026 (anh Nhật: mở miễn phí, học hết trên trang): học trọn bộ đề ngay trên trang - bấm đáp án biết đúng/sai,
+				 * giải thích, căn cứ; tiến độ lưu trên trình duyệt; mỗi 20 câu mời đăng nhập nhẹ (không chặn). Chỉ đề 1 nằm sẵn
+				 * trong HTML (SEO); đề 2, 3... tải qua AJAX cvc_pdf_exam khi bấm tab (tránh trùng nội dung giữa các bộ đề).
+				 */
+				$pql_logged = null !== cvc_auth_token();
+				$pql_q      = static function ( array $qq, int $n, int $i ): void {
+					$ans = (string) $qq['answer'];
+					?>
+					<article class="pql-q" data-i="<?php echo (int) $i; ?>" data-ans="<?php echo esc_attr( $ans ); ?>" id="<?php echo esc_attr( 'd' . $n . '-cau-' . ( $i + 1 ) ); ?>">
+						<p class="pql-text"><b>Câu <?php echo (int) $qq['n']; ?>.</b> <?php echo esc_html( (string) $qq['text'] ); ?></p>
+						<div class="pql-opts">
+							<?php foreach ( (array) $qq['options'] as $o ) : ?><button type="button" class="pql-opt" data-k="<?php echo esc_attr( (string) $o['key'] ); ?>"><span class="pql-k"><?php echo esc_html( (string) $o['key'] ); ?></span><span class="pql-t"><?php echo esc_html( (string) $o['text'] ); ?></span></button><?php endforeach; ?>
+						</div>
+						<details class="pds-ans pql-ans"><summary>Xem đáp án</summary><div><b>Đáp án: <?php echo esc_html( $ans ); ?></b><?php echo '' !== (string) $qq['explanation'] ? ' – ' . esc_html( (string) $qq['explanation'] ) : ''; ?><?php if ( '' !== (string) $qq['ref'] ) : ?><br><i>Căn cứ: <?php echo esc_html( (string) $qq['ref'] ); ?></i><?php endif; ?></div></details>
+					</article>
+					<?php
+				};
+				?>
 				<?php if ( $preview ) : ?>
-					<section class="pds-box" aria-labelledby="pds-pv-h">
-						<h2 id="pds-pv-h">Xem trước <?php echo count( $preview ); ?> câu đầu của đề 1</h2>
-						<?php foreach ( $preview as $qq ) : ?>
-							<div class="pds-q">
-								<p><b>Câu <?php echo (int) $qq['n']; ?>.</b> <?php echo esc_html( (string) $qq['text'] ); ?></p>
-								<ul><?php foreach ( (array) $qq['options'] as $o ) : ?><li><b><?php echo esc_html( (string) $o['key'] ); ?>.</b> <?php echo esc_html( (string) $o['text'] ); ?></li><?php endforeach; ?></ul>
-								<details class="pds-ans"><summary>Xem đáp án</summary><div><b>Đáp án: <?php echo esc_html( (string) $qq['answer'] ); ?></b><?php echo '' !== (string) $qq['explanation'] ? ' – ' . esc_html( (string) $qq['explanation'] ) : ''; ?><?php if ( '' !== (string) $qq['ref'] ) : ?><br><i>Căn cứ: <?php echo esc_html( (string) $qq['ref'] ); ?></i><?php endif; ?></div></details>
+					<section class="pds-box pql" id="hoc-bo-de" aria-labelledby="pds-pv-h" data-slug="<?php echo esc_attr( $slug ); ?>" data-logged="<?php echo $pql_logged ? '1' : '0'; ?>" data-login="<?php echo esc_url( cvc_login_url( $url . '#hoc-bo-de' ) ); ?>" data-ajax="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>">
+						<h2 id="pds-pv-h">Học trọn bộ đề miễn phí · <?php echo (int) $n_e; ?> đề · <?php echo (int) $n_q; ?> câu</h2>
+						<p class="pql-lead">Bấm chọn đáp án để biết đúng / sai ngay, kèm giải thích và căn cứ Điều – khoản. Không cần đăng nhập - tiến độ được lưu trên trình duyệt này.</p>
+						<?php if ( count( $exams ) > 1 ) : ?>
+							<div class="pql-tabs" role="tablist" aria-label="Chọn đề">
+								<?php foreach ( $exams as $k => $ex ) : ?>
+									<button type="button" role="tab" class="pql-tab<?php echo 0 === $k ? ' is-on' : ''; ?>" aria-selected="<?php echo 0 === $k ? 'true' : 'false'; ?>" data-n="<?php echo (int) ( $k + 1 ); ?>" data-exam="<?php echo esc_url( cvc_exam_url( (string) $ex['slug'] ) ); ?>">Đề <?php echo (int) ( $k + 1 ); ?> <small><?php echo (int) $ex['total_questions']; ?> câu</small></button>
+								<?php endforeach; ?>
 							</div>
+						<?php endif; ?>
+						<div class="pql-prog" aria-live="polite"><span class="pql-prog-t">Đã làm <b data-pq="done">0</b>/<b data-pq="total"><?php echo count( $preview ); ?></b> · đúng <b data-pq="right">0</b></span><span class="pql-bar"><i data-pq="bar"></i></span><button type="button" class="pql-reset" data-pq="reset">Làm lại đề này</button></div>
+						<nav class="pql-pager" aria-label="Trang câu hỏi"></nav>
+						<div class="pql-panel" data-n="1" data-loaded="1" data-exam="<?php echo esc_url( cvc_exam_url( (string) ( $exams[0]['slug'] ?? '' ) ) ); ?>">
+							<?php foreach ( $preview as $i => $qq ) { $pql_q( $qq, 1, (int) $i ); } ?>
+						</div>
+						<?php foreach ( array_slice( $exams, 1 ) as $k => $ex ) : ?>
+							<div class="pql-panel" data-n="<?php echo (int) ( $k + 2 ); ?>" data-loaded="0" data-exam="<?php echo esc_url( cvc_exam_url( (string) $ex['slug'] ) ); ?>" hidden><p class="pql-loading">Đang tải đề <?php echo (int) ( $k + 2 ); ?>…</p></div>
 						<?php endforeach; ?>
-						<p class="pds-more">Còn <?php echo max( 0, $n_q - count( $preview ) ); ?> câu trong file PDF. <?php echo cvc_pdf_button( 'recruitment', $rid, array( 'group' => $group, 'label' => 'Tải trọn bộ', 'variant' => 'dap-an', 'class' => 'is-small' ) ); // phpcs:ignore WordPress.Security.EscapeOutput ?></p>
+						<nav class="pql-pager is-bottom" aria-label="Trang câu hỏi"></nav>
+						<div class="pql-cta" hidden></div>
+						<p class="pds-more">Muốn in ra giấy? <?php echo cvc_pdf_button( 'recruitment', $rid, array( 'group' => $group, 'label' => 'Tải trọn bộ PDF (có đáp án)', 'variant' => 'dap-an', 'class' => 'is-small' ) ); // phpcs:ignore WordPress.Security.EscapeOutput ?></p>
 					</section>
 				<?php endif; ?>
 
@@ -177,5 +208,6 @@ get_header();
 <script>
 document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('.pds-copy');if(!b)return;var t=b.getAttribute('data-copy');(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){b.textContent='Đã sao chép';},function(){window.prompt('Sao chép liên kết:',t);});});
 </script>
+<script src="<?php echo esc_url( get_theme_file_uri( '/assets/js/pdf-learn.js' ) . '?ver=' . (string) filemtime( get_theme_file_path( '/assets/js/pdf-learn.js' ) ) ); ?>" defer></script>
 <?php
 get_footer();

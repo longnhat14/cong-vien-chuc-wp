@@ -310,3 +310,16 @@ function cvc_pdf_ajax_visit(): void {
 	( new CVC_Api_Client( null, 5 ) )->post( '/api/exam-pdf/visit', array_filter( $body ), cvc_auth_token() );
 	wp_send_json_success();
 }
+
+/** 03/11/2026: học trọn bộ đề trên trang - tải đề thứ n của bộ (đề 2, 3...) khi bấm tab. Công khai, cache 30 phút. */
+add_action( 'wp_ajax_cvc_pdf_exam', 'cvc_pdf_exam_ajax' );
+add_action( 'wp_ajax_nopriv_cvc_pdf_exam', 'cvc_pdf_exam_ajax' );
+function cvc_pdf_exam_ajax(): void {
+	$slug = sanitize_title( wp_unslash( (string) ( $_POST['slug'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification
+	$n    = absint( $_POST['n'] ?? 0 ); // phpcs:ignore WordPress.Security.NonceVerification
+	if ( '' === $slug || $n < 1 || $n > 20 ) {
+		wp_send_json( array( 'success' => false ) );
+	}
+	$d = cvc_pdf_api( '/api/pdf-sets/' . $slug . '/exams/' . $n, array(), 1800 );
+	wp_send_json( array( 'success' => ! empty( $d['questions'] ), 'data' => $d ) );
+}
