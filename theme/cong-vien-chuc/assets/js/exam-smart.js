@@ -337,7 +337,9 @@
     var f = q.feedback, ok = f.is_correct === true;
     fb.classList.add('show', ok ? 'ok' : 'no');
     var ck = correctKey(q) || f.correct_option_key;
-    var html = '<h3>' + (ok ? '✓ Chính xác' : '✗ Chưa đúng') + (ck && !ok ? ' <span class="sx-fbkey">- đáp án đúng: <strong>' + esc(ck) + '</strong></span>' : '') + '</h3>' +
+    // 03/11/2026: nút "Câu tiếp" ngay cạnh kết luận đúng/sai (máy tính) - không phải cuộn qua giải thích.
+    var html = '<div class="sx-fbhead"><h3>' + (ok ? '✓ Chính xác' : '✗ Chưa đúng') + (ck && !ok ? ' <span class="sx-fbkey">- đáp án đúng: <strong>' + esc(ck) + '</strong></span>' : '') + '</h3>' +
+      (current < TOTAL - 1 ? '<button type="button" class="sx-btn sx-primary sx-fbnext sx-fbquick" data-act="next2" title="Phím Enter hoặc →">Câu tiếp →</button>' : '') + '</div>' +
       '<p class="sx-fbline">' + (ck ? 'Đáp án đúng: <strong>' + esc(ck) + '</strong>. ' : '') + (ok ? '' : 'Bạn chọn ' + esc(q.selected || '') + '.') + '</p>';
     var more = '';
     if (f.explanation) more += '<div class="sx-explain">' + esc(f.explanation).replace(/\n/g, '<br>') + '</div>';
@@ -345,10 +347,11 @@
     if (f.knowledge) more += '<p class="sx-learn">Học lại: <a href="' + esc(linkTo(f.knowledge.url)) + '" target="_blank" rel="noopener">' + esc(f.knowledge.title) + '</a></p>';
     if (more) html += '<div class="sx-fbmore" id="sx-fbmore">' + more + '</div><button type="button" class="sx-fbtoggle" data-act="more" aria-expanded="false" aria-controls="sx-fbmore">Xem đầy đủ giải thích &amp; căn cứ ▾</button>';
     if (!f.explanation && !f.article) html += '<p class="sx-muted">Câu hỏi này chưa có giải thích sẵn - bấm "Giải thích chi tiết" để xem diễn giải.</p>';
-    html += '<div class="sx-group"><button type="button" class="sx-btn" data-act="explain">▤ Giải thích chi tiết</button>' + (current < TOTAL - 1 ? '<button type="button" class="sx-btn sx-primary sx-fbnext" data-act="next">Câu tiếp theo →</button>' : '') + '</div>';
+    html += '<div class="sx-group"><button type="button" class="sx-btn" data-act="explain">▤ Giải thích chi tiết</button>' + '</div>'; // nút Câu tiếp ở đầu khung + thanh dính đáy (03/11/2026)
     fb.innerHTML = html;
     fb.querySelector('[data-act="explain"]').onclick = function () { openExplain(current); };
     var nx = fb.querySelector('[data-act="next"]'); if (nx) nx.onclick = function () { go(current + 1); };
+    var nx2 = fb.querySelector('[data-act="next2"]'); if (nx2) nx2.onclick = function () { go(current + 1); };
     var mo = fb.querySelector('[data-act="more"]');
     if (mo) mo.onclick = function () { var box = document.getElementById('sx-fbmore'), op = !box.classList.contains('open'); box.classList.toggle('open', op); mo.setAttribute('aria-expanded', op ? 'true' : 'false'); mo.innerHTML = op ? 'Thu gọn ▴' : 'Xem đầy đủ giải thích &amp; căn cứ ▾'; };
   }

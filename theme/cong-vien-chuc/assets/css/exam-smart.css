@@ -338,3 +338,12 @@ body.sx-mob .sx-sheetback{position:fixed;inset:0;z-index:64;background:rgba(0,0,
 body.sx-sheet-lock{overflow:hidden}
 @media(prefers-reduced-motion:reduce){body.sx-mob .sx-side,body.sx-mob #sx-mNext.is-ready{transition:none;animation:none}}
 .sx-sr{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+/* 03/11/2026: máy tính - thanh "Câu trước / Câu tiếp theo" dính đáy màn hình, không phải cuộn qua phần giải thích dài mới bấm được. */
+@media (min-width:761px){
+.sx-mainpanel{overflow:clip}
+.sx-main .sx-nav{position:sticky;bottom:0;z-index:6;background:#fff;box-shadow:0 -6px 14px rgba(0,0,0,.06)}
+.sx-fbhead{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.sx-fbhead h3{margin:0}
+.sx-fbquick{white-space:nowrap}
+}
+@media (max-width:760px){.sx-fbquick{display:none!important}}
