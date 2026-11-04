@@ -436,3 +436,8 @@
 :root .ch-study.is-done{border-color:#bfe3cb;background:#effaf2;color:#1f6b3a}
 :root .ch-study.is-done b{background:#23845a}
 @media (max-width:640px){:root .ch-study{padding:0 9px}:root .ch-study .ch-study-l{display:none}}
+
+/* 04/11/2026: nhãn số liệu menu con (dem-*) + chấm đỏ nội dung mới */
+:root .ch-nav-badge.is-count,:root .ch-mg .ch-mega-txt b .ch-nav-badge.is-count{color:#7a4a12;background:#fff4eb;border-color:#f3cfb3;white-space:nowrap;font-variant-numeric:tabular-nums}
+:root .ch-mg .ch-mg-pills .ch-nav-badge.is-count,:root .ch-mg .ch-mg-pills .ch-mega-txt b .ch-nav-badge.is-count{display:block;margin:2px 0 0;padding:0;border:0;background:none;font-weight:600;font-size:11px;color:#8a5a17}
+:root .ch-nav-dot{display:inline-block;width:7px;height:7px;margin-left:5px;border-radius:50%;background:#d92d2d;vertical-align:4px;box-shadow:0 0 0 2px rgba(217,45,45,.18)}

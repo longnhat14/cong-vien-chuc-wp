@@ -157,7 +157,7 @@ function cvc_chrome_header(): void {
 					<?php else : ?>
 					<div class="ch-nav-sub">
 						<?php foreach ( $kids as $kid ) : ?>
-						<a href="<?php echo esc_url( $kid['url'] ); ?>"<?php echo $active( array( $kid['url'] ) ) ? ' class="is-active" aria-current="page"' : ''; ?>><span class="ch-sub-lb"><?php if ( ! empty( $kid['icon'] ) && function_exists( 'cvc_nav_icon' ) ) : ?><i class="ch-sub-ico" aria-hidden="true"><?php echo cvc_nav_icon( (string) $kid['icon'] ); // phpcs:ignore WordPress.Security.EscapeOutput ?></i><?php endif; ?><?php echo esc_html( $kid['label'] ); ?></span><?php if ( ! empty( $kid['badge'] ) ) : ?><small class="ch-nav-badge<?php echo ! empty( $kid['new'] ) ? ' is-new' : ''; ?>"<?php echo ! empty( $kid['new_tip'] ) ? ' title="' . esc_attr( $kid['new_tip'] ) . '"' : ''; ?>><?php echo esc_html( $kid['badge'] ); ?></small><?php endif; ?></a>
+						<a href="<?php echo esc_url( $kid['url'] ); ?>"<?php echo $active( array( $kid['url'] ) ) ? ' class="is-active" aria-current="page"' : ''; ?>><span class="ch-sub-lb"><?php if ( ! empty( $kid['icon'] ) && function_exists( 'cvc_nav_icon' ) ) : ?><i class="ch-sub-ico" aria-hidden="true"><?php echo cvc_nav_icon( (string) $kid['icon'] ); // phpcs:ignore WordPress.Security.EscapeOutput ?></i><?php endif; ?><?php echo esc_html( $kid['label'] ); ?></span><?php echo cvc_nav_badge_html( $kid ); // phpcs:ignore WordPress.Security.EscapeOutput ?></a>
 						<?php endforeach; ?>
 					</div>
 					<?php endif; ?>
@@ -252,7 +252,7 @@ function cvc_chrome_mega( string $key, array $kids, callable $active ): void {
 						?>
 						<a class="ch-mega-item<?php echo 'audience' === $g ? ' is-pill' : ''; ?><?php echo $on ? ' is-active' : ''; ?>" href="<?php echo esc_url( $k['url'] ); ?>"<?php echo $on ? ' aria-current="page"' : ''; ?><?php echo '_blank' === ( $k['target'] ?? '' ) ? ' target="_blank" rel="noopener"' : ''; ?>>
 							<?php echo $tile( $k ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
-							<span class="ch-mega-txt"><b><?php echo esc_html( $k['label'] ); ?><?php if ( null !== $cnt ) : ?><em class="ch-mg-count" title="Tin đang nhận hồ sơ"><?php echo esc_html( number_format_i18n( $cnt ) ); ?></em><?php endif; ?><?php if ( ! empty( $k['badge'] ) ) : ?><small class="ch-nav-badge<?php echo ! empty( $k['new'] ) ? ' is-new' : ''; ?>"<?php echo ! empty( $k['new_tip'] ) ? ' title="' . esc_attr( $k['new_tip'] ) . '"' : ''; ?>><?php echo esc_html( $k['badge'] ); ?></small><?php endif; ?></b><?php if ( 'audience' !== $g && ! empty( $k['desc'] ) ) : ?><small><?php echo esc_html( $k['desc'] ); ?></small><?php endif; ?></span>
+							<span class="ch-mega-txt"><b><?php echo esc_html( $k['label'] ); ?><?php if ( null !== $cnt ) : ?><em class="ch-mg-count" title="Tin đang nhận hồ sơ"><?php echo esc_html( number_format_i18n( $cnt ) ); ?></em><?php endif; ?><?php echo cvc_nav_badge_html( $k ); // phpcs:ignore WordPress.Security.EscapeOutput ?></b><?php if ( 'audience' !== $g && ! empty( $k['desc'] ) ) : ?><small><?php echo esc_html( $k['desc'] ); ?></small><?php endif; ?></span>
 							<?php if ( 'audience' !== $g ) : ?><span class="ch-mg-go" aria-hidden="true"><?php echo $go; // phpcs:ignore WordPress.Security.EscapeOutput ?></span><?php endif; ?>
 						</a>
 					<?php endforeach; ?>
@@ -282,7 +282,7 @@ function cvc_chrome_mega( string $key, array $kids, callable $active ): void {
 			<div class="ch-mg-foot">
 				<?php if ( $more ) : ?>
 					<span class="ch-mg-foot-h">Học thêm</span>
-					<?php foreach ( $more as $k ) : ?><a class="ch-mg-dot<?php echo $active( array( $k['url'] ) ) ? ' is-active' : ''; ?>" href="<?php echo esc_url( $k['url'] ); ?>"><?php echo esc_html( $k['label'] ); ?><?php if ( ! empty( $k['badge'] ) ) : ?> <small class="ch-nav-badge<?php echo ! empty( $k['new'] ) ? ' is-new' : ''; ?>"<?php echo ! empty( $k['new_tip'] ) ? ' title="' . esc_attr( $k['new_tip'] ) . '"' : ''; ?>><?php echo esc_html( $k['badge'] ); ?></small><?php endif; ?></a><?php endforeach; ?>
+					<?php foreach ( $more as $k ) : ?><a class="ch-mg-dot<?php echo $active( array( $k['url'] ) ) ? ' is-active' : ''; ?>" href="<?php echo esc_url( $k['url'] ); ?>"><?php echo esc_html( $k['label'] ); ?> <?php echo cvc_nav_badge_html( $k ); // phpcs:ignore WordPress.Security.EscapeOutput ?></a><?php endforeach; ?>
 				<?php endif; ?>
 				<?php foreach ( $foot as $k ) : ?>
 					<?php $note = '' !== (string) ( $k['desc'] ?? '' ) && function_exists( 'cvc_nav_fill' ) ? cvc_nav_fill( (string) $k['desc'] ) : null; ?>

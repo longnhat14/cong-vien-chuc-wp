@@ -140,15 +140,13 @@ function cvc_nav_from_wp_menu(): ?array {
 					$new_title = sprintf( $auto[ $c ][1], (int) $stats_now[ $auto[ $c ][0] ] );
 				}
 			}
-			// 04/11/2026: mục Ngân hàng câu hỏi / Kiến thức hiện số (28.400+ câu, 10.100+ bài).
-			if ( '' === $row['badge'] && function_exists( 'cvc_site_stats' ) ) {
-				$nav_path = untrailingslashit( (string) wp_parse_url( (string) $row['url'], PHP_URL_PATH ) );
-				$nav_ss   = cvc_site_stats();
-				if ( function_exists( 'cvc_question_bank_url' ) && $nav_path === untrailingslashit( (string) wp_parse_url( cvc_question_bank_url(), PHP_URL_PATH ) ) && $nav_ss['questions'] > 0 ) {
-					$row['badge'] = cvc_stat_label( (int) $nav_ss['questions'] ) . ' câu';
-				} elseif ( function_exists( 'cvc_knowledge_url' ) && $nav_path === untrailingslashit( (string) wp_parse_url( cvc_knowledge_url(), PHP_URL_PATH ) ) && $nav_ss['knowledge'] > 0 ) {
-					$row['badge'] = cvc_stat_label( (int) $nav_ss['knowledge'] ) . ' bài';
-				}
+			// 04/11/2026: nhãn số liệu theo lớp dem-* (Giao diện → Menu) - xem cvc_nav_count_badge().
+			$dot = false;
+			if ( '' === $row['badge'] && ( $cb = cvc_nav_count_badge( $classes, (string) $row['url'] ) ) ) {
+				$row['badge'] = $cb['text'];
+				$row['tip']   = $cb['tip'];
+				// Có nội dung mới: giữ nhãn số + chấm đỏ (chú thích khi rê chuột).
+				$dot = $is_new;
 			}
 			if ( $is_new && '' === $row['badge'] ) {
 				$row['badge'] = 'Mới';
@@ -161,6 +159,8 @@ function cvc_nav_from_wp_menu(): ?array {
 				'variant' => in_array( 'mau-dong', $classes, true ) ? 'bronze' : '',
 				'new'     => $is_new && 'Mới' === $row['badge'],
 				'new_tip' => $new_title,
+				'dot'     => $dot,
+				'tip'     => (string) ( $row['tip'] ?? '' ),
 			);
 		}
 	}
@@ -322,6 +322,114 @@ function cvc_nav_stats_refresh(): void {
 	delete_transient( 'cvc_nav_stats_lock' );
 }
 
+/**
+ * 04/11/2026: nhãn số cho mục menu con theo lớp CSS:
+ *  dem-de / dem-thi-thu / dem-cau / dem-bai / dem-pdf / dem-xep-hang / dem-chu-de / dem-cong-chuc / dem-vien-chuc /
+ *  dem-giao-duc / dem-y-te / dem-vi-tri / dem-don-vi / dem-van-ban / dem-da-luu (người đăng nhập) / dem-tien-do (người đăng nhập).
+ * Mục Ngân hàng câu hỏi / Kiến thức không có lớp vẫn nhận số theo URL. Số 0 -> không hiện.
+ *
+ * @param array<int, string> $classes
+ * @return array{text: string, tip: string}|null
+ */
+function cvc_nav_count_badge( array $classes, string $url ): ?array {
+	if ( ! function_exists( 'cvc_site_stats' ) ) {
+		return null;
+	}
+	$ss  = cvc_site_stats();
+	$raw = (array) ( $ss['raw'] ?? array() );
+	$g   = (array) ( $ss['groups'] ?? array() );
+	$map = array(
+		'dem-de'        => array( $ss['exams'], 'đề', 'đề thi đang phát hành' ),
+		'dem-thi-thu'   => array( (int) ( $raw['exams_mock'] ?? 0 ), 'đề', 'đề thi thử tính giờ' ),
+		'dem-cau'       => array( $ss['questions'], 'câu', 'câu hỏi có đáp án, căn cứ' ),
+		'dem-bai'       => array( $ss['knowledge'], 'bài', 'bài kiến thức' ),
+		'dem-pdf'       => array( (int) ( $raw['pdf_sets'] ?? 0 ), 'bộ', 'bộ đề PDF có đáp án' ),
+		'dem-xep-hang'  => array( (int) ( $raw['ranking_users_7d'] ?? 0 ), 'thí sinh tuần này', 'thí sinh nộp bài trong 7 ngày' ),
+		'dem-chu-de'    => array( (int) ( $raw['topics'] ?? 0 ), 'chủ đề', 'chủ đề ôn thi' ),
+		'dem-cong-chuc' => array( (int) ( $raw['track_civil'] ?? 0 ), 'câu', 'câu hỏi nhóm ôn thi công chức' ),
+		'dem-vien-chuc' => array( (int) ( $raw['track_public'] ?? 0 ), 'câu', 'câu hỏi nhóm ôn thi viên chức' ),
+		'dem-giao-duc'  => array( (int) ( $g['education'] ?? 0 ), 'câu', 'câu hỏi ngành giáo dục' ),
+		'dem-y-te'      => array( (int) ( $g['health'] ?? 0 ), 'câu', 'câu hỏi ngành y tế' ),
+		'dem-vi-tri'    => array( (int) ( $raw['open_positions'] ?? 0 ), 'vị trí', 'vị trí đang tuyển' ),
+		'dem-don-vi'    => array( (int) ( $raw['open_employers'] ?? 0 ), 'đơn vị', 'đơn vị đang tuyển' ),
+		'dem-van-ban'   => array( (int) ( $raw['legal_public'] ?? 0 ), 'văn bản', 'văn bản đã đối chiếu nguồn' ),
+	);
+	$hit = null;
+	foreach ( $classes as $c ) {
+		if ( isset( $map[ $c ] ) ) {
+			$hit = $map[ $c ];
+			break;
+		}
+		// Số riêng của người đã đăng nhập (đọc từ thẻ Ôn hôm nay đã lưu tạm).
+		if ( ( 'dem-da-luu' === $c || 'dem-tien-do' === $c ) && function_exists( 'cvc_auth_token' ) && cvc_auth_token() && function_exists( 'cvc_study_summary' ) ) {
+			$st = cvc_nav_user_stats();
+			if ( 'dem-da-luu' === $c && (int) ( $st['due'] ?? 0 ) > 0 ) {
+				return array( 'text' => (int) $st['due'] . ' đến hạn', 'tip' => (int) $st['due'] . ' câu sai đến hạn ôn lại' );
+			}
+			if ( 'dem-da-luu' === $c && (int) ( $st['learning'] ?? 0 ) > 0 ) {
+				return array( 'text' => (int) $st['learning'] . ' câu', 'tip' => 'Đang ôn ' . (int) $st['learning'] . ' câu' );
+			}
+			if ( 'dem-tien-do' === $c && (int) ( $st['done'] ?? 0 ) > 0 && (int) ( $st['total'] ?? 0 ) > 0 ) {
+				$pct = max( 1, (int) round( $st['done'] / $st['total'] * 100 ) );
+				return array( 'text' => 'đã luyện ' . $pct . '%', 'tip' => number_format_i18n( (int) $st['done'] ) . ' / ' . number_format_i18n( (int) $st['total'] ) . ' câu' );
+			}
+			return null;
+		}
+	}
+	if ( null === $hit ) {
+		$path = untrailingslashit( (string) wp_parse_url( $url, PHP_URL_PATH ) );
+		$same = static fn ( string $u ) => untrailingslashit( (string) wp_parse_url( $u, PHP_URL_PATH ) ) === $path;
+		if ( function_exists( 'cvc_question_bank_url' ) && $same( cvc_question_bank_url() ) ) {
+			$hit = $map['dem-cau'];
+		} elseif ( function_exists( 'cvc_knowledge_url' ) && $same( cvc_knowledge_url() ) ) {
+			$hit = $map['dem-bai'];
+		}
+	}
+	if ( null === $hit || (int) $hit[0] <= 0 ) {
+		return null;
+	}
+
+	return array( 'text' => cvc_stat_label( (int) $hit[0] ) . ' ' . $hit[1], 'tip' => number_format_i18n( (int) $hit[0] ) . ' ' . $hit[2] );
+}
+
+/** Số riêng người dùng cho menu, lưu tạm 2 phút theo phiên đăng nhập. @return array<string, int> */
+function cvc_nav_user_stats(): array {
+	static $memo = null;
+	if ( null !== $memo ) {
+		return $memo;
+	}
+	$token = cvc_auth_token();
+	$key   = 'cvc_navu_' . md5( (string) $token );
+	$c     = get_transient( $key );
+	if ( is_array( $c ) ) {
+		return $memo = $c;
+	}
+	$s    = (array) cvc_study_summary();
+	$memo = array(
+		'due'      => (int) ( $s['book']['due'] ?? 0 ),
+		'learning' => (int) ( $s['book']['learning'] ?? 0 ),
+		'done'     => (int) ( $s['bank']['done'] ?? 0 ),
+		'total'    => (int) ( $s['bank']['total'] ?? 0 ),
+	);
+	set_transient( $key, $memo, 2 * MINUTE_IN_SECONDS );
+
+	return $memo;
+}
+
+/** Nhãn của 1 mục menu con: chữ (số / Mới / Sắp có) + chấm đỏ khi vừa có số vừa có nội dung mới. */
+function cvc_nav_badge_html( array $k ): string {
+	if ( empty( $k['badge'] ) ) {
+		return '';
+	}
+	$tip = ! empty( $k['new_tip'] ) && empty( $k['dot'] ) ? (string) $k['new_tip'] : (string) ( $k['tip'] ?? '' );
+	$h   = '<small class="ch-nav-badge' . ( ! empty( $k['new'] ) ? ' is-new' : ( ! empty( $k['tip'] ) ? ' is-count' : '' ) ) . '"' . ( '' !== $tip ? ' title="' . esc_attr( $tip ) . '"' : '' ) . '>' . esc_html( (string) $k['badge'] ) . '</small>';
+	if ( ! empty( $k['dot'] ) ) {
+		$h .= '<i class="ch-nav-dot" title="' . esc_attr( '' !== (string) ( $k['new_tip'] ?? '' ) ? (string) $k['new_tip'] : 'Có nội dung mới' ) . '" aria-label="Mới"></i>';
+	}
+
+	return $h;
+}
+
 /** Số tin đang mở của trang có URL này (chỉ trang tuyển dụng tổng / theo loại); null nếu không biết. */
 function cvc_nav_count_for( string $url ): ?int {
 	$path = (string) wp_parse_url( $url, PHP_URL_PATH );
@@ -339,6 +447,11 @@ function cvc_nav_count_for( string $url ): ?int {
  */
 function cvc_nav_fill( string $text ): ?string {
 	$st  = cvc_nav_stats();
+	// 04/11/2026: thêm mã {don-vi-tuyen} {cau-hoi} {bai-kien-thuc} {bo-pdf} từ số liệu chung.
+	if ( function_exists( 'cvc_site_stats' ) ) {
+		$ss  = cvc_site_stats();
+		$st += array_filter( array( 'don-vi-tuyen' => (int) ( $ss['raw']['open_employers'] ?? 0 ), 'cau-hoi' => cvc_stat_floor( (int) $ss['questions'] ), 'bai-kien-thuc' => cvc_stat_floor( (int) $ss['knowledge'] ), 'bo-pdf' => (int) ( $ss['raw']['pdf_sets'] ?? 0 ) ) );
+	}
 	$out = esc_html( $text );
 	$bad = false;
 	$out = preg_replace_callback(

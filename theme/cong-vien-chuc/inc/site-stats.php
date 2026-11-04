@@ -42,6 +42,7 @@ function cvc_site_stats(): array {
 		'new_k7'         => (int) ( $c['new_knowledge_7d'] ?? 0 ),
 		'groups'         => (array) ( $c['questions_groups'] ?? array() ),
 		'open_recruit'   => (int) ( $c['open_recruitments'] ?? 0 ),
+		'raw'            => $c,
 	);
 
 	return $memo;
