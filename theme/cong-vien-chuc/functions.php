@@ -101,6 +101,7 @@ require_once __DIR__ . '/inc/course-purchase.php';
 require_once __DIR__ . '/inc/engagement.php';
 require_once __DIR__ . '/inc/homepage-nextgen.php';
 require_once __DIR__ . '/inc/home-v17.php';
+require_once __DIR__ . '/inc/site-stats.php'; // Số liệu quảng bá câu hỏi / bài kiến thức (04/11/2026)
 require_once __DIR__ . '/inc/ai-coach.php';
 require_once __DIR__ . '/inc/sitemap.php';
 require_once __DIR__ . '/inc/routes.php';

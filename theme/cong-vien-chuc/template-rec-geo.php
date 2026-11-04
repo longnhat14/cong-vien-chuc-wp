@@ -440,6 +440,7 @@ get_header();
 
 			<section class="rg-card is-materials" id="tai-lieu">
 				<h3><?php echo $rg_ic( 'book-open' ); // phpcs:ignore ?> <?php echo esc_html( 'Tài liệu ôn thi ' . $rg_noun ); ?></h3>
+				<?php if ( function_exists( 'cvc_trust_strip' ) ) { cvc_trust_strip( 'inline' ); } // 04/11/2026 ?>
 				<ul class="rg-check">
 					<li><a href="<?php echo esc_url( $track_url ); ?>"><?php echo $rg_ic( 'check-circle' ); // phpcs:ignore ?> <?php echo esc_html( $track_lbl ); ?></a></li>
 					<li><a href="<?php echo esc_url( $rg_docs ); ?>"><?php echo $rg_ic( 'check-circle' ); // phpcs:ignore ?> <?php echo esc_html( 'Tài liệu ôn thi ' . $rg_noun ); ?></a></li>

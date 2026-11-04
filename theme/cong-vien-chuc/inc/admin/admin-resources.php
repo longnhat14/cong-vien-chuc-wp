@@ -411,7 +411,7 @@ function cvc_admin_resources(): array {
 				array( 'key' => 'status', 'label' => 'Trạng thái', 'format' => 'status' ),
 			),
 			'filters'  => array(
-				'status'    => array( 'label' => 'Trạng thái', 'options' => $content_status ),
+				'status'    => array( 'label' => 'Trạng thái', 'options' => $content_status + array( 'personal' => 'Bài ôn cá nhân (người dùng)' ) ),
 				'exam_type' => array( 'label' => 'Loại đề', 'options' => array( 'official' => 'Chính thức', 'mock' => 'Thi thử', 'practice' => 'Luyện tập', 'mock_exam' => 'Mô phỏng' ) ),
 			),
 			'fields'   => array(

@@ -121,7 +121,8 @@ get_header();
 			<div class="ci-kpi"><span class="ci-sym" aria-hidden="true">⌂</span><div><b><?php echo isset( $counts['open_recruitments'] ) ? esc_html( number_format_i18n( (int) $counts['open_recruitments'] ) ) : '—'; ?></b><small>Tin đang nhận hồ sơ</small></div></div>
 			<a class="ci-kpi" href="<?php echo esc_url( add_query_arg( 'con-han', 1, cvc_positions_url() ) ); ?>"><span class="ci-sym" aria-hidden="true">☷</span><div><b><?php echo isset( $counts['open_positions'] ) ? esc_html( number_format_i18n( (int) $counts['open_positions'] ) ) : '—'; ?></b><small>Vị trí đang tuyển dụng</small></div></a>
 			<div class="ci-kpi"><span class="ci-sym" aria-hidden="true">▣</span><div><b><?php echo isset( $counts['published_exams'] ) ? esc_html( number_format_i18n( (int) $counts['published_exams'] ) ) : '—'; ?></b><small>Đề thi đang phát hành</small></div></div>
-			<div class="ci-kpi"><span class="ci-sym" aria-hidden="true">§</span><div><b><?php echo isset( $counts['verified_legal_documents'] ) ? esc_html( number_format_i18n( (int) $counts['verified_legal_documents'] ) ) : '—'; ?></b><small>Văn bản đã đối chiếu nguồn</small></div></div>
+			<?php $ci_ss = function_exists( 'cvc_site_stats' ) ? cvc_site_stats() : array( 'questions' => 0 ); // 04/11/2026: thay "văn bản" bằng ngân hàng câu hỏi ?>
+			<a class="ci-kpi" href="<?php echo esc_url( function_exists( 'cvc_question_bank_url' ) ? cvc_question_bank_url() : cvc_exams_url() ); ?>" title="<?php echo esc_attr( number_format( (int) $ci_ss['questions'], 0, ',', '.' ) . ' câu' ); ?>"><span class="ci-sym" aria-hidden="true">?</span><div><b><?php echo $ci_ss['questions'] > 0 ? esc_html( cvc_stat_label( (int) $ci_ss['questions'] ) ) : '—'; ?></b><small>Câu hỏi ôn thi có đáp án, căn cứ</small></div></a>
 		</section>
 
 		<div class="ci-workspace">

@@ -140,6 +140,16 @@ function cvc_nav_from_wp_menu(): ?array {
 					$new_title = sprintf( $auto[ $c ][1], (int) $stats_now[ $auto[ $c ][0] ] );
 				}
 			}
+			// 04/11/2026: mục Ngân hàng câu hỏi / Kiến thức hiện số (28.400+ câu, 10.100+ bài).
+			if ( '' === $row['badge'] && function_exists( 'cvc_site_stats' ) ) {
+				$nav_path = untrailingslashit( (string) wp_parse_url( (string) $row['url'], PHP_URL_PATH ) );
+				$nav_ss   = cvc_site_stats();
+				if ( function_exists( 'cvc_question_bank_url' ) && $nav_path === untrailingslashit( (string) wp_parse_url( cvc_question_bank_url(), PHP_URL_PATH ) ) && $nav_ss['questions'] > 0 ) {
+					$row['badge'] = cvc_stat_label( (int) $nav_ss['questions'] ) . ' câu';
+				} elseif ( function_exists( 'cvc_knowledge_url' ) && $nav_path === untrailingslashit( (string) wp_parse_url( cvc_knowledge_url(), PHP_URL_PATH ) ) && $nav_ss['knowledge'] > 0 ) {
+					$row['badge'] = cvc_stat_label( (int) $nav_ss['knowledge'] ) . ' bài';
+				}
+			}
 			if ( $is_new && '' === $row['badge'] ) {
 				$row['badge'] = 'Mới';
 			}

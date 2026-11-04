@@ -36,7 +36,11 @@ $u = array(
 );
 
 cvc_seo_set_title( 'Công Viên Chức — Ôn thi vững vàng, sự nghiệp bền lâu' );
-cvc_seo_set_description( 'Tìm đề thi thử, tài liệu ôn thi công chức viên chức, văn bản pháp luật và tin tuyển dụng mới nhất. Học có lộ trình, luyện đề có kết quả.' );
+// 04/11/2026: mô tả kèm số câu hỏi / bài kiến thức (số làm tròn, cập nhật theo dữ liệu thật).
+$cvc_ss = function_exists( 'cvc_site_stats' ) ? cvc_site_stats() : array( 'questions' => 0 );
+cvc_seo_set_description( $cvc_ss['questions'] > 0
+	? 'Ôn thi công chức, viên chức với ' . cvc_stat_label( $cvc_ss['questions'] ) . ' câu hỏi trắc nghiệm có đáp án, căn cứ Điều – khoản, ' . cvc_stat_label( $cvc_ss['knowledge'] ) . ' bài kiến thức và ' . number_format( $cvc_ss['exams'], 0, ',', '.' ) . ' đề thi thử. Tin tuyển dụng mới nhất theo từng tỉnh.'
+	: 'Tìm đề thi thử, tài liệu ôn thi công chức viên chức, văn bản pháp luật và tin tuyển dụng mới nhất. Học có lộ trình, luyện đề có kết quả.' );
 cvc_seo_set_canonical( $u['home'] );
 
 $e = static function ( $s ) {
@@ -203,17 +207,28 @@ $GLOBALS['cvc_home17_cfg'] = array(
  <?php
  $stats = array(
 	 array( (int) ( $counts['exams'] ?? 0 ), 'Đề thi thử &amp; luyện tập', '<path d="M5 3h10l4 4v14H5z"/><path d="M14 3v5h5M8 13h8M8 17h6"/>', $u['exams'] ),
-	 array( (int) ( $counts['legal_documents'] ?? 0 ), 'Văn bản pháp luật', '<path d="M4 4h16v16H4z"/><path d="M8 8h8M8 12h8M8 16h5"/>', $u['legal'] ),
-	 array( (int) ( $counts['topics'] ?? 0 ), 'Chuyên đề ôn tập', '<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v17H6.5A2.5 2.5 0 0 1 4 17.5z"/><path d="M4 6h12M8 10h8M8 14h7"/>', $u['topics'] ),
+	 // 04/11/2026: thay "Văn bản pháp luật" / "Chuyên đề ôn tập" bằng ngân hàng câu hỏi và bài kiến thức (làm tròn + "+").
+	 array( (int) ( $counts['questions'] ?? 0 ), 'Câu hỏi trắc nghiệm có đáp án, căn cứ', '<path d="M9 9a3 3 0 1 1 4 2.8c-.6.3-1 .9-1 1.6V14"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="9"/>', function_exists( 'cvc_question_bank_url' ) ? cvc_question_bank_url() : $u['exams'], true ),
+	 array( (int) ( $counts['knowledge'] ?? 0 ), 'Bài kiến thức tóm tắt theo văn bản', '<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v17H6.5A2.5 2.5 0 0 1 4 17.5z"/><path d="M4 6h12M8 10h8M8 14h7"/>', function_exists( 'cvc_knowledge_url' ) ? cvc_knowledge_url() : $u['topics'], true ),
 	 array( (int) ( $counts['open_recruitments'] ?? 0 ), 'Tin tuyển dụng còn hạn', '<path d="M3 20h18M5 20V8l7-4 7 4v12M9 20v-6h6v6M8 10h.01M16 10h.01"/>', $u['rec'] ),
  );
  if ( array_sum( array_column( $stats, 0 ) ) > 0 ) :
 	 ?>
  <div class="container stats-wrap"><div class="stats">
   <?php foreach ( $stats as $s ) : ?>
-  <div class="stat"><span class="stat-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><?php echo $s[2]; // phpcs:ignore ?></svg></span><div><strong class="stat-counter" data-target="<?php echo (int) $s[0]; ?>" data-suffix=""><?php echo esc_html( number_format( $s[0], 0, ',', '.' ) ); ?></strong><small><?php echo $s[1]; // phpcs:ignore ?></small></div></div>
+  <?php $s_round = ! empty( $s[4] ) && $s[0] >= 1000; $s_val = $s_round ? cvc_stat_floor( $s[0] ) : $s[0]; ?>
+  <a class="stat" href="<?php echo esc_url( $s[3] ); ?>" title="<?php echo esc_attr( number_format( $s[0], 0, ',', '.' ) ); ?>"><span class="stat-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><?php echo $s[2]; // phpcs:ignore ?></svg></span><div><strong class="stat-counter" data-target="<?php echo (int) $s_val; ?>" data-suffix="<?php echo $s_round ? '+' : ''; ?>"><?php echo esc_html( number_format( $s_val, 0, ',', '.' ) . ( $s_round ? '+' : '' ) ); ?></strong><small><?php echo $s[1]; // phpcs:ignore ?></small></div></a>
   <?php endforeach; ?>
- </div></div>
+ </div>
+ <?php
+ // 04/11/2026: câu hỏi theo nhóm + câu mới tuần này.
+ $qg = (array) ( $counts['questions_groups'] ?? array() );
+ $qg_lbl = array( 'general' => 'Kiến thức chung & pháp luật', 'education' => 'Giáo dục', 'health' => 'Y tế', 'specialized' => 'Chuyên ngành khác' );
+ if ( array_sum( array_map( 'intval', $qg ) ) > 0 ) :
+	 ?>
+ <p class="stats-groups"><?php foreach ( $qg_lbl as $gk => $gl ) : if ( (int) ( $qg[ $gk ] ?? 0 ) <= 0 ) { continue; } ?><a href="<?php echo esc_url( function_exists( 'cvc_question_bank_url' ) ? cvc_question_bank_url() : '#' ); ?>"><b><?php echo esc_html( cvc_stat_label( (int) $qg[ $gk ] ) ); ?></b> <?php echo esc_html( $gl ); ?></a><?php endforeach; ?><?php if ( (int) ( $counts['new_questions_7d'] ?? 0 ) > 0 ) : ?><span class="is-new">+<?php echo esc_html( number_format( (int) $counts['new_questions_7d'], 0, ',', '.' ) ); ?> câu mới tuần này</span><?php endif; ?></p>
+ <?php endif; ?>
+ </div>
  <?php endif; ?>
 </section>
 

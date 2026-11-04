@@ -309,6 +309,7 @@ get_header();
 
 					<aside class="xd-side">
 						<?php if ( is_array( $pe_acc ) ) { cvc_pe_render_paybox( $exam, $pe_acc, $token, $clean_url ); } ?>
+						<?php if ( function_exists( 'cvc_trust_strip' ) ) { cvc_trust_strip( 'inline', 'Đề này thuộc ngân hàng ôn thi của Công Viên Chức' ); } // 04/11/2026 ?>
 
 						<?php if ( $rp_rec ) : ?>
 							<div class="dz-card xd-rec">

@@ -53,6 +53,7 @@ cvc_auth_start(
 );
 ?>
 <div class="au-panel">
+	<?php if ( function_exists( 'cvc_trust_strip' ) ) { cvc_trust_strip( 'inline', 'Tạo tài khoản miễn phí để luyện' ); } // 04/11/2026 ?>
 	<?php if ( function_exists( 'cvc_google_button' ) ) { cvc_google_button( isset( $_GET['redirect_to'] ) ? sanitize_text_field( wp_unslash( $_GET['redirect_to'] ) ) : '', 'signup' ); } ?>
 
 	<form class="au-form" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" id="cvc-register-form">

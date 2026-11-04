@@ -112,7 +112,8 @@ function cvc_aic_render(): void {
 		<div class="aic-engines" id="aiChatEngines" role="radiogroup" aria-label="Chọn AI trả lời" hidden></div>
 		<div class="aic-context">Bạn có thể hỏi về cách ôn thi, chọn đề, tra cứu văn bản hoặc tìm thông báo tuyển dụng. Cuộc trò chuyện được giữ khi bạn chuyển trang.</div>
 		<div class="aic-messages" id="aiChatMessages" aria-live="polite">
-			<div class="aic-msg bot">Xin chào! Tôi là AI Coach - huấn luyện viên ôn thi của bạn. Tôi có thể giúp xác định phần kiến thức cần củng cố, gợi ý đề luyện tập và xây dựng lộ trình ôn thi phù hợp. Bạn muốn bắt đầu từ đâu?</div>
+			<?php $aic_ss = function_exists( 'cvc_site_stats' ) ? cvc_site_stats() : array( 'questions' => 0 ); // 04/11/2026 ?>
+			<div class="aic-msg bot">Xin chào! Tôi là AI Coach - huấn luyện viên ôn thi của bạn<?php echo $aic_ss['questions'] > 0 ? esc_html( ', trả lời dựa trên ' . cvc_stat_label( (int) $aic_ss['questions'] ) . ' câu hỏi, ' . cvc_stat_label( (int) $aic_ss['knowledge'] ) . ' bài kiến thức và văn bản pháp luật gốc' ) : ''; ?>. Tôi có thể giúp xác định phần kiến thức cần củng cố, gợi ý đề luyện tập và xây dựng lộ trình ôn thi phù hợp. Bạn muốn bắt đầu từ đâu?</div>
 		</div>
 		<div class="aic-chips" id="aiChatChips">
 			<?php foreach ( $chips as $prompt => $label ) : ?>

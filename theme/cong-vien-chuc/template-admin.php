@@ -180,9 +180,9 @@ get_header();
 			$tiles = array(
 				array( 'Tin tuyển dụng đang mở', $d['recruitments']['open'] ?? null, 'recruitments', 'Tổng ' . $sum( $d['recruitments']['by_status'] ?? array() ) . ' tin' ),
 				array( 'Câu hỏi đã xuất bản', $d['questions']['by_status']['published'] ?? null, 'questions', ( (int) ( $d['questions']['by_status']['draft'] ?? 0 ) ) . ' câu nháp' ),
-				array( 'Đề thi', $sum( $d['exams']['by_status'] ?? array() ), 'exams', ( (int) ( $d['exam_attempts_7_days'] ?? 0 ) ) . ' lượt thi 7 ngày qua' ),
+				array( 'Đề thi công khai', $d['exams']['by_status']['published'] ?? null, 'exams', ( (int) ( $d['exams']['by_status']['draft'] ?? 0 ) ) . ' nháp · ' . ( (int) ( $d['exams']['by_status']['personal'] ?? 0 ) ) . ' bài ôn cá nhân · ' . ( (int) ( $d['exam_attempts_7_days'] ?? 0 ) ) . ' lượt thi 7 ngày' ),
 				array( 'Khóa học', $sum( $d['courses']['by_status'] ?? array() ), 'courses', ( (int) ( $d['courses']['by_status']['published'] ?? 0 ) ) . ' đã xuất bản' ),
-				array( 'Bài kiến thức', $sum( $d['knowledge_items']['by_status'] ?? array() ), 'knowledge-items', ( (int) ( $d['knowledge_items']['by_status']['published'] ?? 0 ) ) . ' đã xuất bản' ),
+				array( 'Bài kiến thức đã xuất bản', $d['knowledge_items']['by_status']['published'] ?? null, 'knowledge-items', 'Tổng ' . $sum( $d['knowledge_items']['by_status'] ?? array() ) . ' (gồm nháp, lưu trữ)' ),
 				array( 'Văn bản pháp luật', $d['legal_documents']['public'] ?? null, 'legal-documents', 'đang hiện công khai' ),
 				array( 'Người dùng', $d['users']['total'] ?? null, 'users', '+' . ( (int) ( $d['users']['last_7_days'] ?? 0 ) ) . ' trong 7 ngày' ),
 				array( 'Doanh thu 30 ngày', isset( $d['orders']['revenue_30_days'] ) ? number_format( (float) $d['orders']['revenue_30_days'], 0, ',', '.' ) . 'đ' : null, 'orders', ( (int) ( $d['orders']['paid_30_days'] ?? 0 ) ) . ' đơn đã thanh toán' ),
@@ -443,6 +443,21 @@ get_header();
 				<div>
 					<h1 class="text-2xl font-black text-ink"><?php echo esc_html( $res['label'] ); ?></h1>
 					<p class="text-sm text-ink-muted"><?php echo esc_html( $list['ok'] ? number_format_i18n( $total ) . ' bản ghi' . ( empty( $base_args ) ? '' : ' khớp bộ lọc' ) : '' ); ?></p>
+					<?php
+					// 04/11/2026: Đề thi - tab theo trạng thái (Công khai / Nháp / Bài ôn cá nhân), khớp số trên trang chủ.
+					$sc = (array) ( $list['data']['meta']['status_counts'] ?? array() );
+					if ( 'exams' === $resource_key && $sc ) :
+						$cur_st = (string) ( $current_filters['status'] ?? '' );
+						$tabs   = array( '' => array( 'Tất cả (trừ bài ôn cá nhân)', array_sum( array_map( 'intval', $sc ) ) - (int) ( $sc['personal'] ?? 0 ) ), 'published' => array( 'Công khai', (int) ( $sc['published'] ?? 0 ) ), 'draft' => array( 'Nháp', (int) ( $sc['draft'] ?? 0 ) + (int) ( $sc['review'] ?? 0 ) ), 'personal' => array( 'Bài ôn cá nhân', (int) ( $sc['personal'] ?? 0 ) ) );
+						?>
+						<nav class="flex flex-wrap gap-1 mt-2" aria-label="Trạng thái đề">
+							<?php foreach ( $tabs as $tk => $tv ) : ?>
+								<a href="<?php echo esc_url( cvc_admin_url( 'exams', null, array_filter( array( 'status' => $tk ) ) ) ); ?>" class="px-3 py-1 rounded-full text-xs font-bold border <?php echo $tk === $cur_st ? 'bg-acc text-white border-acc' : 'bg-white text-ink-2 border-slate-300 hover:border-acc-line'; ?>"><?php echo esc_html( $tv[0] . ' · ' . number_format_i18n( $tv[1] ) ); ?></a>
+							<?php endforeach; ?>
+						</nav>
+						<?php if ( 'personal' === $cur_st ) : ?><p class="text-xs text-ink-muted mt-1">"Bài ôn hôm nay" hệ thống tạo riêng cho từng người dùng mỗi ngày - không công khai, không tính vào số đề trên trang chủ.</p><?php endif; ?>
+						<?php if ( 'draft' === $cur_st ) : ?><p class="text-xs text-ink-muted mt-1">Đề nháp: chủ yếu đề riêng theo tin (RP-) chưa đủ câu trong kho hoặc tin đã tắt / hết hạn, và đề luyện văn bản (LD-) đang ẩn.</p><?php endif; ?>
+					<?php endif; ?>
 				</div>
 				<?php if ( cvc_admin_can_resource( $res, 'create' ) ) : ?>
 					<a href="<?php echo esc_url( cvc_admin_url( $resource_key, 'new', array_intersect_key( $current_filters, array_flip( array( 'recruitment_id', 'exam_subject_id', 'topic_id', 'legal_document_id', 'course_id' ) ) ) ) ); ?>" class="inline-flex items-center gap-2 px-4 py-2 bg-acc hover:bg-acc-deep text-white font-black text-sm rounded-xl self-start">

@@ -37,6 +37,7 @@ cvc_auth_start(
 );
 ?>
 <div class="au-panel">
+	<?php if ( function_exists( 'cvc_trust_strip' ) ) { cvc_trust_strip( 'inline', 'Đăng nhập để luyện và lưu tiến độ trên' ); } // 04/11/2026 ?>
 	<?php if ( function_exists( 'cvc_google_button' ) ) { cvc_google_button( $redirect_to, 'signin' ); } ?>
 
 	<form class="au-form" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">

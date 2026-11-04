@@ -302,6 +302,7 @@ function cvc_chrome_footer(): void {
 	?>
 	<footer class="ch-footer">
 		<div class="ch-container">
+			<?php if ( function_exists( 'cvc_trust_strip' ) ) { cvc_trust_strip( 'footer' ); } // 04/11/2026: dải niềm tin ?>
 			<div class="ch-footer-grid">
 				<div><?php cvc_chrome_brand( $ico, true ); ?><p>Nền tảng hỗ trợ ôn thi công chức, viên chức, tra cứu văn bản, tìm tài liệu và theo dõi thông báo tuyển dụng.</p></div>
 				<div><h3>Ôn thi</h3><div class="ch-footer-links"><a href="<?php echo esc_url( cvc_exams_mode_url( 'on-tap' ) ); ?>">Luyện thi trắc nghiệm</a><a href="<?php echo esc_url( cvc_exams_mode_url( 'thi-that' ) ); ?>">Thi thử trắc nghiệm</a><a href="<?php echo esc_url( cvc_question_bank_url() ); ?>">Ngân hàng câu hỏi</a><a href="<?php echo esc_url( cvc_saved_questions_url() ); ?>">Câu hỏi đã lưu</a><a href="<?php echo esc_url( home_url( '/bo-de-pdf/' ) ); ?>">Bộ đề PDF có đáp án</a></div></div>

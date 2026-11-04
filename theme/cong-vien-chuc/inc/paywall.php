@@ -70,6 +70,7 @@ add_action(
 			<p class="pw-kicker"><i class="fa-solid fa-lock-open" aria-hidden="true"></i> Gói ôn thi</p>
 			<h1 class="pw-h1"><?php echo esc_html( ! empty( $o['label'] ) ? 'Mở khóa: ' . $o['label'] : 'Gói ôn thi' ); ?></h1>
 			<?php if ( ! empty( $o['desc'] ) ) : ?><p class="pw-lead"><?php echo esc_html( (string) $o['desc'] ); ?></p><?php endif; ?>
+			<?php if ( function_exists( 'cvc_trust_strip' ) ) { cvc_trust_strip( 'card', 'Gói ôn thi mở khóa toàn bộ:' ); } // 04/11/2026 ?>
 
 			<?php if ( ! $res['ok'] ) : ?>
 				<p class="pw-note is-warn">Không tải được thông tin gói, vui lòng thử lại sau.</p>

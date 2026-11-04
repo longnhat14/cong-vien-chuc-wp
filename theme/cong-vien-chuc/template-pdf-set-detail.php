@@ -162,6 +162,7 @@ get_header();
 						<?php endforeach; ?>
 						<nav class="pql-pager is-bottom" aria-label="Trang câu hỏi"></nav>
 						<div class="pql-cta" hidden></div>
+						<?php if ( function_exists( 'cvc_trust_strip' ) ) { cvc_trust_strip( 'inline', 'Học tiếp với ngân hàng ôn thi:' ); } // 04/11/2026 ?>
 						<p class="pds-more">Muốn in ra giấy? <?php echo cvc_pdf_button( 'recruitment', $rid, array( 'group' => $group, 'label' => 'Tải trọn bộ PDF (có đáp án)', 'variant' => 'dap-an', 'class' => 'is-small' ) ); // phpcs:ignore WordPress.Security.EscapeOutput ?></p>
 					</section>
 				<?php endif; ?>

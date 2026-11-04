@@ -142,6 +142,12 @@ function cvc_study_card( array $o = array() ): void {
 				<div class="st-box"><span class="st-lbl">Đồng hồ ngưỡng vòng 1</span><span class="st-note">Làm 1 đề Thi thử (từ 20 câu) để biết bạn đang ở mức bao nhiêu/60 câu so với ngưỡng 30 câu.</span>
 					<a class="st-link" href="<?php echo esc_url( function_exists( 'cvc_exams_mode_url' ) ? cvc_exams_mode_url( 'thi-that' ) : home_url( '/thi-thu-trac-nghiem/' ) ); ?>">Chọn đề thi thử →</a></div>
 			<?php endif; ?>
+			<?php $bank = (array) ( $s['bank'] ?? array() ); if ( (int) ( $bank['total'] ?? 0 ) > 0 ) : $bpct = min( 100, max( (int) $bank['done'] > 0 ? 1 : 0, (int) round( (int) $bank['done'] / max( 1, (int) $bank['total'] ) * 100 ) ) ); // 04/11/2026 ?>
+				<div class="st-box"><span class="st-lbl">Ngân hàng câu hỏi</span><b class="st-big"><?php echo esc_html( number_format( (int) $bank['done'], 0, ',', '.' ) ); ?> <small>/ <?php echo esc_html( cvc_stat_label( (int) $bank['total'] ) ); ?> câu đã luyện</small></b>
+					<span class="st-meter" aria-hidden="true"><i style="width:<?php echo (int) $bpct; ?>%"></i></span>
+					<span class="st-note">Mỗi câu có đáp án, giải thích và căn cứ Điều – khoản. Luyện đều mỗi ngày để phủ hết ngân hàng.</span>
+					<a class="st-link" href="<?php echo esc_url( function_exists( 'cvc_question_bank_url' ) ? cvc_question_bank_url() : home_url( '/' ) ); ?>">Luyện câu chưa làm →</a></div>
+			<?php endif; ?>
 			<?php if ( ! $compact ) : ?>
 				<div class="st-box"><span class="st-lbl">Sổ câu sai</span><b class="st-big"><?php echo (int) $book['due']; ?> <small>câu đến hạn</small></b>
 					<span class="st-note">Đang ôn <?php echo (int) $book['learning']; ?> · Đã thuộc <?php echo (int) $book['mastered']; ?>. Câu sai quay lại sau 1 → 3 → 7 → 14 ngày; đúng 3 lần cách ngày là thuộc.</span>
