@@ -237,7 +237,7 @@ $GLOBALS['cvc_home17_cfg'] = array(
 if ( function_exists( 'cvc_auth_token' ) && cvc_auth_token() ) {
 	cvc_study_card();
 } elseif ( function_exists( 'cvc_trial_widget' ) ) {
-	cvc_trial_widget( array( 'source' => 'home', 'title' => 'Thử sức với 5 câu Kiến thức chung vòng 1', 'sub' => 'Không cần đăng nhập. Chọn đáp án là thấy ngay đúng / sai, giải thích và điều luật căn cứ. Vòng 1 thi 60 câu, đúng từ 30 câu là qua.' ) );
+	cvc_trial_widget( array( 'source' => is_404() ? '404' : 'home', 'title' => 'Thử sức với 5 câu Kiến thức chung vòng 1', 'sub' => 'Không cần đăng nhập. Chọn đáp án là thấy ngay đúng / sai, giải thích và điều luật căn cứ. Vòng 1 thi 60 câu, đúng từ 30 câu là qua.' ) );
 }
 ?></div>
 <div class="source-marquee" aria-label="Các nguồn thông tin công vụ tham khảo">
