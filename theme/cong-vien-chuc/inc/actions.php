@@ -344,17 +344,26 @@ function cvc_handle_profile_update(): void {
 		$payload['province_id'] = absint( $_POST['province_id'] );
 	}
 	if ( isset( $_POST['leaderboard_visibility'] ) ) {
-		$payload['leaderboard_visibility'] = 'hidden' === $_POST['leaderboard_visibility'] ? 'hidden' : 'full';
+		$vis                               = sanitize_key( wp_unslash( $_POST['leaderboard_visibility'] ) );
+		$payload['leaderboard_visibility'] = in_array( $vis, array( 'full', 'initials', 'hidden' ), true ) ? $vis : 'full';
 	}
+	// 11/11/2026: đồng ý hiện ảnh + tên trên trang Vinh danh (form "Bảng xếp hạng & vinh danh").
+	if ( isset( $_POST['fame_form'] ) ) {
+		$payload['fame_consent'] = ! empty( $_POST['fame_consent'] );
+	}
+	$back = cvc_account_url( 'profile' ) . ( isset( $_POST['fame_form'] ) ? '#hien-thi' : '' );
 
 	$result = ( new CVC_Profile_Service() )->update( $payload, $token );
+	if ( function_exists( 'cvc_auth_refresh_user_cache' ) ) {
+		cvc_auth_refresh_user_cache();
+	}
 
 	if ( ! $result['ok'] ) {
-		cvc_redirect_with_notice( cvc_account_url( 'profile' ), 'error', cvc_api_error_message( $result ), null );
+		cvc_redirect_with_notice( $back, 'error', cvc_api_error_message( $result ), null );
 		return;
 	}
 
-	cvc_redirect_with_notice( cvc_account_url( 'profile' ), 'success', 'Đã cập nhật hồ sơ.', null );
+	cvc_redirect_with_notice( $back, 'success', 'Đã cập nhật hồ sơ.', null );
 }
 
 add_action( 'admin_post_nopriv_cvc_profile_change_password', 'cvc_handle_profile_change_password' );

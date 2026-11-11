@@ -427,3 +427,62 @@ body.cvc-doc .cvc-google__wait{margin:10px 0;font-size:15px;color:var(--dz-ink2)
 body.cvc-doc .cvc-google__or{width:100%;display:flex;align-items:center;gap:10px;margin:8px 0 4px;color:var(--dz-muted);font-size:13px}
 body.cvc-doc .cvc-google__or::before,body.cvc-doc .cvc-google__or::after{content:"";flex:1;border-top:1px solid var(--dz-line)}
 body.cvc-doc .cvc-google + .cvc-form--auth{margin-top:0;border-top:0}
+
+/* ---- Bảng chăm chỉ, vinh danh, chọn ảnh đại diện (11/11/2026) ---- */
+.cvc-fame-nudge{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:10px 0;padding:10px 12px;border:1px solid #e6d29a;border-radius:10px;background:#fbf5e3;color:#3d3214}.cvc-fame-nudge p{flex:1;min-width:200px;margin:0;font-size:14px;line-height:1.45}.cvc-fame-nudge-ic{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#c9a052;color:#fff;font-size:16px;flex:none}.cvc-fame-nudge-btn{display:inline-flex;align-items:center;min-height:40px;padding:6px 14px;border-radius:10px;background:#123a63;color:#fff!important;font-weight:700;text-decoration:none!important;font-size:14px}.cvc-fame-nudge.is-compact p{font-size:13px}
+.cvc-lb-addpic{display:inline-block;margin-left:6px;font-size:12.5px;font-weight:700;color:#1767aa;text-decoration:underline}
+.cvc-lb-table tr.cvc-lb-gap td{background:#f4f6f9;color:#5c5c5c;font-size:12.5px;text-align:center;padding:4px}
+.cvc-lb-kinds{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.cvc-lb-kinds a{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border:1px solid #cfd6df;border-radius:12px;background:#fff;color:#123a63;text-decoration:none}
+.cvc-lb-kinds a small{font-size:12.5px;color:#5c5c5c}
+.cvc-lb-kinds a.is-active{border-color:#123a63;background:#eaf3fc;box-shadow:inset 0 0 0 1px #123a63}
+.cvc-lb-kinds a:last-child b{color:#8a6414}
+@media (max-width:560px){.cvc-lb-kinds{grid-template-columns:1fr 1fr}.cvc-lb-kinds a:last-child{grid-column:1/-1}}
+.cvc-lb-pager{display:flex;justify-content:space-between;align-items:center;font-size:14px;margin-top:10px}
+.cvc-lb-pager a{font-weight:700;color:#1767aa}
+.cvc-fame-head{padding:18px 20px;border-radius:16px;background:linear-gradient(135deg,#123a63,#0b2744);color:#fff}
+.cvc-fame-head h1{margin:2px 0 6px;font-size:28px;line-height:1.25;color:#fff}
+.cvc-fame-head p{margin:0;color:#d5e1ee;font-size:15px}
+.cvc-fame-head .cvc-fame-kicker{color:#e3c27a;font-weight:800;letter-spacing:.08em;font-size:13px;text-transform:uppercase}
+.cvc-fame-archive select{min-height:36px;border:1px solid #cfd6df;border-radius:8px;padding:4px 8px;background:#fff}
+.cvc-fame-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+@media (max-width:860px){.cvc-fame-grid{grid-template-columns:1fr}}
+.cvc-fame-col{border:1px solid #dfe4ea;border-radius:16px;background:#fff;padding:16px}
+.cvc-fame-col h2{margin:0;font-size:20px;color:#123a63}
+.cvc-fame-sub{margin:2px 0 12px;font-size:13px;color:#5c5c5c}
+.cvc-fame-empty{color:#5c5c5c;font-size:14px}
+.cvc-fame-list{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.cvc-fame-list li{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:12px}
+.cvc-fame-list li.is-top{padding:10px;background:#f7f9fc;border:1px solid #e6ebf1}
+.cvc-fame-list li.is-r1{background:#fbf5e3;border-color:#e6d29a}
+.cvc-fame-list li.is-me{box-shadow:inset 0 0 0 2px #1767aa}
+.cvc-fame-rank{display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border-radius:14px;border:1px solid #c8c8c8;font-weight:800;font-size:14px;background:#fff;flex:none}
+.cvc-fame-rank.is-gold{background:#f6e7b8;border-color:#c9a338;color:#5b4300}.cvc-fame-rank.is-silver{background:#ececec;border-color:#9a9a9a}.cvc-fame-rank.is-bronze{background:#f2ddca;border-color:#b07b4f;color:#5a3412}
+.cvc-fame-who{flex:1;min-width:0;display:flex;flex-direction:column}
+.cvc-fame-who b{font-size:15px;color:#14263b;overflow-wrap:anywhere}
+.cvc-fame-list li.is-top .cvc-fame-who b{font-size:17px}
+.cvc-fame-who small{font-size:12.5px;color:#5c5c5c}
+.cvc-fame-val{font-size:15px;color:#123a63;white-space:nowrap;font-variant-numeric:tabular-nums}
+.cvc-fame-share{font-size:13px;font-weight:700;color:#1767aa;text-decoration:underline}
+.cvc-fame-report{display:inline}.cvc-fame-report button{border:0;background:none;padding:0;font-size:12px;color:#8a8f98;text-decoration:underline;cursor:pointer}
+.cvc-fame-me{margin:12px 0 0;padding:10px 12px;border-radius:10px;background:#eaf3fc;font-size:14px;color:#14263b}
+.cvc-fame-cta{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:14px;border-radius:12px;background:#fbf5e3;border:1px solid #ecdcb4}
+.cvc-fame-cta p{margin:0;flex:1;min-width:220px}
+.cvc-fame-cardimg{width:100%;max-width:720px;height:auto;border-radius:12px;box-shadow:0 6px 24px #0b274433}
+.cvc-fame-sharebar{display:flex;flex-wrap:wrap;gap:8px}
+.cvc-avatar-ways{display:grid;gap:8px;margin-top:12px}
+.cvc-avatar-way{border:1px solid #dfe4ea;border-radius:12px;background:#fff;padding:10px 12px}
+.cvc-avatar-way summary{cursor:pointer;font-size:15px;color:#123a63;min-height:32px;display:flex;align-items:center;gap:8px}
+.cvc-avatar-way summary small{color:#5c5c5c;font-weight:400}
+.cvc-avatar-way form{display:grid;gap:10px;margin-top:8px}
+.cvc-preset-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:8px;border:0;padding:0;margin:0}
+.cvc-preset{position:relative;display:grid;place-items:center;padding:4px;border-radius:50%;cursor:pointer}
+.cvc-preset input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.cvc-preset img{width:64px;height:64px;border-radius:50%;border:3px solid transparent;transition:border-color .15s}
+.cvc-preset input:checked+img{border-color:#123a63;box-shadow:0 0 0 3px #c9a052}
+.cvc-preset input:focus-visible+img{outline:2px solid #1767aa;outline-offset:2px}
+.cvc-fame-consent{position:relative;display:block;padding-left:28px;font-size:14px;line-height:1.45}
+.cvc-fame-consent input{position:absolute;left:0;top:1px;margin:0;width:18px;height:18px}
+.cvc-avatar-check{margin:0;padding:8px 10px;border-radius:8px;background:#fdf3e1;color:#7a4b12;font-size:13.5px}
+.cvc-radio,.cvc-form .cvc-form__field label.cvc-radio{display:grid!important;grid-template-columns:20px minmax(0,1fr);gap:8px;align-items:start;justify-items:start;text-align:left;font-weight:400;font-size:14.5px;line-height:1.45;margin:6px 0;width:100%}
+.cvc-radio input{margin:3px 0 0;width:18px;height:18px}

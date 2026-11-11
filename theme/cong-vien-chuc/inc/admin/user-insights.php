@@ -57,6 +57,7 @@ function cvc_ui_tabs( string $cur ): void {
 		'tong-quan' => array( 'Tổng quan', cvc_admin_url( 'nguoi-dung' ) ),
 		'danh-sach' => array( 'Danh sách người dùng', cvc_admin_url( 'nguoi-dung', null, array( 'xem' => 'danh-sach' ) ) ),
 		'goi-y'     => array( 'Gợi ý & cảnh báo', cvc_admin_url( 'nguoi-dung', null, array( 'xem' => 'goi-y' ) ) ),
+		'anh'       => array( 'Ảnh đại diện', cvc_admin_url( 'nguoi-dung', null, array( 'xem' => 'anh' ) ) ),
 	);
 	echo '<nav class="flex flex-wrap gap-2 text-sm" aria-label="Người dùng">';
 	foreach ( $tabs as $k => $t ) {
@@ -185,6 +186,10 @@ function cvc_admin_render_user_insights( string $item_param ): void {
 	}
 	if ( 'goi-y' === $xem ) {
 		cvc_ui_render_advice();
+		return;
+	}
+	if ( 'anh' === $xem ) {
+		cvc_ui_render_avatars();
 		return;
 	}
 	cvc_ui_render_overview();
@@ -794,3 +799,60 @@ function cvc_ui_trial_section( int $days, callable $pct ): void {
 	<?php
 }
 
+/** Kiểm duyệt ảnh đại diện (11/11/2026): ảnh bị báo, ảnh chờ AI kiểm, tất cả ảnh thật. */
+function cvc_ui_render_avatars(): void {
+	$loc = sanitize_key( (string) ( $_GET['loc'] ?? 'reported' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+	$res = cvc_admin_api_get( '/api/admin/fame/avatars', array( 'loc' => $loc ) );
+	$d   = $res['ok'] ? (array) ( $res['data']['data'] ?? array() ) : array();
+	$c   = (array) ( $d['counts'] ?? array() );
+	$can = cvc_admin_can( 'user.update' );
+	$lab = array( 'reported' => 'Bị báo', 'pending' => 'Chờ AI kiểm', 'all' => 'Tất cả ảnh thật' );
+	$chk = array( 'ok' => 'Đạt', 'pending' => 'Chờ kiểm', 'reported' => 'Bị báo - tạm ẩn ở Vinh danh', 'rejected' => 'Đã gỡ' );
+	?>
+	<header><h1 class="text-2xl font-black text-ink">Ảnh đại diện</h1>
+		<p class="text-sm text-ink-muted">Ảnh tải lên / ảnh Google được AI kiểm tự động; ảnh vi phạm bị gỡ và người dùng được báo. Từ 2 người báo, ảnh tạm ẩn khỏi trang Vinh danh tới khi bạn quyết định. Ảnh minh họa có sẵn không cần kiểm.</p></header>
+	<?php cvc_ui_tabs( 'anh' ); ?>
+	<?php if ( ! $res['ok'] ) : ?><p class="text-sm text-red-700"><?php echo esc_html( cvc_admin_error_message( $res ) ); ?></p><?php return; ?><?php endif; ?>
+	<section class="ui-kpis">
+		<?php foreach ( array( array( 'Dùng ảnh minh họa', $c['presets'] ?? 0 ), array( 'Ảnh thật', $c['all'] ?? 0 ), array( 'Đồng ý vinh danh', $c['consent'] ?? 0 ), array( 'Đang bị báo', $c['reported'] ?? 0 ), array( 'Chờ AI kiểm', $c['pending'] ?? 0 ) ) as $k ) : ?>
+			<div class="ui-kpi"><small><?php echo esc_html( $k[0] ); ?></small><b><?php echo esc_html( cvc_ui_n( $k[1] ) ); ?></b></div>
+		<?php endforeach; ?>
+	</section>
+	<nav class="flex flex-wrap gap-2 text-sm">
+		<?php foreach ( $lab as $k => $l ) : ?>
+			<a href="<?php echo esc_url( cvc_admin_url( 'nguoi-dung', null, array( 'xem' => 'anh', 'loc' => $k ) ) ); ?>" class="px-3 py-1.5 rounded-lg border <?php echo $k === ( $d['filter'] ?? '' ) ? 'bg-acc-soft text-acc border-acc-line font-bold' : 'bg-white border-slate-300'; ?>"><?php echo esc_html( $l . ' (' . (int) ( $c[ $k ] ?? 0 ) . ')' ); ?></a>
+		<?php endforeach; ?>
+	</nav>
+	<?php if ( empty( $d['items'] ) ) : ?><div class="ui-card text-sm text-ink-muted">Không có ảnh nào trong mục này.</div><?php endif; ?>
+	<div class="grid gap-3" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr))">
+		<?php foreach ( (array) ( $d['items'] ?? array() ) as $it ) : ?>
+			<article class="ui-card space-y-2">
+				<div class="flex items-center gap-3"><?php echo cvc_avatar_html( (string) $it['name'], $it['avatar'] ? (string) $it['avatar'] : null, 72 ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+					<div class="text-sm"><a class="font-bold text-ink" href="<?php echo esc_url( cvc_admin_url( 'nguoi-dung', (string) (int) $it['user_id'] ) ); ?>"><?php echo esc_html( (string) $it['name'] ); ?></a><br>
+						<span class="text-ink-muted"><?php echo esc_html( ( 'google' === $it['source'] ? 'Ảnh Google' : 'Tải lên' ) . ' · ' . ( $chk[ $it['check'] ?? '' ] ?? (string) $it['check'] ) ); ?></span><br>
+						<span class="text-ink-muted"><?php echo esc_html( cvc_ui_dt( $it['set_at'] ?? null ) ); ?><?php echo ! empty( $it['consent'] ) ? ' · đồng ý vinh danh' : ''; ?></span></div></div>
+				<?php foreach ( (array) $it['reports'] as $r ) : ?><p class="text-xs text-red-700">Báo: <?php echo esc_html( (string) ( $r['reason'] ?: 'không ghi lý do' ) ); ?> (<?php echo esc_html( cvc_ui_dt( $r['at'] ) ); ?>)</p><?php endforeach; ?>
+				<?php if ( $can ) : ?>
+					<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="flex gap-2">
+						<?php wp_nonce_field( 'cvc_admin_avatar' ); ?><input type="hidden" name="action" value="cvc_admin_avatar"><input type="hidden" name="uid" value="<?php echo (int) $it['user_id']; ?>">
+						<button type="submit" name="op" value="remove" class="px-3 py-1.5 rounded-lg bg-red-700 text-white text-xs font-bold" data-cvc-confirm="Gỡ ảnh này và báo người dùng?">Gỡ ảnh</button>
+						<?php if ( 'ok' !== ( $it['check'] ?? '' ) ) : ?><button type="submit" name="op" value="keep" class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-xs font-bold">Ảnh ổn - giữ</button><?php endif; ?>
+					</form>
+				<?php endif; ?>
+			</article>
+		<?php endforeach; ?>
+	</div>
+	<?php
+}
+
+add_action( 'admin_post_cvc_admin_avatar', 'cvc_admin_handle_avatar' );
+add_action( 'admin_post_nopriv_cvc_admin_avatar', 'cvc_admin_handle_avatar' );
+
+function cvc_admin_handle_avatar(): void {
+	check_admin_referer( 'cvc_admin_avatar' );
+	$token = cvc_admin_require_staff();
+	$back  = wp_get_referer() ?: cvc_admin_url( 'nguoi-dung', null, array( 'xem' => 'anh' ) );
+	$op    = 'remove' === ( $_POST['op'] ?? '' ) ? 'remove' : 'keep';
+	$r     = cvc_admin_client()->post( '/api/admin/fame/avatars/' . absint( $_POST['uid'] ?? 0 ) . '/' . $op, array(), $token );
+	cvc_admin_redirect( $back, $r['ok'] ? 'success' : 'error', (string) ( $r['data']['message'] ?? cvc_admin_error_message( $r ) ) );
+}

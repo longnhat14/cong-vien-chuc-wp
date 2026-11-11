@@ -80,3 +80,5 @@ body.cvc-doc .tr-cta{background:#eaf3fc;border-color:#8fb4da}
 body.cvc-doc .st-days .is-today i{box-shadow:none;border-width:3px}
 body.cvc-doc .xd-gate.is-hl{box-shadow:none;outline:3px solid #1767aa}
 @media (max-width:560px){body.cvc-doc .st-card,body.cvc-doc .tr-card{border-radius:3px}}
+.st-rank{margin:8px 0 0;font-size:13.5px;font-weight:800}
+.st-rank a{color:#8a6414!important;text-decoration:underline!important;text-underline-offset:3px}

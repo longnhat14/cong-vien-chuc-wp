@@ -122,6 +122,8 @@ function cvc_study_card( array $o = array() ): void {
 				<p class="st-weektxt"><b><?php echo (int) $w['done']; ?>/<?php echo (int) $w['goal']; ?> ngày</b> tuần này · <?php echo esc_html( $week_txt ); ?></p>
 				<?php if ( (int) $w['weeks_streak'] > 0 ) : ?><p class="st-streak">Chuỗi <?php echo (int) $w['weeks_streak']; ?> tuần ôn đều</p><?php endif; ?>
 				<p class="st-hint">Ngày ôn = làm từ 10 câu hoặc xong bài ôn hôm nay. Nghỉ 2 ngày/tuần vẫn giữ chuỗi.</p>
+				<?php $ef = is_array( $s['effort'] ?? null ) ? $s['effort'] : null; // 11/11/2026: hạng Bảng chăm chỉ tuần ?>
+				<p class="st-rank"><a href="<?php echo esc_url( home_url( '/xep-hang/' ) ); ?>">★ <?php echo $ef ? 'Hạng ' . (int) $ef['rank'] . '/' . (int) $ef['participants'] . ' chăm chỉ tuần này · ' . esc_html( function_exists( 'cvc_lb_points' ) ? cvc_lb_points( $ef['score'] ) : (string) $ef['score'] ) . ' điểm' : 'Ôn 10 câu để lên Bảng chăm chỉ tuần này'; ?></a></p>
 			</div>
 		</div>
 		<?php if ( ! $compact || $thr || $cd ) : ?>

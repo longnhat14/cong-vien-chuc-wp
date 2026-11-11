@@ -87,15 +87,21 @@ function cvc_handle_avatar(): void {
 	$back  = cvc_account_url( 'profile' );
 	$api   = new CVC_Api_Client();
 
-	if ( 'remove' === ( $_POST['op'] ?? '' ) ) {
+	$op    = sanitize_key( (string) ( $_POST['op'] ?? '' ) );
+	$fame  = isset( $_POST['fame_consent'] ) ? '1' : '0';
+	$back .= '#anh-dai-dien';
+	if ( 'remove' === $op ) {
 		$res = $api->delete( '/api/profile/avatar', $token );
+	} elseif ( 'preset' === $op || 'google' === $op ) {
+		// 11/11/2026: ảnh minh họa có sẵn / ảnh Google, kèm đồng ý vinh danh.
+		$res = $api->post( '/api/profile/avatar/choose', array( 'source' => $op, 'key' => sanitize_key( wp_unslash( (string) ( $_POST['key'] ?? '' ) ) ), 'fame_consent' => '1' === $fame ), $token );
 	} else {
 		$files = function_exists( 'cvc_employer_files_from_request' ) ? cvc_employer_files_from_request( 'file' ) : array();
 		if ( empty( $files ) ) {
 			cvc_redirect_with_notice( $back, 'error', 'Hãy chọn ảnh (JPG, PNG hoặc WebP, tối đa 2 MB).', null );
 			return;
 		}
-		$res = $api->post_multipart( '/api/profile/avatar', array(), $files, $token );
+		$res = $api->post_multipart( '/api/profile/avatar', array( 'fame_consent' => $fame ), $files, $token );
 	}
 	if ( function_exists( 'cvc_auth_refresh_user_cache' ) ) {
 		cvc_auth_refresh_user_cache();
