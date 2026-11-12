@@ -19,6 +19,15 @@ if ( $pcseo_term instanceof WP_Term ) {
 }
 $pcseo_action = $pcseo_term instanceof WP_Term ? get_term_link( $pcseo_term ) : ( PCSEO_Blog::enabled() ? PCSEO_Blog::url() : home_url( '/' ) );
 
+// Plugin chỉ nạp blog.css khi dùng template của nó → bản của theme phải tự nạp (cùng biến màu / thụt lề như plugin).
+wp_enqueue_style( 'pcseo-blog', plugins_url( 'assets/blog.css', PCSEO_FILE ), array(), PCSEO_VERSION );
+wp_add_inline_style(
+	'pcseo-blog',
+	'.pcseo-blog{--pcseo-accent:' . ( sanitize_hex_color( (string) PCSEO_Blog::s( 'blog_accent' ) ) ?: '#0b5ed7' )
+	. ';--pcseo-indent:' . max( 0, min( 4, (float) PCSEO_Blog::s( 'blog_indent' ) ) )
+	. 'em;--pcseo-gap:' . max( 0.3, min( 3, (float) PCSEO_Blog::s( 'blog_para_gap' ) ) ) . 'em}'
+);
+
 PCSEO_Blog::header();
 ?>
 <main id="primary" class="pcseo-blog pcseo-archive">
