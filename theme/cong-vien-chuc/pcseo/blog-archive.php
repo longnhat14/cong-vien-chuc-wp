@@ -36,6 +36,7 @@ PCSEO_Blog::header();
 				<input type="search" name="q" value="<?php echo esc_attr( $pcseo_search ); ?>" placeholder="Tìm bài viết…" aria-label="Tìm bài viết">
 				<button type="submit">Tìm</button>
 			</form>
+			<p class="cvc-blog-data">Số liệu độc quyền: <a href="<?php echo esc_url( home_url( '/bao-cao-tuyen-dung/' ) ); ?>">Báo cáo tuyển dụng hằng tháng</a> · <a href="<?php echo esc_url( home_url( '/cau-hay-sai-nhat/' ) ); ?>">Câu hay sai nhất</a></p>
 			<?php if ( $pcseo_cats ) : ?>
 				<nav class="pcseo-chips" aria-label="Chuyên mục">
 					<a class="pcseo-chip<?php echo $pcseo_term ? '' : ' is-active'; ?>" href="<?php echo esc_url( PCSEO_Blog::url() ); ?>">Tất cả</a>

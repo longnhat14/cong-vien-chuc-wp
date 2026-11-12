@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Tăng số này khi thêm/sửa rewrite rule để buộc flush lại đúng 1 lần.
-const CVC_REWRITE_VERSION = '33';
+const CVC_REWRITE_VERSION = '34';
 
 /**
  * Section hợp lệ của /tai-khoan/{section}/ (Phase 10) - map slug tiếng
@@ -343,6 +343,9 @@ function cvc_register_rewrite_rules(): void {
 	add_rewrite_rule( '^xep-hang/?$', 'index.php?cvc_page=leaderboard', 'top' );
 	add_rewrite_rule( '^vinh-danh/the/?$', 'index.php?cvc_page=fame-card', 'top' ); // Vinh danh (11/11/2026)
 	add_rewrite_rule( '^vinh-danh/?$', 'index.php?cvc_page=fame', 'top' );
+	add_rewrite_rule( '^bao-cao-tuyen-dung/([0-9]{4}-[0-9]{2})/?$', 'index.php?cvc_page=report-month&cvc_report_month=$matches[1]', 'top' ); // 12/11/2026
+	add_rewrite_rule( '^bao-cao-tuyen-dung/?$', 'index.php?cvc_page=report-month', 'top' );
+	add_rewrite_rule( '^cau-hay-sai-nhat/?$', 'index.php?cvc_page=hardest', 'top' );
 	add_rewrite_rule( '^don-vi/tin/([0-9]+)/?$', 'index.php?cvc_page=employer&cvc_employer_view=tin&cvc_employer_id=$matches[1]', 'top' );
 	add_rewrite_rule( '^don-vi/([a-z-]+)/?$', 'index.php?cvc_page=employer&cvc_employer_view=$matches[1]', 'top' );
 	add_rewrite_rule( '^don-vi/?$', 'index.php?cvc_page=employer&cvc_employer_view=bang-dieu-khien', 'top' );
@@ -418,6 +421,7 @@ function cvc_register_query_vars( array $vars ): array {
 	$vars[] = 'cvc_position_slug';
 	$vars[] = 'cvc_sitemap';
 	$vars[] = 'cvc_round_slug';
+	$vars[] = 'cvc_report_month';
 	$vars[] = 'cvc_knowledge_slug';
 	$vars[] = 'cvc_exam_slug';
 	$vars[] = 'cvc_order_code';
@@ -530,6 +534,8 @@ function cvc_template_include( string $template ): string {
 		'leaderboard'           => 'template-leaderboard.php',
 		'fame'                  => 'template-fame.php',
 		'fame-card'             => 'template-fame.php',
+		'report-month'          => 'template-report-month.php',
+		'hardest'               => 'template-hardest.php',
 		'employer'              => 'template-employer.php',
 		'certificate-verify'    => 'template-certificate-verify.php',
 		'admin-ai-settings'     => 'template-admin-ai-settings.php',
@@ -841,6 +847,7 @@ function cvc_main_nav_items_default(): array {
 				array( 'group' => 'practice', 'label' => 'Câu hỏi đã lưu', 'desc' => 'Câu đánh dấu, câu sai và câu cần ôn lại', 'url' => cvc_saved_questions_url(), 'sym' => '⚑' ),
 				array( 'group' => 'assess', 'label' => 'Bộ đề PDF có đáp án', 'desc' => 'Tải đề theo tin tuyển dụng, theo văn bản - miễn phí', 'url' => home_url( '/bo-de-pdf/' ), 'sym' => '⇩' ),
 				array( 'group' => 'assess', 'label' => 'Bảng xếp hạng', 'desc' => 'Chăm chỉ và điểm thi thử theo tuần, tháng, từng đề', 'url' => home_url( '/xep-hang/' ), 'sym' => '★' ),
+				array( 'group' => 'assess', 'label' => 'Câu hay sai nhất', 'desc' => 'Câu thí sinh trả lời sai nhiều nhất và đáp án hay nhầm', 'url' => home_url( '/cau-hay-sai-nhat/' ), 'sym' => '!' ),
 				array( 'group' => 'assess', 'label' => 'Bảng vinh danh', 'desc' => 'Top 10 ôn chăm nhất, thi thử điểm cao nhất', 'url' => home_url( '/vinh-danh/' ), 'sym' => '♛' ),
 				array( 'group' => 'assess', 'label' => 'Kết quả & tiến độ', 'desc' => 'Tổng quan điểm số, tiến độ và chủ đề còn yếu', 'url' => cvc_account_url( 'overview' ), 'sym' => '↗' ),
 				array( 'group' => 'more', 'label' => 'Chủ đề ôn thi', 'url' => cvc_topics_url() ),
