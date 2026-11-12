@@ -71,7 +71,9 @@
 			body.innerHTML = '';
 			nextBtn.classList.add('hidden');
 			reloadBtn.classList.add('hidden');
-			post('cvc_mini_quiz_load').then(function (res) {
+			var after = root.querySelector('[data-quiz-after]');
+			if (after) after.hidden = true;
+			post('cvc_mini_quiz_load', { ki: root.getAttribute('data-ki') || '', ld: root.getAttribute('data-ld') || '' }).then(function (res) {
 				if (!res.success || !res.data || !res.data.questions || !res.data.questions.length) {
 					progress.textContent = 'Chưa tải được câu hỏi';
 					body.innerHTML = '<p class="dz-muted">Hãy thử lại sau hoặc vào trang đề thi.</p>';
@@ -139,6 +141,8 @@
 					} else {
 						progress.textContent = 'Hoàn thành: đúng ' + state.correct + '/' + state.questions.length + ' câu';
 						reloadBtn.classList.remove('hidden');
+						var afterEl = root.querySelector('[data-quiz-after]');
+						if (afterEl) afterEl.hidden = false;
 					}
 				});
 		}

@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /** Danh sách bài đã đăng gọn nhẹ (id, tiêu đề, link, ngày, chuyên mục, chữ không dấu để so khớp). */
 function cvc_blog_posts_index(): array {
-	$c = get_transient( 'cvc_blog_idx_v1' );
+	$c = get_transient( 'cvc_blog_idx_v2' );
 	if ( is_array( $c ) ) {
 		return $c;
 	}
@@ -25,16 +25,20 @@ function cvc_blog_posts_index(): array {
 		$title = html_entity_decode( (string) get_the_title( $id ), ENT_QUOTES, 'UTF-8' );
 		$kw    = (string) get_post_meta( $id, 'rank_math_focus_keyword', true );
 		$cats  = wp_get_post_categories( $id );
+		// 12/11/2026: số hiệu văn bản được trích trong bài + cụm luật của bài cầu nối (meta cvc_law_cluster) - xem inc/law-blog.php.
+		preg_match_all( '~\b\d{1,4}/\d{4}/[\p{Lu}Đ][\p{Lu}\dĐ\-]*~u', (string) get_post_field( 'post_content', $id ), $lm );
 		$out[] = array(
-			'id'    => (int) $id,
-			'title' => $title,
-			'url'   => (string) get_permalink( $id ),
-			'date'  => (string) get_the_date( 'Y-m-d', $id ),
-			'cats'  => array_map( 'intval', (array) $cats ),
-			'text'  => cvc_blog_ascii( $title . ' ' . str_replace( ',', ' ', $kw ) ),
+			'id'     => (int) $id,
+			'title'  => $title,
+			'url'    => (string) get_permalink( $id ),
+			'date'   => (string) get_the_date( 'Y-m-d', $id ),
+			'cats'   => array_map( 'intval', (array) $cats ),
+			'text'   => cvc_blog_ascii( $title . ' ' . str_replace( ',', ' ', $kw ) . ' ' . str_replace( '-', ' ', (string) get_post_field( 'post_name', $id ) ) ),
+			'laws'   => array_values( array_unique( array_map( static fn ( $n ) => mb_strtoupper( $n, 'UTF-8' ), $lm[0] ?? array() ) ) ),
+			'bridge' => (string) get_post_meta( $id, 'cvc_law_cluster', true ),
 		);
 	}
-	set_transient( 'cvc_blog_idx_v1', $out, HOUR_IN_SECONDS );
+	set_transient( 'cvc_blog_idx_v2', $out, HOUR_IN_SECONDS );
 
 	return $out;
 }
@@ -43,8 +47,9 @@ function cvc_blog_ascii( string $s ): string {
 	return trim( (string) preg_replace( '/[^a-z0-9 ]+/', ' ', strtolower( remove_accents( $s ) ) ) );
 }
 
-add_action( 'save_post_post', static fn () => delete_transient( 'cvc_blog_idx_v1' ) );
-add_action( 'deleted_post', static fn () => delete_transient( 'cvc_blog_idx_v1' ) );
+add_action( 'save_post_post', static fn () => delete_transient( 'cvc_blog_idx_v2' ) );
+add_action( 'deleted_post', static fn () => delete_transient( 'cvc_blog_idx_v2' ) );
+add_action( 'transition_post_status', static fn () => delete_transient( 'cvc_blog_idx_v2' ) );
 
 /** Mục lục theo chuyên mục. @return array<int, array{name:string,url:string,posts:array}> */
 function cvc_blog_index_groups( int $cat = 0 ): array {

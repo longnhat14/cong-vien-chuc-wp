@@ -73,6 +73,8 @@ get_header();
 			$key_points = array_values( array_filter( array_map( 'strval', is_array( $item['key_points'] ?? null ) ? $item['key_points'] : array() ) ) );
 			$practice   = is_array( $item['practice_exam'] ?? null ) ? $item['practice_exam'] : null;
 			$q_count    = (int) ( $item['questions_count'] ?? 0 );
+			// 12/11/2026: bài blog theo cụm luật của văn bản (inc/law-blog.php).
+			$kt_pick    = function_exists( 'cvc_kt_blog_pick' ) ? cvc_kt_blog_pick( $legalDoc, $slug ) : array( 'cluster' => 'cong-vu', 'inline' => null, 'side' => array() );
 			$prev_item  = is_array( $item['previous'] ?? null ) ? $item['previous'] : null;
 			$next_item  = is_array( $item['next'] ?? null ) ? $item['next'] : null;
 			$content    = trim( (string) ( $item['content'] ?? '' ) );
@@ -178,6 +180,8 @@ get_header();
 						</section>
 					<?php endif; ?>
 
+					<?php if ( function_exists( 'cvc_kt_render_inline' ) ) { cvc_kt_render_inline( $kt_pick ); } ?>
+
 					<?php if ( $article && ! empty( $article['content'] ) ) : ?>
 						<section id="nguyen-van" class="dz-panel scroll-mt-24 space-y-3">
 							<details>
@@ -186,6 +190,12 @@ get_header();
 							</details>
 						</section>
 					<?php endif; ?>
+
+					<?php
+					if ( function_exists( 'cvc_kt_render_quiz' ) && $q_count > 0 ) {
+						cvc_kt_render_quiz( (int) ( $item['id'] ?? 0 ), (int) ( $legalDoc['id'] ?? 0 ), $article && '' !== (string) ( $article['number'] ?? '' ) ? 'Điều ' . (string) $article['number'] : '', $practice, $kt_pick );
+					}
+					?>
 
 					<?php if ( $is_ai ) : ?>
 						<p class="text-[11px] text-ink-muted">Bài học được biên soạn tự động từ toàn văn chính thức và kiểm tra đối chiếu với nguyên văn Điều luật. Khi có khác biệt, nguyên văn văn bản là căn cứ.</p>
@@ -212,8 +222,8 @@ get_header();
 						<?php endif; ?>
 					</div>
 					<?php // 01/11/2026: sách nổi bật theo chủ đề bài (claude/ke-hoach-sach-cam-nang-noi-bat.md). ?>
+					<?php if ( $is_found && function_exists( 'cvc_kt_render_side' ) ) { cvc_kt_render_side( $kt_pick ); } // 12/11/2026: lên trên Sách nổi bật ?>
 					<?php if ( $is_found && function_exists( 'cvc_book_side' ) ) { cvc_book_side( cvc_book_side_items( 'exam', array( 'topics' => array_values( array_filter( array( (string) ( $item['title'] ?? '' ), (string) ( $topic['name'] ?? '' ) ) ) ) ) ), 'Sách nổi bật', 'h2' ); } ?>
-					<?php if ( $is_found && function_exists( 'cvc_render_blog_related' ) ) { cvc_render_blog_related( (string) ( $item['title'] ?? '' ) . ' ' . (string) ( $topic['name'] ?? '' ), 'Bài hướng dẫn liên quan', 3 ); } // 12/11/2026 ?>
 				</aside>
 			</div>
 

@@ -43,8 +43,8 @@ final class CVC_Homepage_Service extends CVC_Api_Service {
 		);
 	}
 
-	public function miniQuiz( int $count = 5 ): array {
-		return $this->client->get( '/api/mini-quiz', array( 'count' => $count ) );
+	public function miniQuiz( int $count = 5, array $params = array() ): array {
+		return $this->client->get( '/api/mini-quiz', array( 'count' => $count ) + $params );
 	}
 
 	public function miniQuizCheck( string $quizToken, int $questionId, int $optionId ): array {

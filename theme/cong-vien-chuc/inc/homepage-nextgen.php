@@ -80,7 +80,9 @@ add_action( 'wp_ajax_nopriv_cvc_mini_quiz_load', 'cvc_handle_mini_quiz_load' );
 function cvc_handle_mini_quiz_load(): void {
 	check_ajax_referer( 'cvc_mini_quiz', 'nonce' );
 
-	$result = ( new CVC_Homepage_Service() )->miniQuiz( 5 );
+	// 12/11/2026: luyện nhanh theo Điều luật (trang /kien-thuc/).
+	$params = array_filter( array( 'knowledge_item_id' => absint( $_POST['ki'] ?? 0 ), 'legal_document_id' => absint( $_POST['ld'] ?? 0 ) ) );
+	$result = ( new CVC_Homepage_Service() )->miniQuiz( 5, $params );
 
 	if ( ! $result['ok'] ) {
 		wp_send_json_error( array( 'message' => cvc_api_error_message( $result ) ), $result['status'] ?: 500 );

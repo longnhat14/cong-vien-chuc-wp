@@ -147,6 +147,27 @@ function cvc_ll_kind_code( string $kind ): string {
 	return $map[ $k ] ?? '';
 }
 
+/** Slug bài học /kien-thuc/ của Điều $art trong văn bản $doc_slug ('' nếu chưa có). Cache 12 giờ / văn bản. */
+function cvc_ll_lesson_slug( string $doc_slug, string $art ): string {
+	static $mem = array();
+	if ( ! function_exists( 'cvc_knowledge_item_url' ) ) {
+		return '';
+	}
+	if ( ! isset( $mem[ $doc_slug ] ) ) {
+		$key = 'cvc_ll_les_' . md5( $doc_slug );
+		$map = get_transient( $key );
+		if ( ! is_array( $map ) ) {
+			$res = ( new CVC_Api_Client( null, 5 ) )->get( '/api/legal-documents/' . rawurlencode( $doc_slug ) . '/lessons' );
+			$map = ! empty( $res['ok'] ) && is_array( $res['data']['data'] ?? null ) ? $res['data']['data'] : null;
+			set_transient( $key, is_array( $map ) ? $map : array(), is_array( $map ) ? 12 * HOUR_IN_SECONDS : 10 * MINUTE_IN_SECONDS );
+			$map = is_array( $map ) ? $map : array();
+		}
+		$mem[ $doc_slug ] = $map;
+	}
+
+	return (string) ( $mem[ $doc_slug ][ mb_strtolower( $art, 'UTF-8' ) ] ?? '' );
+}
+
 function cvc_ll_url( array $row, string $anchor = '' ): string {
 	return function_exists( 'cvc_legal_document_url' ) ? cvc_legal_document_url( (string) $row['s'] ) . $anchor : home_url( '/van-ban-phap-luat/' . rawurlencode( (string) $row['s'] ) . '/' ) . $anchor;
 }
@@ -198,7 +219,12 @@ function cvc_ll_pattern(): string {
 	$full = '\d{1,4}\/\d{4}\/\p{Lu}[\p{Lu}\d\-Đ]*(?:\/[\p{Lu}\d\-Đ]+)?|\d{1,4}-\p{Lu}{1,5}\/\p{Lu}{2,6}|\d{1,5}\/(?:QĐ|NQ)-[\p{L}\-]{2,12}';
 	$kind = '(?i:Nghị\s+định|Thông\s+tư\s+liên\s+tịch|Thông\s+tư|Quyết\s+định|Nghị\s+quyết|Bộ\s+luật|Luật|NĐ|TT|QĐ|NQ)';
 	$sub  = '(?:,?' . $sp . '(?:khoản|điểm)' . $sp . '[\dA-Za-zđ]+){0,2}';
-	$p    = '~(?<![\p{L}\d\/\-])(?:'
+	$p    = '~(?<![\p{L}\d\/\-])(?:';
+	if ( '' !== $maps['law_re'] ) {
+		// 0) "Điều 9 [khoản..] (của) Luật Khoa học, công nghệ và đổi mới sáng tạo [năm 2025] [số 93/2025/QH15]" (12/11/2026).
+		$p .= '(?<d0>Điều' . $sp . '(?<dn0>\d{1,3}[a-zđ]?)' . $sub . $sp . '(?:của' . $sp . ')?(?<ln0>' . $maps['law_re'] . ')(?:' . $sp . '(?:năm' . $sp . ')?(?<ly0>(?:19|20)\d{2}))?(?:' . $sp . 'số' . $sp . '(?<f0>' . $full . '))?)|';
+	}
+	$p   .= ''
 		// 1) "Điều 12 [khoản..] (của) Nghị định 232/2026[/NĐ-CP]" hoặc với số hiệu đầy đủ.
 		. '(?<d1>Điều' . $sp . '(?<dn>\d{1,3}[a-zđ]?)' . $sub . $sp . '(?:của' . $sp . ')?(?:(?<k1>' . $kind . ')' . $sp . '(?:số' . $sp . ')?)?(?:(?<f1>' . $full . ')|(?<s1>\d{1,4}\/\d{4}(?![\/\d])))' . ')'
 		// 2) "Nghị định (số) 232/2026[/NĐ-CP]"
@@ -231,7 +257,23 @@ function cvc_ll_chunk( string $s, array &$seen ): string {
 			$anchor = '';
 			$text   = $m[0];
 			$kind   = '';
-			if ( ! empty( $m['f3'] ) ) {
+			$art = '';
+			if ( ! empty( $m['d0'] ) ) {
+				$art = (string) $m['dn0'];
+				if ( ! empty( $m['f0'] ) ) {
+					$row = cvc_ll_find_full( $m['f0'] );
+				} else {
+					$key0  = mb_strtolower( preg_replace( '/\s+/u', ' ', $m['ln0'] ), 'UTF-8' );
+					$cands = $maps['laws'][ $key0 ] ?? array();
+					$all0  = $cands;
+					if ( '' !== ( $m['ly0'] ?? '' ) ) {
+						$cands = array_values( array_filter( $cands, static fn ( $c ) => $c['year'] === $m['ly0'] ) );
+					}
+					if ( 1 === count( $cands ) && ( '' !== ( $m['ly0'] ?? '' ) || 1 === count( $all0 ) ) ) {
+						$row = $cands[0]['row'];
+					}
+				}
+			} elseif ( ! empty( $m['f3'] ) ) {
 				$row = cvc_ll_find_full( $m['f3'] );
 				if ( ! $row ) {
 					cvc_ll_note_missing( $m['f3'] );
@@ -254,8 +296,11 @@ function cvc_ll_chunk( string $s, array &$seen ): string {
 				} elseif ( ! empty( $m['s1'] ) ) {
 					$row = cvc_ll_find_short( $m['s1'], (string) ( $m['k1'] ?? '' ) );
 				}
-				if ( $row && ! empty( $row['a'] ) && ! empty( $m['dn'] ) ) {
-					$anchor = '#dieu-' . sanitize_title( $m['dn'] );
+				if ( $row && ! empty( $m['dn'] ) ) {
+					$art = (string) $m['dn'];
+					if ( ! empty( $row['a'] ) ) {
+						$anchor = '#dieu-' . sanitize_title( $m['dn'] );
+					}
 				}
 			} elseif ( ! empty( $m['h5'] ) ) {
 				$row = cvc_ll_find_full( 'Hiến pháp 2013' );
@@ -271,6 +316,14 @@ function cvc_ll_chunk( string $s, array &$seen ): string {
 			}
 			if ( ! $row || ! empty( $row['dup'] ) ) {
 				return $text;
+			}
+			// 12/11/2026: "Điều N <văn bản>" có bài học /kien-thuc/ → trỏ thẳng tới bài học của Điều đó (link hai chiều blog ↔ Điều luật).
+			$lesson = '' !== $art ? cvc_ll_lesson_slug( (string) $row['s'], $art ) : '';
+			if ( '' !== $lesson && $lesson !== (string) get_query_var( 'cvc_knowledge_slug' ) && ! isset( $seen[ $row['s'] . '#' . $lesson ] ) ) {
+				$seen[ $row['s'] . '#' . $lesson ] = true;
+				++$GLOBALS['cvc_ll']['emitted'];
+				$title = 'Điều ' . $art . ' ' . trim( (string) ( $row['n'] ?? '' ) . ' — ' . (string) ( $row['t'] ?? '' ), ' —' );
+				return '<a class="ll" href="' . esc_url( cvc_knowledge_item_url( $lesson ) ) . '" data-ll="' . esc_attr( (string) $row['s'] ) . '" title="' . esc_attr( $title ) . '">' . $text . '</a>';
 			}
 			if ( '' !== $self && $row['s'] === $self ) {
 				return $text;

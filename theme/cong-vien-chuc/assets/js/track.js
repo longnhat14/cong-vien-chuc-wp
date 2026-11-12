@@ -30,6 +30,13 @@
 
   send({ e: 'view', p: location.pathname });
 
+  // 12/11/2026: lượt bấm liên kết nội bộ có gắn vị trí (data-cvc-go), vd trang Điều luật → bài viết.
+  document.addEventListener('click', function (ev) {
+    var a = ev.target && ev.target.closest ? ev.target.closest('a[data-cvc-go]') : null;
+    if (!a || !a.href) return;
+    try { var u = new URL(a.href, location.href); if (u.host !== location.host) return; send({ e: 'go', k: a.getAttribute('data-cvc-go'), p: u.pathname }); } catch (e) {}
+  }, true);
+
   var IDLE = 180000, acc = 0, last = Date.now(), act = Date.now();
   ['pointermove', 'keydown', 'scroll', 'touchstart', 'click'].forEach(function (t) { window.addEventListener(t, function () { act = Date.now(); }, { passive: true }); });
   function tick(force) {
