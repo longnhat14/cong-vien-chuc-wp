@@ -19,4 +19,5 @@ if ( cvc_cat_filter_count( cvc_cat_filters( 'topics', $_GET ) ) > 0 ) { // phpcs
 
 get_header();
 cvc_cat_render_page( 'topics' );
+if ( function_exists( 'cvc_side_feed' ) ) { cvc_side_feed( array( 'slot' => 'cds', 'text' => 'chủ đề ôn thi công chức viên chức' ), 'band' ); } // 12/11/2026
 get_footer();

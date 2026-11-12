@@ -41,4 +41,5 @@ if ( cvc_cat_filter_count( $cvc_cat_f ) > 0 || ! empty( $_GET['tinh'] ) || ! emp
 
 get_header();
 cvc_cat_render_page( 'exams' );
+if ( function_exists( 'cvc_side_feed' ) ) { cvc_side_feed( array( 'slot' => 'des', 'text' => 'thi trắc nghiệm công chức viên chức', 'blocks' => array( 'fame', 'rec', 'blog' ) ), 'band' ); } // 12/11/2026
 get_footer();

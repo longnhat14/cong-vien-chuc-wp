@@ -338,9 +338,9 @@ get_header();
 					<?php if ( '' !== $agency ) : ?><a class="ld-btn is-sm" href="<?php echo esc_url( add_query_arg( 'co-quan', rawurlencode( $agency ), cvc_legal_documents_url() ) ); ?>">§ Văn bản cùng cơ quan</a><?php endif; ?>
 				</div>
 			</section>
+			<?php if ( function_exists( 'cvc_side_feed' ) ) { cvc_side_feed( array( 'slot' => 'vb', 'doc' => (array) $document, 'text' => $title, 'seed' => (string) ( $document['slug'] ?? '' ) ) ); } // 12/11/2026 ?>
 			<?php // 01/11/2026: sách nổi bật dẫn văn bản này (claude/ke-hoach-sach-cam-nang-noi-bat.md). ?>
 			<?php if ( function_exists( 'cvc_book_side' ) ) { cvc_book_side( cvc_book_side_items( 'legal', array( 'number' => $doc_number ) ), 'Sách nổi bật', 'h2', array( 'compact' => true ) ); } ?>
-			<?php if ( function_exists( 'cvc_render_blog_related' ) ) { cvc_render_blog_related( $title, 'Bài hướng dẫn liên quan', 3 ); } // 12/11/2026 ?>
 		</aside>
 
 		<div class="ld-content">

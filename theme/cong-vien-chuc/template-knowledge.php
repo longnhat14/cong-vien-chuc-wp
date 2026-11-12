@@ -19,4 +19,5 @@ if ( cvc_cat_filter_count( cvc_cat_filters( 'knowledge', $_GET ) ) > 0 ) { // ph
 
 get_header();
 cvc_cat_render_page( 'knowledge' );
+if ( function_exists( 'cvc_side_feed' ) ) { cvc_side_feed( array( 'slot' => 'kts', 'text' => 'kiến thức pháp luật công chức viên chức' ), 'band' ); } // 12/11/2026
 get_footer();

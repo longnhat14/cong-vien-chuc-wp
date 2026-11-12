@@ -297,6 +297,7 @@ get_header();
 
 	</div>
 
+	<?php if ( function_exists( 'cvc_side_feed' ) ) { cvc_side_feed( array( 'slot' => 'tl', 'text' => (string) ( $doc['title'] ?? '' ), 'seed' => (string) ( $doc['slug'] ?? '' ) ), 'band' ); } // 12/11/2026 ?>
 </main>
 
 <?php

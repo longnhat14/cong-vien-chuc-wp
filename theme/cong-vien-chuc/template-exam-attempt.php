@@ -468,6 +468,7 @@ $doc_icon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H
 			<section class="sx-panel"><div class="sx-body"><?php echo $cvc_rank_html; // phpcs:ignore WordPress.Security.EscapeOutput ?></div></section>
 				<?php endif; ?>
 			<?php endif; ?>
+			<?php if ( function_exists( 'cvc_side_feed' ) ) { cvc_side_feed( array( 'slot' => 'lb', 'text' => $exam_title, 'seed' => $exam_title, 'new_tab' => true, 'blocks' => array( 'fame', 'blog', 'rec' ) ), 'compact' ); } // 12/11/2026: cả Ôn tập và Thi thật; mở tab mới, không rời bài ?>
 		</aside>
 	</div>
 

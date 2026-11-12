@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Tăng số này khi thêm/sửa rewrite rule để buộc flush lại đúng 1 lần.
-const CVC_REWRITE_VERSION = '34';
+const CVC_REWRITE_VERSION = '35';
 
 /**
  * Section hợp lệ của /tai-khoan/{section}/ (Phase 10) - map slug tiếng
@@ -346,6 +346,7 @@ function cvc_register_rewrite_rules(): void {
 	add_rewrite_rule( '^bao-cao-tuyen-dung/([0-9]{4}-[0-9]{2})/?$', 'index.php?cvc_page=report-month&cvc_report_month=$matches[1]', 'top' ); // 12/11/2026
 	add_rewrite_rule( '^bao-cao-tuyen-dung/?$', 'index.php?cvc_page=report-month', 'top' );
 	add_rewrite_rule( '^cau-hay-sai-nhat/?$', 'index.php?cvc_page=hardest', 'top' );
+	add_rewrite_rule( '^moi-cap-nhat/?$', 'index.php?cvc_page=latest', 'top' ); // 12/11/2026
 	add_rewrite_rule( '^don-vi/tin/([0-9]+)/?$', 'index.php?cvc_page=employer&cvc_employer_view=tin&cvc_employer_id=$matches[1]', 'top' );
 	add_rewrite_rule( '^don-vi/([a-z-]+)/?$', 'index.php?cvc_page=employer&cvc_employer_view=$matches[1]', 'top' );
 	add_rewrite_rule( '^don-vi/?$', 'index.php?cvc_page=employer&cvc_employer_view=bang-dieu-khien', 'top' );
@@ -536,6 +537,7 @@ function cvc_template_include( string $template ): string {
 		'fame-card'             => 'template-fame.php',
 		'report-month'          => 'template-report-month.php',
 		'hardest'               => 'template-hardest.php',
+		'latest'                => 'template-latest.php',
 		'employer'              => 'template-employer.php',
 		'certificate-verify'    => 'template-certificate-verify.php',
 		'admin-ai-settings'     => 'template-admin-ai-settings.php',

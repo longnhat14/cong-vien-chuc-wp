@@ -108,6 +108,7 @@ function cvc_sitemap_render(): void {
 		}
 	}
 	$rows[] = array( 'path' => '/cau-hay-sai-nhat/', 'lastmod' => '' );
+	$rows[] = array( 'path' => '/moi-cap-nhat/', 'lastmod' => cvc_sitemap_lastmod( $data['notices'] ) );
 	$rows = array_merge( $rows, $data['notices'], $data['positions'] );
 
 	status_header( 200 );

@@ -422,6 +422,7 @@ else :
 				<a class="history-row<?php echo ! empty( $h['current'] ) ? ' is-current' : ''; ?>" href="<?php $a( cvc_exam_result_url( (int) $h['id'] ) ); ?>"><span class="history-icon"><?php echo ! empty( $h['current'] ) ? '✓' : '↗'; ?></span><span><b><?php $e( $trim( $h['title'] ?? 'Lượt thi #' . $h['id'], 60 ) ); ?></b><small><?php $e( ( ! empty( $h['current'] ) ? 'Lượt này · ' : '' ) . $fmt_date( $h['submitted_at'] ?? null, true ) ); ?></small></span><span class="history-score"><?php echo null !== $h['percentage'] ? esc_html( (int) $h['percentage'] . '%' ) : '--'; ?></span></a>
 			<?php endforeach; ?>
 		</div></div></section>
+		<?php if ( function_exists( 'cvc_side_feed' ) ) { cvc_side_feed( array( 'slot' => 'kq', 'text' => (string) ( $r['exam']['title'] ?? '' ), 'seed' => (string) $attempt_id, 'blocks' => array( 'fame', 'blog', 'rec' ) ) ); } // 12/11/2026 ?>
 	</div></aside></div>
 </main>
 <?php endif; ?>

@@ -170,11 +170,19 @@ function cvc_admin_render_index_coverage(): void {
 	<?php
 	$lk    = (array) ( $d['links'] ?? array() );
 	$slots = (array) ( $lk['slots'] ?? array() );
-	$sl    = array( 'kt-inline' => 'Dòng gợi ý trong bài', 'kt-side' => 'Khối cột phải', 'kt-quiz' => 'Sau luyện nhanh 5 câu' );
+	$sl    = array( 'kt-inline' => 'Điều luật: dòng gợi ý trong bài', 'kt-quiz' => 'Điều luật: sau luyện nhanh' );
+	$pref  = array( 'kt' => 'Điều luật', 'vb' => 'Văn bản', 'xd' => 'Trang đề', 'cd' => 'Chủ đề', 'qb' => 'Ngân hàng câu hỏi', 'pdf' => 'Bộ đề PDF', 'tl' => 'Tài liệu', 'des' => 'Danh sách đề', 'kts' => 'DS kiến thức', 'cds' => 'DS chủ đề', 'vbs' => 'DS văn bản', 'pdfs' => 'DS bộ đề PDF', 'tls' => 'DS tài liệu', 'kq' => 'Kết quả thi', 'lb' => 'Làm bài', 'bp' => 'Cuối bài viết', 'hm' => 'Trang chủ', 'ft' => 'Chân trang', 'lu' => 'Mới cập nhật' );
+	$kind  = array( 'rec' => 'tin tuyển dụng', 'blog' => 'bài viết', 'fame' => 'vinh danh', 'new' => 'mới cập nhật', 'exam' => 'đề thi', 'side' => 'khối cột phải (cũ)' );
+	foreach ( array_keys( $slots ) as $k ) {
+		if ( ! isset( $sl[ $k ] ) && preg_match( '/^([a-z0-9]+)-([a-z]+)$/', (string) $k, $mm ) ) {
+			$sl[ $k ] = ( $pref[ $mm[1] ] ?? $mm[1] ) . ': ' . ( $kind[ $mm[2] ] ?? $mm[2] );
+		}
+	}
+	uksort( $sl, static fn ( $a, $b ) => (int) ( $slots[ $b ] ?? 0 ) <=> (int) ( $slots[ $a ] ?? 0 ) );
 	$kv    = (int) ( $lk['kt_views'] ?? 0 );
 	?>
 	<section class="dz-card space-y-3">
-		<h2 class="font-black text-ink">Trang Điều luật → bài viết, đề luyện (30 ngày)</h2>
+		<h2 class="font-black text-ink">Lượt bấm liên kết nội bộ theo vị trí (30 ngày)</h2>
 		<p class="text-xs text-ink-muted">Lượt xem trang Điều luật: <?php echo esc_html( $num( $kv ) ); ?>. Lượt bấm đếm từ 12/11/2026.</p>
 		<div class="grid gap-3" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr))">
 			<?php foreach ( $sl as $k => $label ) : ?>

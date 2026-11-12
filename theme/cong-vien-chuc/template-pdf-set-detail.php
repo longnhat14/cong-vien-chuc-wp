@@ -198,6 +198,7 @@ get_header();
 					<p>Hỏi <b>AI Coach</b> để được giải thích từng đáp án theo văn bản pháp luật, gợi ý cách nhớ — miễn phí, 24/7.</p>
 					<button type="button" class="pds-btn" data-open-ai data-ai-prompt="<?php echo esc_attr( 'Tôi đang ôn bộ đề ' . $set['title'] . '. Hãy gợi ý các văn bản và nội dung trọng tâm cần nắm.' ); ?>">Hỏi AI Coach</button>
 				</section>
+				<?php if ( function_exists( 'cvc_side_feed' ) ) { cvc_side_feed( array( 'slot' => 'pdf', 'text' => (string) ( $set['title'] ?? '' ), 'seed' => (string) ( $set['slug'] ?? '' ) ) ); } // 12/11/2026 ?>
 			</aside>
 		</div>
 

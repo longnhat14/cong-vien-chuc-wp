@@ -344,6 +344,7 @@ get_header();
 		</section>
 	</form>
 </div>
+	<?php if ( function_exists( 'cvc_side_feed' ) ) { cvc_side_feed( array( 'slot' => 'vbs', 'text' => 'văn bản pháp luật công chức viên chức' ), 'band' ); } // 12/11/2026 ?>
 </main>
 <?php
 get_footer();

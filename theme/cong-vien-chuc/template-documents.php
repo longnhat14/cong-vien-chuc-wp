@@ -178,6 +178,7 @@ function cvc_document_price_badge( array $doc ): string {
 	?>
 	<div class="dl-sec dl-more"><?php cvc_render_listing_explore_nav( 'documents' ); ?></div>
 </div>
+	<?php if ( function_exists( 'cvc_side_feed' ) ) { cvc_side_feed( array( 'slot' => 'tls', 'text' => 'tài liệu ôn thi công chức viên chức' ), 'band' ); } // 12/11/2026 ?>
 </main>
 
 <?php get_footer(); ?>

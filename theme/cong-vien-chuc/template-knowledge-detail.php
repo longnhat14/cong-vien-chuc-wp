@@ -222,7 +222,7 @@ get_header();
 						<?php endif; ?>
 					</div>
 					<?php // 01/11/2026: sách nổi bật theo chủ đề bài (claude/ke-hoach-sach-cam-nang-noi-bat.md). ?>
-					<?php if ( $is_found && function_exists( 'cvc_kt_render_side' ) ) { cvc_kt_render_side( $kt_pick ); } // 12/11/2026: lên trên Sách nổi bật ?>
+					<?php if ( $is_found && function_exists( 'cvc_side_feed' ) ) { cvc_side_feed( array( 'slot' => 'kt', 'doc' => $legalDoc, 'text' => (string) ( $item['title'] ?? '' ), 'seed' => $slug, 'exclude' => array_filter( array( (int) ( $kt_pick['inline']['id'] ?? 0 ) ) ) ) ); } // 12/11/2026: tin tuyển dụng + bài viết + vinh danh ?>
 					<?php if ( $is_found && function_exists( 'cvc_book_side' ) ) { cvc_book_side( cvc_book_side_items( 'exam', array( 'topics' => array_values( array_filter( array( (string) ( $item['title'] ?? '' ), (string) ( $topic['name'] ?? '' ) ) ) ) ) ), 'Sách nổi bật', 'h2' ); } ?>
 				</aside>
 			</div>

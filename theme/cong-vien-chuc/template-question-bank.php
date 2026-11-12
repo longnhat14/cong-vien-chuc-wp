@@ -332,6 +332,7 @@ get_header();
 						<p class="qb-hint">Mỗi câu ghi Điều làm căn cứ và trích dẫn nguyên văn đoạn quy định. Đối chiếu văn bản gốc và hiệu lực trước khi ghi nhớ số liệu cụ thể.</p>
 					</div>
 				</article>
+				<?php if ( function_exists( 'cvc_side_feed' ) ) { cvc_side_feed( array( 'slot' => 'qb', 'text' => 'ngân hàng câu hỏi thi công chức viên chức', 'seed' => (string) ( $_SERVER['REQUEST_URI'] ?? '' ) ) ); } // 12/11/2026 ?>
 			</aside>
 		</div>
 

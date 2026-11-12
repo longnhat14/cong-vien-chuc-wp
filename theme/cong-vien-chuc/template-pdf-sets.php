@@ -128,6 +128,7 @@ get_header();
 			</ol>
 		</section>
 	</div>
+	<?php if ( function_exists( 'cvc_side_feed' ) ) { cvc_side_feed( array( 'slot' => 'pdfs', 'text' => 'bộ đề thi công chức viên chức pdf' ), 'band' ); } // 12/11/2026 ?>
 </main>
 <?php
 get_footer();

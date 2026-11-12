@@ -333,7 +333,7 @@ get_header();
 
 						<?php if ( function_exists( 'cvc_ci_render_exam_jobs' ) && ! $rp_rec ) { cvc_ci_render_exam_jobs( $exam_id ); } ?>
 						<?php if ( function_exists( 'cvc_render_leaderboard_mini' ) && $can_pdf ) { cvc_render_leaderboard_mini( array( 'de' => $exam_id ), 'Top thí sinh đề này' ); } ?>
-						<?php if ( function_exists( 'cvc_render_blog_related' ) ) { cvc_render_blog_related( (string) $exam['title'] . ' ' . implode( ' ', (array) ( $exam_subject_names ?? array() ) ), 'Bài hướng dẫn ôn thi', 3 ); } // 12/11/2026 ?>
+						<?php if ( function_exists( 'cvc_side_feed' ) ) { cvc_side_feed( array( 'slot' => 'xd', 'text' => (string) $exam['title'] . ' ' . implode( ' ', (array) ( $exam_subject_names ?? array() ) ), 'seed' => (string) ( $exam['slug'] ?? '' ) ) ); } // 12/11/2026 ?>
 					</aside>
 				</div>
 
