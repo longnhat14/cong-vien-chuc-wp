@@ -295,6 +295,8 @@ get_header();
 				cvc_admin_render_legal_document( absint( $_GET['id'] ?? 0 ) ); // phpcs:ignore WordPress.Security.NonceVerification
 			} elseif ( 'cau-moi' === $cvc_ing_view ) {
 				cvc_admin_render_general_questions();
+			} elseif ( 'google-index' === $cvc_ing_view ) {
+				cvc_admin_render_google_indexing();
 			} elseif ( 'bao-cau-sai' === $cvc_ing_view ) {
 				cvc_admin_render_question_reports();
 			} elseif ( 'tai-pdf' === $cvc_ing_view ) {
