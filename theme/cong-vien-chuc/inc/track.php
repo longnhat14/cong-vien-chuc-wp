@@ -60,11 +60,12 @@ function cvc_track_assets(): void {
 /** Nguồn đến lần đầu (cookie cvc_src do track.js ghi) -> trường gửi kèm khi đăng ký. */
 function cvc_track_signup_fields(): array {
 	$raw = isset( $_COOKIE['cvc_src'] ) ? json_decode( wp_unslash( (string) $_COOKIE['cvc_src'] ), true ) : null;
+	$ref = function_exists( 'cvc_growth_signup_fields' ) ? cvc_growth_signup_fields() : array(); // 12/11/2026: mã giới thiệu
 	if ( ! is_array( $raw ) ) {
-		return array();
+		return $ref;
 	}
 
-	return array_filter(
+	return $ref + array_filter(
 		array(
 			'signup_source'  => mb_substr( sanitize_text_field( (string) ( $raw['s'] ?? '' ) ), 0, 120 ),
 			'signup_landing' => mb_substr( sanitize_text_field( (string) ( $raw['l'] ?? '' ) ), 0, 191 ),

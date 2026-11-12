@@ -152,6 +152,7 @@ get_header();
 	<div class="dz-wrap space-y-6">
 
 		<?php cvc_render_breadcrumbs( $breadcrumb_items ); ?>
+		<?php if ( $is_found && function_exists( 'cvc_growth_challenge_banner' ) ) { cvc_growth_challenge_banner( (string) ( $exam['slug'] ?? '' ) ); } // 12/11/2026 thách đấu ?>
 
 		<?php if ( ! $is_found ) : ?>
 			<div class="dz-panel text-center space-y-4">

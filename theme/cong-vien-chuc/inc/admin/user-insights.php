@@ -58,6 +58,7 @@ function cvc_ui_tabs( string $cur ): void {
 		'danh-sach' => array( 'Danh sách người dùng', cvc_admin_url( 'nguoi-dung', null, array( 'xem' => 'danh-sach' ) ) ),
 		'goi-y'     => array( 'Gợi ý & cảnh báo', cvc_admin_url( 'nguoi-dung', null, array( 'xem' => 'goi-y' ) ) ),
 		'anh'       => array( 'Ảnh đại diện', cvc_admin_url( 'nguoi-dung', null, array( 'xem' => 'anh' ) ) ),
+		'gioi-thieu' => array( 'Mời bạn bè & lan tỏa', cvc_admin_url( 'nguoi-dung', null, array( 'xem' => 'gioi-thieu' ) ) ),
 	);
 	echo '<nav class="flex flex-wrap gap-2 text-sm" aria-label="Người dùng">';
 	foreach ( $tabs as $k => $t ) {
@@ -190,6 +191,10 @@ function cvc_admin_render_user_insights( string $item_param ): void {
 	}
 	if ( 'anh' === $xem ) {
 		cvc_ui_render_avatars();
+		return;
+	}
+	if ( 'gioi-thieu' === $xem ) {
+		cvc_ui_render_referrals();
 		return;
 	}
 	cvc_ui_render_overview();
@@ -855,4 +860,70 @@ function cvc_admin_handle_avatar(): void {
 	$op    = 'remove' === ( $_POST['op'] ?? '' ) ? 'remove' : 'keep';
 	$r     = cvc_admin_client()->post( '/api/admin/fame/avatars/' . absint( $_POST['uid'] ?? 0 ) . '/' . $op, array(), $token );
 	cvc_admin_redirect( $back, $r['ok'] ? 'success' : 'error', (string) ( $r['data']['message'] ?? cvc_admin_error_message( $r ) ) );
+}
+
+
+/* ---------- Mời bạn bè & lan tỏa (12/11/2026) ---------- */
+function cvc_ui_render_referrals(): void {
+	$tt  = sanitize_key( (string) ( $_GET['tt'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification
+	$res = cvc_admin_api_get( '/api/admin/referrals', array_filter( array( 'tt' => $tt ) ) );
+	$d   = $res['ok'] ? (array) ( $res['data']['data'] ?? array() ) : array();
+	$c   = (array) ( $d['counts'] ?? array() );
+	$k   = (array) ( $d['kpi'] ?? array() );
+	$can = cvc_admin_can( 'user.update' );
+	$st  = array( 'pending' => 'Chờ bắt đầu ôn', 'review' => 'Cần kiểm tra', 'rewarded' => 'Đã thưởng', 'capped' => 'Hết lượt tháng', 'rejected' => 'Từ chối / hết hạn' );
+	$src = array( 'link' => 'Link mời', 'challenge' => 'Thách đấu', 'group' => 'Nhóm ôn thi' );
+	$url = static fn ( array $a = array() ) => cvc_admin_url( 'nguoi-dung', null, array( 'xem' => 'gioi-thieu' ) + $a );
+	?>
+	<header><h1 class="text-2xl font-black text-ink">Mời bạn bè &amp; lan tỏa</h1>
+		<p class="text-sm text-ink-muted">Người mới đăng ký qua link mời, xác minh email và làm xong 1 bài (hoặc 10 câu) trong 30 ngày: cả hai nhận 7 ngày Gói ôn thi đầy đủ; người mời tối đa 10 lượt thưởng / tháng. Lượt đăng ký cùng IP với người mời chuyển sang "Cần kiểm tra".</p></header>
+	<?php cvc_ui_tabs( 'gioi-thieu' ); ?>
+	<?php if ( ! $res['ok'] ) : ?><p class="text-sm text-red-700"><?php echo esc_html( cvc_admin_error_message( $res ) ); ?></p><?php return; ?><?php endif; ?>
+	<div class="grid gap-3" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">
+		<?php foreach ( array( array( 'Đăng ký 30 ngày', $k['signups_30d'] ?? 0, '' ), array( 'Qua lời mời 30 ngày', $k['referred_30d'] ?? 0, cvc_ui_pct( (int) ( $k['referred_30d'] ?? 0 ), (int) ( $k['signups_30d'] ?? 0 ) ) ), array( 'Lời thách đấu', $k['challenges'] ?? 0, ( $k['challenge_views'] ?? 0 ) . ' lượt xem' ), array( 'Nhóm ôn thi', $k['groups'] ?? 0, ( $k['group_members'] ?? 0 ) . ' thành viên' ), array( 'Ngày gói đã tặng', $k['days_granted'] ?? 0, 'cả hai phía' ) ) as $x ) : ?>
+			<div class="dz-card"><p class="text-xs text-ink-muted"><?php echo esc_html( $x[0] ); ?></p><p class="text-2xl font-black tabular-nums"><?php echo esc_html( (string) $x[1] ); ?></p><p class="text-xs text-ink-muted"><?php echo esc_html( (string) $x[2] ); ?></p></div>
+		<?php endforeach; ?>
+	</div>
+	<nav class="flex flex-wrap gap-2 text-sm">
+		<a href="<?php echo esc_url( $url() ); ?>" class="px-3 py-1 rounded-lg border <?php echo '' === $tt ? 'bg-acc-soft text-acc font-bold' : 'bg-white border-slate-300'; ?>">Tất cả</a>
+		<?php foreach ( $st as $kk => $l ) : ?><a href="<?php echo esc_url( $url( array( 'tt' => $kk ) ) ); ?>" class="px-3 py-1 rounded-lg border <?php echo $kk === $tt ? 'bg-acc-soft text-acc font-bold' : 'bg-white border-slate-300'; ?>"><?php echo esc_html( $l . ' (' . (int) ( $c[ $kk ] ?? 0 ) . ')' ); ?></a><?php endforeach; ?>
+	</nav>
+	<div class="dz-card overflow-x-auto"><table class="w-full text-sm">
+		<thead><tr class="text-left text-xs text-ink-muted"><th class="py-1 pr-2">Người mời</th><th class="pr-2">Người được mời</th><th class="pr-2">Nguồn</th><th class="pr-2">Trạng thái</th><th class="pr-2">Ngày</th><th></th></tr></thead>
+		<tbody>
+		<?php if ( empty( $d['items'] ) ) : ?><tr><td colspan="6" class="py-3 text-ink-muted">Chưa có lượt nào.</td></tr><?php endif; ?>
+		<?php foreach ( (array) ( $d['items'] ?? array() ) as $it ) : ?>
+			<tr class="border-t border-slate-100 align-top">
+				<td class="py-1 pr-2"><?php echo esc_html( (string) $it['referrer'] ); ?><br><small class="text-ink-muted"><?php echo esc_html( (string) $it['referrer_email'] ); ?></small></td>
+				<td class="pr-2"><?php echo esc_html( (string) $it['referred'] ); ?><br><small class="text-ink-muted"><?php echo esc_html( (string) $it['referred_email'] . ( empty( $it['email_verified_at'] ) ? ' · chưa xác minh' : '' ) ); ?></small></td>
+				<td class="pr-2 whitespace-nowrap"><?php echo esc_html( $src[ $it['source'] ] ?? (string) $it['source'] ); ?></td>
+				<td class="pr-2"><?php echo esc_html( $st[ $it['status'] ] ?? (string) $it['status'] ); ?><?php echo ! empty( $it['note'] ) ? '<br><small class="text-ink-muted">' . esc_html( (string) $it['note'] ) . '</small>' : ''; ?></td>
+				<td class="pr-2 whitespace-nowrap text-xs"><?php echo esc_html( function_exists( 'cvc_admin_dt' ) ? cvc_admin_dt( (string) $it['created_at'] ) : (string) $it['created_at'] ); ?></td>
+				<td class="whitespace-nowrap"><?php if ( $can && in_array( $it['status'], array( 'pending', 'review' ), true ) ) : ?>
+					<?php foreach ( array( 'approve' => 'Duyệt', 'reject' => 'Từ chối' ) as $op => $lb ) : ?>
+						<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="inline"><?php wp_nonce_field( 'cvc_admin_ref' ); ?><input type="hidden" name="action" value="cvc_admin_ref"><input type="hidden" name="id" value="<?php echo (int) $it['id']; ?>"><input type="hidden" name="op" value="<?php echo esc_attr( $op ); ?>"><button type="submit" class="px-2 py-1 rounded-lg border border-slate-300 bg-white text-xs font-bold"><?php echo esc_html( $lb ); ?></button></form>
+					<?php endforeach; ?>
+				<?php endif; ?></td>
+			</tr>
+		<?php endforeach; ?>
+		</tbody>
+	</table></div>
+	<?php if ( ! empty( $d['top'] ) ) : ?>
+		<div class="dz-card"><p class="font-black text-ink mb-1">Người mời hiệu quả nhất</p><ol class="list-decimal pl-5 text-sm"><?php foreach ( (array) $d['top'] as $t ) : ?><li><?php echo esc_html( (string) $t['name'] . ' - ' . (int) $t['n'] . ' bạn' ); ?></li><?php endforeach; ?></ol></div>
+	<?php endif; ?>
+	<?php
+}
+
+function cvc_ui_pct( int $a, int $b ): string {
+	return $b > 0 ? number_format_i18n( $a * 100 / $b, 1 ) . '% số đăng ký' : '';
+}
+
+add_action( 'admin_post_cvc_admin_ref', 'cvc_ui_handle_ref' );
+add_action( 'admin_post_nopriv_cvc_admin_ref', 'cvc_ui_handle_ref' );
+
+function cvc_ui_handle_ref(): void {
+	check_admin_referer( 'cvc_admin_ref' );
+	$token = cvc_admin_require_staff();
+	$r     = ( new CVC_Api_Client( null, 30 ) )->post( '/api/admin/referrals/' . absint( $_POST['id'] ?? 0 ), array( 'op' => 'reject' === ( $_POST['op'] ?? '' ) ? 'reject' : 'approve' ), $token );
+	cvc_admin_redirect( cvc_admin_url( 'nguoi-dung', null, array( 'xem' => 'gioi-thieu' ) ), $r['ok'] ? 'success' : 'error', (string) ( $r['data']['message'] ?? cvc_admin_error_message( $r ) ) );
 }

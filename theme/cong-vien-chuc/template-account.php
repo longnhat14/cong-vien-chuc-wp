@@ -52,6 +52,7 @@ $section_titles = array(
 	'certificates'         => 'Chứng chỉ của tôi',
 	'profile'              => 'Hồ sơ cá nhân',
 	'security'             => 'Bảo mật & đăng nhập',
+	'referral'             => 'Mời bạn bè',
 );
 
 $section_fa_icons = array(
@@ -69,6 +70,7 @@ $section_fa_icons = array(
 	'notifications'        => 'fa-bell',
 	'certificates'         => 'fa-award',
 	'security'             => 'fa-shield-halved',
+	'referral'             => 'fa-user-plus',
 );
 
 cvc_seo_set_title( ( $section_titles[ $section ] ?? 'Tài khoản' ) . ' — Công Viên Chức' );

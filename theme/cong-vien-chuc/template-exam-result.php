@@ -398,6 +398,7 @@ else :
 
 	</div>
 	<aside class="right"><div class="right-grid">
+		<?php if ( function_exists( 'cvc_growth_result_box' ) ) { cvc_growth_result_box( (int) $attempt_id, (array) ( $r['exam'] ?? array() ) ); } // 12/11/2026 thách bạn bè ?>
 		<?php if ( function_exists( 'cvc_render_attempt_ranking' ) ) : ?>
 			<?php ob_start(); cvc_render_attempt_ranking( $attempt_id, 'side-title' ); $cvc_rank_html = (string) ob_get_clean(); ?>
 			<?php if ( '' !== trim( $cvc_rank_html ) ) : ?><section class="card"><div class="pad"><?php echo $cvc_rank_html; // phpcs:ignore WordPress.Security.EscapeOutput ?></div></section><?php endif; ?>

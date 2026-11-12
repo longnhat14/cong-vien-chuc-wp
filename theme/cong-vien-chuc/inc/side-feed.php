@@ -87,7 +87,7 @@ function cvc_sf_fame_box( string $slot, int $n = 5, string $target = '' ): strin
 		$rk = (int) $r['rank'];
 		$h .= '<li><span class="cvc-sf-rk' . ( $rk <= 3 ? ' r' . $rk : '' ) . '">' . $rk . '</span><a href="' . $fame . '" data-cvc-go="' . esc_attr( $slot ) . '-fame"' . $target . '>' . esc_html( (string) $r['name'] ) . ( ! empty( $r['province'] ) ? ' <small>' . esc_html( (string) $r['province'] ) . '</small>' : '' ) . '</a><span class="cvc-sf-pt">' . esc_html( cvc_sf_num( $r['score'] ) ) . ' điểm</span></li>';
 	}
-	$h .= '</ul><p class="cvc-sf-note">' . esc_html( number_format_i18n( (int) ( $ef['participants'] ?? 0 ) ) ) . ' người đang ôn tuần này · <a href="' . esc_url( home_url( '/xep-hang/' ) ) . '" data-cvc-go="' . esc_attr( $slot ) . '-fame"' . $target . '>Bảng xếp hạng</a></p></section>';
+	$h .= '</ul><p class="cvc-sf-note">' . esc_html( number_format_i18n( (int) ( $ef['participants'] ?? 0 ) ) ) . ' người đang ôn tuần này · <a href="' . esc_url( home_url( '/xep-hang/' ) ) . '" data-cvc-go="' . esc_attr( $slot ) . '-fame"' . $target . '>Bảng xếp hạng</a> · <a href="' . esc_url( home_url( '/nhom-on-thi/' ) ) . '" data-cvc-go="' . esc_attr( $slot ) . '-fame"' . $target . '>Nhóm ôn thi</a></p></section>';
 
 	return $h;
 }
