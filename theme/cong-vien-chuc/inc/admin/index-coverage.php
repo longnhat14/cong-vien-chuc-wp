@@ -167,6 +167,30 @@ function cvc_admin_render_index_coverage(): void {
 		</section>
 	<?php endif; ?>
 
+	<?php
+	$lk    = (array) ( $d['links'] ?? array() );
+	$slots = (array) ( $lk['slots'] ?? array() );
+	$sl    = array( 'kt-inline' => 'Dòng gợi ý trong bài', 'kt-side' => 'Khối cột phải', 'kt-quiz' => 'Sau luyện nhanh 5 câu' );
+	$kv    = (int) ( $lk['kt_views'] ?? 0 );
+	?>
+	<section class="dz-card space-y-3">
+		<h2 class="font-black text-ink">Trang Điều luật → bài viết, đề luyện (30 ngày)</h2>
+		<p class="text-xs text-ink-muted">Lượt xem trang Điều luật: <?php echo esc_html( $num( $kv ) ); ?>. Lượt bấm đếm từ 12/11/2026.</p>
+		<div class="grid gap-3" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr))">
+			<?php foreach ( $sl as $k => $label ) : ?>
+				<?php $c = (int) ( $slots[ $k ] ?? 0 ); ?>
+				<div class="rounded-xl border border-slate-200 p-3"><p class="text-xs text-ink-muted"><?php echo esc_html( $label ); ?></p><p class="text-2xl font-black tabular-nums"><?php echo esc_html( $num( $c ) ); ?></p><p class="text-xs text-ink-muted"><?php echo esc_html( cvc_idxcov_pct( $c, $kv ) ); ?> lượt xem</p></div>
+			<?php endforeach; ?>
+		</div>
+		<?php if ( ! empty( $lk['top'] ) ) : ?>
+			<table class="w-full text-sm"><thead><tr class="text-left text-xs text-ink-muted"><th class="py-1 pr-2">Trang đích</th><th class="text-right">Lượt bấm</th></tr></thead><tbody>
+			<?php foreach ( (array) $lk['top'] as $x ) : ?>
+				<tr class="border-t border-slate-100"><td class="py-1 pr-2 break-all"><?php echo esc_html( (string) $x['dest'] ); ?></td><td class="text-right tabular-nums"><?php echo esc_html( $num( $x['clicks'] ) ); ?></td></tr>
+			<?php endforeach; ?>
+			</tbody></table>
+		<?php endif; ?>
+	</section>
+
 	<section class="dz-card overflow-x-auto">
 		<h2 class="font-black text-ink mb-2">Lượt kiểm tra gần đây</h2>
 		<table class="w-full text-sm">
