@@ -501,6 +501,7 @@ if ( $home_pop['items'] ) :
 </section>
 <?php endif; ?>
 <?php if ( function_exists( 'cvc_pdf_render_home_block' ) ) { cvc_pdf_render_home_block(); } // Bộ đề PDF (27/10/2026) ?>
+<?php if ( function_exists( 'cvc_render_home_blog' ) ) { cvc_render_home_blog(); } // Cẩm nang mới - liên kết tới bài viết (12/11/2026) ?>
 <section class="section-soft">
  <div class="container">
   <div class="section-head"><div><div class="section-label">MỤC TIÊU DÀI HẠN</div><h2>Chuẩn bị cho bước tiếp theo trong sự nghiệp</h2><p>Chọn nội dung gần nhất với mục tiêu hiện tại của bạn — sau đó bắt đầu bằng một hành động cụ thể.</p></div></div>

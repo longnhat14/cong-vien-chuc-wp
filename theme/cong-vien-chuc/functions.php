@@ -96,6 +96,8 @@ require_once __DIR__ . '/inc/doc-popular.php'; // Khối tài liệu được đ
 require_once __DIR__ . '/inc/book-shelf.php'; // Kệ sách / Tủ sách / sách nổi bật (01/11/2026)
 require_once __DIR__ . '/inc/study.php'; // Thói quen ôn thi + khách làm thử 5 câu (02/11/2026)
 require_once __DIR__ . '/inc/post-blocks.php'; // Khối tự cập nhật trong bài viết: tuyển dụng, ôn thi, sách (02/11/2026)
+require_once __DIR__ . '/inc/blog-hub.php'; // Liên kết nội bộ tới bài viết blog: mục lục, bài liên quan, trang chủ (12/11/2026)
+require_once __DIR__ . '/inc/pcseo-layouts.php'; // 10 bố cục + giọng văn xoay vòng cho bài AI (12/11/2026)
 require_once __DIR__ . '/inc/admin-settings.php';
 require_once __DIR__ . '/inc/combo.php';
 require_once __DIR__ . '/inc/course-purchase.php';

@@ -1,0 +1,196 @@
+--- /sessions/rcw-01cr4ejke36ktk9g1guphwvp/tmpw/pcseo/class-pcseo-writer.orig.php	2026-11-12 03:38:26.867092287 +0000
++++ /sessions/rcw-01cr4ejke36ktk9g1guphwvp/tmpw/pcseo/pctech-ai-seo/includes/class-pcseo-writer.php	2026-11-12 03:38:26.898092287 +0000
+@@ -468,6 +468,7 @@
+ 			'voice'     => class_exists( 'PCSEO_Voices' ) ? PCSEO_Voices::pick( $head, (int) $job->cluster_id ) : null,
+ 			'resources' => self::brand_mentions() > 0 ? array_slice( (array) apply_filters( 'pcseo_brief_resources', array(), $head, $secondary ), 0, 8 ) : array(),
+ 			'year'      => (int) gmdate( 'Y' ),
++			'layout'    => apply_filters( 'pcseo_brief_layout', null, $head, (int) $job->cluster_id, (int) $job->id ),
+ 			'facts'     => class_exists( 'PCSEO_Quiz' ) ? PCSEO_Quiz::facts( array_merge( array( $head ), array_slice( $secondary, 0, 4 ) ) ) : array(),
+ 		);
+ 		// v0.12.0: tài nguyên thật (tin tuyển dụng, đề thi, sách…) do theme cung cấp → được phép đặt link khi giới thiệu.
+@@ -502,7 +503,7 @@
+ 	public static function style_rules(): string {
+ 		$voice = trim( (string) self::setting( 'ai_voice' ) );
+ 		$out   = '';
+-		if ( class_exists( 'PCSEO_Voices' ) && PCSEO_Voices::enabled() ) {
++		if ( ! empty( self::$layout['voice'] ) || ( class_exists( 'PCSEO_Voices' ) && PCSEO_Voices::enabled() ) ) {
+ 			$out .= "GIỌNG VĂN: theo mục \"GIỌNG VĂN CỦA BÀI NÀY\" trong THÔNG TIN BÀI VIẾT.\n"
+ 				. "- TUYỆT ĐỐI KHÔNG bịa trải nghiệm cá nhân hay câu chuyện cụ thể (\"mình từng thi…\", \"học viên của mình đỗ…\"), không tự nhận chức danh, số năm kinh nghiệm, thành tích. Được dùng quan sát chung: \"Kinh nghiệm cho thấy…\", \"Nhiều bạn hay…\".\n";
+ 		} elseif ( '' !== $voice ) {
+@@ -626,7 +627,8 @@
+ 			. "Ý định tìm kiếm: người đọc đang {$intent}.\n"
+ 			. "Năm hiện tại: {$brief['year']} (từ khóa có năm cũ mà nội dung là thông tin thay đổi theo năm — lịch, điều kiện, chỉ tiêu, giá, quy định — thì viết cho năm hiện tại; tài liệu/sự kiện của riêng năm đó thì giữ năm).\n"
+ 			. "Độ dài mục tiêu: khoảng {$words} từ.{$cov}\n"
+-			. ( ! empty( $brief['voice'] ) && class_exists( 'PCSEO_Voices' ) ? PCSEO_Voices::prompt( (array) $brief['voice'] ) : '' )
++			. ( ! empty( $brief['layout']['voice'] ) ? "GIỌNG VĂN CỦA BÀI NÀY: " . $brief['layout']['voice'] . "\n" : ( ! empty( $brief['voice'] ) && class_exists( 'PCSEO_Voices' ) ? PCSEO_Voices::prompt( (array) $brief['voice'] ) : '' ) )
++			. ( ! empty( $brief['layout']['prompt'] ) ? "BỐ CỤC CỦA BÀI NÀY — \"" . ( $brief['layout']['name'] ?? '' ) . "\" (BẮT BUỘC, ưu tiên hơn mọi quy tắc bố cục chung; bài phải khác hẳn các bài thông thường về cấu trúc và nhịp văn):\n" . $brief['layout']['prompt'] . "\n" : '' )
+ 			. "Trang nội bộ được phép liên kết:\n" . self::links_text( (array) ( $brief['links'] ?? array() ) )
+ 			. ( ! empty( $brief['resources'] ) ? "\n\nTÀI NGUYÊN THẬT CỦA WEBSITE (giới thiệu tự nhiên 2–3 mục phù hợp, chỉ dùng đúng thông tin dưới đây):\n- " . implode( "\n- ", array_map( static fn( $r ) => ( $r['type'] ?? '' ) . ': ' . ( $r['title'] ?? '' ) . ( ! empty( $r['meta'] ) ? ' (' . $r['meta'] . ')' : '' ) . ' — ' . ( $r['url'] ?? '' ), (array) $brief['resources'] ) ) : '' )
+ 			. ( ! empty( $brief['facts']['facts'] ) ? "\n\nDỮ LIỆU ĐỘC QUYỀN (từ dữ liệu luyện thi trên " . get_bloginfo( 'name' ) . ', cập nhật ' . $brief['facts']['date'] . ") — chỉ được dùng đúng các con số này:\n- " . implode( "\n- ", $brief['facts']['facts'] ) : '' );
+@@ -638,11 +640,13 @@
+ 			$brief = self::build_brief( $job );
+ 			self::update( (int) $job->id, array( 'brief' => wp_json_encode( $brief, JSON_UNESCAPED_UNICODE ) ) );
+ 		}
++		self::use_layout( $brief );
++		$lay_note = null !== self::$layout ? "\nBố cục bắt buộc: " . (string) self::$layout['sections'] . ' Tiêu đề: ' . (string) self::$layout['title'] . '.' . ( self::lay( 'faq' ) ? '' : ' Bài này KHÔNG có mục FAQ: để "faq":[].' ) . "\n" : '';
+ 		$user = "Lập dàn ý bài viết chuẩn SEO theo THÔNG TIN BÀI VIẾT. Trả về DUY NHẤT JSON:\n"
+ 			. '{"title":"Tiêu đề H1 ≤ 65 ký tự, BẮT ĐẦU bằng nguyên văn từ khóa chính","seo_title":"Tiêu đề SEO ≤ 60 ký tự, bắt đầu bằng từ khóa chính","meta_description":"140–155 ký tự, chứa từ khóa chính","slug":"duong-dan-khong-dau","sections":[{"h2":"Tiêu đề H2 chứa nguyên văn 1 từ khóa phụ","keyword":"từ khóa phụ dùng trong H2 này","h3":["Tiêu đề phụ H3"],"points":"Ý chính, 1 câu","format":"đoạn văn | bảng | danh sách | các bước | lưu ý | mẹo | quan trọng | ví dụ | căn cứ pháp lý","links":[số thứ tự trang nội bộ]}],"faq":["Câu hỏi 1","Câu hỏi 2"]}'
+ 			. "\nQuy tắc tiêu đề: H1 (title) = từ khóa chính đứng đầu, có thể thêm phần bổ nghĩa sau dấu \":\" hoặc \"–\". MỖI H2 chứa nguyên văn (hoặc gần nguyên văn) một từ khóa phụ khác nhau — dùng lần lượt danh sách từ khóa phụ, hết thì dùng từ khóa liên quan; ghi từ khóa đã dùng vào \"keyword\". H3 là tiêu đề phụ trong mục (H4 nếu cần chia nhỏ hơn); câu hỏi FAQ sẽ là H3.\n"
+ 			. "Yêu cầu: 5–7 mục H2 theo trình tự logic (ưu tiên dạng câu hỏi người đọc hay tìm), mỗi H2 0–3 H3; \"format\" là cách trình bày nổi bật nhất của mục — có ít nhất 1 mục \"bảng\" nếu nội dung có dữ liệu so sánh/mốc thời gian/hồ sơ, và 2–3 mục dạng hộp; 3–5 câu hỏi FAQ.\n"
+-			. "Liên kết nội bộ: chọn 3–6 trang phù hợp nhất, RẢI ĐỀU — mỗi mục H2 tối đa 1 trang, các mục có link cách nhau, không dồn vào cùng một mục.";
++			. "Liên kết nội bộ: chọn 3–6 trang phù hợp nhất, RẢI ĐỀU — mỗi mục H2 tối đa 1 trang, các mục có link cách nhau, không dồn vào cùng một mục." . $lay_note;
+ 		$res  = self::call( $job, self::system_prompt(), $user, 2500, true, array( self::brief_text( $brief ) ) );
+ 		if ( is_wp_error( $res ) ) {
+ 			self::fail( $job, 'Dàn ý: ' . $res->get_error_message() );
+@@ -797,8 +801,8 @@
+ 			? "- Hộp số liệu độc quyền (BẮT BUỘC 1 hộp, đặt ở mục phù hợp nhất): <div class=\"pcseo-data\"><p class=\"pcseo-box-title\">📊 Số liệu từ " . get_bloginfo( 'name' ) . "</p><p>1–3 số liệu lấy NGUYÊN VĂN từ DỮ LIỆU ĐỘC QUYỀN, nêu rõ \"theo dữ liệu luyện thi trên " . get_bloginfo( 'name' ) . " (cập nhật " . $brief['facts']['date'] . ")\" và ý nghĩa với người ôn thi</p></div>. Không tự tạo số khác trong hộp này.\n"
+ 			: '';
+ 		return "CÁC THÀNH PHẦN TRÌNH BÀY (chỉ dùng đúng các thẻ & class dưới đây):\n" . $data
+-			. "- Câu trả lời trực tiếp ngay sau MỖI <h2> (trừ FAQ, Kết luận): <p class=\"pcseo-answer\">40–60 từ trả lời thẳng câu hỏi của mục, chứa ý chính</p>\n"
+-			. "- Hộp tóm tắt đầu bài: <div class=\"pcseo-summary\"><p class=\"pcseo-box-title\">📌 Tóm tắt nhanh</p><ul><li>…</li></ul></div> (3–5 ý, mỗi ý 1 câu có thông tin cụ thể)\n"
++			. ( self::lay( 'answers' ) ? "- Câu trả lời trực tiếp ngay sau MỖI <h2> (trừ FAQ, Kết luận): <p class=\"pcseo-answer\">40–60 từ trả lời thẳng câu hỏi của mục, chứa ý chính</p>\n" : "- Câu trả lời trực tiếp <p class=\"pcseo-answer\">…</p>: chỉ dùng nếu BỐ CỤC CỦA BÀI NÀY yêu cầu.\n" )
++			. ( self::lay( 'summary' ) ? "- Hộp tóm tắt đầu bài: <div class=\"pcseo-summary\"><p class=\"pcseo-box-title\">📌 Tóm tắt nhanh</p><ul><li>…</li></ul></div> (3–5 ý, mỗi ý 1 câu có thông tin cụ thể)\n" : "- KHÔNG dùng hộp \"Tóm tắt nhanh\" ở bài này.\n" )
+ 			. "- Hộp điểm nhấn: <div class=\"pcseo-callout pcseo-KIEU\"><p class=\"pcseo-box-title\">EMOJI TIÊU ĐỀ</p><p>…</p></div> với KIEU/EMOJI TIÊU ĐỀ: note/⚠️ Lưu ý · tip/💡 Mẹo · important/❗ Quan trọng · example/📝 Ví dụ · legal/📜 Căn cứ pháp lý. Tối đa 1 hộp mỗi mục, 2–4 hộp cả bài.\n"
+ 			. "- Bảng: <table><thead><tr><th>…</th></tr></thead><tbody><tr><td>…</td></tr></tbody></table> (2–5 cột, có tiêu đề cột).\n"
+ 			. "- Danh sách đánh dấu: <ul class=\"pcseo-check\"><li>…</li></ul>; các bước: <ol class=\"pcseo-steps\"><li><strong>Bước…</strong> …</li></ol>; danh sách thường <ul>/<ol>.\n"
+@@ -821,6 +825,24 @@
+ 
+ 	private const FAST_MARK = '===BÀI VIẾT===';
+ 
++	/**
++	 * v0.13.1 (Công Viên Chức, 12/11/2026): bố cục + giọng văn xoay vòng theo bài - do theme cấp qua filter
++	 * `pcseo_brief_layout` (null = giữ bố cục mặc định cũ). Gán khi nạp brief của bài đang xử lý.
++	 * @var array|null
++	 */
++	private static $layout = null;
++
++	/** Bố cục của bài (brief) - đặt làm bố cục hiện hành cho system prompt. */
++	private static function use_layout( array $brief ): ?array {
++		self::$layout = ! empty( $brief['layout'] ) && is_array( $brief['layout'] ) ? $brief['layout'] : null;
++		return self::$layout;
++	}
++
++	/** Cờ của bố cục hiện hành (mặc định cũ khi không có bố cục). */
++	private static function lay( string $k, $default = true ) {
++		return null === self::$layout ? $default : ( self::$layout[ $k ] ?? $default );
++	}
++
+ 	private static function job_brief( object $job ): array {
+ 		$brief = json_decode( (string) $job->brief, true );
+ 		if ( ! is_array( $brief ) ) {
+@@ -828,6 +850,7 @@
+ 			$job->brief = wp_json_encode( $brief, JSON_UNESCAPED_UNICODE );
+ 			self::update( (int) $job->id, array( 'brief' => $job->brief ) );
+ 		}
++		self::use_layout( $brief );
+ 		return $brief;
+ 	}
+ 
+@@ -838,21 +861,24 @@
+ 
+ 	/** @return array{0:string,1:string,2:int,3:array} [system, user, max_tokens, context] */
+ 	private static function fast_request( object $job, array $brief ): array {
++		self::use_layout( $brief );
+ 		$words = (int) self::setting( 'ai_words' );
+ 		$cta   = self::cta();
+ 		$subs  = array_merge( (array) ( $brief['secondary'] ?? array() ), (array) ( $brief['related'] ?? array() ) );
+ 		$user  = "VIẾT TOÀN BÀI MỘT LẦN theo THÔNG TIN BÀI VIẾT.\n\n"
+-			. "Bước 1 — tự lập dàn ý trong đầu (không in ra): 5–7 mục H2 theo trình tự logic, ưu tiên dạng câu hỏi người đọc hay tìm. "
++			. "Bước 1 — tự lập dàn ý trong đầu (không in ra): " . (string) self::lay( 'sections', '5–7 mục H2 theo trình tự logic, ưu tiên dạng câu hỏi người đọc hay tìm.' ) . ' '
+ 			. 'MỖI H2 chứa nguyên văn (hoặc gần nguyên văn) một từ khóa phụ khác nhau, dùng lần lượt: ' . ( $subs ? implode( ' | ', array_slice( $subs, 0, 8 ) ) : '(không có — dùng biến thể của từ khóa chính)' ) . ". "
+ 			. "Mỗi mục chọn 1 cách trình bày nổi bật (bảng nếu có dữ liệu so sánh/mốc thời gian/hồ sơ; 2–3 mục dạng hộp điểm nhấn). H3/H4 là tiêu đề phụ.\n"
+ 			. "Bước 2 — in ra đúng định dạng sau, không thêm gì khác:\n"
+-			. "TIÊU ĐỀ: <H1 ≤ 65 ký tự, BẮT ĐẦU bằng nguyên văn từ khóa chính>\n"
+-			. "TIÊU ĐỀ SEO: <≤ 60 ký tự, bắt đầu bằng từ khóa chính>\n"
++			. "TIÊU ĐỀ: <" . (string) self::lay( 'title', 'H1 ≤ 65 ký tự, BẮT ĐẦU bằng nguyên văn từ khóa chính' ) . ">\n"
++			. "TIÊU ĐỀ SEO: <≤ 60 ký tự, " . ( self::lay( 'title_start', true ) ? 'bắt đầu bằng từ khóa chính' : 'chứa nguyên văn từ khóa chính, ưu tiên đặt gần đầu' ) . ">\n"
+ 			. "MÔ TẢ: <140–155 ký tự, chứa từ khóa chính>\n"
+ 			. "ĐƯỜNG DẪN: <duong-dan-khong-dau>\n"
+ 			. ( self::auto_category( $job ) && class_exists( 'PCSEO_Categorizer' ) ? PCSEO_Categorizer::prompt_line() : '' )
+ 			. self::FAST_MARK . "\n"
+-			. "<HTML bài viết, theo thứ tự: hộp Tóm tắt nhanh → đoạn mở bài 60–110 từ (câu đầu chứa từ khóa chính) → các mục H2 (tổng khoảng " . (int) round( $words * 0.8 ) . " từ) → <h2>Câu hỏi thường gặp</h2> với 3–5 câu hỏi <h3> và trả lời <p> 40–80 từ → <h2>Kết luận</h2> 60–110 từ" . ( '' !== $cta ? ' kêu gọi: ' . $cta : '' ) . ">\n\n"
++			. ( null !== self::$layout && ! empty( self::$layout['order'] )
++				? '<HTML bài viết, theo thứ tự: ' . self::$layout['order'] . ' (các mục thân bài tổng khoảng ' . (int) round( $words * 0.8 ) . ' từ; câu đầu bài chứa từ khóa chính)' . ( '' !== $cta ? '; phần cuối kêu gọi: ' . $cta : '' ) . ">\n\n"
++				: "<HTML bài viết, theo thứ tự: hộp Tóm tắt nhanh → đoạn mở bài 60–110 từ (câu đầu chứa từ khóa chính) → các mục H2 (tổng khoảng " . (int) round( $words * 0.8 ) . " từ) → <h2>Câu hỏi thường gặp</h2> với 3–5 câu hỏi <h3> và trả lời <p> 40–80 từ → <h2>Kết luận</h2> 60–110 từ" . ( '' !== $cta ? ' kêu gọi: ' . $cta : '' ) . ">\n\n" )
+ 			. "Liên kết nội bộ: chọn 3–6 trang phù hợp nhất trong danh sách, mỗi mục H2 tối đa 1 link, các link ở các mục khác nhau, rải từ đầu đến cuối bài.\n"
+ 			. 'HTML thuần, không markdown, không thẻ <h1>.';
+ 		$max = min( 16000, (int) ( $words * 2.8 ) + 2500 );
+@@ -980,7 +1006,7 @@
+ 			$problem = 'AI không trả đúng định dạng';
+ 		} elseif ( PCSEO_Text::word_count( $html ) < $words * 0.5 || mb_strlen( $plain ) < 1500 ) {
+ 			$problem = 'bài quá ngắn';
+-		} elseif ( $res['truncated'] && ! $has_faq ) {
++		} elseif ( $res['truncated'] && ( ! $has_faq || ! empty( $brief['layout'] ) ) ) {
+ 			$problem = 'AI dừng giữa chừng';
+ 		}
+ 		if ( '' !== $problem ) {
+@@ -1028,6 +1054,7 @@
+ 
+ 	private static function step_write( object $job ): void {
+ 		$brief    = json_decode( (string) $job->brief, true ) ?: array();
++		self::use_layout( $brief );
+ 		$o        = json_decode( (string) $job->outline, true ) ?: array();
+ 		$done     = json_decode( (string) $job->sections, true ) ?: array();
+ 		$sections = (array) ( $o['sections'] ?? array() );
+@@ -1061,12 +1088,16 @@
+ 		}
+ 		$share = (int) round( $words * 0.8 * count( $batch ) / max( 1, count( $sections ) ) );
+ 		$order = array();
+-		if ( $first ) {
++		if ( $first && null !== self::$layout && ! empty( self::$layout['order_first'] ) ) {
++			$order[] = (string) self::$layout['order_first'];
++		} elseif ( $first ) {
+ 			$order[] = 'hộp Tóm tắt nhanh';
+ 			$order[] = 'đoạn mở bài 60–110 từ (câu đầu chứa từ khóa chính, nói rõ người đọc nhận được gì)';
+ 		}
+ 		$order[] = 'các mục H2 dưới đây (tổng khoảng ' . $share . ' từ)';
+-		if ( $last ) {
++		if ( $last && null !== self::$layout && ! empty( self::$layout['order_last'] ) ) {
++			$order[] = (string) self::$layout['order_last'] . ( self::lay( 'faq' ) && ! empty( $o['faq'] ) ? ' — câu hỏi FAQ: ' . implode( ' | ', $o['faq'] ) : '' );
++		} elseif ( $last ) {
+ 			$order[] = '<h2>Câu hỏi thường gặp</h2> với mỗi câu hỏi là <h3> và câu trả lời <p> 40–80 từ — câu hỏi: ' . ( ! empty( $o['faq'] ) ? implode( ' | ', $o['faq'] ) : 'tự chọn 3–5 câu' );
+ 			$cta     = self::cta();
+ 			$order[] = '<h2>Kết luận</h2> 60–110 từ tóm ý chính' . ( '' !== $cta ? ' và kêu gọi: ' . $cta : '' );
+@@ -1171,6 +1202,7 @@
+ 
+ 	private static function step_finish( object $job ): void {
+ 		$brief = json_decode( (string) $job->brief, true ) ?: array();
++		self::use_layout( $brief );
+ 		$o     = json_decode( (string) $job->outline, true ) ?: array();
+ 		$cta   = self::cta();
+ 		$faq   = $o['faq'] ?? array();
+@@ -1312,14 +1344,18 @@
+ 		$target  = (int) self::setting( 'ai_words' );
+ 		$qa      = array(
+ 			array( $words >= $target * 0.7, 'Độ dài ' . number_format_i18n( $words ) . ' từ (mục tiêu ' . number_format_i18n( $target ) . ')' ),
+-			array( str_starts_with( PCSEO_Text::ascii( $title ), $kw_a ), 'H1 bắt đầu bằng từ khóa chính' ),
++			! empty( $brief['layout'] ) && empty( $brief['layout']['title_start'] )
++				? array( str_contains( PCSEO_Text::ascii( $title ), $kw_a ), 'H1 chứa từ khóa chính (bố cục "' . ( $brief['layout']['name'] ?? '' ) . '")' )
++				: array( str_starts_with( PCSEO_Text::ascii( $title ), $kw_a ), 'H1 bắt đầu bằng từ khóa chính' ),
+ 			array( '' !== $first_p && str_contains( $first_p, $kw_a ), 'Từ khóa chính trong đoạn mở đầu' ),
+ 			array( $h2_kw > 0, 'Từ khóa chính trong ít nhất 1 H2 (' . $h2_kw . '/' . count( $h2s ) . ')' ),
+ 			array( count( $h2s ) >= 4, count( $h2s ) . ' mục H2' ),
+ 			array( $density <= 3, 'Mật độ từ khóa ' . number_format( $density, 1 ) . '% (≤ 3%)' ),
+ 			array( $kept >= 2, $kept . ' liên kết nội bộ rải đều' . ( $removed ? ' · gỡ ' . $removed . ' link không hợp lệ' : '' ) . ( $spaced ? ' · bỏ ' . $spaced . ' link đặt quá sát nhau' : '' ) ),
+ 			array( mb_strlen( (string) ( $o['meta_description'] ?? '' ) ) >= 110 && mb_strlen( (string) ( $o['meta_description'] ?? '' ) ) <= 165, 'Meta description ' . mb_strlen( (string) ( $o['meta_description'] ?? '' ) ) . ' ký tự' ),
+-			array( (bool) $faq, count( $faq ) . ' câu hỏi FAQ' ),
++			! empty( $brief['layout'] ) && empty( $brief['layout']['faq'] )
++				? array( true, 'Bố cục "' . ( $brief['layout']['name'] ?? '' ) . '" không dùng FAQ', 'info' )
++				: array( (bool) $faq, count( $faq ) . ' câu hỏi FAQ' ),
+ 		);
+ 		if ( ! $x ) { // Tiêu chí trình bày (bài viết từ 0.7.0).
+ 			$main_h2  = count( array_filter( $h2s, static fn( $h ) => ! preg_match( '/^(câu hỏi thường gặp|kết luận)/iu', trim( $h ) ) ) );
+@@ -1344,11 +1380,11 @@
+ 				)
+ 			);
+ 			$qa[]     = array( ! $subs || $h2_sub >= (int) ceil( $main_h2 * 0.6 ), 'H2 chứa từ khóa phụ (' . $h2_sub . '/' . $main_h2 . ')' );
+-			$qa[]     = array( str_contains( $html, 'class="pcseo-summary"' ), 'Hộp tóm tắt nhanh đầu bài' );
++			$qa[]     = ! empty( $brief['layout'] ) && empty( $brief['layout']['summary'] ) ? array( true, 'Bố cục không dùng hộp tóm tắt', 'info' ) : array( str_contains( $html, 'class="pcseo-summary"' ), 'Hộp tóm tắt nhanh đầu bài' );
+ 			if ( ! empty( $fdata['facts'] ) ) {
+ 				$qa[] = array( $data_ok > 0, $data_ok ? 'Hộp số liệu độc quyền (số liệu đã đối chiếu dữ liệu thật)' : ( $data_rm ? 'Hộp số liệu bị gỡ vì có số không khớp dữ liệu thật' : 'Chưa có hộp số liệu độc quyền' ) );
+ 			}
+-			$qa[]     = array( $answers >= (int) ceil( $main_h2 / 2 ), 'Câu trả lời trực tiếp sau H2 (' . $answers . '/' . $main_h2 . ')' );
++			$qa[]     = ! empty( $brief['layout'] ) && empty( $brief['layout']['answers'] ) ? array( true, 'Bố cục không bắt buộc câu trả lời sau H2 (' . $answers . '/' . $main_h2 . ')', 'info' ) : array( $answers >= (int) ceil( $main_h2 / 2 ), 'Câu trả lời trực tiếp sau H2 (' . $answers . '/' . $main_h2 . ')' );
+ 			$qa[]     = array( $tables + $callouts >= 2, $tables . ' bảng · ' . $callouts . ' hộp điểm nhấn' );
+ 			$qa[]     = array( $bold >= 2 && $bold <= max( 8, 3 * $main_h2 ), $bold . ' chỗ in đậm (vừa phải: 2–' . max( 8, 3 * $main_h2 ) . ')' );
+ 			if ( self::no_promo() ) {

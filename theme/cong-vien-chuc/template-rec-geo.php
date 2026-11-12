@@ -457,6 +457,7 @@ get_header();
 					<a class="rg-btn" href="<?php echo esc_url( $rg_other['url'] ); ?>"><?php echo esc_html( $rg_other['h1'] . ' ' . $rg_label ); ?> <?php echo $rg_ic( 'arrow-right' ); // phpcs:ignore ?></a>
 				</section>
 			<?php endif; ?>
+			<?php if ( function_exists( 'cvc_render_blog_related' ) ) { cvc_render_blog_related( (string) ( $rg_other['h1'] ?? '' ) . ' ' . $rg_label . ' ' . ( $rg_other['noun'] ?? '' ), 'Cẩm nang thi tuyển', 3 ); } // 12/11/2026 ?>
 		</aside>
 	</div>
 

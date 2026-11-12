@@ -984,6 +984,12 @@ get_header();
 	<?php endif; ?>
 
 	<?php if ( function_exists( 'cvc_ci_render_detail_block' ) ) { cvc_ci_render_detail_block( $rid ); } ?>
+	<?php
+	// 12/11/2026: bài hướng dẫn liên quan (cùng tỉnh / ngành / loại) - liên kết nội bộ tới blog.
+	if ( function_exists( 'cvc_render_blog_related' ) ) {
+		cvc_render_blog_related( implode( ' ', array_filter( array( (string) ( $recruitment['title'] ?? '' ), (string) ( $recruitment['agency']['name'] ?? '' ), (string) ( $recruitment['province']['name'] ?? '' ), (string) ( $type_lbl ?? '' ), implode( ' ', array_slice( array_map( static fn ( $p ) => (string) ( $p['name'] ?? '' ), (array) ( $recruitment['positions'] ?? array() ) ), 0, 5 ) ) ) ) ), 'Bài hướng dẫn liên quan', 3, 'rd-card' );
+	}
+	?>
 	<?php if ( function_exists( 'cvc_render_leaderboard_mini' ) && $rid ) { cvc_render_leaderboard_mini( array( 'dot' => (int) $rid ), 'Bảng xếp hạng ôn thi đợt này', 'rd-card cvc-lb-rd' ); } // Bảng xếp hạng (21/10/2026) ?>
 
 	<div class="rd-legacy"><?php cvc_render_candidate_kit( $recruitment ); ?></div>
