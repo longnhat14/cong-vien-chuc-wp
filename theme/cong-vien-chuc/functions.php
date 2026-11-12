@@ -48,6 +48,7 @@ require_once __DIR__ . '/inc/admin/personal-exams.php';
 require_once __DIR__ . '/inc/admin/recruitment-imports.php';
 require_once __DIR__ . '/inc/admin/question-reports.php';
 require_once __DIR__ . '/inc/admin/google-indexing.php'; // Google Indexing API - trang việc làm (12/11/2026)
+require_once __DIR__ . '/inc/admin/index-coverage.php'; // Tình trạng index Google - Search Console (12/11/2026)
 require_once __DIR__ . '/inc/admin/general-questions.php'; // Câu tư duy & xã hội - văn hóa - lịch sử chờ duyệt (02/11/2026)
 require_once __DIR__ . '/inc/admin/exam-pdf.php';
 require_once __DIR__ . '/inc/admin/paywall.php'; // Quản trị → Thu phí theo tính năng (03/11/2026)

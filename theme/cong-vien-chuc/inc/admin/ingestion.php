@@ -49,6 +49,7 @@ function cvc_ingestion_tabs( string $active ): void {
 		'bao-cau-sai' => array( 'Báo câu sai', cvc_admin_url( 'thu-thap', null, array( 'xem' => 'bao-cau-sai' ) ) ),
 		'cau-moi'     => array( 'Câu tư duy & xã hội', cvc_admin_url( 'thu-thap', null, array( 'xem' => 'cau-moi' ) ) ),
 		'google-index' => array( 'Google Indexing', cvc_admin_url( 'thu-thap', null, array( 'xem' => 'google-index' ) ) ),
+		'index-google' => array( 'Tình trạng index', cvc_admin_url( 'thu-thap', null, array( 'xem' => 'index-google' ) ) ),
 		'tai-pdf'     => array( 'Tải đề PDF', cvc_admin_url( 'thu-thap', null, array( 'xem' => 'tai-pdf' ) ) ),
 		'email'       => array( 'Email', cvc_admin_url( 'thu-thap', null, array( 'xem' => 'email' ) ) ),
 	);

@@ -95,6 +95,19 @@ function cvc_sitemap_render(): void {
 			}
 		}
 	}
+	// 12/11/2026: báo cáo tuyển dụng theo tháng + câu hay sai nhất (trang dữ liệu gốc, đổi theo tháng).
+	$rm = get_transient( 'cvc_sitemap_rm' );
+	if ( ! is_array( $rm ) ) {
+		$rmr = ( new CVC_Api_Client( null, 15 ) )->get( '/api/reports/recruitment-month' );
+		$rm  = array_values( array_filter( array_map( static fn ( $m ) => is_array( $m ) ? (string) ( $m['ym'] ?? '' ) : (string) $m, (array) ( $rmr['data']['data']['months'] ?? array() ) ) ) );
+		set_transient( 'cvc_sitemap_rm', $rm, 6 * HOUR_IN_SECONDS );
+	}
+	foreach ( $rm as $ym ) {
+		if ( preg_match( '/^\d{4}-\d{2}$/', $ym ) ) {
+			$rows[] = array( 'path' => '/bao-cao-tuyen-dung/' . $ym . '/', 'lastmod' => '' );
+		}
+	}
+	$rows[] = array( 'path' => '/cau-hay-sai-nhat/', 'lastmod' => '' );
 	$rows = array_merge( $rows, $data['notices'], $data['positions'] );
 
 	status_header( 200 );
